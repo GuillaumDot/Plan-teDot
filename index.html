@@ -2565,7 +2565,10 @@ frame = function(now, once){
     frameErrors++;
     if (frameErrors >= 3) {
       running = false;
-      try { toast('L’affichage 3D a rencontré une erreur. Recharge PlanèteDot pour relancer l’univers.', 6500); } catch(_) {}
+      try {
+        const detail = String((err && err.message) || err || 'Erreur inconnue').slice(0, 150);
+        toast('Erreur 3D : ' + detail, 10000);
+      } catch(_) {}
       return;
     }
     if (!once && running) requestAnimationFrame(frame);
