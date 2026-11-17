@@ -819,7 +819,28 @@ async function initAccount(){
     }catch(err){ authMessage(err.message||'Une erreur est survenue.',true); }
     finally{btn.disabled=false;}
   };
-  $('#accountBtn').onclick=async()=>{ if(!confirm('Se déconnecter de PlanèteDot ?')) return; await sb.auth.signOut(); authUser=null;remoteReady=false;$('#accountBtn').style.display='none';$('#authGate').hidden=false;setAuthMode('login');authMessage('Tu es déconnecté.'); };
+  $('#accountBtn').onclick=async()=>{
+    if(!confirm('Se déconnecter de PlanèteDot ?')) return;
+    const btn=$('#accountBtn');
+    btn.disabled=true;
+    try {
+      // Let Supabase invalidate the session before changing the UI.
+      const {error}=await sb.auth.signOut({scope:'local'});
+      if(error) throw error;
+      clearTimeout(saveT);
+      remoteReady=false;
+      authUser=null;
+      ME=null;
+      try { au.pause(); au.removeAttribute('src'); au.load(); } catch(e) { console.warn('Arrêt audio',e); }
+      // A fresh document removes all account-specific in-memory state,
+      // WebGL objects, social subscriptions and old screens.
+      location.replace(location.origin+location.pathname+'?deconnecte=1');
+    } catch(e) {
+      console.error('Déconnexion impossible',e);
+      authMessage('Déconnexion non confirmée : '+(e.message||'réessaie.'),true);
+      btn.disabled=false;
+    }
+  };
   const {data,error}=await Promise.race([
     sb.auth.getSession(),
     pdDelay(12000).then(()=>({data:{session:null},error:new Error('Restauration de session trop lente')}))
