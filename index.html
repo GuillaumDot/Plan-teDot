@@ -3429,19 +3429,7 @@ function addXP(n){ if (!n || !SYS) return; const before = level(SYS.xp); SYS.xp 
 let QPL = null, AMB = null, SHOT_PT = null, shotT = -9, ART = null, wakeL = null;
 function playList(ids, start, planetId, pl){ QPL = pl || null; sfx('confirm'); cineArm = performance.now(); lastInteract = performance.now() - 0; unlockAudio(); Q = ids.filter(id => TRACKS.has(id)); if (!Q.length){ toast('Aucun morceau à jouer ici'); return; } qi = clamp(start, 0, Q.length - 1); qPlanet = planetId; load(); }
 let switching = false;
-function load(){ const t = TRACKS.get(Q[qi]); if (!t) return;
-  // Official album tracks always play the real MP3 from audio/
-  if (t.official && t.url){
-    switching = true; updNP();
-    if (curUrl) URL.revokeObjectURL(curUrl); curUrl = null;
-    au.src = t.url;
-    au.play().catch(() => toast('Touche lecture pour lancer le son'));
-    updNP(); refreshRows(); if (cine) cineCaption();
-    msMeta();
-    setTimeout(() => switching = false, 800);
-    return;
-  }
-  if (!t.blob && !t.url){ toast('Le son se prépare…', 1500); ensureBlob(t).then(ok => { if (ok && Q[qi] === t.id) load(); }); updNP(); return; }
+function load(){ const t = TRACKS.get(Q[qi]); if (!t) return; if (t.official && t.url){ if (QPL) qPlanet = QPL[qi] || null; switching = true; setTimeout(() => switching = false, 2500); if (curUrl){ URL.revokeObjectURL(curUrl); curUrl = null; } au.src = new URL(t.url, document.baseURI).href; trackSecs = 0; au.play().catch(() => toast('Touche lecture pour lancer le son')); updNP(); refreshRows(); if (cine) cineCaption(); msMeta(); return; } if (!t.blob && !t.url){ toast('Le son se prépare…', 1500); ensureBlob(t).then(ok => { if (ok && Q[qi] === t.id) load(); }); updNP(); return; }
   if (t.url && !t.blob){ switching = true; updNP(); fetchBlob(t.url).then(b => { t.blob = b; if (TRACKS.get(Q[qi]) === t) load(); }).catch(() => { if (TRACKS.get(Q[qi]) !== t) return; au.src = t.url; au.play().catch(() => {}); updNP(); }); return; } if (QPL){ qPlanet = QPL[qi] || null; if (MENU.open && qPlanet){ const mi = VIEW.planets.findIndex(x => x.id === qPlanet); if (mi >= 0 && mi !== MENU.sel){ MENU.sel = mi; setTimeout(() => MENU.open && renderMenu(), 60); } } } switching = true; setTimeout(() => switching = false, 2500); if (curUrl) URL.revokeObjectURL(curUrl); curUrl = URL.createObjectURL(t.blob); au.src = curUrl; trackSecs = 0;
   au.play().catch(() => toast('Touche lecture pour lancer le son')); updNP(); refreshRows(); if (cine) cineCaption();
   msMeta(); }
@@ -3643,11 +3631,9 @@ const OFFICIAL_ALBUM = [
 ];
 function loadOfficialAlbum(){
   const ids=[];
-  const base = location.href.replace(/[^/]*$/, ''); // directory of the current page
   OFFICIAL_ALBUM.forEach(([title,artist,file],i)=>{
     const id='planetedot-album-'+(i+1); ids.push(id);
-    const url = base + 'audio/' + file;
-    TRACKS.set(id,{id,title,artist,album:'PlanèteDot',genre:'Rap',fam:'Rap',dur:180,blob:null,size:0,added:Date.now()-i,src:{k:'local',u:''},url:url,official:true});
+    TRACKS.set(id,{id,title,artist,album:'PlanèteDot',genre:'Rap',fam:'Rap',dur:180,blob:null,size:0,added:Date.now()-i,src:{k:'local',u:''},url:'audio/'+file,official:true});
     META[id]=META[id]||{plays:0,secs:0,heard:0,f:null};
   });
 }
@@ -3742,14 +3728,12 @@ async function synth(t){
   for (let i = 0; i < N; i++){ const x = clamp(d[i] * gn, -1, 1); v.setInt16(44 + i * 2, x * 32767, true); }
   return new Blob([ab], {type: 'audio/wav'});
 }
-async function ensureBlob(t){ if (t.blob) return true; if (t.official || t.url) return false; // never synth the official album tracks
-  try { t.blob = await synth(t); } catch(e){ return false; } return true; }
-async function prerender(){ for (const t of TRACKS.values()){ if (!t.blob) await ensureBlob(t); await new Promise(r => setTimeout(r, 30)); } }
+async function ensureBlob(t){ if (t.official) return true; if (!t.blob){ try { t.blob = await synth(t); } catch(e){ return false; } } return true; }
+async function prerender(){ for (const t of TRACKS.values()){ if (t.official) continue; if (!t.blob) await ensureBlob(t); await new Promise(r => setTimeout(r, 30)); } }
 
 /* ================= boot ================= */
 (async () => {
-  buildNewcomer(); await idbOpen(); const savedTracks = await idbAll('tracks'); (savedTracks || []).forEach(t => { if (t && t.id) TRACKS.set(t.id, t); }); loadOfficialAlbum(); // force official tracks with real audio URLs after any IDB override
-gdInit(); setTimeout(prerender, 1500);
+  buildNewcomer(); loadOfficialAlbum(); await idbOpen(); const savedTracks = await idbAll('tracks'); (savedTracks || []).forEach(t => { if (t && t.id) TRACKS.set(t.id, t); }); loadOfficialAlbum(); gdInit(); setTimeout(prerender, 1500);
   VIEW = SYS; updNP(); $('#ppIc').innerHTML = ICON.playp; $('#libLogo').src = LOGO;
   await initAccount();
   splashStart = time;
