@@ -486,6 +486,9 @@ button:active, .btn:active, .pcard:active { transform:scale(.975); }
 button, .btn, .card { -webkit-tap-highlight-color:transparent; }
 button:active { transform:scale(.975); }
 @media (prefers-reduced-motion:reduce){ *, *::before, *::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;} }
+
+/* FIX iOS 2026-11-17: never let the full-screen transition flash obscure the universe. */
+#flash, #flash[style] { opacity:0 !important; display:none !important; visibility:hidden !important; pointer-events:none !important; }
 </style>
 </head>
 <body>
@@ -3894,5 +3897,6 @@ addEventListener('keydown', e => { if (e.key === 'Escape' && sheetOpen) closeShe
 }
 }
 </script>
+<div id="pd-build-proof" style="position:fixed;top:calc(env(safe-area-inset-top,0px) + 6px);right:8px;z-index:2147483646;font:10px system-ui;color:#d6f3ff;background:#13283d;border:1px solid #3b708f;border-radius:8px;padding:3px 6px;pointer-events:none">FIX FLASH · 17/11 · V8</div>
 </body>
 </html>
