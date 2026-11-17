@@ -655,7 +655,7 @@ const SWATCH = t => { const T = TYPES[t]; return `background:radial-gradient(cir
 function makePlanet(name, type, over = {}){
   const T = TYPES[type];
   return Object.assign({id: uid(), name, type, size: 1, c1: [...T.c1], c2: [...T.c2], atH: T.atH, atmo: T.atmo, ring: T.ring, ringH: (T.c1[0] + .05) % 1, ringTilt: .25, ringRoll: -.25,
-    moons: 1, clouds: T.clouds || .4, spin: .18, tilt: .3, seed: Math.random() * 10, phase: Math.random() * TAU, tracks: [], terr: [], org: 'genre', emo: -1, origin: '', auto: true, xp: 0, path: [-1, -1, -1], last: 0, ghosts: []}, over);
+    moons: 1, clouds: T.clouds || .4, spin: .18, tilt: .3, seed: Math.random() * 10, phase: Math.random() * TAU, tracks: [], isPublic: false, terr: [], org: 'genre', emo: -1, origin: '', auto: true, xp: 0, path: [-1, -1, -1], last: 0, ghosts: []}, over);
 }
 function surprise(p){
   const type = Math.floor(Math.random() * TYPES.length), T = TYPES[type], h = Math.random();
@@ -667,12 +667,12 @@ function makeEarth(){ const r = Math.random;
   return makePlanet('Terre', 11, {size: .95 + r() * .15, moons: 1, ring: 0, tilt: .3 + r() * .2, spin: .16 + r() * .06, clouds: .35 + r() * .45, atH: .57 + r() * .03, atmo: .5 + r() * .12,
     c1: [.58 + r() * .04, .7, .3], c2: [.25 + r() * .1, .4, .3], seed: r() * 50, auto: false, org: 'genre'}); }
 function defaultSystem(){
-  return {v: 2, name: '', user: '', hue: .58, theme: Math.floor(Math.random() * 6), xp: 0, secs: 0, created: Date.now(), planets: [makeEarth()]};
+  return {v: 2, name: '', user: '', hue: .58, theme: Math.floor(Math.random() * 6), xp: 0, secs: 0, created: Date.now(), planets: []};
 }
 function fixSys(s){
   if (!s || !Array.isArray(s.planets)) return defaultSystem();
   s.v = 2; s.theme = s.theme ?? 0; s.xp = s.xp || 0; s.secs = s.secs || 0; s.hue = s.hue ?? .58;
-  s.planets.forEach(p => { p.terr = Array.isArray(p.terr) ? p.terr : []; p.tracks = Array.isArray(p.tracks) ? p.tracks : []; p.org = p.org || 'genre'; p.emo = p.emo ?? -1; p.origin = p.origin || ''; p.auto = p.auto ?? true; p.xp = p.xp || 0; p.path = Array.isArray(p.path) ? p.path : [-1, -1, -1]; p.last = p.last || 0; p.ghosts = Array.isArray(p.ghosts) ? p.ghosts : []; /* Runtime animation cache must not survive JSON persistence. */ delete p._la; delete p._lt; });
+  s.planets.forEach(p => { p.terr = Array.isArray(p.terr) ? p.terr : []; p.tracks = Array.isArray(p.tracks) ? p.tracks : []; p.isPublic = p.isPublic !== false; p.org = p.org || 'genre'; p.emo = p.emo ?? -1; p.origin = p.origin || ''; p.auto = p.auto ?? true; p.xp = p.xp || 0; p.path = Array.isArray(p.path) ? p.path : [-1, -1, -1]; p.last = p.last || 0; p.ghosts = Array.isArray(p.ghosts) ? p.ghosts : []; /* Runtime animation cache must not survive JSON persistence. */ delete p._la; delete p._lt; });
   return s;
 }
 
@@ -785,7 +785,7 @@ async function activateAccount(session){
     ]);
     if(insErr){ authMessage('Le compte existe, mais la sauvegarde n’est pas prête. Vérifie le script SQL.',true); console.error(insErr); return false; }
   }
-  remoteReady=true; attachOfficialAlbumToSystem(); save(); VIEW=SYS; INBOX=[]; MYSIG=[]; OTHERS.clear(); // Public social data is optional: never hold the user's login hostage.
+  remoteReady=true; save(); VIEW=SYS; INBOX=[]; MYSIG=[]; OTHERS.clear(); // Public social data is optional: never hold the user's login hostage.
   setTimeout(() => { Promise.resolve().then(async () => {
     try { await Promise.race([refreshPublicGalaxies(), pdDelay(8000)]); }
     catch(e) { console.warn('Galaxies publiques différées', e); }
@@ -2371,11 +2371,13 @@ let gManual = false;
 const ICON_SEARCH = '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>';
 const TUTO = [
   {t: () => `Bienvenue ${SYS.user || ''}`, d: 'Ton étoile vient de naître. On fait le tour en trente secondes ?', todo: 'Touche « Suivant »', at: () => STAR_PT, cam: 'star', ic: '✦'},
-  {t: 'Une planète = une playlist', d: 'Elle contient tes morceaux et vibre quand tu les écoutes.', todo: 'Touche la planète', wait: () => sheetOpen && sheetKind === 'scan', at: () => PL_PT, cam: 'planet', ic: '◉'},
+  {t: 'Crée ta première playlist', d: 'Utilise le bouton + pour créer ta planète, puis importe tes morceaux. Tu peux choisir si elle est publique ou privée.', todo: 'Touche Suivant', at: () => rectPt('#bNew'), cam: 'wide', ic: '◉'},
   {t: 'Le logo, ton raccourci', d: 'Il aligne toutes tes playlists pour choisir en un geste.', todo: 'Touche le logo', wait: () => MENU.open, at: () => LOGO_PT, cam: 'logo', ic: '⟲'},
   {t: 'Un logo, un album', d: 'Ce logo est la pochette de « PlanèteDot », l’album de GuillaumDot en préparation. Son système brille au cœur de la galaxie : écoute-le, copie sa planète.', todo: 'Écoute un extrait quand tu veux', act: ['Écouter l’album', () => playAlbum(0)], at: () => LOGO_PT, cam: 'logo', ic: '◎'},
   {t: 'Ta musique', d: 'Tes sons vivent ici. Chaque écoute leur fait conquérir un bout de planète.', todo: 'Touche ce bouton', wait: () => sheetOpen && sheetKind === 'library', at: () => rectPt('#bLib'), cam: 'wide', ic: '♪'},
   {t: 'Écoute = évolution', d: 'Villages, cités, satellites : tes planètes grandissent avec toi. Ton étoile aussi.', todo: 'Écoute, c’est tout', at: () => null, cam: 'wide', ic: '✺'},
+  {t: 'Communiquer', d: 'Depuis une galaxie, ouvre le profil d’un voyageur pour lui envoyer un signal. Retrouve les réponses dans Transmissions.', todo: 'Touche Suivant', at: () => null, cam: 'wide', ic: '✉'},
+  {t: 'Se déconnecter', d: 'Ouvre ton compte depuis le bouton de profil, puis choisis Déconnexion. Tes données restent associées à ton compte.', todo: 'Touche Suivant', at: () => rectPt('#accountBtn'), cam: 'wide', ic: '⇥'},
   {t: 'Andromède', d: 'D’autres galaxies t’attendent, et l’album PlanèteDot brille en leur cœur. Va écouter ce qu’écoutent les autres.', todo: 'Ce bouton t’y emmène quand tu veux', at: () => rectPt('#bLeft'), cam: 'wide', ic: '✧'}];
 let STAR_PT = null;
 let tutoI = -1;
@@ -2589,10 +2591,10 @@ function arrive(){
 }
 
 /* ================= input ================= */
-const ptrs = new Map(); let pinch = null, dragging = false, lastInteract = performance.now();
+const ptrs = new Map(); let pinch = null, gestureMulti = false, dragging = false, lastInteract = performance.now();
 cv.addEventListener('pointerdown', e => { lastInteract = performance.now(); try { cv.setPointerCapture(e.pointerId); } catch(_){}
   ptrs.set(e.pointerId, {x: e.clientX, y: e.clientY, t0: performance.now(), moved: 0});
-  if (ptrs.size === 2){ const [a, b] = [...ptrs.values()]; pinch = {d: Math.hypot(a.x - b.x, a.y - b.y), dist: cam.g.dist, pz}; } });
+  if (ptrs.size === 2){ gestureMulti = true; const [a, b] = [...ptrs.values()]; pinch = {d: Math.hypot(a.x - b.x, a.y - b.y), dist: cam.g.dist, pz}; } });
 cv.addEventListener('pointermove', e => {
   if (mode === 'splash'){ tilt.tx = (e.clientX / innerWidth - .5) * .35; tilt.ty = (e.clientY / innerHeight - .5) * .28; }
   const p = ptrs.get(e.pointerId); if (!p) return;
@@ -2609,8 +2611,8 @@ cv.addEventListener('pointermove', e => {
     if (mode === 'planet' || (mode === 'system' && focus)) pz = clamp(pinch.pz * pinch.d / Math.max(d, 1), .2, 1.8); else cam.g.dist = clamp(pinch.dist * pinch.d / Math.max(d, 1), 2.5, 600); }
 });
 const endPtr = e => { const p = ptrs.get(e.pointerId); ptrs.delete(e.pointerId); if (ptrs.size < 2) pinch = null; if (!ptrs.size) dragging = false;
-  if (p && p.moved < 10 && performance.now() - p.t0 < 420) tap(e.clientX * RS, e.clientY * RS);
-  if (mode === 'splash'){ tilt.tx = 0; tilt.ty = 0; } };
+  if (p && !gestureMulti && !ptrs.size && p.moved < 14 && performance.now() - p.t0 < 550) { const r=cv.getBoundingClientRect(); tap((e.clientX-r.left)*cv.width/r.width,(e.clientY-r.top)*cv.height/r.height); }
+  if (!ptrs.size) gestureMulti = false; if (mode === 'splash'){ tilt.tx = 0; tilt.ty = 0; } };
 cv.addEventListener('pointerup', endPtr); cv.addEventListener('pointercancel', e => { ptrs.delete(e.pointerId); pinch = null; dragging = false; });
 cv.addEventListener('wheel', e => { e.preventDefault(); if (mode === 'planet' || (mode === 'system' && focus)){ pz = clamp(pz * Math.exp(e.deltaY * .0015), .2, 1.8); return; } if (mode === 'system' || mode === 'galaxy') cam.g.dist = clamp(cam.g.dist * Math.exp(e.deltaY * .0012), 2.5, 600); }, {passive: false});
 function tap(x, y){
@@ -2846,11 +2848,12 @@ function openPlaylist(p, fromLib){
       : tr.length ? `<button class="btn pri" id="sPlay">${live ? ICON.pauseS + 'Pause' : ICON.play + 'Lecture'}</button><button class="btn" id="sShuf">${ICON.shuf}Aléatoire</button>`
       : `<label class="btn pri">${ICON.file}Importer${imp}</label>`}<button class="icb" id="sMore" aria-label="Plus">⋯</button></div>
     <div class="more off" id="pMore">${ro ? `<button id="sSig">${ICON.signal}Envoyer un signal</button>` : `<label>${ICON.file}Importer de la musique${imp}</label>${TRACKS.size ? `<button id="sAdd">${ICON.plus}Ajouter depuis ma musique</button>` : ''}
-      <button id="sRen">${ICON.forge}Renommer</button><button id="sLand">${ICON.land}Explorer la planète</button><button id="sForge">${ICON.forge}Façonner</button>${tr.length ? `<button id="sDna">${ICON.shuf}Accorder au son</button>` : ''}`}
+      <button id="sPrivacy">${p.isPublic === false ? "◯ Rendre cette playlist publique" : "◉ Rendre cette playlist privée"}</button><button id="sRen">${ICON.forge}Renommer</button><button id="sLand">${ICON.land}Explorer la planète</button><button id="sForge">${ICON.forge}Façonner</button>${tr.length ? `<button id="sDna">${ICON.shuf}Accorder au son</button>` : ''}`}
       <dl class="spec">${rows.map(r => `<div><dt>${r[0]}</dt><dd class="${r[2] || ''}">${esc(r[1])}${r[3] || ''}</dd></div>`).join('')}</dl></div>
     ${tr.length ? `<ul class="list" id="pList">${rowsHTML2}</ul>` : ro ? '<div class="empty">Aucun titre visible.</div>' : '<div class="empty">Planète vide.</div>'}`, () => {
     const on = (id, f) => sbody.querySelectorAll('#' + id).forEach(e => e.onclick = f);
     on('sMore', () => { $('#pMore').classList.toggle('off'); sfx('tick'); });
+    on('sPrivacy', () => { p.isPublic = p.isPublic === false; save(); if(remoteReady) publishPublicGalaxy(); toast(p.isPublic ? 'Playlist publique' : 'Playlist privée'); openPlaylist(p, fromLib); });
     on('sLand', () => { if (fromLib && mode === 'system') focusOn(p.id); land(p); }); on('sCopy', () => copyPlanet(p)); on('sAlb', () => playAlbum(0)); on('sAdd', () => openPicker(p, null)); on('sSig', () => composeSignal(ownerId, VIEW));
     on('sPlay', () => { if (live){ au.pause(); } else if (qPlanet === p.id && Q.length && au.paused){ au.play(); } else playList(p.tracks, 0, p.id); setTimeout(() => sheetKind === 'scan' && openPlaylist(p, fromLib), 150); });
     on('sShuf', () => { playList(shuffle(p.tracks), 0, p.id); setTimeout(() => sheetKind === 'scan' && openPlaylist(p, fromLib), 150); });
@@ -2980,9 +2983,9 @@ function openNewPlanet(){
   if (mode !== 'system' || readonly) return; overview();
   openSheet('new', head('Nouvelle planète', 'Elle prend la forme de sa musique.') +
     `<label class="field"><span>Nom de la playlist</span><input type="text" id="nN" maxlength="28" placeholder="Ex. Nuits de Saturne"></label>
-     <label class="big" id="nBig">${ICON.file}Importer des morceaux<input type="file" id="nImp" multiple accept="audio/*,.mp3,.m4a,.aac,.wav,.flac,.ogg,.opus,.aif,.aiff"></label>
+     <label class="field" style="display:flex;align-items:center;gap:10px"><input id="nPublic" type="checkbox"> Rendre cette playlist publique dans la galaxie</label><label class="big" id="nBig">${ICON.file}Importer des morceaux<input type="file" id="nImp" multiple accept="audio/*,.mp3,.m4a,.aac,.wav,.flac,.ogg,.opus,.aif,.aiff"></label>
      <div class="row" style="justify-content:space-between;margin:12px 0 0">${TRACKS.size ? '<button class="lnk" id="nLib">Depuis ma musique</button>' : '<span></span>'}<button class="lnk" id="nHand">Façonner à la main</button></div>`, () => {
-    const mk = () => { const nm = $('#nN').value.trim() || 'Planète ' + (SYS.planets.length + 1); const p = makePlanet(nm, 1, {auto: true, xp: 0}); surprise(p); p.name = nm; p.auto = true; SYS.planets.push(p); addXP(15); save(); return p; };
+    const mk = () => { const nm = $('#nN').value.trim() || 'Planète ' + (SYS.planets.length + 1); const p = makePlanet(nm, 1, {auto: true, xp: 0, isPublic: false}); surprise(p); p.name = nm; p.auto = true; p.isPublic = $('#nPublic').checked; SYS.planets.push(p); addXP(15); save(); return p; };
     $('#nImp').onchange = async e => { const files = e.target.files; if (!files.length) return; const p = mk(); closeSheet(true); focusOn(p.id); await importFiles(files, p); applyDNA(p, false); scanPlanet(p); toast(`${p.name} est née · analyse du son en cours`); };
     const nl = $('#nLib'); if (nl) nl.onclick = () => { const p = mk(); openPicker(p, null); };
     $('#nHand').onclick = () => openForge(null);
@@ -3087,13 +3090,13 @@ function onboard(step){
     $('#oGo').onclick = go; $('#oU').onkeydown = e => { if (e.key === 'Enter') go(); };
   } else {
     if (SYS.planets[0] && mode === 'system'){ focusOn(SYS.planets[0].id, .3); pz = 1.1; transFx(.6); }
-    card.innerHTML = `<h2>Voici ta Terre</h2><p>Ta première playlist. Donne-lui ses premiers sons.</p>
-      <span class="btn pri wide big">${ICON.file}Ajouter mes sons<input type="file" id="oI" multiple accept="audio/*,.mp3,.m4a,.aac,.wav,.flac,.ogg,.opus,.aif,.aiff"></span>
+    card.innerHTML = `<h2>Crée ton univers musical</h2><p>Commence par créer ta première playlist : elle deviendra une planète à personnaliser.</p>
+      <span class="btn pri wide big">${ICON.file}Importer des sons pour ma planète<input type="file" id="oI" multiple accept="audio/*,.mp3,.m4a,.aac,.wav,.flac,.ogg,.opus,.aif,.aiff"></span>
       <div class="row" style="justify-content:space-between;margin:12px 2px 0"><button class="lnk sm" id="oF">+ Nouvelle planète</button><button class="lnk sm" id="oX">Plus tard</button></div>`;
     card.classList.remove('off');
     const done = () => { card.classList.add('off'); dock.classList.remove('down'); if (!LS.get('pd.tuto')) setTimeout(() => startTuto(), 1500); };
     $('#oF').onclick = () => { done(); openNewPlanet(); };
-    $('#oI').onchange = e => { done(); importFiles(e.target.files, SYS.planets[0]).then(() => openPlaylist(SYS.planets[0])); };
+    $('#oI').onchange = e => { const files=e.target.files; if(!files.length)return; done(); const p=makePlanet('Ma première playlist',1,{isPublic:false}); SYS.planets.push(p); save(); importFiles(files,p).then(() => openPlaylist(p)); };
     $('#oX').onclick = () => done();
   }
 }
@@ -3532,7 +3535,7 @@ function snapshotLite(){ return {name: SYS.name, user: SYS.user, hue: SYS.hue, l
 function nowInfo(){ if (au.paused || !Q.length) return null; const t = TRACKS.get(Q[qi]); if (!t) return null; const p = SYS.planets.find(x => x.id === qPlanet);
   return {t: t.title.slice(0, 80), a: (t.artist || '').slice(0, 60), pid: p ? p.id : '', pn: p ? p.name.slice(0, 40) : '', src: t.src && t.src.k !== 'local' ? t.src.k : '', u: t.src && t.src.u ? t.src.u.slice(0, 200) : '', ts: Date.now() - (au.currentTime || 0) * 1000, dur: au.duration || 240}; }
 function snapshot(){ return {name: SYS.name.slice(0, 40), user: SYS.user.slice(0, 30), hue: SYS.hue, hueSet: !!SYS.hueSet, secs: SYS.secs || 0, theme: SYS.theme, level: level(SYS.xp), updated: Date.now(), now: nowInfo(),
-  planets: SYS.planets.slice(0, 24).map(p => { const tr = []; p.terr.slice(0, 12).forEach((t, ti) => t.tracks.slice(0, 40).forEach(id => { const x = TRACKS.get(id); if (x) { const m = META[id] || {}; tr.push([x.title.slice(0, 80), (x.artist || '').slice(0, 60), ti, x.src && x.src.k !== 'local' ? x.src.k : '', Math.round(((m.plays || 0) + (m.secs || 0) / 300) * 10) / 10, trackBiome(id, p)]); } }));
+  planets: SYS.planets.filter(p => p.isPublic !== false).slice(0, 24).map(p => { const tr = []; p.terr.slice(0, 12).forEach((t, ti) => t.tracks.slice(0, 40).forEach(id => { const x = TRACKS.get(id); if (x) { const m = META[id] || {}; tr.push([x.title.slice(0, 80), (x.artist || '').slice(0, 60), ti, x.src && x.src.k !== 'local' ? x.src.k : '', Math.round(((m.plays || 0) + (m.secs || 0) / 300) * 10) / 10, trackBiome(id, p)]); } }));
     return {id: p.id, name: p.name.slice(0, 40), type: p.type, size: p.size, c1: p.c1, c2: p.c2, atH: p.atH, atmo: p.atmo, ring: p.ring, ringH: p.ringH, ringTilt: p.ringTilt, ringRoll: p.ringRoll,
       moons: p.moons, clouds: p.clouds, arch: p.arch || 0, spin: p.spin, tilt: p.tilt, seed: p.seed, phase: p.phase, emo: p.emo, origin: (p.origin || '').slice(0, 40), level: plevel(p), xp: p.xp || 0, path: pathOf(p), act: Math.round(act(p) * 100) / 100,
       terr: p.terr.slice(0, 12).map(t => ({id: t.id, name: t.name.slice(0, 30), kind: t.kind, hue: t.hue, lat: t.lat, lon: t.lon, n: t.tracks.length, lib: Math.round(liberation(t, p) * 100) / 100})), tracks: tr.slice(0, 240)}; })}; }
