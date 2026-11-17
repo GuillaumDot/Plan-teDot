@@ -824,9 +824,9 @@ function detectTier(){
 const TIER = detectTier(); const PANM = TIER >= 2 ? 'HRTF' : 'equalpower';
 const OCT = [3, 4, 5][TIER];
 if (TIER === 0) document.documentElement.classList.add('lowfx'); if (TIER === 1) document.documentElement.classList.add('tier1');
-let scale = [.7, .9, 1][TIER], maxScale = [1.15, 1.4, 1.65][TIER]; const SMIN = [.38, .42, .45][TIER];
+let scale = [.65, .75, .85][TIER], maxScale = [1, 1.15, 1.3][TIER]; const SMIN = [.38, .42, .45][TIER];
 let DPR = 1, W = 1, H = 1, RS = 1;
-function resize(){ DPR = window.devicePixelRatio || 1; RS = Math.min(DPR, maxScale) * scale; W = Math.max(2, Math.round(innerWidth * RS)); H = Math.max(2, Math.round(innerHeight * RS)); cv.width = W; cv.height = H; gl.viewport(0, 0, W, H); skyFbo.resize(); if (typeof POST_READY !== 'undefined') POST.resize(); }
+function resize(){ DPR = window.devicePixelRatio || 1; RS = Math.min(DPR, maxScale) * scale; RS = Math.min(RS, Math.sqrt(1200000 / Math.max(1, innerWidth * innerHeight))); W = Math.max(2, Math.round(innerWidth * RS)); H = Math.max(2, Math.round(innerHeight * RS)); cv.width = W; cv.height = H; gl.viewport(0, 0, W, H); skyFbo.resize(); if (typeof POST_READY !== 'undefined') POST.resize(); }
 // dynamic resolution
 let perfAcc = 0, perfN = 0, perfT = 0;
 let slowN = 0, fastN = 0;
@@ -2470,7 +2470,7 @@ function copyPlanet(p){
 }
 
 /* ================= main loop ================= */
-let last = performance.now(), flyT = 1, running = true, frameN = 0, FCAP = 60, lastDraw = 0;
+let last = performance.now(), flyT = 1, running = true, frameN = 0, FCAP = 30, lastDraw = 0;
 /* cinematic mode: GTA-style camera when a playlist plays untouched */
 let cine = null, cineArm = 0;
 const SHOTS = [['wide', 3], ['establish', 2], ['medium', 3], ['sunrise', 2], ['tracking', 2.2], ['low', 1.2], ['close', .5], ['pass', 1.5], ['region', 2.4], ['regionWide', 1.4]];
@@ -3429,7 +3429,7 @@ function addXP(n){ if (!n || !SYS) return; const before = level(SYS.xp); SYS.xp 
 let QPL = null, AMB = null, SHOT_PT = null, shotT = -9, ART = null, wakeL = null;
 function playList(ids, start, planetId, pl){ QPL = pl || null; sfx('confirm'); cineArm = performance.now(); lastInteract = performance.now() - 0; unlockAudio(); Q = ids.filter(id => TRACKS.has(id)); if (!Q.length){ toast('Aucun morceau à jouer ici'); return; } qi = clamp(start, 0, Q.length - 1); qPlanet = planetId; load(); }
 let switching = false;
-function load(){ const t = TRACKS.get(Q[qi]); if (!t) return; if (t.official && t.url){ if (QPL) qPlanet = QPL[qi] || null; switching = true; setTimeout(() => switching = false, 2500); if (curUrl){ URL.revokeObjectURL(curUrl); curUrl = null; } au.src = new URL(t.url, document.baseURI).href; trackSecs = 0; au.play().catch(() => toast('Touche lecture pour lancer le son')); updNP(); refreshRows(); if (cine) cineCaption(); msMeta(); return; } if (!t.blob && !t.url){ toast('Le son se prépare…', 1500); ensureBlob(t).then(ok => { if (ok && Q[qi] === t.id) load(); }); updNP(); return; }
+function load(){ const t = TRACKS.get(Q[qi]); if (!t) return; if (t.official && t.url){ if (QPL) qPlanet = QPL[qi] || null; switching = true; setTimeout(() => switching = false, 2500); if (curUrl){ URL.revokeObjectURL(curUrl); curUrl = null; } au.src = new URL(t.url, document.baseURI).href; au.onerror = () => toast('Impossible de lire ce MP3. Vérifie le dossier audio sur GitHub.', 5000); trackSecs = 0; au.play().catch(() => toast('Touche lecture pour lancer le son')); updNP(); refreshRows(); if (cine) cineCaption(); msMeta(); return; } if (!t.blob && !t.url){ toast('Le son se prépare…', 1500); ensureBlob(t).then(ok => { if (ok && Q[qi] === t.id) load(); }); updNP(); return; }
   if (t.url && !t.blob){ switching = true; updNP(); fetchBlob(t.url).then(b => { t.blob = b; if (TRACKS.get(Q[qi]) === t) load(); }).catch(() => { if (TRACKS.get(Q[qi]) !== t) return; au.src = t.url; au.play().catch(() => {}); updNP(); }); return; } if (QPL){ qPlanet = QPL[qi] || null; if (MENU.open && qPlanet){ const mi = VIEW.planets.findIndex(x => x.id === qPlanet); if (mi >= 0 && mi !== MENU.sel){ MENU.sel = mi; setTimeout(() => MENU.open && renderMenu(), 60); } } } switching = true; setTimeout(() => switching = false, 2500); if (curUrl) URL.revokeObjectURL(curUrl); curUrl = URL.createObjectURL(t.blob); au.src = curUrl; trackSecs = 0;
   au.play().catch(() => toast('Touche lecture pour lancer le son')); updNP(); refreshRows(); if (cine) cineCaption();
   msMeta(); }
@@ -3437,7 +3437,7 @@ function msMeta(){ try { const t = TRACKS.get(Q[qi]); if (!t) return; const p = 
   navigator.mediaSession.metadata = new MediaMetadata({title: t.title, artist: t.artist || '', album: p ? p.name : 'planèteDot', artwork: ART ? [{src: ART, sizes: '240x240', type: 'image/jpeg'}] : []}); } catch(e){} }
 /* the playing planet, as it is on screen right now, becomes the artwork of the system media card */
 const shotCv = document.createElement('canvas'); shotCv.width = shotCv.height = 240;
-function shotTick(){ if (!SHOT_PT || au.paused || !Q.length || !('mediaSession' in navigator)) return; const nowS = performance.now() / 1000; if (nowS - shotT < (document.hidden ? 4 : 20)) return; shotT = nowS;
+function shotTick(){ if (!SHOT_PT || au.paused || !Q.length || !('mediaSession' in navigator)) return; const nowS = performance.now() / 1000; if (nowS - shotT < 60) return; shotT = nowS;
   try { const sz = clamp(SHOT_PT.r * 2.7, 40, Math.min(W, H)), x = clamp(SHOT_PT.x - sz / 2, 0, W - sz), y = clamp(SHOT_PT.y - sz / 2, 0, H - sz), c = shotCv.getContext('2d'); c.drawImage(cv, x, y, sz, sz, 0, 0, 240, 240); shotCv.toBlob(bl => { if (!bl) return; const u = URL.createObjectURL(bl); const old = ART; ART = u; msMeta(); if (old && old.startsWith('blob:')) setTimeout(() => URL.revokeObjectURL(old), 4000); }, 'image/jpeg', .8); } catch(e){} }
 /* the whole galaxy, planet after planet */
 function playGalaxy(){ if (VIEW && VIEW.gd){ playAlbum(0); return; } const ids = [], pl = [];
@@ -3729,15 +3729,15 @@ async function synth(t){
   return new Blob([ab], {type: 'audio/wav'});
 }
 async function ensureBlob(t){ if (t.official) return true; if (!t.blob){ try { t.blob = await synth(t); } catch(e){ return false; } } return true; }
-async function prerender(){ for (const t of TRACKS.values()){ if (t.official) continue; if (!t.blob) await ensureBlob(t); await new Promise(r => setTimeout(r, 30)); } }
+async function prerender(){ /* Mobile stability: synthesize demo tracks only when explicitly played. */ }
 
 /* ================= boot ================= */
 (async () => {
-  buildNewcomer(); loadOfficialAlbum(); await idbOpen(); const savedTracks = await idbAll('tracks'); (savedTracks || []).forEach(t => { if (t && t.id) TRACKS.set(t.id, t); }); loadOfficialAlbum(); gdInit(); setTimeout(prerender, 1500);
+  buildNewcomer(); loadOfficialAlbum(); await idbOpen(); const savedTracks = await idbAll('tracks'); (savedTracks || []).forEach(t => { if (t && t.id) TRACKS.set(t.id, t); }); loadOfficialAlbum(); gdInit(); /* No background audio synthesis: prevents memory spikes on iPhone. */
   VIEW = SYS; updNP(); $('#ppIc').innerHTML = ICON.playp; $('#libLogo').src = LOGO;
   await initAccount();
   splashStart = time;
-  setTimeout(() => { try { unlockAudio(); sndInit(); setTimeout(() => { if (actx && actx.state === 'running' && SND.bus && mode === 'splash' && !SIG){ SIG = true; sfx('sig'); } }, 350); } catch(e){} }, 500);
+  /* AudioContext starts on the first user gesture to respect iOS audio policies. */
   setTimeout(() => { if (mode === 'splash' && warpT < 0) $('#hint').classList.remove('hide'); }, 2400);
   requestAnimationFrame(t => { last = t; requestAnimationFrame(frame); });
 })();
