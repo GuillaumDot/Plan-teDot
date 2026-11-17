@@ -873,10 +873,14 @@ async function initAccount(){
     finally{btn.disabled=false;}
   };
   $('#accountBtn').onclick=async()=>{ if(!confirm('Se déconnecter de PlanèteDot ?')) return; await sb.auth.signOut(); authUser=null;remoteReady=false;$('#accountBtn').style.display='none';$('#authGate').hidden=false;setAuthMode('login');authMessage('Tu es déconnecté.'); };
-  const {data,error}=await sb.auth.getSession();
-  if(error) console.warn(error);
-  if(data.session){ const ok=await activateAccount(data.session); if(!ok) $('#authGate').hidden=false; }
-  else { $('#authGate').hidden=false; setAuthMode('login'); }
+   $('#authGate').hidden=false;
+   const sessionResult=await Promise.race([sb.auth.getSession(),new Promise(resolve=>setTimeout(()=>resolve({error:new Error('Délai de connexion dépassé'),data:{session:null}}),10000))]);
+   const {data,error}=sessionResult;
+   if(error) console.warn('Session:',error);
+   if(data && data.session){
+     const activation=await Promise.race([activateAccount(data.session),new Promise(resolve=>setTimeout(()=>resolve(false),12000))]);
+     if(!activation){ $('#authGate').hidden=false; setAuthMode('login'); authMessage('Session non chargée. Reconnecte-toi pour continuer.',true); }
+   } else { $('#authGate').hidden=false; setAuthMode('login'); if(error) authMessage('Connexion lente. Réessaie de te connecter.',true); }
 }
 
 
@@ -3827,11 +3831,13 @@ async function prerender(){ /* Mobile stability: synthesize demo tracks only whe
 (async () => {
   buildNewcomer(); loadOfficialAlbum(); await idbOpen(); const savedTracks = await idbAll('tracks').catch(e => { console.warn('Stockage audio local indisponible', e); return []; }); (savedTracks || []).forEach(t => { if (t && t.id) TRACKS.set(t.id, t); }); loadOfficialAlbum(); gdInit(); /* No background audio synthesis: prevents memory spikes on iPhone. */
   VIEW = SYS; updNP(); $('#ppIc').innerHTML = ICON.playp; $('#libLogo').src = LOGO;
-  await initAccount();
+  // Start graphics independently of network authentication. A slow session refresh must never freeze WebGL.
   splashStart = time;
+  requestAnimationFrame(t => { last = t; requestAnimationFrame(frame); });
   /* AudioContext starts on the first user gesture to respect iOS audio policies. */
   setTimeout(() => { if (mode === 'splash' && warpT < 0) $('#hint').classList.remove('hide'); }, 2400);
-  requestAnimationFrame(t => { last = t; requestAnimationFrame(frame); });
+  try { await initAccount(); }
+  catch(e) { console.error('Initialisation du compte:',e); $('#authGate').hidden=false; setAuthMode('login'); authMessage('Connexion indisponible. Réessaie dans un instant.',true); }
 })();
 addEventListener('keydown', e => { if (e.key === 'Escape' && sheetOpen) closeSheet(); if ((e.key === 'Enter' || e.key === ' ') && mode === 'splash' && document.activeElement === document.body) startWarp(); });
 }
