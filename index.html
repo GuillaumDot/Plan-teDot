@@ -1732,7 +1732,7 @@ const POST = {on: false, s: null, b: [], bloom: .85, ca: 0, flash: 0,
     this.pass(PBL, a4, u => { tx(u, 'uS', b4, 0); gl.uniform2f(u.uDir, 0, 1 / a4.h); });
     this.pass(PBL, a8, u => { tx(u, 'uS', a4, 0); gl.uniform2f(u.uDir, 1.7 / a8.w, 0); });
     this.pass(PBL, b8, u => { tx(u, 'uS', a8, 0); gl.uniform2f(u.uDir, 0, 1.7 / a8.h); });
-    this.pass(PF, null, u => { tx(u, 'uS', sc, 0); tx(u, 'uB1', a4, 1); tx(u, 'uB2', b8, 2); gl.uniform1f(u.uBloom, this.bloom); gl.uniform1f(u.uCA, this.ca); gl.uniform1f(u.uT, time);
+    this.pass(PF, null, u => { tx(u, 'uS', sc, 0); tx(u, 'uB1', a4, 1); tx(u, 'uB2', b8, 2); gl.uniform1f(u.uBloom, /iPhone|iPad|iPod/i.test(navigator.userAgent) ? Math.min(this.bloom, .10) : this.bloom); gl.uniform1f(u.uCA, this.ca); gl.uniform1f(u.uT, time);
       gl.uniform1f(u.uVig, .26 + (1 - ECLs) * .45); gl.uniform1f(u.uGrain, Math.min(.8, (1 - ECLs) * .32 + BDARK)); gl.uniform1f(u.uFlash, this.flash); gl.uniform2f(u.uRes, W, H); gl.uniform1f(u.uSharp, clamp(.4 + (1 - scale) * 1.2, 0, 1)); });
     gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA); }
 };
@@ -2154,8 +2154,10 @@ function renderSystem(dt, flyIn){ { const kT = 1 + Math.max(0, starR(VIEW) - .55
   const sl0 = MENU.t > 0 ? menuSlot(-1, n) : null; const sp = project(sl0 ? sl0.p.map(v => v * mE) : [0,0,0]);
   let starPx = 0; ECL = 1; const PP = sys.planets.map((p, i) => planetPos(p, i));
   if (sp) STAR_PT = {x: sp.x, y: sp.y};
-  if (sp){ const r = pxR(lerp(sR * (1 + lvl * .09 + beatLvl * .025) * (.2 + .8 * starIgnite), sl0 ? sl0.r * .5 : 1, sl0 ? mE : 0), sp.w); starPx = r; passTrack('star', sp.x, sp.y, r * 1.6);
-    if (sys.gd){ bodies.push({w: sp.w + .02, kind: 2, x: sp.x, y: sp.y, r: Math.max(r * 4.2, 60 * RS), q: 1, c1: [.28, .5, 1], atmo: .5, alpha: (.5 + beatLvl * .15) * starIgnite}); bodies.push({w: sp.w + .01, kind: 2, x: sp.x, y: sp.y, r: r * 1.5, q: 1, c1: [.7, .85, 1], atmo: .4, alpha: .5 * starIgnite}); }
+  if (sp){ const r = pxR(lerp(sR * (1 + lvl * .09 + beatLvl * .025) * (.2 + .8 * starIgnite), sl0 ? sl0.r * .5 : 1, sl0 ? mE : 0), sp.w); // iPhone safety: prevent near-camera stars from covering the whole viewport.
+    const starLimit = Math.min(W, H) * .105;
+    r = Math.min(r, starLimit); starPx = r; passTrack('star', sp.x, sp.y, r * 1.6);
+    if (sys.gd){ bodies.push({w: sp.w + .02, kind: 2, x: sp.x, y: sp.y, r: Math.min(Math.max(r * 1.45, 18 * RS), Math.min(W,H) * .16), q: 1, c1: [.28, .5, 1], atmo: .25, alpha: .17 * starIgnite}); bodies.push({w: sp.w + .01, kind: 2, x: sp.x, y: sp.y, r: Math.min(r * 1.1, Math.min(W,H) * .12), q: 1, c1: [.7, .85, 1], atmo: .2, alpha: .2 * starIgnite}); }
     else bodies.push({w: sp.w, kind: 1, x: sp.x, y: sp.y, r, q: 2.8, c1: sc, seed: 3, audio: Math.min(2.1, lvl * 1.6 + beatLvl * .5 + bassLvl * .5), atmo: (.25 + .75 * starIgnite) * (1 + (1 - ECLs) * 1.3), alpha: BIRTH ? clamp(starIgnite * 3, 0, 1) : (readonly || sys.user ? 1 : 0), ecl: 1});
     picks.push({x: sp.x, y: sp.y, r: Math.max(r * (sys.gd ? 1.8 : 1.2), 30 * RS), w: sp.w, act: () => sys.gd ? openAlbum() : openStar()});
     if (!sheetOpen) placeNC(lab('star', `<b>${esc(sys.user || 'Ton étoile')}</b>`, 'star'), sp.x, sp.y + r * 1.25 + 6 * RS, starIgnite);
@@ -2246,7 +2248,7 @@ function renderSystem(dt, flyIn){ { const kT = 1 + Math.max(0, starR(VIEW) - .55
     drawLogo(sp.x, sp.y, S, [time * .16, .28 + Math.sin(time * .2) * .08, 0], new Float32Array([sp.x - 260 * RS, sp.y - 320 * RS, 1.1, 0, sp.x + 320 * RS, sp.y + 140 * RS, .7, 0, W / 2, H, .4, 0]), starIgnite);
     useSP(); bodies.filter(b => b.w < sp.w).forEach(drawBody); }
   else { useSP(); bodies.forEach(drawBody); }
-  if (sp && TIER > 0 && MENU.t < .5){ const off = Math.hypot(sp.x - W / 2, sp.y - H / 2) / Math.hypot(W, H); flares(sp, sc, clamp(1 - off * 1.4, 0, 1) * .22 * ECL * starIgnite).forEach(drawBody); }
+  if (sp && TIER > 0 && MENU.t < .5 && !/iPhone|iPad|iPod/i.test(navigator.userAgent)){ const off = Math.hypot(sp.x - W / 2, sp.y - H / 2) / Math.hypot(W, H); flares(sp, sc, clamp(1 - off * 1.4, 0, 1) * .22 * ECL * starIgnite).forEach(drawBody); }
   if (!cine && !sys.gd){ const Rl = orbitR(n) + 3.6, la = time * .045; const lp = project([Math.cos(la) * Rl, 1.4 + Math.sin(time * .3) * .3, Math.sin(la) * Rl]);
     if (lp){ const S = clamp(pxR(1.3, lp.w), 16 * RS, 64 * RS); LOGO_LC.set([...sc, ...sc, .7, .8, 1]); LOGO_PT = {x: lp.x, y: lp.y}; const la2 = time * .45; drawLogo(lp.x, lp.y, S, [la2 - .38 * Math.sin(2 * la2), .2 + Math.sin(time * .3) * .1, 0], new Float32Array([sp ? sp.x : W / 2, sp ? sp.y : H / 2, .4 + .8 * ECL, 0, 0, 0, 0, 0, 0, 0, 0, 0]), .95 * starIgnite * (1 - mE * .5));
       picks.push({x: lp.x, y: lp.y, r: Math.max(S * .8, 26 * RS), w: lp.w, act: () => MENU.open ? closeMenu() : openMenu()}); } }
