@@ -1879,10 +1879,14 @@ function drawSky(R, U, F, neb, theme){
   gl.bindFramebuffer(gl.FRAMEBUFFER, POST.target()); gl.viewport(0, 0, W, H);
 }
 function drawBG(camx, camy, warp, lights, ring, exp = 1.3){
-  gl.useProgram(BG.p); gl.bindVertexArray(quad); gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, skyFbo.tex); gl.uniform1i(BG.u.uSky, 1);
-  gl.uniform2f(BG.u.uRes, W, H); gl.uniform2f(BG.u.uCam, camx, camy); gl.uniform1f(BG.u.uT, time); gl.uniform1f(BG.u.uWarp, warp); gl.uniform1f(BG.u.uExp, exp);
-  gl.uniform1f(BG.u.uDpr, RS); gl.uniform4fv(BG.u.uL, lights || NOL); gl.uniform4fv(BG.u.uRing, ring || [0,0,1,0]);
-  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+  // Mode de secours iPhone : fond spatial neutre, sans shader de ciel,
+  // traînées radiales, lumière d'arrière-plan ou effet de tunnel.
+  // Les planètes et les contrôles sont rendus ensuite normalement.
+  gl.disable(gl.BLEND);
+  gl.clearColor(0.005, 0.008, 0.025, 1);
+  gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 }
 const NOL = new Float32Array(12);
 function useSP(){ gl.useProgram(SP.p); gl.bindVertexArray(quad); gl.uniform2f(SP.u.uRes, W, H); gl.uniform1f(SP.u.uT, time); }
