@@ -550,6 +550,26 @@ button:active { transform:scale(.975); }
 <audio id="ra" preload="auto" playsinline loop></audio>
 <button id="radio" class="glass hide" aria-label="Interception radio"></button>
 
+<script>
+/* PlanèteDot startup rescue v2 — independent of WebGL, Supabase and app bundle. */
+(function(){
+ const events=[];let phase='Chargement du code';let ready=false;
+ function record(msg){events.push(new Date().toISOString().slice(11,19)+' '+String(msg).slice(0,350));if(events.length>24)events.shift();}
+ function panel(reason){
+   let el=document.getElementById('pd-rescue');if(!el){el=document.createElement('section');el.id='pd-rescue';el.style.cssText='position:fixed;z-index:2147483647;inset:0;overflow:auto;background:#080d1b;color:#f3f6ff;padding:env(safe-area-inset-top,24px) 22px 28px;font:16px/1.5 -apple-system,BlinkMacSystemFont,sans-serif';document.body.appendChild(el);}
+   el.replaceChildren();const h=document.createElement('h2');h.textContent='PlanèteDot · diagnostic de démarrage';el.append(h);
+   const p=document.createElement('p');p.textContent=reason+' — Étape : '+phase;el.append(p);
+   const details=document.createElement('pre');details.style.cssText='white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;background:#151e35;padding:12px;border-radius:10px';details.textContent=events.join('\n')||'Aucune erreur JavaScript capturée';el.append(details);
+   const b=document.createElement('button');b.textContent='Copier le diagnostic';b.style.cssText='padding:14px;margin:8px;background:#4678ff;color:white;border:0;border-radius:10px';b.onclick=()=>{const t='PlanèteDot diagnostic\n'+navigator.userAgent+'\n'+details.textContent;if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(()=>b.textContent='Diagnostic copié').catch(()=>window.prompt('Copier ce texte',t));else window.prompt('Copier ce texte',t)};el.append(b);
+   const r=document.createElement('button');r.textContent='Réessayer';r.style.cssText=b.style.cssText+';background:#283852';r.onclick=()=>location.reload();el.append(r);
+   const x=document.createElement('button');x.textContent='Fermer le diagnostic';x.style.cssText=b.style.cssText+';background:#283852';x.onclick=()=>el.remove();el.append(x);
+ }
+ window.__pdRescue={record,phase(v){phase=v;record(v)},ready(){ready=true;record('Interface authentification prête')},show:panel};
+ window.addEventListener('error',e=>{record('ERREUR '+(e.message||'ressource')+' '+(e.filename||'')+':'+(e.lineno||''));if(!ready)panel('Le code a rencontré une erreur avant la connexion')});
+ window.addEventListener('unhandledrejection',e=>record('PROMESSE '+String(e.reason&&e.reason.message||e.reason)));
+ setTimeout(()=>{if(!ready)panel('Le démarrage a dépassé 15 secondes')},15000);
+})();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 {
@@ -557,8 +577,8 @@ const LOGO = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgMCAgM
 const $ = s => document.querySelector(s);
 const cv = $('#gl');
 const gl = cv.getContext('webgl2', {antialias: false, alpha: false, powerPreference: 'high-performance', preserveDrawingBuffer: false});
-if (!gl){ const n = $('#nogl'); n.style.display = 'grid'; n.textContent = 'planèteDot a besoin de WebGL 2 pour afficher son univers. Mets à jour ton navigateur (Safari, Chrome ou Firefox) puis réessaie.'; }
-else main();
+if (!gl){ window.__pdRescue.show('WebGL 2 indisponible sur ce navigateur'); const n = $('#nogl'); n.style.display = 'grid'; n.textContent = 'planèteDot a besoin de WebGL 2 pour afficher son univers. Mets à jour ton navigateur (Safari, Chrome ou Firefox) puis réessaie.'; }
+else { try { window.__pdRescue.phase("Initialisation WebGL"); main(); } catch(e){window.__pdRescue.record("Erreur main: "+e.message);window.__pdRescue.show("Échec du moteur 3D");} }
 
 function main(){
 const DEMO = false;
@@ -841,7 +861,7 @@ async function activateAccountInner(session){
   authUser=session.user; ME=authUser.id; remoteReady=false;
   let data,error; try{({data,error}=await withDeadline(sb.from('user_systems').select('system').eq('user_id',authUser.id).maybeSingle(),9000,'Chargement de ton univers'));}catch(e){authMessage('Connexion établie, mais ton univers tarde à charger. Réessaie dans quelques instants.',true);console.warn(e);return false;}
   if(error){ authMessage('Connexion réussie, mais la base n’est pas encore configurée. Applique le script SQL fourni avec l’application.',true); console.error(error); return false; }
-  if(data && data.system){ SYS=fixSys(data.system); }
+  if(data && data.system){ window.__pdRescue.phase("Restauration des planètes"); SYS=fixSys(data.system); }
   else {
     SYS=fixSys(defaultSystem());
     const md=authUser.user_metadata||{}; const pseudo=(md.username||authUser.email.split('@')[0]||'Explorateur').slice(0,24);
@@ -850,7 +870,7 @@ async function activateAccountInner(session){
     if(insErr){ authMessage('Le compte existe, mais la sauvegarde n’est pas prête. Vérifie le script SQL.',true); console.error(insErr); return false; }
   }
   remoteReady=true; loadOfficialAlbum(); attachOfficialAlbumToSystem(); save(); VIEW=SYS; INBOX=[]; MYSIG=[]; OTHERS.clear(); /* Ne pas bloquer la connexion sur le réseau social. */ Promise.resolve().then(async()=>{ try { await loadPublicCatalogue(); } catch(e){ console.warn('Catalogue différé',e); } try { await refreshPublicGalaxies(); startPublicRealtime(); await publishPublicGalaxy(); } catch(e){ console.warn('Carte publique différée',e); } });
-  $('#authGate').hidden=true; $('#accountBtn').style.display='block';
+  window.__pdRescue.phase('Compte chargé : affichage de l’univers'); $('#authGate').hidden=true; $('#accountBtn').style.display='block';
   updNP(); updUI();
   if(!SYS.name || !SYS.user){ setTimeout(()=>onboard(1),1200); }
   return true;
@@ -3830,7 +3850,7 @@ async function prerender(){ /* Mobile stability: synthesize demo tracks only whe
 
 /* ================= boot ================= */
 (async () => {
-  buildNewcomer(); loadOfficialAlbum(); gdInit(); /* No background audio synthesis: prevents memory spikes on iPhone. */
+  window.__pdRescue.phase("Préparation du système musical"); buildNewcomer(); loadOfficialAlbum(); gdInit(); /* No background audio synthesis: prevents memory spikes on iPhone. */
   VIEW = SYS; updNP(); $('#ppIc').innerHTML = ICON.playp; $('#libLogo').src = LOGO;
   // Start graphics independently of network authentication. A slow session refresh must never freeze WebGL.
   splashStart = time;
@@ -3839,8 +3859,8 @@ async function prerender(){ /* Mobile stability: synthesize demo tracks only whe
   setTimeout(() => { if (mode === 'splash' && warpT < 0) $('#hint').classList.remove('hide'); }, 2400);
   // Le stockage audio est secondaire : ne jamais bloquer la connexion dessus.
   (async()=>{ try{await idbOpen(); const tracks=await withDeadline(idbAll('tracks'),4000,'Lecture des fichiers locaux');(tracks||[]).forEach(t=>{if(t&&t.id&&!TRACKS.has(t.id))TRACKS.set(t.id,t);});loadOfficialAlbum();if(authUser)updUI();}catch(e){console.warn('Audio local différé',e);} })();
-  try { await initAccount(); }
-  catch(e) { console.error('Initialisation du compte:',e); $('#authGate').hidden=false; setAuthMode('login'); authMessage('Connexion indisponible. Réessaie dans un instant.',true); }
+  window.__pdRescue.phase("Restauration de la session Supabase"); try { await initAccount(); window.__pdRescue.ready(); }
+  catch(e) { console.error('Initialisation du compte:',e); window.__pdRescue.record('Erreur auth: '+e.message); $('#authGate').hidden=false; setAuthMode('login'); authMessage('Connexion indisponible. Réessaie dans un instant.',true); window.__pdRescue.ready(); }
 })();
 addEventListener('keydown', e => { if (e.key === 'Escape' && sheetOpen) closeSheet(); if ((e.key === 'Enter' || e.key === ' ') && mode === 'splash' && document.activeElement === document.body) startWarp(); });
 }
