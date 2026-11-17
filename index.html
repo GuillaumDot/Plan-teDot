@@ -746,7 +746,7 @@ const starR = s => { const f = starFrac(s), k = Math.floor(f); return lerp(STARS
 /* ================= storage ================= */
 const LS = {get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null; } }, set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }};
 let idb = null;
-function idbOpen(){ return new Promise(res => { try { const q = indexedDB.open('planetedot', 1); q.onupgradeneeded = () => { q.result.createObjectStore('tracks', {keyPath: 'id'}); q.result.createObjectStore('kv'); }; q.onsuccess = () => { idb = q.result; res(true); }; q.onerror = () => res(false); } catch(e){ res(false); } }); }
+function idbOpen(){ return new Promise(res => { let done=false; const finish=v=>{if(!done){done=true;res(v);}}; const timer=setTimeout(()=>{console.warn('IndexedDB: ouverture trop longue');finish(false);},4000); try { const q = indexedDB.open('planetedot', 1); q.onupgradeneeded = () => { if(!q.result.objectStoreNames.contains('tracks'))q.result.createObjectStore('tracks', {keyPath: 'id'}); if(!q.result.objectStoreNames.contains('kv'))q.result.createObjectStore('kv'); }; q.onsuccess = () => { idb = q.result; clearTimeout(timer); finish(true); }; q.onerror = () => {clearTimeout(timer);finish(false);}; q.onblocked=()=>console.warn('IndexedDB: accès bloqué par un autre onglet'); } catch(e){clearTimeout(timer);finish(false);} }); }
 const idbReq = (store, mode, fn) => new Promise(res => { if (!idb) return res(null); try { const tx = idb.transaction(store, mode); const r = fn(tx.objectStore(store)); tx.oncomplete = () => res(r && r.result !== undefined ? r.result : null); tx.onerror = tx.onabort = () => res(null); } catch(e){ res(null); } });
 const idbAll = s => idbReq(s, 'readonly', st => st.getAll());
 const idbPut = (s, v, k) => idbReq(s, 'readwrite', st => k === undefined ? st.put(v) : st.put(v, k));
@@ -830,6 +830,7 @@ function saveMeta(){ save(); }
 function authMessage(msg, error=false){ const el=$('#authMsg'); el.textContent=msg||''; el.classList.toggle('error',!!error); }
 let authMode = 'login';
 function setAuthMode(mode){ authMode=mode; const reg=mode==='signup'; $('#authTitle').textContent=reg?'Crée ton univers':'Entre dans PlanèteDot'; $('#authSubmit').textContent=reg?'Créer mon compte':'Se connecter'; $('#authMode').textContent=reg?'J’ai déjà un compte':'Créer un compte'; $('#authName').hidden=!reg; $('#authNameLabel').hidden=!reg; $('#authName').required=reg; $('#authPassword').autocomplete=reg?'new-password':'current-password'; authMessage(''); }
+const withDeadline=(promise,ms,label)=>Promise.race([Promise.resolve(promise),new Promise((_,reject)=>setTimeout(()=>reject(new Error(label+' : délai dépassé')),ms))]);
 let activatingAccount = null;
 async function activateAccount(session){
   if(activatingAccount) return activatingAccount;
@@ -838,14 +839,14 @@ async function activateAccount(session){
 }
 async function activateAccountInner(session){
   authUser=session.user; ME=authUser.id; remoteReady=false;
-  const {data,error}=await sb.from('user_systems').select('system').eq('user_id',authUser.id).maybeSingle();
+  let data,error; try{({data,error}=await withDeadline(sb.from('user_systems').select('system').eq('user_id',authUser.id).maybeSingle(),9000,'Chargement de ton univers'));}catch(e){authMessage('Connexion établie, mais ton univers tarde à charger. Réessaie dans quelques instants.',true);console.warn(e);return false;}
   if(error){ authMessage('Connexion réussie, mais la base n’est pas encore configurée. Applique le script SQL fourni avec l’application.',true); console.error(error); return false; }
   if(data && data.system){ SYS=fixSys(data.system); }
   else {
     SYS=fixSys(defaultSystem());
     const md=authUser.user_metadata||{}; const pseudo=(md.username||authUser.email.split('@')[0]||'Explorateur').slice(0,24);
     SYS.user=pseudo; SYS.name='Système de '+pseudo;
-    const {error:insErr}=await sb.from('user_systems').upsert({user_id:authUser.id,system:SYS,updated_at:new Date().toISOString()},{onConflict:'user_id'});
+    let insErr; try{({error:insErr}=await withDeadline(sb.from('user_systems').upsert({user_id:authUser.id,system:SYS,updated_at:new Date().toISOString()},{onConflict:'user_id'}),9000,'Création de ton univers'));}catch(e){authMessage('Sauvegarde trop lente. Réessaie.',true);console.warn(e);return false;}
     if(insErr){ authMessage('Le compte existe, mais la sauvegarde n’est pas prête. Vérifie le script SQL.',true); console.error(insErr); return false; }
   }
   remoteReady=true; loadOfficialAlbum(); attachOfficialAlbumToSystem(); save(); VIEW=SYS; INBOX=[]; MYSIG=[]; OTHERS.clear(); /* Ne pas bloquer la connexion sur le réseau social. */ Promise.resolve().then(async()=>{ try { await loadPublicCatalogue(); } catch(e){ console.warn('Catalogue différé',e); } try { await refreshPublicGalaxies(); startPublicRealtime(); await publishPublicGalaxy(); } catch(e){ console.warn('Carte publique différée',e); } });
@@ -864,15 +865,15 @@ async function initAccount(){
     try{
       let result;
       if(authMode==='signup') result=await sb.auth.signUp({email,password,options:{data:{username:$('#authName').value.trim()||email.split('@')[0]},emailRedirectTo:location.origin+location.pathname}});
-      else result=await sb.auth.signInWithPassword({email,password});
+      else result=await withDeadline(sb.auth.signInWithPassword({email,password}),12000,'Connexion');
       if(result.error) throw result.error;
-      if(result.data.session){ const ok=await activateAccount(result.data.session); if(ok) authMessage('Bienvenue dans ton univers !'); }
+      if(result.data.session){ const ok=await withDeadline(activateAccount(result.data.session),12000,'Ouverture de ton univers'); if(ok) authMessage('Bienvenue dans ton univers !'); }
       else if(authMode==='signup') authMessage('Compte créé. Consulte ta boîte e-mail et confirme ton adresse, puis connecte-toi ici.');
       else authMessage('Connecte-toi pour continuer.');
     }catch(err){ authMessage(err.message||'Une erreur est survenue.',true); }
     finally{btn.disabled=false;}
   };
-  $('#accountBtn').onclick=async()=>{ if(!confirm('Se déconnecter de PlanèteDot ?')) return; await sb.auth.signOut(); authUser=null;remoteReady=false;$('#accountBtn').style.display='none';$('#authGate').hidden=false;setAuthMode('login');authMessage('Tu es déconnecté.'); };
+  $('#accountBtn').onclick=async()=>{ if(!confirm('Se déconnecter de PlanèteDot ?')) return; await withDeadline(sb.auth.signOut(),8000,'Déconnexion').catch(e=>console.warn(e)); authUser=null;remoteReady=false;$('#accountBtn').style.display='none';$('#authGate').hidden=false;setAuthMode('login');authMessage('Tu es déconnecté.'); };
    $('#authGate').hidden=false;
    const sessionResult=await Promise.race([sb.auth.getSession(),new Promise(resolve=>setTimeout(()=>resolve({error:new Error('Délai de connexion dépassé'),data:{session:null}}),10000))]);
    const {data,error}=sessionResult;
@@ -3829,13 +3830,15 @@ async function prerender(){ /* Mobile stability: synthesize demo tracks only whe
 
 /* ================= boot ================= */
 (async () => {
-  buildNewcomer(); loadOfficialAlbum(); await idbOpen(); const savedTracks = await idbAll('tracks').catch(e => { console.warn('Stockage audio local indisponible', e); return []; }); (savedTracks || []).forEach(t => { if (t && t.id) TRACKS.set(t.id, t); }); loadOfficialAlbum(); gdInit(); /* No background audio synthesis: prevents memory spikes on iPhone. */
+  buildNewcomer(); loadOfficialAlbum(); gdInit(); /* No background audio synthesis: prevents memory spikes on iPhone. */
   VIEW = SYS; updNP(); $('#ppIc').innerHTML = ICON.playp; $('#libLogo').src = LOGO;
   // Start graphics independently of network authentication. A slow session refresh must never freeze WebGL.
   splashStart = time;
   requestAnimationFrame(t => { last = t; requestAnimationFrame(frame); });
   /* AudioContext starts on the first user gesture to respect iOS audio policies. */
   setTimeout(() => { if (mode === 'splash' && warpT < 0) $('#hint').classList.remove('hide'); }, 2400);
+  // Le stockage audio est secondaire : ne jamais bloquer la connexion dessus.
+  (async()=>{ try{await idbOpen(); const tracks=await withDeadline(idbAll('tracks'),4000,'Lecture des fichiers locaux');(tracks||[]).forEach(t=>{if(t&&t.id&&!TRACKS.has(t.id))TRACKS.set(t.id,t);});loadOfficialAlbum();if(authUser)updUI();}catch(e){console.warn('Audio local différé',e);} })();
   try { await initAccount(); }
   catch(e) { console.error('Initialisation du compte:',e); $('#authGate').hidden=false; setAuthMode('login'); authMessage('Connexion indisponible. Réessaie dans un instant.',true); }
 })();
