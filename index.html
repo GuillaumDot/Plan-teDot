@@ -765,6 +765,19 @@ function saveMeta(){ save(); }
 function authMessage(msg, error=false){ const el=$('#authMsg'); el.textContent=msg||''; el.classList.toggle('error',!!error); }
 let authMode = 'login';
 function setAuthMode(mode){ authMode=mode; const reg=mode==='signup'; $('#authTitle').textContent=reg?'Crée ton univers':'Entre dans PlanèteDot'; $('#authSubmit').textContent=reg?'Créer mon compte':'Se connecter'; $('#authMode').textContent=reg?'J’ai déjà un compte':'Créer un compte'; $('#authName').hidden=!reg; $('#authNameLabel').hidden=!reg; $('#authName').required=reg; $('#authPassword').autocomplete=reg?'new-password':'current-password'; authMessage(''); }
+let experienceStarted = false;
+function startExperience(){
+  if (experienceStarted || !authUser || !remoteReady) return;
+  experienceStarted = true;
+  running = true;
+  splashStart = time;
+  setTimeout(() => { try { unlockAudio(); sndInit(); setTimeout(() => { if (actx && actx.state === 'running' && SND.bus && mode === 'splash' && !SIG){ SIG = true; sfx('sig'); } }, 350); } catch(e){} }, 500);
+  setTimeout(() => { if (mode === 'splash' && warpT < 0) $('#hint').classList.remove('hide'); }, 2400);
+  setTimeout(prerender, 1500);
+  last = performance.now();
+  requestAnimationFrame(frame);
+}
+
 async function activateAccount(session){
   authUser=session.user; remoteReady=false;
   const {data,error}=await sb.from('user_systems').select('system').eq('user_id',authUser.id).maybeSingle();
@@ -780,11 +793,12 @@ async function activateAccount(session){
   remoteReady=true; VIEW=SYS; INBOX=[]; MYSIG=[]; OTHERS.clear();
   $('#authGate').hidden=true; $('#accountBtn').style.display='block';
   updNP(); updUI();
+  startExperience();
   if(!SYS.name || !SYS.user){ setTimeout(()=>onboard(1),1200); }
   return true;
 }
 async function initAccount(){
-  if(!window.supabase || !window.supabase.createClient){ authMessage('Connexion au service indisponible. Vérifie ta connexion Internet.',true); return; }
+  if(!window.supabase || !window.supabase.createClient){ authMessage('Connexion au service indisponible. Vérifie ta connexion Internet.',true); return false; }
   sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
   $('#authMode').onclick=()=>setAuthMode(authMode==='login'?'signup':'login');
   $('#authForm').onsubmit=async e=>{
@@ -801,7 +815,7 @@ async function initAccount(){
     }catch(err){ authMessage(err.message||'Une erreur est survenue.',true); }
     finally{btn.disabled=false;}
   };
-  $('#accountBtn').onclick=async()=>{ if(!confirm('Se déconnecter de PlanèteDot ?')) return; await sb.auth.signOut(); authUser=null;remoteReady=false;$('#accountBtn').style.display='none';$('#authGate').hidden=false;setAuthMode('login');authMessage('Tu es déconnecté.'); };
+  $('#accountBtn').onclick=async()=>{ if(!confirm('Se déconnecter de PlanèteDot ?')) return; await sb.auth.signOut(); authUser=null;remoteReady=false;running=false;experienceStarted=false;try{au.pause();}catch(e){} $('#accountBtn').style.display='none';$('#authGate').hidden=false;setAuthMode('login');authMessage('Tu es déconnecté.'); };
   const {data,error}=await sb.auth.getSession();
   if(error) console.warn(error);
   if(data.session){ const ok=await activateAccount(data.session); if(!ok) $('#authGate').hidden=false; }
@@ -2538,6 +2552,38 @@ function frame(now, once){
   POST.end(); shotTick();
   if (!once) requestAnimationFrame(frame);
 }
+/* Recover the render loop after a transient JavaScript error instead of leaving a frozen frame. */
+const frameCore = frame;
+let frameErrors = 0;
+frame = function(now, once){
+  if (!running && !once) return;
+  try {
+    frameCore(now, once);
+    frameErrors = 0;
+  } catch(err) {
+    console.error('PlanèteDot render loop:', err);
+    frameErrors++;
+    if (frameErrors >= 3) {
+      running = false;
+      try { toast('L’affichage 3D a rencontré une erreur. Recharge PlanèteDot pour relancer l’univers.', 6500); } catch(_) {}
+      return;
+    }
+    if (!once && running) requestAnimationFrame(frame);
+  }
+};
+cv.addEventListener('webglcontextlost', e => {
+  e.preventDefault();
+  running = false;
+  try { toast('Le moteur 3D a été suspendu par iOS. Patiente ou recharge PlanèteDot.', 6500); } catch(_) {}
+});
+cv.addEventListener('webglcontextrestored', () => location.reload());
+addEventListener('pageshow', () => {
+  if (authUser && remoteReady && !document.hidden && !running) {
+    running = true;
+    last = performance.now();
+    requestAnimationFrame(frame);
+  }
+});
 document.addEventListener('visibilitychange', () => { if (SND.ab && actx) SND.ab.gain.setTargetAtTime(document.hidden ? 0 : 1, actx.currentTime, .1); if (document.hidden) running = false; else if (!running){ running = true; last = performance.now(); requestAnimationFrame(frame); } });
 function arrive(){
   warpT = -1; const isNew = !SYS.name || !SYS.user; if (isNew){ starIgnite = 0; sndInit(); } if (hudEl) hudEl.style.opacity = 0;
@@ -3424,7 +3470,7 @@ function listenTick(dt){
 }
 function addXP(n){ if (!n || !SYS) return; const before = level(SYS.xp); SYS.xp = (SYS.xp || 0) + n; const after = level(SYS.xp); save();
   if (after > before){ $('#flash').style.opacity = .45; toast(`Ton étoile atteint l’âge stellaire ${after}. ${slots(SYS) > SYS.planets.length ? 'Une nouvelle orbite s’est ouverte.' : ''}`, 6000); updUI(); } }
-let QPL = null, AMB = null, SHOT_PT = null, shotT = -9, ART = null, wakeL = null;
+let QPL = null, AMB = null, SHOT_PT = null, shotT = -9, ART = null;
 function playList(ids, start, planetId, pl){ QPL = pl || null; sfx('confirm'); cineArm = performance.now(); lastInteract = performance.now() - 0; unlockAudio(); Q = ids.filter(id => TRACKS.has(id)); if (!Q.length){ toast('Aucun morceau à jouer ici'); return; } qi = clamp(start, 0, Q.length - 1); qPlanet = planetId; load(); }
 let switching = false;
 function load(){ const t = TRACKS.get(Q[qi]); if (!t) return; if (!t.blob && !t.url){ toast('Le son se prépare…', 1500); ensureBlob(t).then(ok => { if (ok && Q[qi] === t.id) load(); }); updNP(); return; }
@@ -3447,15 +3493,13 @@ function playGalaxy(){ if (VIEW && VIEW.gd){ playAlbum(0); return; } const ids =
 function ambient(on){
   if (on){ const pid = playingPlanet() || (VIEW === SYS && VIEW.planets[MENU.sel] ? VIEW.planets[MENU.sel].id : null); if (!pid || mode !== 'system'){ toast('Lance un morceau de ton système pour afficher sa planète en fond.', 4500); return; }
     if (MENU.open) closeMenu(true); if (cine) exitCine(); closeSheet(true); AMB = {pid, t: performance.now()}; focusOn(pid); pz = .5; document.body.classList.add('amb');
-    try { if (navigator.wakeLock) navigator.wakeLock.request('screen').then(w => { wakeL = w; if (!AMB) w.release(); }).catch(() => {}); } catch(e){}
-    toast('Mode fond · touche l’écran pour revenir', 3500); }
-  else { AMB = null; document.body.classList.remove('amb'); try { if (wakeL) wakeL.release(); } catch(e){} wakeL = null; } }
+    /* No Screen Wake Lock here: the user must be able to lock the phone. */
+    toast('Mode fond · tu peux verrouiller ton téléphone ; la musique continue si iOS autorise la lecture en arrière-plan.', 5000); }
+  else { AMB = null; document.body.classList.remove('amb'); } }
 function ambTick(dt){ if (!AMB) return; if (mode !== 'system' || VIEW !== SYS){ ambient(false); return; } const pp = playingPlanet(); if (pp && pp !== focus){ focusOn(pp); pz = .5; } else if (!focus){ focusOn(AMB.pid); pz = .5; }
   cam.g.yaw += dt * .025; cineArm = performance.now(); lastInteract = performance.now(); }
 addEventListener('pointerdown', e => { if (AMB && performance.now() - AMB.t > 900){ e.stopPropagation(); e.preventDefault(); ambient(false); } }, true);
-document.addEventListener('visibilitychange', () => { if (!document.hidden && AMB && navigator.wakeLock) try { navigator.wakeLock.request('screen').then(w => { wakeL = w; }).catch(() => {}); } catch(e){} });
-/* while the app is in the background and music plays, one frame every few seconds keeps the planet turning on the media card */
-setInterval(() => { if (document.hidden && !au.paused && Q.length && 'mediaSession' in navigator){ try { const n = performance.now(); last = n - 40; frame(n, true); } catch(e){} } }, 4000);
+/* iOS suspends page rendering when the phone is locked; audio playback is handled by the media element and Media Session. */
 /* a zone (a track) can be copied onto any of your planets */
 function openCopyTo(ref, from){ const key = (ref.title + '|' + (ref.artist || '')).toLowerCase(); const lib = ref.id && TRACKS.has(ref.id) ? ref.id : ([...TRACKS.values()].find(t => (t.title + '|' + (t.artist || '')).toLowerCase() === key) || {}).id;
   const dst = SYS.planets.filter(p => !(from && VIEW === SYS && p.id === from.id));
@@ -3696,13 +3740,14 @@ async function prerender(){ for (const t of TRACKS.values()){ if (!t.blob) await
 
 /* ================= boot ================= */
 (async () => {
-  demoTracks(false); buildNewcomer(); await idbOpen(); const savedTracks = await idbAll('tracks'); (savedTracks || []).forEach(t => { if (t && t.id) TRACKS.set(t.id, t); }); gdInit(); setTimeout(prerender, 1500);
+  /* Prepare account-independent data, but keep the experience stopped behind the account gate. */
+  demoTracks(false); buildNewcomer(); await idbOpen();
+  const savedTracks = await idbAll('tracks');
+  (savedTracks || []).forEach(t => { if (t && t.id) TRACKS.set(t.id, t); });
+  gdInit();
   VIEW = SYS; updNP(); $('#ppIc').innerHTML = ICON.playp; $('#libLogo').src = LOGO;
+  running = false;
   await initAccount();
-  splashStart = time;
-  setTimeout(() => { try { unlockAudio(); sndInit(); setTimeout(() => { if (actx && actx.state === 'running' && SND.bus && mode === 'splash' && !SIG){ SIG = true; sfx('sig'); } }, 350); } catch(e){} }, 500);
-  setTimeout(() => { if (mode === 'splash' && warpT < 0) $('#hint').classList.remove('hide'); }, 2400);
-  requestAnimationFrame(t => { last = t; requestAnimationFrame(frame); });
 })();
 addEventListener('keydown', e => { if (e.key === 'Escape' && sheetOpen) closeSheet(); if ((e.key === 'Enter' || e.key === ' ') && mode === 'splash' && document.activeElement === document.body) startWarp(); });
 }
