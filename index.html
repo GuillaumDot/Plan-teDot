@@ -2081,7 +2081,26 @@ function drawLogo(cx, cy, S, rot, L, alpha){
 let logoSpin = 0, logoSpinV = 0; const sstep = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
 let LOGO_MAT = +(LS.get('pd.logo') ?? 0) || 0;
 const LOGO_LC = new Float32Array([.76, .88, 1, 1, .88, .76, .76, .88, 1]);
-function startWarp(){ if (warpT >= 0) return; warpT = 0; $('#hint').classList.add('hide'); unlockAudio(); sndInit(); if (!SIG){ SIG = true; sfx('sig'); setTimeout(() => sfx('hook'), 420); } else sfx('hook'); logoSpinV = 7; POST.flash = .25; if (navigator.vibrate) try { navigator.vibrate([18, 40, 12]); } catch(e){} }
+function startWarp(){
+  if(mode !== 'splash') return;
+  try {
+    warpT = -1;
+    const flash = document.querySelector('#flash');
+    if(flash){ flash.style.opacity='0'; flash.style.pointerEvents='none'; }
+    const hint = document.querySelector('#hint');
+    if(hint) hint.classList.add('hide');
+    arrive();
+  } catch(err) {
+    console.error('Échec entrée univers:',err);
+    const pane=document.createElement('div');
+    pane.style.cssText='position:fixed;inset:15% 5%;z-index:2147483647;background:#10182b;color:white;padding:20px;border-radius:12px;overflow:auto;font:15px system-ui';
+    const title=document.createElement('h2');title.textContent='Erreur à l’entrée de l’univers';pane.appendChild(title);
+    const pre=document.createElement('pre');pre.style.whiteSpace='pre-wrap';pre.textContent=String(err&&err.stack||err);pane.appendChild(pre);
+    const btn=document.createElement('button');btn.textContent='Copier l’erreur';btn.onclick=()=>navigator.clipboard&&navigator.clipboard.writeText(pre.textContent);pane.appendChild(btn);
+    document.body.appendChild(pane);
+  }
+}
+function startWarpLegacy(){ if (warpT >= 0) return; warpT = 0; $('#hint').classList.add('hide'); unlockAudio(); sndInit(); if (!SIG){ SIG = true; sfx('sig'); setTimeout(() => sfx('hook'), 420); } else sfx('hook'); logoSpinV = 7; POST.flash = .25; if (navigator.vibrate) try { navigator.vibrate([18, 40, 12]); } catch(e){} }
 
 /* ================= system scene ================= */
 const gL = (a, c) => { const dx = c.x - a.x, dy = -(c.y - a.y), l = Math.hypot(dx, dy) || 1; return [dx / l, dy / l, 0]; };
