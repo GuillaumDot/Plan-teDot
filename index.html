@@ -483,7 +483,7 @@ body.amb #top,body.amb #dock,body.amb #rail,body.amb #radio,body.amb #labels,bod
     <div class="auth-mark">✦</div>
     <p class="auth-kicker">TON UNIVERS MUSICAL</p>
     <h1 id="authTitle">Entre dans PlanèteDot</h1>
-    <p class="auth-intro">Crée ton compte pour retrouver tes planètes et tes playlists sur tes appareils.</p>
+    <p class="auth-intro">Explore les galaxies. Crée un compte pour partager ton univers.</p>
     <form id="authForm">
       <label for="authEmail">Adresse e-mail</label>
       <input id="authEmail" type="email" autocomplete="email" required placeholder="toi@exemple.fr">
@@ -494,6 +494,7 @@ body.amb #top,body.amb #dock,body.amb #rail,body.amb #radio,body.amb #labels,bod
       <button id="authSubmit" type="submit">Se connecter</button>
     </form>
     <button id="authMode" class="auth-switch" type="button">Créer un compte</button>
+    <button id="guestEnter" class="auth-switch" type="button" style="display:block;width:100%;margin-top:12px;padding:12px;border:1px solid rgba(160,200,255,.28);border-radius:16px">Explorer sans compte · spectateur</button>
     <p id="authMsg" role="status" aria-live="polite"></p>
     <small>Les fichiers audio importés restent sur cet appareil. Seules les données de tes planètes et playlists sont synchronisées.</small>
   </div>
@@ -506,7 +507,7 @@ body.amb #top,body.amb #dock,body.amb #rail,body.amb #radio,body.amb #labels,bod
 <div id="hud"></div>
 <div id="mpanel" class="glass off"></div>
 <div id="tdim" class="off"></div><div id="tring" class="off"></div><div id="tuto" class="glass off"></div><div id="evo" class="glass off"></div>
-<div id="hint" class="hide"><span>Touche le logo pour entrer dans ton univers</span><small>Tes planètes et playlists sont liées à ton compte.</small></div>
+<div id="hint" class="hide"><span>Entre dans l’univers</span></div>
 
 <header id="top" class="hide">
   <button class="circ glass" id="bLeft" aria-label="Galaxie"></button>
@@ -746,6 +747,7 @@ const meta = id => META[id] || (META[id] = {plays: 0, secs: 0, f: null, heard: 0
 let saveT = 0, metaT = 0;
 let sb = null, authUser = null, remoteReady = false, saveBusy = false;
 let ME = null, publicSyncBusy = false, publicChannel = null;
+let guestMode = false;
 const SUPABASE_URL = 'https://dwttunsmhswsfwmadjbf.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_mtkxJuLHbjvgNMyPSXddSA_80V8tG3V';
 function save(){
@@ -802,6 +804,7 @@ async function initAccount(){
   if(!window.supabase || !window.supabase.createClient){ $('#authGate').hidden=false; authMessage('Connexion au service indisponible. Vérifie ta connexion Internet.',true); return; }
   sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
   $('#authMode').onclick=()=>setAuthMode(authMode==='login'?'signup':'login');
+  $('#guestEnter').onclick=async()=>{ guestMode=true; remoteReady=false; authUser=null; ME=null; $('#authGate').hidden=true; $('#accountBtn').style.display='none'; SYS=fixSys(defaultSystem()); SYS.name='Exploration'; SYS.user='Spectateur'; VIEW=SYS; readonly=true; try{await Promise.race([refreshPublicGalaxies(),pdDelay(6500)]);}catch(e){console.warn('Visite hors ligne',e);} updUI(); enterGalaxy(); toast('Mode spectateur · lecture seule'); };
   $('#authForm').onsubmit=async e=>{
     e.preventDefault(); const email=$('#authEmail').value.trim(); const password=$('#authPassword').value;
     const btn=$('#authSubmit'); btn.disabled=true; authMessage(authMode==='signup'?'Création du compte…':'Connexion…');
@@ -2317,7 +2320,7 @@ function galRadius(o){ const st = statsOf(o); return clamp(2.2 + st.pl * .35 + M
 let COUNTS = new Map(), FOLLOWS = new Map();
 function followersOf(id){ let n = 0; FOLLOWS.forEach((list, who) => { if (who !== id && list.includes(id)) n++; }); return n; }
 const myFollows = () => FOLLOWS.get(ME || 'me') || [];
-async function toggleFollow(id, s){ const list = [...myFollows()]; const i = list.indexOf(id); if (i >= 0) list.splice(i, 1); else list.push(id); FOLLOWS.set(ME || 'me', list);
+async function toggleFollow(id, s){ if(guestMode || !authUser){toast('Connecte-toi pour suivre une étoile');return;} const list = [...myFollows()]; const i = list.indexOf(id); if (i >= 0) list.splice(i, 1); else list.push(id); FOLLOWS.set(ME || 'me', list);
   sfx(i >= 0 ? 'close' : 'confirm'); toast(i >= 0 ? `Tu ne suis plus ${s.user || 'ce système'}` : `Tu suis ${s.user || 'ce système'}`);
   if (DB && ME){ try { await DB.doc('follows/' + ME).set({ids: list.slice(0, 500)}); if (i < 0) pushSignal({id: uid(), type: 'follow', to: id, fromName: SYS.user, fromSys: SYS.name, ts: Date.now()}); } catch(e){} }
   renderGP(); updUI(); }
@@ -2426,9 +2429,9 @@ function renderGP(){
       <div class="row" style="margin:0;align-items:center"><button class="btn pri wide" id="gGo">${ICON.jump}Voyager</button><button class="btn" id="gAl">${ICON.play}Écouter</button></div>`;
     gp.classList.remove('off'); $('#gGo').onclick = () => jumpTo(o); $('#gAl').onclick = () => playAlbum(0); return; }
   const gen = sysGenres(s); const me = sysPos(ME || 'me'), q = sysPos(o.id); const ly = Math.round(Math.hypot(me[0]-q[0], me[2]-q[2]) * 137);
-  const stt = statsOf(o); const fol = myFollows().includes(o.id);
+  const stt = statsOf(o); const fol = myFollows().includes(o.id); const renameNotice=fol && s.previousStar && s.starRenamedAt && s.previousStar!==s.user ? `<p class="note">${esc(s.previousStar)} s’appelle désormais ${esc(s.user)}</p>` : ''; 
   gp.innerHTML = `<h3>${esc(s.name || 'Système sans nom')}</h3><p>${o.mine ? 'Ton système' : (s.demo ? 'Système d’exemple de ' : 'Système de ') + esc(s.user || 'quelqu’un')}${o.mine ? '' : ' · ' + ly.toLocaleString('fr-FR') + ' al'}</p>
-    <div class="stat3"><span><b>${stt.pl}</b> playlists</span><span><b>${fmtLong(stt.h * 3600) || '0 s'}</b> d’écoute</span><span><b>${stt.f}</b> abonnés</span><span><b>${stt.v}</b> visites</span><span><b>${stt.c}</b> copies</span></div>
+    ${renameNotice}<div class="stat3"><span><b>${stt.pl}</b> playlists</span><span><b>${fmtLong(stt.h * 3600) || '0 s'}</b> d’écoute</span><span><b>${stt.f}</b> abonnés</span><span><b>${stt.v}</b> visites</span><span><b>${stt.c}</b> copies</span></div>
     ${galTraits(o).length ? `<div class="chips">${galTraits(o).map(g => `<span class="chip trait">${g}</span>`).join('')}</div>` : ''}
     <div class="row" style="margin:0;align-items:center">${o.mine ? `<button class="btn pri wide" id="gGo">${ICON.jump}Rentrer chez moi</button>` : `<button class="btn pri wide" id="gGo">${ICON.jump}Voyager</button><button class="btn" id="gFol">${fol ? ICON.followed + 'Suivi' : ICON.follow + 'Suivre'}</button><button class="icb" id="gSig" aria-label="Signal">${ICON.signal}</button>`}</div>`;
   gp.classList.remove('off');
@@ -2498,6 +2501,7 @@ function stopRadio(){ radio = null; clearInterval(radioT); try { ra.pause(); } c
 radioEl.onclick = () => toggleRadio();
 /* copy another user's planet */
 function copyPlanet(p){
+  if(guestMode || !authUser || p.isPublic===false){toast('Copie indisponible');return;}
   if (SYS.planets.length >= slots(SYS)){ toast(`Toutes tes orbites sont occupées. Ton étoile en ouvrira une nouvelle au niveau ${level(SYS.xp) + 1}.`, 6000); return; }
   const lib = new Map([...TRACKS.values()].map(t => [(t.title + '|' + (t.artist || '')).toLowerCase(), t.id]));
   const np = makePlanet(p.name, p.type, {size: p.size, c1: [...p.c1], c2: [...p.c2], atH: p.atH, atmo: p.atmo, ring: p.ring, ringH: p.ringH, ringTilt: p.ringTilt, ringRoll: p.ringRoll, moons: p.moons, clouds: p.clouds,
@@ -2826,7 +2830,7 @@ const eqHTML = '<span class="eq"><i style="height:6px"></i><i style="height:12px
 let libTab = 'playlists';
 function openPlaylist(p, fromLib){
   if (mode === 'system' && !fromLib) focusOn(p.id, .2);
-  const ro = readonly, live = isLive(p);
+  const ro = readonly, live = isLive(p), privateView = ro && p.isPublic === false;
   const tr = ro ? (p.tracksRO || []).map((x, i) => ({id: 'ro' + i, title: x[0], artist: x[1], dur: 0, ro: true})) : p.tracks.map(id => TRACKS.get(id)).filter(Boolean);
   const dur = tr.reduce((a, t) => a + (t.dur || 0), 0); const sono = sonoOf(p);
   const EI = eraInfo(p), st = EI.e, pc = EI.pc;
@@ -2844,11 +2848,11 @@ function openPlaylist(p, fromLib){
   openSheet('scan', `<div class="sh" style="margin:0"><div></div><button class="x" data-close aria-label="Fermer">${ICON.x}</button></div>
     <div class="ph2"><i class="art" style="${artCSS(p)}"></i><h2 id="pName" ${ro ? '' : 'title="Renommer"'}>${esc(p.name)}</h2>
       <p>${plural(tr.length, 'titre')}${dur ? ' · ' + fmtLong(dur) : ''}${live ? ' · <span style="color:#4aa3ff">en écoute</span>' : ''}</p>${(() => { const EI = eraInfo(p); if (EI.e >= 6) return '<p class="eran">' + esc(eraName(p)) + ' · ère finale</p><p class="eran" style="opacity:.7">' + EI.counts + '</p>'; return `<div class="erab"><i style="width:${Math.round(EI.pc * 100)}%"></i></div><p class="eran">${esc(eraName(p))} · ${EI.need}</p><p class="eran" style="opacity:.7">${EI.counts}</p>`; })()}</div>
-    <div class="pact2">${ro ? `${p.gd ? `<button class="btn pri" id="sAlb">${ICON.play}Écouter</button>` : ''}<button class="btn${p.gd ? '' : ' pri'}" id="sLand">${ICON.land}Explorer</button><button class="btn" id="sCopy">${ICON.plus}Copier</button>`
+    <div class="pact2">${ro ? `${p.gd ? `<button class="btn pri" id="sAlb">${ICON.play}Écouter</button>` : ''}<button class="btn${p.gd ? '' : ' pri'}" id="sLand">${ICON.land}Explorer</button>${privateView ? '<span class="chip">Privée · écoute indisponible</span>' : `<button class="btn" id="sCopy">${ICON.plus}Copier</button>`}`
       : tr.length ? `<button class="btn pri" id="sPlay">${live ? ICON.pauseS + 'Pause' : ICON.play + 'Lecture'}</button><button class="btn" id="sShuf">${ICON.shuf}Aléatoire</button>`
       : `<label class="btn pri">${ICON.file}Importer${imp}</label>`}<button class="icb" id="sMore" aria-label="Plus">⋯</button></div>
     <div class="more off" id="pMore">${ro ? `<button id="sSig">${ICON.signal}Envoyer un signal</button>` : `<label>${ICON.file}Importer de la musique${imp}</label>${TRACKS.size ? `<button id="sAdd">${ICON.plus}Ajouter depuis ma musique</button>` : ''}
-      <button id="sPrivacy">${p.isPublic === false ? "◯ Rendre cette playlist publique" : "◉ Rendre cette playlist privée"}</button><button id="sRen">${ICON.forge}Renommer</button><button id="sLand">${ICON.land}Explorer la planète</button><button id="sForge">${ICON.forge}Façonner</button>${tr.length ? `<button id="sDna">${ICON.shuf}Accorder au son</button>` : ''}`}
+      <button id="sPrivacy">${p.isPublic === false ? "◯ Rendre cette playlist publique" : "◉ Rendre cette playlist privée"}</button><button id="sRemoveTrack">${ICON.x}Retirer un titre de cette planète</button><button id="sRen">${ICON.forge}Renommer</button><button id="sLand">${ICON.land}Explorer la planète</button><button id="sForge">${ICON.forge}Façonner</button>${tr.length ? `<button id="sDna">${ICON.shuf}Accorder au son</button>` : ''}`}
       <dl class="spec">${rows.map(r => `<div><dt>${r[0]}</dt><dd class="${r[2] || ''}">${esc(r[1])}${r[3] || ''}</dd></div>`).join('')}</dl></div>
     ${tr.length ? `<ul class="list" id="pList">${rowsHTML2}</ul>` : ro ? '<div class="empty">Aucun titre visible.</div>' : '<div class="empty">Planète vide.</div>'}`, () => {
     const on = (id, f) => sbody.querySelectorAll('#' + id).forEach(e => e.onclick = f);
@@ -2857,6 +2861,7 @@ function openPlaylist(p, fromLib){
     on('sLand', () => { if (fromLib && mode === 'system') focusOn(p.id); land(p); }); on('sCopy', () => copyPlanet(p)); on('sAlb', () => playAlbum(0)); on('sAdd', () => openPicker(p, null)); on('sSig', () => composeSignal(ownerId, VIEW));
     on('sPlay', () => { if (live){ au.pause(); } else if (qPlanet === p.id && Q.length && au.paused){ au.play(); } else playList(p.tracks, 0, p.id); setTimeout(() => sheetKind === 'scan' && openPlaylist(p, fromLib), 150); });
     on('sShuf', () => { playList(shuffle(p.tracks), 0, p.id); setTimeout(() => sheetKind === 'scan' && openPlaylist(p, fromLib), 150); });
+    on('sRemoveTrack', () => { const options=p.tracks.map((id,i)=>({id,i,t:TRACKS.get(id)})).filter(x=>x.t); if(!options.length){toast('Aucun titre');return;} const names=options.map(x=>(x.i+1)+' · '+x.t.title).join('\n'); const choice=prompt('Numéro du titre à retirer de cette playlist :\n'+names); if(choice===null)return; const ix=Number(choice)-1; if(!Number.isInteger(ix)||ix<0||ix>=p.tracks.length){toast('Numéro invalide');return;} const id=p.tracks[ix]; if(!confirm('Retirer ce titre de la planète ? Le fichier restera dans ta bibliothèque.'))return; p.tracks.splice(ix,1); p.terr.forEach(t=>{if(Array.isArray(t.tracks))t.tracks=t.tracks.filter(x=>x!==id);}); if(qPlanet===p.id && Q.includes(id))au.pause(); save();updUI();openPlaylist(p,fromLib); });
     on('sForge', () => openForge(p)); on('sDna', () => { applyDNA(p, true); openPlaylist(p, fromLib); });
     const ren = () => { if (ro) return; const h = $('#pName'); if (!h || h.querySelector('input')) return; const v0 = p.name; h.innerHTML = `<input class="ren" value="${esc(v0)}" maxlength="32" enterkeyhint="done">`; const inp = h.querySelector('input'); inp.focus(); inp.select();
       const done = ok => { const v = inp.value.trim(); if (ok && v && v !== v0){ p.name = v; save(); if (typeof publishSoon === 'function') publishSoon(); updUI(); toast('Planète renommée'); } openPlaylist(p, fromLib); };
@@ -2969,7 +2974,7 @@ function openStar(){
     $('#sTh').onclick = e => { const b = e.target.closest('[data-t]'); if (!b) return; SYS.theme = +b.dataset.t; $('#sTh').querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c === b)); save(); };
     $('#sQ').onclick = e => { const b = e.target.closest('[data-q]'); if (!b) return; const q = +b.dataset.q; if (q < 0) { try { localStorage.removeItem(QKEY); } catch(_){} } else LS.set(QKEY, q); $('#sQ').querySelectorAll('button').forEach(c => c.classList.toggle('on', c === b)); toast('Qualité enregistrée : relance planèteDot pour l’appliquer.'); };
     { const ab = $('#sAlbum'); if (ab) ab.onclick = () => openAlbum(); }
-    $('#sOk').onclick = () => { SYS.name = $('#sN').value.trim() || SYS.name; SYS.user = $('#sU').value.trim() || SYS.user; save(); updUI(); closeSheet(); };
+    $('#sOk').onclick = () => { const oldStar=SYS.user; SYS.name = $('#sN').value.trim() || SYS.name; SYS.user = $('#sU').value.trim() || SYS.user; if(oldStar!==SYS.user){SYS.previousStar=oldStar;SYS.starRenamedAt=Date.now();} save(); updUI(); closeSheet(); };
     $('#sGal').onclick = () => { save(); enterGalaxy(); };
     $('#sLg').onclick = e => { const b = e.target.closest('[data-m]'); if (!b) return; LOGO_MAT = +b.dataset.m; LS.set('pd.logo', LOGO_MAT); $('#sLg').querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c === b)); sfx('tick'); };
     const gb = $('#sGuide'); if (gb) gb.onclick = () => { closeSheet(true); startTuto(true); };
@@ -2980,12 +2985,12 @@ function openStar(){
 
 /* forge */
 function openNewPlanet(){
-  if (mode !== 'system' || readonly) return; overview();
+  if (mode !== 'system' || readonly || guestMode) return; overview();
   openSheet('new', head('Nouvelle planète', 'Elle prend la forme de sa musique.') +
     `<label class="field"><span>Nom de la playlist</span><input type="text" id="nN" maxlength="28" placeholder="Ex. Nuits de Saturne"></label>
      <label class="field" style="display:flex;align-items:center;gap:10px"><input id="nPublic" type="checkbox"> Rendre cette playlist publique dans la galaxie</label><label class="big" id="nBig">${ICON.file}Importer des morceaux<input type="file" id="nImp" multiple accept="audio/*,.mp3,.m4a,.aac,.wav,.flac,.ogg,.opus,.aif,.aiff"></label>
-     <div class="row" style="justify-content:space-between;margin:12px 0 0">${TRACKS.size ? '<button class="lnk" id="nLib">Depuis ma musique</button>' : '<span></span>'}<button class="lnk" id="nHand">Façonner à la main</button></div>`, () => {
-    const mk = () => { const nm = $('#nN').value.trim() || 'Planète ' + (SYS.planets.length + 1); const p = makePlanet(nm, 1, {auto: true, xp: 0, isPublic: false}); surprise(p); p.name = nm; p.auto = true; p.isPublic = $('#nPublic').checked; SYS.planets.push(p); addXP(15); save(); return p; };
+     <div class="row" style="justify-content:space-between;margin:12px 0 0">${TRACKS.size ? '<button class="lnk" id="nLib">Depuis ma musique</button>' : '<span></span>'}<button class="lnk" id="nHand">Choisir ma planète</button></div>`, () => {
+    const mk = () => { const nm = $('#nN').value.trim() || 'Planète ' + (SYS.planets.length + 1); const p = makePlanet(nm, 1, {auto: false, xp: 0, isPublic: false}); surprise(p); p.name = nm; p.auto = false; p.tlock = 1; p.isPublic = $('#nPublic').checked; SYS.planets.push(p); addXP(15); save(); return p; };
     $('#nImp').onchange = async e => { const files = e.target.files; if (!files.length) return; const p = mk(); closeSheet(true); focusOn(p.id); await importFiles(files, p); applyDNA(p, false); scanPlanet(p); toast(`${p.name} est née · analyse du son en cours`); };
     const nl = $('#nLib'); if (nl) nl.onclick = () => { const p = mk(); openPicker(p, null); };
     $('#nHand').onclick = () => openForge(null);
@@ -2996,13 +3001,13 @@ function openForge(existing){
   if (mode !== 'system' || readonly) return;
   const isNew = !existing; let p;
   if (isNew){ p = makePlanet('', 1); surprise(p); p.name = ''; SYS.planets.push(p); } else p = existing;
-  const backup = JSON.stringify(p); focusOn(p.id); let committed = false, auto = isNew;
+  const backup = JSON.stringify(p); focusOn(p.id); let committed = false, auto = false;
   const sl = (id, label, min, max, step, val, cls = '') => `<div class="sl"><label for="${id}">${label}</label><input type="range" class="${cls}" id="${id}" min="${min}" max="${max}" step="${step}" value="${val}"><output></output></div>`;
   const seg = (id, label, opts, val) => `<div class="segrow"><label>${label}</label><div class="seg" id="${id}">${opts.map((o, i) => `<button data-v="${i}" class="${i === val ? 'on' : ''}">${o}</button>`).join('')}</div></div>`;
   const render = () => head(isNew ? 'Nouvelle planète' : 'Façonner ' + p.name, isNew ? 'Chaque planète est une playlist.' : TYPES[p.type].name,
       isNew ? `<button class="x" id="fDice" aria-label="Surprends-moi" style="width:44px;height:44px">${ICON.dice}</button>` : '') +
     `<label class="field"><span>Nom de la planète (et de la playlist)</span><input type="text" id="fName" maxlength="28" placeholder="Ex. Aurore de minuit" value="${esc(p.name)}"></label>
-     ${isNew ? `<div class="grp"><h3>Planète</h3><div class="seg" id="fAuto" style="margin:0 0 10px"><button data-v="0" class="${auto ? 'on' : ''}">L’appli choisit</button><button data-v="1" class="${auto ? '' : 'on'}">Je choisis</button></div>${auto ? `<p class="note">Elle prendra forme d’après les morceaux que tu lui donnes.</p>` : `<div class="types" id="fType">${TYPES.map((T, i) => `<button class="ty${i === p.type ? ' on' : ''}" data-t="${i}"><i style="${SWATCH(i)}"></i>${T.name}</button>`).join('')}</div>`}</div>` : ''}
+     ${isNew ? `<div class="grp"><h3>Planète</h3><div class="seg" id="fAuto" style="margin:0 0 10px"><button data-v="0" class="${auto ? 'on' : ''}">Adapter à ma musique</button><button data-v="1" class="${auto ? '' : 'on'}">Je choisis</button></div>${auto ? `<p class="note">Elle prendra forme d’après les morceaux que tu lui donnes.</p>` : `<div class="types" id="fType">${TYPES.map((T, i) => `<button class="ty${i === p.type ? ' on' : ''}" data-t="${i}"><i style="${SWATCH(i)}"></i>${T.name}</button>`).join('')}</div>`}</div>` : ''}
      <div class="grp"><h3>Forme</h3>${sl('fSize', 'Taille', .5, 1.5, .01, p.size)}${p.type !== 2 && p.type !== 8 ? sl('fCl', 'Nuages', 0, 1, .01, p.clouds) : ''}${seg('fRing', 'Anneaux', ['Aucun', 'Fins', 'Larges'], p.ring)}${seg('fMoon', 'Lunes', ['0', '1', '2', '3'], Math.min(3, p.moons))}</div>
      ${p.type === 2 ? `<div class="grp"><h3>Atmosphère</h3>${sl('fAt', 'Halo', 0, 1, .01, p.atmo)}${sl('fAh', 'Couleur', 0, 1, .005, p.atH, 'hue')}</div>` : ''}
      ${isNew ? '' : `<button class="btn red" id="fDel" style="width:100%;margin:0 0 6px">Détruire la planète</button>`}
@@ -3090,7 +3095,7 @@ function onboard(step){
     $('#oGo').onclick = go; $('#oU').onkeydown = e => { if (e.key === 'Enter') go(); };
   } else {
     if (SYS.planets[0] && mode === 'system'){ focusOn(SYS.planets[0].id, .3); pz = 1.1; transFx(.6); }
-    card.innerHTML = `<h2>Crée ton univers musical</h2><p>Commence par créer ta première playlist : elle deviendra une planète à personnaliser.</p>
+    card.innerHTML = `<h2>Ta musique, ton univers</h2><p>Crée ta première planète.</p>
       <span class="btn pri wide big">${ICON.file}Importer des sons pour ma planète<input type="file" id="oI" multiple accept="audio/*,.mp3,.m4a,.aac,.wav,.flac,.ogg,.opus,.aif,.aiff"></span>
       <div class="row" style="justify-content:space-between;margin:12px 2px 0"><button class="lnk sm" id="oF">+ Nouvelle planète</button><button class="lnk sm" id="oX">Plus tard</button></div>`;
     card.classList.remove('off');
@@ -3534,19 +3539,19 @@ let DB = null, pubT = 0, canShare = true, INBOX = [], MYSIG = [];
 function snapshotLite(){ return {name: SYS.name, user: SYS.user, hue: SYS.hue, level: level(SYS.xp), planets: SYS.planets.map(p => ({terr: p.terr.map(t => ({name: t.name, kind: t.kind, n: t.tracks.length}))}))}; }
 function nowInfo(){ if (au.paused || !Q.length) return null; const t = TRACKS.get(Q[qi]); if (!t) return null; const p = SYS.planets.find(x => x.id === qPlanet);
   return {t: t.title.slice(0, 80), a: (t.artist || '').slice(0, 60), pid: p ? p.id : '', pn: p ? p.name.slice(0, 40) : '', src: t.src && t.src.k !== 'local' ? t.src.k : '', u: t.src && t.src.u ? t.src.u.slice(0, 200) : '', ts: Date.now() - (au.currentTime || 0) * 1000, dur: au.duration || 240}; }
-function snapshot(){ return {name: SYS.name.slice(0, 40), user: SYS.user.slice(0, 30), hue: SYS.hue, hueSet: !!SYS.hueSet, secs: SYS.secs || 0, theme: SYS.theme, level: level(SYS.xp), updated: Date.now(), now: nowInfo(),
-  planets: SYS.planets.filter(p => p.isPublic !== false).slice(0, 24).map(p => { const tr = []; p.terr.slice(0, 12).forEach((t, ti) => t.tracks.slice(0, 40).forEach(id => { const x = TRACKS.get(id); if (x) { const m = META[id] || {}; tr.push([x.title.slice(0, 80), (x.artist || '').slice(0, 60), ti, x.src && x.src.k !== 'local' ? x.src.k : '', Math.round(((m.plays || 0) + (m.secs || 0) / 300) * 10) / 10, trackBiome(id, p)]); } }));
-    return {id: p.id, name: p.name.slice(0, 40), type: p.type, size: p.size, c1: p.c1, c2: p.c2, atH: p.atH, atmo: p.atmo, ring: p.ring, ringH: p.ringH, ringTilt: p.ringTilt, ringRoll: p.ringRoll,
+function snapshot(){ return {name: SYS.name.slice(0, 40), user: SYS.user.slice(0, 30), previousStar: String(SYS.previousStar||'').slice(0,30), starRenamedAt: SYS.starRenamedAt||0, hue: SYS.hue, hueSet: !!SYS.hueSet, secs: SYS.secs || 0, theme: SYS.theme, level: level(SYS.xp), updated: Date.now(), now: (()=>{const n=nowInfo();return n && SYS.planets.find(p=>p.id===n.pid)?.isPublic===false ? null : n;})(),
+  planets: SYS.planets.slice(0, 24).map(p => { const tr = []; p.terr.slice(0, 12).forEach((t, ti) => t.tracks.slice(0, 40).forEach(id => { const x = TRACKS.get(id); if (x) { const m = META[id] || {}; tr.push([x.title.slice(0, 80), (x.artist || '').slice(0, 60), ti, x.src && x.src.k !== 'local' ? x.src.k : '', Math.round(((m.plays || 0) + (m.secs || 0) / 300) * 10) / 10, trackBiome(id, p)]); } }));
+    return {id: p.id, isPublic: p.isPublic !== false, name: p.name.slice(0, 40), type: p.type, size: p.size, c1: p.c1, c2: p.c2, atH: p.atH, atmo: p.atmo, ring: p.ring, ringH: p.ringH, ringTilt: p.ringTilt, ringRoll: p.ringRoll,
       moons: p.moons, clouds: p.clouds, arch: p.arch || 0, spin: p.spin, tilt: p.tilt, seed: p.seed, phase: p.phase, emo: p.emo, origin: (p.origin || '').slice(0, 40), level: plevel(p), xp: p.xp || 0, path: pathOf(p), act: Math.round(act(p) * 100) / 100,
-      terr: p.terr.slice(0, 12).map(t => ({id: t.id, name: t.name.slice(0, 30), kind: t.kind, hue: t.hue, lat: t.lat, lon: t.lon, n: t.tracks.length, lib: Math.round(liberation(t, p) * 100) / 100})), tracks: tr.slice(0, 240)}; })}; }
+      terr: p.terr.slice(0, 12).map(t => ({id: t.id, name: t.name.slice(0, 30), kind: t.kind, hue: t.hue, lat: t.lat, lon: t.lon, n: t.tracks.length, lib: Math.round(liberation(t, p) * 100) / 100})), tracks: tr.slice(0, 240).map(t => p.isPublic === false ? [t[0],t[1],t[2],'',t[4],t[5]] : t)}; })}; }
 const num = (v, a, b, d) => (typeof v === 'number' && isFinite(v)) ? clamp(v, a, b) : d;
 const col3 = (c, d) => Array.isArray(c) && c.length === 3 ? c.map(v => num(v, 0, 1, .5)) : d;
 const sid = (v, d) => typeof v === 'string' && /^[\w-]{1,40}$/.test(v) ? v : d;
-function sanitize(v){ if (!v || !Array.isArray(v.planets)) return null; return {name: String(v.name || '').slice(0, 40), user: String(v.user || '').slice(0, 30), hue: num(v.hue, 0, 1, .58), theme: Math.round(num(v.theme, 0, 5, 0)), level: Math.round(num(v.level, 1, 999, 1)), secs: num(v.secs, 0, 1e9, 0), hueSet: !!v.hueSet,
+function sanitize(v){ if (!v || !Array.isArray(v.planets)) return null; return {name: String(v.name || '').slice(0, 40), user: String(v.user || '').slice(0, 30), previousStar: String(v.previousStar||'').slice(0,30), starRenamedAt: num(v.starRenamedAt,0,1e15,0), hue: num(v.hue, 0, 1, .58), theme: Math.round(num(v.theme, 0, 5, 0)), level: Math.round(num(v.level, 1, 999, 1)), secs: num(v.secs, 0, 1e9, 0), hueSet: !!v.hueSet,
   now: v.now && typeof v.now.t === 'string' ? {t: v.now.t.slice(0, 80), a: String(v.now.a || '').slice(0, 60), pid: sid(v.now.pid, ''), pn: String(v.now.pn || '').slice(0, 40), src: String(v.now.src || '').slice(0, 12), u: /^https?:\/\//.test(v.now.u || '') ? String(v.now.u).slice(0, 200) : '', ts: num(v.now.ts, 0, 1e15, 0), dur: num(v.now.dur, 1, 36000, 240)} : null,
   planets: v.planets.slice(0, 24).map(p => { const terr = Array.isArray(p.terr) ? p.terr.slice(0, 12).map(t => ({id: sid(t.id, uid()), name: String(t.name || 'Territoire').slice(0, 30), kind: String(t.kind || 'manual').slice(0, 10), hue: num(t.hue, 0, 1, .5), lat: num(t.lat, -1.6, 1.6, 0), lon: num(t.lon, -3.2, 3.2, 0), lib: num(t.lib, 0, 1, 0), tracks: new Array(Math.round(num(t.n, 0, 9999, 0))).fill(0)})) : [];
     const tracksRO = Array.isArray(p.tracks) ? p.tracks.slice(0, 240).filter(Array.isArray).map(t => [String(t[0] || '').slice(0, 80), String(t[1] || '').slice(0, 60), Math.round(num(t[2], 0, 11, 0)), String(t[3] || '').slice(0, 12), num(t[4], 0, 1e6, 0), Math.round(num(t[5], 0, 7, 7))]) : [];
-    return {id: sid(p.id, uid()), name: String(p.name || 'Planète').slice(0, 40), type: Math.round(num(p.type, 0, 11, 0)), size: num(p.size, .5, 1.5, 1), c1: col3(p.c1, [.6,.6,.5]), c2: col3(p.c2, [.5,.6,.5]),
+    return {id: sid(p.id, uid()), isPublic: p.isPublic !== false, name: String(p.name || 'Planète').slice(0, 40), type: Math.round(num(p.type, 0, 11, 0)), size: num(p.size, .5, 1.5, 1), c1: col3(p.c1, [.6,.6,.5]), c2: col3(p.c2, [.5,.6,.5]),
       atH: num(p.atH, 0, 1, .6), atmo: num(p.atmo, 0, 1, .4), ring: Math.round(num(p.ring, 0, 2, 0)), ringH: num(p.ringH, 0, 1, .6), ringTilt: num(p.ringTilt, -1, 1, .25), ringRoll: num(p.ringRoll, -1, 1, 0),
       moons: Math.round(num(p.moons, 0, 3, 0)), arch: Math.round(num(p.arch, 0, 5, 0)), clouds: num(p.clouds, 0, 1, .4), spin: num(p.spin, 0, 1, .2), tilt: num(p.tilt, -1, 1, .2), seed: num(p.seed, 0, 100, 1), phase: num(p.phase, 0, 7, 0),
       emo: Math.round(num(p.emo, -1, 7, -1)), origin: String(p.origin || '').slice(0, 40), level: Math.round(num(p.level, 1, 99, 1)), xp: num(p.xp, 0, 1e7, 0), path: Array.isArray(p.path) ? p.path.slice(0, 3).map(x => Math.round(num(x, -1, 2, -1))) : [-1, -1, -1], act: num(p.act, 0, 1, 0), terr, tracksRO, tracks: tracksRO.map(() => 0), org: 'manual', auto: false}; })}; }
@@ -3558,6 +3563,7 @@ async function pushSignal(item){ if (!DB || !ME){ MYSIG = [item, ...MYSIG].slice
 function routeIds(){ const s = new Set(); MYSIG.forEach(x => s.add(x.to)); INBOX.forEach(x => s.add(x.from)); return [...s]; }
 function flagsOn(p, t){ if (readonly) return 0; return INBOX.filter(x => x.type === 'flag' && x.planet === p.id && x.terr === t.id).length; }
 function composeSignal(toId, s){
+  if(guestMode || !authUser){toast('Connecte-toi pour communiquer');return;}
   const all = [...TRACKS.values()].slice(0, 300);
   openSheet('signal', head('Envoyer un signal', `Vers ${esc(s.name || 'ce système')} · ${esc(s.user || '')}`) +
     `<label class="field"><span>Message</span><textarea id="gM" rows="3" maxlength="140" placeholder="Ton système m’a donné des frissons…"></textarea></label>
@@ -3602,12 +3608,12 @@ async function publishPublicGalaxy(){
   finally{publicSyncBusy=false;}
 }
 async function refreshPublicGalaxies(){
-  if(!sb || !authUser) return;
+  if(!sb || (!authUser && !guestMode)) return;
   try{
     const {data,error}=await sb.from('public_galaxies').select('owner_id,system').order('updated_at',{ascending:false}).limit(200);
     if(error) throw error;
     const next=new Map();
-    (data||[]).forEach(row=>{ if(!row || row.owner_id===authUser.id) return; const v=sanitize(row.system); if(v && v.name) next.set(row.owner_id,v); });
+    (data||[]).forEach(row=>{ if(!row || (authUser && row.owner_id===authUser.id)) return; const v=sanitize(row.system); if(v && v.name) next.set(row.owner_id,v); });
     OTHERS=next;
     if(typeof mode!=='undefined' && mode==='galaxy'){updUI();renderFilters();}
   }catch(e){console.warn('Carte publique non disponible. Applique le SQL fourni.',e);}
