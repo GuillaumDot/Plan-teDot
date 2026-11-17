@@ -475,6 +475,12 @@ body.amb #top,body.amb #dock,body.amb #rail,body.amb #radio,body.amb #labels,bod
 #authMsg{min-height:18px;margin:8px 0;color:#a9d8ff;font-size:12px}#authMsg.error{color:#ffaaa9}.auth-card small{display:block;color:rgba(226,233,255,.48);font-size:10px;line-height:1.5;margin-top:10px}
 #accountBtn{position:fixed;z-index:100;left:12px;right:auto;bottom:calc(env(safe-area-inset-bottom,0px) + 92px);top:auto;border:1px solid rgba(255,255,255,.18);border-radius:20px;padding:7px 11px;background:rgba(8,13,28,.68);backdrop-filter:blur(12px);color:#dceaff;font:11px var(--font);display:none}
 
+/* PlanèteDot visual polish: smoother glass surfaces, restrained transitions */
+:root { --pd-ease:cubic-bezier(.22,1,.36,1); }
+button, .btn, .chip, .pcard, .tr { -webkit-tap-highlight-color:transparent; transition:transform .22s var(--pd-ease), opacity .22s ease, background-color .25s ease, border-color .25s ease; }
+button:active, .btn:active, .pcard:active { transform:scale(.975); }
+#sheet, .sheet, .panel { -webkit-backdrop-filter:blur(22px); backdrop-filter:blur(22px); }
+@media (prefers-reduced-motion:reduce) { button, .btn, .chip, .pcard, .tr {transition:none!important;} }
 </style>
 </head>
 <body>
@@ -746,6 +752,58 @@ const meta = id => META[id] || (META[id] = {plays: 0, secs: 0, f: null, heard: 0
 let saveT = 0, metaT = 0;
 let sb = null, authUser = null, remoteReady = false, saveBusy = false;
 let ME = null, publicSyncBusy = false, publicChannel = null;
+/* Global catalogue: public files are opt-in; local files never leave this device. */
+const SHARED_BUCKET='planetedot-shared';
+const GLOBAL_PLAYS=new Map();
+let playSession='', playRegistered=false, playTrackKey='', playStartedAt=0, publicCatalogueLoaded=false;
+const officialKey=id=>/^(?:gd|planetedot-album-)([1-8])$/.test(id)?'official:'+id.match(/([1-8])$/)[1]:null;
+function globalKey(t){ if(!t) return null; return officialKey(t.id)||(t.sharedOwner&&t.sharedId?t.sharedOwner+':'+t.sharedId:null)||(authUser&&!t.builtin?'local:'+authUser.id+':'+t.id:null); }
+function newPlaySession(){playSession=(crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random().toString(36).slice(2));playRegistered=false;playTrackKey='';playStartedAt=0;}
+async function loadPublicCatalogue(){
+ if(!sb||!authUser)return;
+ try{
+  const [{data:tracks,error:te},{data:counts,error:ce}]=await Promise.all([
+   sb.from('shared_tracks').select('owner_id,track_id,title,artist,audio_path,duration_seconds').limit(1000),
+   sb.from('global_track_counts').select('track_key,plays').limit(2000)]);
+  if(te)throw te;
+  if(!ce)(counts||[]).forEach(x=>GLOBAL_PLAYS.set(x.track_key,Number(x.plays)||0));
+  const {data:pub}=sb.storage.from(SHARED_BUCKET).getPublicUrl('');
+  const root=pub.publicUrl.replace(/\/$/,'');
+  (tracks||[]).forEach(x=>{
+   const id='shared:'+x.owner_id+':'+x.track_id;
+   const path=x.audio_path.split('/').map(encodeURIComponent).join('/');
+   const old=TRACKS.get(id);
+   TRACKS.set(id,{...(old||{}),id,title:x.title,artist:x.artist,album:'Partagé',dur:Number(x.duration_seconds)||0,url:root+'/'+path,sharedOwner:x.owner_id,sharedId:x.track_id,shared:true,added:0,src:{k:'local',u:''}});
+  });
+  publicCatalogueLoaded=true;
+ }catch(e){console.warn('Catalogue public:',e);}
+}
+async function recordGlobalPlay(){
+ const t=TRACKS.get(Q[qi]);const key=globalKey(t);
+ if(!sb||!authUser||!key||playRegistered||!playSession)return;
+ playRegistered=true;
+ try{const {data,error}=await sb.rpc('record_track_play',{p_track_key:key,p_session_key:playSession});
+  if(error)throw error;
+  if(data){GLOBAL_PLAYS.set(key,(GLOBAL_PLAYS.get(key)||0)+1);}
+ }catch(e){playRegistered=false;console.warn('Compteur mondial:',e);}
+}
+async function shareTrack(id){
+ const t=TRACKS.get(id);
+ if(!sb||!authUser||!t||!t.blob){toast('Seuls les fichiers audio importés sur cet appareil peuvent être publiés.',5000);return;}
+ if(t.blob.size>50*1024*1024){toast('Fichier trop volumineux (50 Mo maximum).',5000);return;}
+ const fileExt=(t.blob.type.includes('wav')?'wav':t.blob.type.includes('mp4')?'m4a':t.blob.type.includes('ogg')?'ogg':'mp3');
+ const path=authUser.id+'/'+encodeURIComponent(t.id)+'.'+fileExt;
+ toast('Publication du morceau en cours…',12000);
+ try{
+  const {error:uploadError}=await sb.storage.from(SHARED_BUCKET).upload(path,t.blob,{contentType:t.blob.type||'audio/mpeg',upsert:true});
+  if(uploadError)throw uploadError;
+  const {error}=await sb.from('shared_tracks').upsert({owner_id:authUser.id,track_id:t.id,title:t.title.slice(0,80),artist:(t.artist||'').slice(0,60),audio_path:path,duration_seconds:t.dur||0},{onConflict:'owner_id,track_id'});
+  if(error)throw error;
+  t.sharedOwner=authUser.id;t.sharedId=t.id;t.shared=true;
+  await idbPut('tracks',t);await loadPublicCatalogue();save();toast('Morceau publié : les autres comptes peuvent maintenant l’écouter.',5500);
+ }catch(e){console.error('Publication audio:',e);toast('Publication impossible : '+(e.message||'erreur réseau'),6500);}
+}
+
 const SUPABASE_URL = 'https://dwttunsmhswsfwmadjbf.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_mtkxJuLHbjvgNMyPSXddSA_80V8tG3V';
 function save(){
@@ -779,7 +837,7 @@ async function activateAccount(session){
     const {error:insErr}=await sb.from('user_systems').upsert({user_id:authUser.id,system:SYS,updated_at:new Date().toISOString()},{onConflict:'user_id'});
     if(insErr){ authMessage('Le compte existe, mais la sauvegarde n’est pas prête. Vérifie le script SQL.',true); console.error(insErr); return false; }
   }
-  remoteReady=true; loadOfficialAlbum(); attachOfficialAlbumToSystem(); save(); VIEW=SYS; INBOX=[]; MYSIG=[]; OTHERS.clear(); try { await Promise.race([refreshPublicGalaxies(), new Promise(r=>setTimeout(r,3500))]); startPublicRealtime(); publishPublicGalaxy().catch(e=>console.warn('Publication différée',e)); } catch(e){ console.warn('Carte publique indisponible',e); }
+  remoteReady=true; loadOfficialAlbum(); attachOfficialAlbumToSystem(); await Promise.race([loadPublicCatalogue(),new Promise(r=>setTimeout(r,4500))]); save(); VIEW=SYS; INBOX=[]; MYSIG=[]; OTHERS.clear(); try { await Promise.race([refreshPublicGalaxies(), new Promise(r=>setTimeout(r,3500))]); startPublicRealtime(); publishPublicGalaxy().catch(e=>console.warn('Publication différée',e)); } catch(e){ console.warn('Carte publique indisponible',e); }
   $('#authGate').hidden=true; $('#accountBtn').style.display='block';
   updNP(); updUI();
   if(!SYS.name || !SYS.user){ setTimeout(()=>onboard(1),1200); }
@@ -826,7 +884,7 @@ const OCT = [3, 4, 5][TIER];
 if (TIER === 0) document.documentElement.classList.add('lowfx'); if (TIER === 1) document.documentElement.classList.add('tier1');
 let scale = [.55, .62, .7][TIER], maxScale = [.8, .95, 1.05][TIER]; const SMIN = [.38, .42, .45][TIER];
 let DPR = 1, W = 1, H = 1, RS = 1;
-function resize(){ DPR = window.devicePixelRatio || 1; RS = Math.min(DPR, maxScale) * scale; RS = Math.min(RS, Math.sqrt(300000 / Math.max(1, innerWidth * innerHeight))); W = Math.max(2, Math.round(innerWidth * RS)); H = Math.max(2, Math.round(innerHeight * RS)); cv.width = W; cv.height = H; gl.viewport(0, 0, W, H); skyFbo.resize(); if (typeof POST_READY !== 'undefined') POST.resize(); }
+function resize(){ DPR = window.devicePixelRatio || 1; RS = Math.min(DPR, maxScale) * scale; RS = Math.min(RS, Math.sqrt((TIER>=2?430000:300000) / Math.max(1, innerWidth * innerHeight))); W = Math.max(2, Math.round(innerWidth * RS)); H = Math.max(2, Math.round(innerHeight * RS)); cv.width = W; cv.height = H; gl.viewport(0, 0, W, H); skyFbo.resize(); if (typeof POST_READY !== 'undefined') POST.resize(); }
 // dynamic resolution
 let perfAcc = 0, perfN = 0, perfT = 0;
 let slowN = 0, fastN = 0;
@@ -2842,32 +2900,44 @@ function openPlayer(){
   });
 }
 let shuf = false;
+function openSharedCatalogue(){
+ const all=[...TRACKS.values()].filter(t=>t.shared||t.official||t.builtin);
+ const unique=new Map();all.forEach(t=>{const k=globalKey(t)||t.id;if(!unique.has(k))unique.set(k,t);});
+ const tracks=[...unique.values()].sort((a,b)=>(GLOBAL_PLAYS.get(globalKey(b))||0)-(GLOBAL_PLAYS.get(globalKey(a))||0));
+ openSheet('publicMusic',head('Musique partagée','Écoute les fichiers publiés par la communauté · lecture seule')+
+  (tracks.length?`<ul class="list" id="sharedList">${tracks.slice(0,300).map((t,i)=>`<li class="tr" data-i="${i}" style="cursor:pointer"><div class="m"><b>${esc(t.title)}</b><span>${esc(t.artist||'Artiste')} · ${(GLOBAL_PLAYS.get(globalKey(t))||0).toLocaleString('fr-FR')} écoutes mondiales</span></div><button class="ib" aria-label="Écouter">${ICON.play}</button></li>`).join('')}</ul>`:'<div class="empty">Aucun morceau publié pour le moment.</div>'),()=>{
+  const el=$('#sharedList');if(el)el.onclick=e=>{const li=e.target.closest('[data-i]');if(!li)return;const ids=tracks.map(t=>t.id);playList(ids,+li.dataset.i,null);};
+ });
+}
 function openLibrary(){
   if (libTab === 'playlists'){
     if (mode === 'system' && !readonly) overview();
     openSheet('library', `<div class="sh"><div><h2>Ma musique</h2></div><button class="x" data-close aria-label="Fermer">${ICON.x}</button></div>
       <div class="tabs"><button class="on" data-t="playlists">Playlists</button><button data-t="titres">Titres</button></div>
+      <button class="btn blue" id="browseShared" style="width:100%;margin:8px 0 12px">♫ Explorer les musiques partagées · écoutes mondiales</button>
       <div class="pgrid">${SYS.planets.map(p => `<button class="pcard" data-p="${p.id}"><i class="art" style="${artCSS(p)}"></i><b>${esc(p.name)}</b><span>${isLive(p) ? '● En écoute' : 'Playlist · ' + plural(p.tracks.length, 'titre')}</span></button>`).join('')}
         <label class="pcard"><i class="art add">+</i><b>Importer</b><span>Fichiers audio</span><input type="file" id="gIn" multiple accept="audio/*,.mp3,.m4a,.aac,.wav,.flac,.ogg,.opus,.aif,.aiff"></label></div>
       ${SAMPLES ? `<button class="btn blue" id="smp" style="width:100%">${ICON.wand}Ajouter les sons d’essai</button>` : ''}`, () => {
       sbody.querySelector('.tabs').onclick = e => { const b = e.target.closest('[data-t]'); if (!b) return; libTab = b.dataset.t; openLibrary(); };
       sbody.querySelector('.pgrid').onclick = e => { const c = e.target.closest('[data-p]'); if (!c) return; const p = SYS.planets.find(x => x.id === c.dataset.p); if (p){ if (mode === 'planet') backToSystem(); openPlaylist(p, false); } };
       $('#gIn').onchange = e => importFiles(e.target.files).then(() => { libTab = 'titres'; openLibrary(); });
+      $('#browseShared').onclick=()=>openSharedCatalogue();
       const sm = $('#smp'); if (sm) sm.onclick = () => loadSamples();
     });
     return; }
   openLibraryTracks(); }
 function openLibraryTracks(){
   if (mode === 'system' && !readonly) overview();
-  const all = [...TRACKS.values()].filter(t => !t.builtin).sort((a, b) => (b.added - a.added));
+  const all = [...TRACKS.values()].filter(t => !t.builtin && (!t.sharedOwner || t.sharedOwner===authUser?.id)).sort((a, b) => (b.added - a.added));
   const html = `<div class="sh"><div><h2>Ma musique</h2></div><button class="x" data-close aria-label="Fermer">${ICON.x}</button></div><div class="tabs"><button data-t="playlists">Playlists</button><button class="on" data-t="titres">Titres · ${all.length}</button></div>` +
-    `<div class="row"><span class="btn pri wide">${ICON.file}Importer des fichiers<input type="file" id="fIn" multiple accept="audio/*,.mp3,.m4a,.aac,.wav,.flac,.ogg,.opus,.aif,.aiff"></span>
+    `<button class="btn blue" id="browseShared" style="width:100%;margin-bottom:12px">♫ Musiques partagées · écoutes mondiales</button><div class="row"><span class="btn pri wide">${ICON.file}Importer des fichiers<input type="file" id="fIn" multiple accept="audio/*,.mp3,.m4a,.aac,.wav,.flac,.ogg,.opus,.aif,.aiff"></span>
       <span class="btn wide">${ICON.folder}Un dossier<input type="file" id="dIn" webkitdirectory multiple></span></div>` + (SAMPLES ? `<div class="row"><button class="btn blue wide" id="smp">${ICON.wand}Ajouter les sons d’essai</button></div>` : '') +
     (all.length ? `<input type="search" id="lq" placeholder="Rechercher dans ta musique" aria-label="Rechercher" value="${esc(libQ)}"><ul class="list" id="lList" style="margin-top:10px"></ul>`
                 : `<div class="empty">Tes fichiers restent sur cet appareil.</div>`) +
     `<p class="note">Origine d’un son (YouTube, SoundCloud…) : touche ses trois points.</p>`;
   openSheet('library', html, () => {
     sbody.querySelector('.tabs').onclick = e => { const b = e.target.closest('[data-t]'); if (!b) return; libTab = b.dataset.t; openLibrary(); };
+    $('#browseShared').onclick=()=>openSharedCatalogue();
     $('#fIn').onchange = e => importFiles(e.target.files).then(openLibraryTracks); $('#dIn').onchange = e => importFiles(e.target.files).then(openLibraryTracks); const sm = $('#smp'); if (sm) sm.onclick = () => loadSamples();
     const L = $('#lList'); if (!L) return;
     const draw = q => { libQ = q || ''; q = libQ.toLowerCase(); L.innerHTML = all.filter(t => !q || (t.title + ' ' + t.artist + ' ' + (t.album || '') + ' ' + (t.genre || '')).toLowerCase().includes(q)).slice(0, 600)
@@ -2882,13 +2952,14 @@ function openLibraryTracks(){
 function openTrack(id){
   const t = TRACKS.get(id); if (!t) return; const m = meta(id); const src = t.src || {k: 'local', u: ''};
   const A = m.a; openSheet('track', head(t.title, esc(t.artist || 'Artiste inconnu')) +
-    `<dl class="spec"><div><dt>Sonorité</dt><dd>${A ? esc(A.sono) : 'Analyse en attente'}</dd></div>${A && A.bpm ? `<div><dt>Tempo</dt><dd>${A.bpm} BPM</dd></div>` : ''}${A ? `<div><dt>Énergie · brillance · basses</dt><dd>${Math.round(A.e * 100)} · ${Math.round(A.b * 100)} · ${Math.round(A.l * 100)}</dd></div>` : ''}<div><dt>Écoutes</dt><dd>${m.plays} · ${fmtLong(m.secs) || '0 s'}</dd></div></dl>` +
+    `<dl class="spec"><div><dt>Sonorité</dt><dd>${A ? esc(A.sono) : 'Analyse en attente'}</dd></div>${A && A.bpm ? `<div><dt>Tempo</dt><dd>${A.bpm} BPM</dd></div>` : ''}${A ? `<div><dt>Énergie · brillance · basses</dt><dd>${Math.round(A.e * 100)} · ${Math.round(A.b * 100)} · ${Math.round(A.l * 100)}</dd></div>` : ''}<div><dt>Écoutes personnelles</dt><dd>${m.plays} · ${fmtLong(m.secs) || '0 s'}</dd></div><div><dt>Écoutes mondiales</dt><dd>${(GLOBAL_PLAYS.get(globalKey(t))||0).toLocaleString('fr-FR')}</dd></div></dl>` +
     `<label class="field"><span>Titre</span><input type="text" id="eT" maxlength="80" value="${esc(t.title)}"></label>
      <label class="field"><span>Artiste</span><input type="text" id="eA" maxlength="60" value="${esc(t.artist)}"></label>
      <label class="field"><span>Genre</span><input type="text" id="eG" maxlength="30" value="${esc(t.genre || '')}" placeholder="Rap, Électro, Soul…"></label>
      <div class="grp"><h3>Origine du son</h3><div class="chips" id="eS">${SOURCES.map(s => `<button class="chip${src.k === s[0] ? ' on' : ''}" data-k="${s[0]}">${s[1]}</button>`).join('')}</div>
      <label class="field"><span>Lien vers l’original (facultatif)</span><input type="url" id="eU" value="${esc(src.u)}" placeholder="https://"></label></div>
      <div class="grp"><h3>Planètes</h3><div class="chips" id="eP">${SYS.planets.map(p => `<button class="chip${p.tracks.includes(id) ? ' on' : ''}" data-p="${p.id}"><i style="background:${hcss(p.c1[0])}"></i>${esc(p.name)}</button>`).join('')}</div></div>
+     ${t.blob && !t.builtin ? `<button class="btn blue" id="eShare" style="width:100%;margin:0 0 8px">${t.shared?'Actualiser le partage public':'Partager ce fichier avec tous les utilisateurs'}</button>` : ''}
      <button class="btn red" id="eDel" style="width:100%;margin:0 0 6px">Retirer de ta musique</button>
      <div class="foot"><button class="btn wide" data-close>Annuler</button><button class="btn pri wide" id="eOk">Enregistrer</button></div>`, () => {
     let k = src.k; $('#eS').onclick = e => { const b = e.target.closest('[data-k]'); if (!b) return; k = b.dataset.k; $('#eS').querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c === b)); };
@@ -2898,6 +2969,7 @@ function openTrack(id){
       let u = $('#eU').value.trim(); if (u && !/^https?:\/\//i.test(u)) u = 'https://' + u; t.src = {k, u: k === 'local' ? '' : u}; idbPut('tracks', t);
       SYS.planets.forEach(p => { const has = p.tracks.includes(id); if (on.has(p.id) && !has) p.tracks.push(id); if (!on.has(p.id) && has) p.tracks = p.tracks.filter(x => x !== id); reorganize(p); });
       save(); updUI(); openLibrary(); };
+    const sh=$('#eShare');if(sh)sh.onclick=()=>shareTrack(id);
     const d = $('#eDel'); d.onclick = () => { if (d.dataset.sure){ removeTrack(id); openLibrary(); } else { d.dataset.sure = 1; d.textContent = 'Toucher encore pour confirmer'; } };
   });
 }
@@ -3429,7 +3501,7 @@ function addXP(n){ if (!n || !SYS) return; const before = level(SYS.xp); SYS.xp 
 let QPL = null, AMB = null, SHOT_PT = null, shotT = -9, ART = null, wakeL = null;
 function playList(ids, start, planetId, pl){ QPL = pl || null; sfx('confirm'); cineArm = performance.now(); lastInteract = performance.now() - 0; unlockAudio(); Q = ids.filter(id => TRACKS.has(id)); if (!Q.length){ toast('Aucun morceau à jouer ici'); return; } qi = clamp(start, 0, Q.length - 1); qPlanet = planetId; load(); }
 let switching = false;
-function load(){ const t = TRACKS.get(Q[qi]); if (!t) return; if (t.official && t.url){ if (QPL) qPlanet = QPL[qi] || null; switching = true; setTimeout(() => switching = false, 2500); if (curUrl){ URL.revokeObjectURL(curUrl); curUrl = null; } au.src = new URL(t.url, document.baseURI).href; au.onerror = () => toast('Impossible de lire ce MP3. Vérifie le dossier audio sur GitHub.', 5000); trackSecs = 0; au.play().catch(() => toast('Touche lecture pour lancer le son')); updNP(); refreshRows(); if (cine) cineCaption(); msMeta(); return; } if (!t.blob && !t.url){ toast('Le son se prépare…', 1500); ensureBlob(t).then(ok => { if (ok && Q[qi] === t.id) load(); }); updNP(); return; }
+function load(){ const t = TRACKS.get(Q[qi]); if (!t) return; newPlaySession(); if ((t.official || t.shared || t.builtin) && t.url){ if (QPL) qPlanet = QPL[qi] || null; switching = true; setTimeout(() => switching = false, 2500); if (curUrl){ URL.revokeObjectURL(curUrl); curUrl = null; } au.src = new URL(t.url, document.baseURI).href; au.onerror = () => toast('Impossible de lire ce MP3. Vérifie le dossier audio sur GitHub.', 5000); trackSecs = 0; au.play().catch(() => toast('Touche lecture pour lancer le son')); updNP(); refreshRows(); if (cine) cineCaption(); msMeta(); return; } if (!t.blob && !t.url){ toast('Le son se prépare…', 1500); ensureBlob(t).then(ok => { if (ok && Q[qi] === t.id) load(); }); updNP(); return; }
   if (t.url && !t.blob){ switching = true; updNP(); fetchBlob(t.url).then(b => { t.blob = b; if (TRACKS.get(Q[qi]) === t) load(); }).catch(() => { if (TRACKS.get(Q[qi]) !== t) return; au.src = t.url; au.play().catch(() => {}); updNP(); }); return; } if (QPL){ qPlanet = QPL[qi] || null; if (MENU.open && qPlanet){ const mi = VIEW.planets.findIndex(x => x.id === qPlanet); if (mi >= 0 && mi !== MENU.sel){ MENU.sel = mi; setTimeout(() => MENU.open && renderMenu(), 60); } } } switching = true; setTimeout(() => switching = false, 2500); if (curUrl) URL.revokeObjectURL(curUrl); curUrl = URL.createObjectURL(t.blob); au.src = curUrl; trackSecs = 0;
   au.play().catch(() => toast('Touche lecture pour lancer le son')); updNP(); refreshRows(); if (cine) cineCaption();
   msMeta(); }
@@ -3477,6 +3549,14 @@ try { navigator.mediaSession.setActionHandler('nexttrack', () => next(1)); navig
   navigator.mediaSession.setActionHandler('play', () => au.play()); navigator.mediaSession.setActionHandler('pause', () => au.pause());
   navigator.mediaSession.setActionHandler('seekto', d => { if (d && isFinite(d.seekTime)) au.currentTime = d.seekTime; }); } catch(e){}
 au.addEventListener('play', () => { try { navigator.mediaSession.playbackState = 'playing'; } catch(e){} }); au.addEventListener('pause', () => { try { navigator.mediaSession.playbackState = 'paused'; } catch(e){} });
+au.addEventListener('playing',()=>{playStartedAt=performance.now();});
+au.addEventListener('pause',()=>{playStartedAt=0;});
+au.addEventListener('timeupdate',()=>{
+ if(au.paused||au.seeking||!Q.length)return;
+ const key=globalKey(TRACKS.get(Q[qi]));if(!key)return;
+ if(playTrackKey!==key){playTrackKey=key;playStartedAt=performance.now();}
+ if(playStartedAt && performance.now()-playStartedAt>=30000)recordGlobalPlay();
+});
 au.addEventListener('timeupdate', () => { try { if (isFinite(au.duration) && au.duration > 0) navigator.mediaSession.setPositionState({duration: au.duration, playbackRate: 1, position: Math.min(au.currentTime, au.duration)}); } catch(e){} });
 function updNP(){ const t = TRACKS.get(Q[qi]) || TRACKS.get('planetedot-album-1'); const p = SYS && SYS.planets ? SYS.planets.find(x => x.id === qPlanet) : null;
   $('#npT').textContent = t ? t.title : 'Silence cosmique'; $('#npA').textContent = t ? (t.artist || 'Artiste inconnu') + (p ? ' · ' + p.name : '') + (t.src && t.src.k !== 'local' ? ' · ' + srcName(t.src.k) : '') : 'Importe ta musique pour commencer'; }
@@ -3489,10 +3569,10 @@ function updProgress(){ const d = au.duration, c = au.currentTime; const f = d &
 /* ================= social: systems, signals, flags ================= */
 let DB = null, pubT = 0, canShare = true, INBOX = [], MYSIG = [];
 function snapshotLite(){ return {name: SYS.name, user: SYS.user, hue: SYS.hue, level: level(SYS.xp), planets: SYS.planets.map(p => ({terr: p.terr.map(t => ({name: t.name, kind: t.kind, n: t.tracks.length}))}))}; }
-function nowInfo(){ if (au.paused || !Q.length) return null; const t = TRACKS.get(Q[qi]); if (!t) return null; const p = SYS.planets.find(x => x.id === qPlanet);
+function nowInfo(){ if (au.paused || !Q.length) return null; const t = TRACKS.get(Q[qi]); if (!t || !(t.shared || t.official || t.builtin)) return null; const p = SYS.planets.find(x => x.id === qPlanet);
   return {t: t.title.slice(0, 80), a: (t.artist || '').slice(0, 60), pid: p ? p.id : '', pn: p ? p.name.slice(0, 40) : '', src: t.src && t.src.k !== 'local' ? t.src.k : '', u: t.src && t.src.u ? t.src.u.slice(0, 200) : '', ts: Date.now() - (au.currentTime || 0) * 1000, dur: au.duration || 240}; }
 function snapshot(){ return {name: SYS.name.slice(0, 40), user: SYS.user.slice(0, 30), hue: SYS.hue, hueSet: !!SYS.hueSet, secs: SYS.secs || 0, theme: SYS.theme, level: level(SYS.xp), updated: Date.now(), now: nowInfo(),
-  planets: SYS.planets.slice(0, 24).map(p => { const tr = []; p.terr.slice(0, 12).forEach((t, ti) => t.tracks.slice(0, 40).forEach(id => { const x = TRACKS.get(id); if (x) { const m = META[id] || {}; tr.push([x.title.slice(0, 80), (x.artist || '').slice(0, 60), ti, x.src && x.src.k !== 'local' ? x.src.k : '', Math.round(((m.plays || 0) + (m.secs || 0) / 300) * 10) / 10, trackBiome(id, p)]); } }));
+  planets: SYS.planets.slice(0, 24).map(p => { const tr = []; p.terr.slice(0, 12).forEach((t, ti) => t.tracks.slice(0, 40).forEach(id => { const x = TRACKS.get(id); if (x && (x.official || x.builtin || x.shared)) { const m = META[id] || {}; tr.push([x.title.slice(0, 80), (x.artist || '').slice(0, 60), ti, x.src && x.src.k !== 'local' ? x.src.k : '', Math.round(((m.plays || 0) + (m.secs || 0) / 300) * 10) / 10, trackBiome(id, p)]); } }));
     return {id: p.id, name: p.name.slice(0, 40), type: p.type, size: p.size, c1: p.c1, c2: p.c2, atH: p.atH, atmo: p.atmo, ring: p.ring, ringH: p.ringH, ringTilt: p.ringTilt, ringRoll: p.ringRoll,
       moons: p.moons, clouds: p.clouds, arch: p.arch || 0, spin: p.spin, tilt: p.tilt, seed: p.seed, phase: p.phase, emo: p.emo, origin: (p.origin || '').slice(0, 40), level: plevel(p), xp: p.xp || 0, path: pathOf(p), act: Math.round(act(p) * 100) / 100,
       terr: p.terr.slice(0, 12).map(t => ({id: t.id, name: t.name.slice(0, 30), kind: t.kind, hue: t.hue, lat: t.lat, lon: t.lon, n: t.tracks.length, lib: Math.round(liberation(t, p) * 100) / 100})), tracks: tr.slice(0, 240)}; })}; }
@@ -3560,6 +3640,7 @@ async function publishPublicGalaxy(){
 }
 async function refreshPublicGalaxies(){
   if(!sb || !authUser) return;
+  await loadPublicCatalogue();
   try{
     const {data,error}=await sb.from('public_galaxies').select('owner_id,system').order('updated_at',{ascending:false}).limit(200);
     if(error) throw error;
