@@ -464,6 +464,10 @@ body.amb #top,body.amb #dock,body.amb #rail,body.amb #radio,body.amb #labels,bod
 .albrow{display:flex;gap:10px;align-items:center;width:100%;padding:8px;margin:0 0 12px;border-radius:14px;background:rgba(255,255,255,.05);text-align:left;color:var(--ink);font:inherit}.albrow img{width:42px;height:42px;border-radius:9px}.albrow span{font-size:11.5px;color:var(--mute)}.albrow b{display:block;font-size:13px;color:var(--ink)}
 
 /* compte et synchronisation */
+/* Planètes privées : marqueur d'accès doux, non interactif */
+.pd-lock{display:inline-grid;place-items:center;font-size:26px;opacity:.57;filter:drop-shadow(0 0 14px rgba(160,200,255,.38));animation:pdLockBreath 4.8s ease-in-out infinite;pointer-events:none}
+@keyframes pdLockBreath{50%{opacity:.27;filter:drop-shadow(0 0 24px rgba(160,200,255,.2))}}
+@media(prefers-reduced-motion:reduce){.pd-lock{animation:none}}
 #authGate{position:fixed;z-index:10000;inset:0;display:flex;align-items:center;justify-content:center;padding:22px;background:radial-gradient(ellipse at 50% 35%,rgba(30,75,145,.25),rgba(1,2,8,.97) 68%);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
 #authGate[hidden]{display:none}
 .auth-card{width:min(100%,410px);padding:30px 24px 22px;border:1px solid rgba(255,255,255,.14);border-radius:26px;background:rgba(8,13,28,.88);box-shadow:0 24px 90px rgba(0,0,0,.55),inset 0 1px rgba(255,255,255,.08);color:#f4f7ff}
@@ -499,6 +503,7 @@ body.amb #top,body.amb #dock,body.amb #rail,body.amb #radio,body.amb #labels,bod
     <small>Les fichiers audio importés restent sur cet appareil. Seules les données de tes planètes et playlists sont synchronisées.</small>
   </div>
 </div>
+<button id="guestExit" type="button" aria-label="Quitter le mode spectateur" title="Retour à la connexion" style="display:none;position:fixed;z-index:101;left:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 92px);padding:10px 15px;border:1px solid rgba(175,215,255,.35);border-radius:22px;background:rgba(8,13,28,.82);color:#e6f2ff;font:12px var(--font)">Quitter la visite</button>
 <button id="accountBtn" type="button" aria-label="Se déconnecter" title="Compte · se déconnecter">Compte ↗</button>
 <canvas id="gl" aria-label="Univers planèteDot"></canvas>
 <div id="labels"></div>
@@ -804,7 +809,8 @@ async function initAccount(){
   if(!window.supabase || !window.supabase.createClient){ $('#authGate').hidden=false; authMessage('Connexion au service indisponible. Vérifie ta connexion Internet.',true); return; }
   sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
   $('#authMode').onclick=()=>setAuthMode(authMode==='login'?'signup':'login');
-  $('#guestEnter').onclick=async()=>{ guestMode=true; remoteReady=false; authUser=null; ME=null; $('#authGate').hidden=true; $('#accountBtn').style.display='none'; SYS=fixSys(defaultSystem()); SYS.name='Exploration'; SYS.user='Spectateur'; VIEW=SYS; readonly=true; try{await Promise.race([refreshPublicGalaxies(),pdDelay(6500)]);}catch(e){console.warn('Visite hors ligne',e);} updUI(); enterGalaxy(); toast('Mode spectateur · lecture seule'); };
+  $('#guestExit').onclick=()=>{ if(!guestMode)return; au.pause();ra.pause(); Q=[]; guestMode=false; readonly=false; OTHERS.clear(); closeSheet(); $('#guestExit').style.display='none'; $('#authGate').hidden=false; setAuthMode('login'); mode='splash'; VIEW=SYS; updUI(); };
+  $('#guestEnter').onclick=async()=>{ guestMode=true; remoteReady=false; authUser=null; ME=null; $('#authGate').hidden=true; $('#accountBtn').style.display='none'; $('#guestExit').style.display='block'; SYS=fixSys(defaultSystem()); SYS.name='Exploration'; SYS.user='Spectateur'; VIEW=SYS; readonly=true; try{await Promise.race([refreshPublicGalaxies(),pdDelay(6500)]);}catch(e){console.warn('Visite hors ligne',e);} updUI(); enterGalaxy(); toast('Mode spectateur · lecture seule'); };
   $('#authForm').onsubmit=async e=>{
     e.preventDefault(); const email=$('#authEmail').value.trim(); const password=$('#authPassword').value;
     const btn=$('#authSubmit'); btn.disabled=true; authMessage(authMode==='signup'?'Création du compte…':'Connexion…');
@@ -2379,6 +2385,7 @@ const TUTO = [
   {t: 'Un logo, un album', d: 'Ce logo est la pochette de « PlanèteDot », l’album de GuillaumDot en préparation. Son système brille au cœur de la galaxie : écoute-le, copie sa planète.', todo: 'Écoute un extrait quand tu veux', act: ['Écouter l’album', () => playAlbum(0)], at: () => LOGO_PT, cam: 'logo', ic: '◎'},
   {t: 'Ta musique', d: 'Tes sons vivent ici. Chaque écoute leur fait conquérir un bout de planète.', todo: 'Touche ce bouton', wait: () => sheetOpen && sheetKind === 'library', at: () => rectPt('#bLib'), cam: 'wide', ic: '♪'},
   {t: 'Écoute = évolution', d: 'Villages, cités, satellites : tes planètes grandissent avec toi. Ton étoile aussi.', todo: 'Écoute, c’est tout', at: () => null, cam: 'wide', ic: '✺'},
+  {t: 'Écouter les galaxies', d: 'Les planètes publiques sont ouvertes à tous, même aux spectateurs, lorsque leurs fichiers audio sont accessibles. Les planètes privées affichent leurs titres et territoires mais restent verrouillées : ni écoute ni copie.', todo: 'Touche Suivant', at: () => null, cam: 'wide', ic: '♫'},
   {t: 'Communiquer', d: 'Depuis une galaxie, ouvre le profil d’un voyageur pour lui envoyer un signal. Retrouve les réponses dans Transmissions.', todo: 'Touche Suivant', at: () => null, cam: 'wide', ic: '✉'},
   {t: 'Se déconnecter', d: 'Ouvre ton compte depuis le bouton de profil, puis choisis Déconnexion. Tes données restent associées à ton compte.', todo: 'Touche Suivant', at: () => rectPt('#accountBtn'), cam: 'wide', ic: '⇥'},
   {t: 'Andromède', d: 'D’autres galaxies t’attendent, et l’album PlanèteDot brille en leur cœur. Va écouter ce qu’écoutent les autres.', todo: 'Ce bouton t’y emmène quand tu veux', at: () => rectPt('#bLeft'), cam: 'wide', ic: '✧'}];
@@ -2846,9 +2853,9 @@ function openPlaylist(p, fromLib){
   const rowsHTML2 = tr.map((t, i) => { const on = !ro && Q[qi] === t.id && !au.paused;
     return `<li class="tr${on ? ' on' : ''}" data-i="${i}" data-id="${t.id}" style="--i:${i}">${on ? eqHTML : `<span class="n">${i + 1}</span>`}<div class="m" data-play><b>${esc(t.title)}</b><span>${dot(t)}${esc(t.artist || 'Artiste inconnu')}${(x => x && x.lvl != null ? ' · ' + regName(p, x) + (x.ev ? ' · ' + REG_EVN[x.evType] : '') : '')(cqOf(t))}</span></div><span class="d">${fmt(t.dur)}</span></li>`; }).join('');
   openSheet('scan', `<div class="sh" style="margin:0"><div></div><button class="x" data-close aria-label="Fermer">${ICON.x}</button></div>
-    <div class="ph2"><i class="art" style="${artCSS(p)}"></i><h2 id="pName" ${ro ? '' : 'title="Renommer"'}>${esc(p.name)}</h2>
+    <div class="ph2"><i class="art" style="${artCSS(p)}"></i>${privateView ? '<span class="pd-lock" aria-hidden="true">🔒</span>' : ''}<h2 id="pName" ${ro ? '' : 'title="Renommer"'}>${esc(p.name)}</h2>
       <p>${plural(tr.length, 'titre')}${dur ? ' · ' + fmtLong(dur) : ''}${live ? ' · <span style="color:#4aa3ff">en écoute</span>' : ''}</p>${(() => { const EI = eraInfo(p); if (EI.e >= 6) return '<p class="eran">' + esc(eraName(p)) + ' · ère finale</p><p class="eran" style="opacity:.7">' + EI.counts + '</p>'; return `<div class="erab"><i style="width:${Math.round(EI.pc * 100)}%"></i></div><p class="eran">${esc(eraName(p))} · ${EI.need}</p><p class="eran" style="opacity:.7">${EI.counts}</p>`; })()}</div>
-    <div class="pact2">${ro ? `${p.gd ? `<button class="btn pri" id="sAlb">${ICON.play}Écouter</button>` : ''}<button class="btn${p.gd ? '' : ' pri'}" id="sLand">${ICON.land}Explorer</button>${privateView ? '<span class="chip">Privée · écoute indisponible</span>' : `<button class="btn" id="sCopy">${ICON.plus}Copier</button>`}`
+    <div class="pact2">${ro ? `${p.gd ? `<button class="btn pri" id="sAlb">${ICON.play}Écouter</button>` : ''}<button class="btn${p.gd ? '' : ' pri'}" id="sLand">${ICON.land}Explorer</button>${privateView ? '<span class="chip" aria-label="Planète verrouillée">🔒 Privée · écoute et copie verrouillées</span>' : `<button class="btn" id="sCopy">${ICON.plus}Copier</button>`}`
       : tr.length ? `<button class="btn pri" id="sPlay">${live ? ICON.pauseS + 'Pause' : ICON.play + 'Lecture'}</button><button class="btn" id="sShuf">${ICON.shuf}Aléatoire</button>`
       : `<label class="btn pri">${ICON.file}Importer${imp}</label>`}<button class="icb" id="sMore" aria-label="Plus">⋯</button></div>
     <div class="more off" id="pMore">${ro ? `<button id="sSig">${ICON.signal}Envoyer un signal</button>` : `<label>${ICON.file}Importer de la musique${imp}</label>${TRACKS.size ? `<button id="sAdd">${ICON.plus}Ajouter depuis ma musique</button>` : ''}
@@ -3460,7 +3467,7 @@ function readAudio(dt){ let v = 0;
   if (!an || au.paused){ bassLvl *= Math.exp(-dt * 5); for (let k = 0; k < 4; k++) SPB[k] *= Math.exp(-dt * 3); } audioLvl = v > audioLvl ? lerp(audioLvl, v, .6) : audioLvl * Math.exp(-dt * 4); beatLvl *= Math.exp(-dt * 7); }
 let tickAcc = 0, trackSecs = 0;
 function listenTick(dt){
-  if (au.paused || !Q.length) return; tickAcc += dt; trackSecs += dt;
+  if (au.paused || !Q.length || guestMode) return; tickAcc += dt; trackSecs += dt;
   if (tickAcc < TICK) return; tickAcc = 0;
   const id = Q[qi]; const m = meta(id); m.secs += TICK; SYS.secs = (SYS.secs || 0) + TICK * STAR_SPEED; STP = null; if (GD_IDS.includes(id)) gdSync(); const skN = starIdx(SYS), sb = SYS.stK ?? skN; SYS.stK = skN; if (skN > sb){ $('#flash').style.opacity = .5; toast(`Ton étoile a tant brûlé qu’elle devient une ${STARS[starIdx(SYS)][0].toLowerCase()}.`, 6500); }
   if (feat.k > 30){ const f = {e: clamp(feat.e / feat.k * 2.2, 0, 1), b: feat.b / feat.k, l: clamp(feat.l / feat.k, 0, 1), n: clamp(onsetAcc / feat.k * 6, 0, 1)}; const o = m.f || {e: 0, b: 0, l: 0, n: 0, w: 0}; const w = o.w + 1;
