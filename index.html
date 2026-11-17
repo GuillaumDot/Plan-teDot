@@ -464,7 +464,7 @@ body.amb #top,body.amb #dock,body.amb #rail,body.amb #radio,body.amb #labels,bod
 .albrow{display:flex;gap:10px;align-items:center;width:100%;padding:8px;margin:0 0 12px;border-radius:14px;background:rgba(255,255,255,.05);text-align:left;color:var(--ink);font:inherit}.albrow img{width:42px;height:42px;border-radius:9px}.albrow span{font-size:11.5px;color:var(--mute)}.albrow b{display:block;font-size:13px;color:var(--ink)}
 
 /* compte et synchronisation */
-#authGate{position:fixed;z-index:10000;inset:0;display:flex;align-items:center;justify-content:center;padding:22px;background:radial-gradient(ellipse at 50% 35%,rgba(30,75,145,.25),rgba(1,2,8,.97) 68%);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+#authGate[hidden]{display:none!important} #authGate{position:fixed;z-index:10000;inset:0;display:flex;align-items:center;justify-content:center;padding:22px;background:radial-gradient(ellipse at 50% 35%,rgba(30,75,145,.25),rgba(1,2,8,.97) 68%);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
 #authGate[hidden]{display:none}
 .auth-card{width:min(100%,410px);padding:30px 24px 22px;border:1px solid rgba(255,255,255,.14);border-radius:26px;background:rgba(8,13,28,.88);box-shadow:0 24px 90px rgba(0,0,0,.55),inset 0 1px rgba(255,255,255,.08);color:#f4f7ff}
 .auth-mark{width:48px;height:48px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,#56c7ff,#5865f2);font-size:27px;margin-bottom:18px;color:white}
@@ -481,6 +481,11 @@ button, .btn, .chip, .pcard, .tr { -webkit-tap-highlight-color:transparent; tran
 button:active, .btn:active, .pcard:active { transform:scale(.975); }
 #sheet, .sheet, .panel { -webkit-backdrop-filter:blur(22px); backdrop-filter:blur(22px); }
 @media (prefers-reduced-motion:reduce) { button, .btn, .chip, .pcard, .tr {transition:none!important;} }
+
+/* Finitions v4 : interactions nettes, réduction du mouvement si demandée */
+button, .btn, .card { -webkit-tap-highlight-color:transparent; }
+button:active { transform:scale(.975); }
+@media (prefers-reduced-motion:reduce){ *, *::before, *::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;} }
 </style>
 </head>
 <body>
@@ -825,7 +830,13 @@ function saveMeta(){ save(); }
 function authMessage(msg, error=false){ const el=$('#authMsg'); el.textContent=msg||''; el.classList.toggle('error',!!error); }
 let authMode = 'login';
 function setAuthMode(mode){ authMode=mode; const reg=mode==='signup'; $('#authTitle').textContent=reg?'Crée ton univers':'Entre dans PlanèteDot'; $('#authSubmit').textContent=reg?'Créer mon compte':'Se connecter'; $('#authMode').textContent=reg?'J’ai déjà un compte':'Créer un compte'; $('#authName').hidden=!reg; $('#authNameLabel').hidden=!reg; $('#authName').required=reg; $('#authPassword').autocomplete=reg?'new-password':'current-password'; authMessage(''); }
+let activatingAccount = null;
 async function activateAccount(session){
+  if(activatingAccount) return activatingAccount;
+  activatingAccount = activateAccountInner(session).finally(()=>{activatingAccount=null;});
+  return activatingAccount;
+}
+async function activateAccountInner(session){
   authUser=session.user; ME=authUser.id; remoteReady=false;
   const {data,error}=await sb.from('user_systems').select('system').eq('user_id',authUser.id).maybeSingle();
   if(error){ authMessage('Connexion réussie, mais la base n’est pas encore configurée. Applique le script SQL fourni avec l’application.',true); console.error(error); return false; }
@@ -837,7 +848,7 @@ async function activateAccount(session){
     const {error:insErr}=await sb.from('user_systems').upsert({user_id:authUser.id,system:SYS,updated_at:new Date().toISOString()},{onConflict:'user_id'});
     if(insErr){ authMessage('Le compte existe, mais la sauvegarde n’est pas prête. Vérifie le script SQL.',true); console.error(insErr); return false; }
   }
-  remoteReady=true; loadOfficialAlbum(); attachOfficialAlbumToSystem(); await Promise.race([loadPublicCatalogue(),new Promise(r=>setTimeout(r,4500))]); save(); VIEW=SYS; INBOX=[]; MYSIG=[]; OTHERS.clear(); try { await Promise.race([refreshPublicGalaxies(), new Promise(r=>setTimeout(r,3500))]); startPublicRealtime(); publishPublicGalaxy().catch(e=>console.warn('Publication différée',e)); } catch(e){ console.warn('Carte publique indisponible',e); }
+  remoteReady=true; loadOfficialAlbum(); attachOfficialAlbumToSystem(); save(); VIEW=SYS; INBOX=[]; MYSIG=[]; OTHERS.clear(); /* Ne pas bloquer la connexion sur le réseau social. */ Promise.resolve().then(async()=>{ try { await loadPublicCatalogue(); } catch(e){ console.warn('Catalogue différé',e); } try { await refreshPublicGalaxies(); startPublicRealtime(); await publishPublicGalaxy(); } catch(e){ console.warn('Carte publique différée',e); } });
   $('#authGate').hidden=true; $('#accountBtn').style.display='block';
   updNP(); updUI();
   if(!SYS.name || !SYS.user){ setTimeout(()=>onboard(1),1200); }
@@ -882,9 +893,9 @@ function detectTier(){
 const TIER = detectTier(); const PANM = TIER >= 2 ? 'HRTF' : 'equalpower';
 const OCT = [3, 4, 5][TIER];
 if (TIER === 0) document.documentElement.classList.add('lowfx'); if (TIER === 1) document.documentElement.classList.add('tier1');
-let scale = [.55, .62, .7][TIER], maxScale = [.8, .95, 1.05][TIER]; const SMIN = [.38, .42, .45][TIER];
+let scale = [.66, .73, .82][TIER], maxScale = [.85, 1.05, 1.25][TIER]; const SMIN = [.38, .42, .45][TIER];
 let DPR = 1, W = 1, H = 1, RS = 1;
-function resize(){ DPR = window.devicePixelRatio || 1; RS = Math.min(DPR, maxScale) * scale; RS = Math.min(RS, Math.sqrt((TIER>=2?430000:300000) / Math.max(1, innerWidth * innerHeight))); W = Math.max(2, Math.round(innerWidth * RS)); H = Math.max(2, Math.round(innerHeight * RS)); cv.width = W; cv.height = H; gl.viewport(0, 0, W, H); skyFbo.resize(); if (typeof POST_READY !== 'undefined') POST.resize(); }
+function resize(){ DPR = window.devicePixelRatio || 1; RS = Math.min(DPR, maxScale) * scale; RS = Math.min(RS, Math.sqrt((TIER>=2?660000:420000) / Math.max(1, innerWidth * innerHeight))); W = Math.max(2, Math.round(innerWidth * RS)); H = Math.max(2, Math.round(innerHeight * RS)); cv.width = W; cv.height = H; gl.viewport(0, 0, W, H); skyFbo.resize(); if (typeof POST_READY !== 'undefined') POST.resize(); }
 // dynamic resolution
 let perfAcc = 0, perfN = 0, perfT = 0;
 let slowN = 0, fastN = 0;
@@ -2595,10 +2606,10 @@ function frame(now, once){
   if (cine && !Q.length) exitCine();
   if (MENU.open && mode !== 'system') closeMenu(true);
   if (tutoI >= 0){ if (mode !== 'system') endTuto(); else tutoTick(); }
-  POST.end(); shotTick();
+  POST.end(); /* Pas de capture GPU périodique : évite les stalls WebGL iOS. */
   if (!once && !document.hidden) requestAnimationFrame(frame);
 }
-document.addEventListener('visibilitychange', () => { if (SND.ab && actx) SND.ab.gain.setTargetAtTime(document.hidden ? 0 : 1, actx.currentTime, .1); if (document.hidden) running = false; else if (!running){ running = true; last = performance.now(); requestAnimationFrame(frame); } });
+document.addEventListener('visibilitychange', () => { /* Ne jamais mettre en pause l’élément audio au verrouillage. */ if (SND.ab && actx) SND.ab.gain.setTargetAtTime(document.hidden ? 0 : 1, actx.currentTime, .1); if (document.hidden) running = false; else if (!running){ running = true; last = performance.now(); requestAnimationFrame(frame); } });
 function arrive(){
   warpT = -1; const isNew = !SYS.name || !SYS.user; if (isNew){ starIgnite = 0; sndInit(); } if (hudEl) hudEl.style.opacity = 0;
   enterSystem(SYS, false); $('#hint').classList.add('hide');
