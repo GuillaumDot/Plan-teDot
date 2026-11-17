@@ -796,6 +796,7 @@ async function activateAccount(session){
   setTimeout(() => { Promise.resolve().then(async () => {
     try { await Promise.race([refreshPublicGalaxies(), pdDelay(8000)]); }
     catch(e) { console.warn('Galaxies publiques différées', e); }
+    try { await Promise.race([loadSocialMemory(), pdDelay(8000)]); } catch(e) { console.warn('Mémoire sociale différée',e); }
     try { startPublicRealtime(); } catch(e) { console.warn('Realtime différé',e); }
     try { await Promise.race([publishPublicGalaxy(), pdDelay(8000)]); }
     catch(e) { console.warn('Publication différée',e); }
@@ -2326,10 +2327,34 @@ function galRadius(o){ const st = statsOf(o); return clamp(2.2 + st.pl * .35 + M
 let COUNTS = new Map(), FOLLOWS = new Map();
 function followersOf(id){ let n = 0; FOLLOWS.forEach((list, who) => { if (who !== id && list.includes(id)) n++; }); return n; }
 const myFollows = () => FOLLOWS.get(ME || 'me') || [];
-async function toggleFollow(id, s){ if(guestMode || !authUser){toast('Connecte-toi pour suivre une étoile');return;} const list = [...myFollows()]; const i = list.indexOf(id); if (i >= 0) list.splice(i, 1); else list.push(id); FOLLOWS.set(ME || 'me', list);
-  sfx(i >= 0 ? 'close' : 'confirm'); toast(i >= 0 ? `Tu ne suis plus ${s.user || 'ce système'}` : `Tu suis ${s.user || 'ce système'}`);
-  if (DB && ME){ try { await DB.doc('follows/' + ME).set({ids: list.slice(0, 500)}); if (i < 0) pushSignal({id: uid(), type: 'follow', to: id, fromName: SYS.user, fromSys: SYS.name, ts: Date.now()}); } catch(e){} }
-  renderGP(); updUI(); }
+async function loadSocialMemory(){
+  if(!sb || !authUser) return;
+  try {
+    const [f, incoming, outgoing] = await Promise.all([
+      sb.from('galaxy_follows').select('follower_id,followed_id').limit(5000),
+      sb.from('galaxy_transmissions').select('id,sender_id,recipient_id,kind,payload,created_at').eq('recipient_id',authUser.id).order('created_at',{ascending:false}).limit(80),
+      sb.from('galaxy_transmissions').select('id,sender_id,recipient_id,kind,payload,created_at').eq('sender_id',authUser.id).order('created_at',{ascending:false}).limit(80)
+    ]);
+    if(f.error) throw f.error;
+    const next=new Map(); (f.data||[]).forEach(x=>{const ids=next.get(x.follower_id)||[];ids.push(x.followed_id);next.set(x.follower_id,ids)});FOLLOWS=next;
+    const unpack=x=>({...(x.payload||{}),id:x.id,type:x.kind,from:x.sender_id,to:x.recipient_id,ts:Date.parse(x.created_at)||0});
+    if(!incoming.error) INBOX=(incoming.data||[]).map(unpack);
+    if(!outgoing.error) MYSIG=(outgoing.data||[]).map(unpack);
+    updBadge();if(mode==='galaxy')updUI();
+  }catch(e){console.warn('Mémoire sociale indisponible',e)}
+}
+async function toggleFollow(id, s){
+  if(guestMode || !authUser){toast('Connecte-toi pour suivre une étoile');return;}
+  if(!sb || !id || id===authUser.id)return;
+  const was=myFollows().includes(id);
+  try{
+    const q=was?sb.from('galaxy_follows').delete().eq('follower_id',authUser.id).eq('followed_id',id):sb.from('galaxy_follows').insert({follower_id:authUser.id,followed_id:id});
+    const {error}=await q;if(error)throw error;
+    const list=myFollows().filter(x=>x!==id);if(!was)list.push(id);FOLLOWS.set(authUser.id,list);
+    // Le serveur crée automatiquement la notification de suivi, sans deuxième coût de connexion.
+    sfx(was?'close':'confirm');toast(was?'Suivi supprimé':'Galaxie suivie · mémorisé');renderGP();updUI();
+  }catch(e){console.warn(e);toast(e?.message?.includes('Connexion') || e?.message?.includes('Maximum') ? e.message : 'Impossible de mémoriser ce suivi pour le moment');}
+}
 function sysGenres(s){ const c = new Map(); (s.planets || []).forEach(p => (p.terr || []).forEach(t => { if (t.kind === 'genre' || !t.kind) c.set(t.name, (c.get(t.name) || 0) + (t.n || (t.tracks ? t.tracks.length : 0))); }));
   return [...c].sort((a, b) => b[1] - a[1]).map(x => x[0]).filter(n => !/^Terres|^Autres/.test(n)).slice(0, 4); }
 function galaxyList(){ const mine = {id: ME || 'me', s: snapshotLite(), mine: true}; return [mine, ...[...OTHERS].map(([id, s]) => ({id, s, mine: false}))]; }
@@ -3564,9 +3589,18 @@ function sanitize(v){ if (!v || !Array.isArray(v.planets)) return null; return {
       emo: Math.round(num(p.emo, -1, 7, -1)), origin: String(p.origin || '').slice(0, 40), level: Math.round(num(p.level, 1, 99, 1)), xp: num(p.xp, 0, 1e7, 0), path: Array.isArray(p.path) ? p.path.slice(0, 3).map(x => Math.round(num(x, -1, 2, -1))) : [-1, -1, -1], act: num(p.act, 0, 1, 0), terr, tracksRO, tracks: tracksRO.map(() => 0), org: 'manual', auto: false}; })}; }
 function publishSoon(){ clearTimeout(pubT); pubT = setTimeout(async () => { if (!DB || !ME || !canShare || !SYS.name) return;
   try { await DB.doc('systems/' + ME).set(snapshot()); } catch(e){ if (e && (e.code === 'invalid_argument' || e.code === 'revoked' || e.code === 'not_granted')) canShare = false; } }, 2500); }
-async function pushSignal(item){ if (!DB || !ME){ MYSIG = [item, ...MYSIG].slice(0, 40); addXP(5); return true; }
-  MYSIG = [item, ...MYSIG].slice(0, 40);
-  try { await DB.doc('signals/' + ME).set({items: MYSIG}); addXP(5); return true; } catch(e){ toast('Ce signal n’a pas pu partir : ton accès ne permet pas d’écrire ici.'); return false; } }
+async function pushSignal(item){
+  if(!authUser || guestMode || !sb || !item.to)return false;
+  if(item.to===authUser.id)return false;
+  const type=['signal','flag','follow','copy','visit'].includes(item.type)?item.type:'signal';
+  const payload={...item};delete payload.to;delete payload.from;delete payload.type;delete payload.id;
+  try{
+    const {data,error}=await sb.from('galaxy_transmissions').insert({sender_id:authUser.id,recipient_id:item.to,kind:type,payload}).select('id,created_at').single();
+    if(error)throw error;
+    MYSIG=[{...item,id:data.id,from:authUser.id,ts:Date.parse(data.created_at)},...MYSIG].slice(0,80);
+    if(type!=='visit')addXP(5);return true;
+  }catch(e){console.warn('Transmission non envoyée',e);toast(e?.message?.includes('Connexion') || e?.message?.includes('Maximum') ? e.message : 'Transmission impossible : vérifie la connexion');return false;}
+}
 function routeIds(){ const s = new Set(); MYSIG.forEach(x => s.add(x.to)); INBOX.forEach(x => s.add(x.from)); return [...s]; }
 function flagsOn(p, t){ if (readonly) return 0; return INBOX.filter(x => x.type === 'flag' && x.planet === p.id && x.terr === t.id).length; }
 function composeSignal(toId, s){
@@ -3627,7 +3661,7 @@ async function refreshPublicGalaxies(){
 }
 function startPublicRealtime(){
   if(!sb || !authUser || publicChannel) return;
-  setInterval(()=>{ if(authUser) refreshPublicGalaxies(); },45000);
+  setInterval(()=>{ if(authUser){ refreshPublicGalaxies();loadSocialMemory(); } },45000);
   publicChannel=sb.channel('planetedot-public-galaxies').on('postgres_changes',{event:'*',schema:'public',table:'public_galaxies'},()=>refreshPublicGalaxies()).subscribe();
 }
 
