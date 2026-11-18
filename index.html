@@ -3204,7 +3204,7 @@ async function importFiles(list, target){
 const SND = {ui: LS.get('pd.sfx') ?? true, amb: LS.get('pd.amb') ?? true, bus: null, rev: null, a: null, ab: null, mix: 0, ev: {}};
 /* the sound of the place, not a score: colored noise beds shaped like weather + sparse natural events */
 function sndInit(){ if (!actx || SND.bus) return; try {
-  const c = actx, bus = c.createGain(); bus.gain.value = .65; try { const cmp = c.createDynamicsCompressor(); cmp.threshold.value = -16; cmp.knee.value = 18; cmp.ratio.value = 3; cmp.attack.value = .008; cmp.release.value = .22; bus.connect(cmp); cmp.connect(c.destination); } catch(e){ bus.connect(c.destination); }
+  const c = actx, bus = c.createGain(); bus.gain.value = 1.05; try { const cmp = c.createDynamicsCompressor(); cmp.threshold.value = -16; cmp.knee.value = 18; cmp.ratio.value = 3; cmp.attack.value = .008; cmp.release.value = .22; bus.connect(cmp); cmp.connect(c.destination); } catch(e){ bus.connect(c.destination); }
   const mkIR = (sec, dec) => { const L = Math.floor(c.sampleRate * sec), ir = c.createBuffer(2, L, c.sampleRate); for (let ch = 0; ch < 2; ch++){ const d = ir.getChannelData(ch); for (let i = 0; i < L; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / L, dec); } return ir; };
   const rev = c.createConvolver(); rev.buffer = mkIR(TIER ? 1.8 : 1.1, 3.2); const rg = c.createGain(); rg.gain.value = .35; rev.connect(rg); rg.connect(bus);
   SND.bus = bus; SND.rev = rev;
@@ -3976,14 +3976,29 @@ function pdSpatialTick(){
   const music=typeof au!=='undefined' && !au.paused && !au.ended;
   const active=PDSPACE.enabled && (typeof SND==='undefined' || SND.amb) && !document.hidden && actx.state==='running';
   // Audibilité améliorée sans masquer la musique : plus présent en visite, atténué pendant les titres.
-  const now=actx.currentTime, target=active?(visiting?(music?.105:.13):(music?.055:.075)):0;
-  PDSPACE.gain.gain.setTargetAtTime(target,now,active?1.4:.65);
+  const now=actx.currentTime, target=active?(visiting?(music?.23:.30):(music?.14:.20)):0;
+  PDSPACE.gain.gain.setTargetAtTime(target,now,active?1.2:.65);
   if(active){const t=performance.now()/1000;PDSPACE.osc.forEach(({pan,f,i})=>{
     pan.pan.setTargetAtTime(Math.sin(t*.11+i*2.1)*.72,now,.35);
     f.frequency.setTargetAtTime(170+65*Math.sin(t*.16+i),now,.5);
   });}
 }
 
+
+/* V5.2: iOS WebAudio wake-up on genuine user gestures; preserve user sound toggles. */
+function pdWakeAudioFromGesture(){
+  try {
+    if(typeof actx==='undefined' || !actx){ if(typeof initAudio==='function') initAudio(); }
+    if(typeof actx!=='undefined' && actx){
+      if(actx.state==='suspended') actx.resume().catch(()=>{});
+      if(typeof sndInit==='function') sndInit();
+      if(typeof pdSpatialInit==='function') pdSpatialInit();
+      if(typeof pdSpatialTick==='function') pdSpatialTick();
+    }
+  }catch(e){console.warn('Audio wake-up',e);}
+}
+document.addEventListener('pointerdown',pdWakeAudioFromGesture,{passive:true});
+document.addEventListener('touchend',pdWakeAudioFromGesture,{passive:true});
 
 /* V5.1 experimental: owner playback presence, visitor radio, no private track broadcast. */
 const PDLIVE={owner:null,track:null,seen:0,active:false,fetching:false,lastPublish:0};
