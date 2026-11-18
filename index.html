@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#010208">
 <title>planèteDot · ton univers musical</title>
-<meta name="pd-version" content="6.0">
+<meta name="pd-version" content="6.1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400..700&display=swap" rel="stylesheet">
@@ -833,7 +833,9 @@ async function initAccount(){
   sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
   $('#authMode').onclick=()=>setAuthMode(authMode==='login'?'signup':'login');
   $('#guestExit').onclick=()=>{ if(!guestMode)return; au.pause();ra.pause(); Q=[]; guestMode=false; readonly=false; OTHERS.clear(); closeSheet(); $('#guestExit').style.display='none'; $('#authGate').hidden=false; setAuthMode('login'); mode='splash'; VIEW=SYS; updUI(); };
-  $('#guestEnter').onclick=async()=>{ guestMode=true; remoteReady=false; authUser=null; ME=null; $('#authGate').hidden=true; $('#accountBtn').style.display='none'; $('#guestExit').style.display='block'; SYS=fixSys(defaultSystem()); SYS.name='Exploration'; SYS.user='Spectateur'; VIEW=SYS; readonly=true; try{await Promise.race([refreshPublicGalaxies(),pdDelay(6500)]);}catch(e){console.warn('Visite hors ligne',e);} updUI(); enterGalaxy(); toast('Mode spectateur · lecture seule'); };
+  $('#guestEnter').onclick=async()=>{ guestMode=true; remoteReady=false; authUser=null; ME=null; $('#authGate').hidden=true; $('#accountBtn').style.display='none'; $('#guestExit').style.display='block'; SYS=fixSys(defaultSystem()); SYS.name='Exploration'; SYS.user='Spectateur'; VIEW=SYS; readonly=true; updUI(); enterGalaxy(); pdArrive('Mode spectateur', 'Andromède', 'Connexion aux galaxies…');
+    Promise.race([refreshPublicGalaxies(),pdDelay(8000)]).then(()=>{ if(!guestMode) return; updUI(); renderFilters(); pdArrive('Mode spectateur', 'Andromède', (OTHERS.size ? plural(OTHERS.size, 'système habité', 'systèmes habités') + ' · ' : '') + 'touche une étoile pour voyager'); }).catch(e=>console.warn('Visite hors ligne',e));
+    if(!pdGuestT) pdGuestT=setInterval(()=>{ if(guestMode && !document.hidden) refreshPublicGalaxies(); },60000); };
   $('#authForm').onsubmit=async e=>{
     e.preventDefault(); const email=$('#authEmail').value.trim(); const password=$('#authPassword').value;
     const btn=$('#authSubmit'); btn.disabled=true; authMessage(authMode==='signup'?'Création du compte…':'Connexion…');
@@ -2343,8 +2345,8 @@ function openAlbum(){ const p = GD.planets[0];
     const go = $('#aGo'); if (go) go.onclick = () => { closeSheet(true); if (mode === 'galaxy') jumpTo(GDO); else enterSystem(GD, true, GD_ID); };
     $('#aList').onclick = e => { const li = e.target.closest('[data-i]'); if (!li) return; playAlbum(+li.dataset.i); setTimeout(() => sheetKind === 'album' && openAlbum(), 200); }; }); }
 function sysPos(id){ if (id === GD_ID) return [0, 0, 0]; const h = hashStr(id), h2 = hashStr(id + '#'), arm = Math.floor(h * 4), r = 24 + h2 * 88; const an = arm * TAU / 4 + r * .045 + (hashStr(id + '!') - .5) * .5 + time * 5 / Math.pow(r, 1.5); return [Math.cos(an) * r, (hashStr(id + '?') - .5) * 3, Math.sin(an) * r]; }
-function statsOf(o){ const s = o.s || {}; if (o.mine) return {pl: SYS.planets.length, v: (COUNTS.get(ME) || {}).v || 0, c: (COUNTS.get(ME) || {}).c || 0, f: followersOf(ME || 'me'), h: (SYS.secs || 0) / 3600};
-  const st = s.stats || {}; const k = COUNTS.get(o.id) || {}; return {pl: (s.planets || []).length, v: (k.v || 0) + (st.v || 0), c: (k.c || 0) + (st.c || 0), f: followersOf(o.id) + (st.f || 0), h: (s.secs || 0) / 3600}; }
+function statsOf(o){ const s = o.s || {}; if (o.mine) return {pl: SYS.planets.length, v: (COUNTS.get(ME) || {}).v || 0, c: (COUNTS.get(ME) || {}).c || 0, f: Math.max(followersOf(ME || 'me'), (COUNTS.get(ME) || {}).f || 0), h: (SYS.secs || 0) / 3600};
+  const st = s.stats || {}; const k = COUNTS.get(o.id) || {}; return {pl: (s.planets || []).length, v: (k.v || 0) + (st.v || 0), c: (k.c || 0) + (st.c || 0), f: Math.max(followersOf(o.id), k.f || 0) + (st.f || 0), h: (s.secs || 0) / 3600}; }
 function galRadius(o){ const st = statsOf(o); return clamp(2.2 + st.pl * .35 + Math.sqrt(st.v) * .22 + st.c * .3 + st.f * .32 + Math.sqrt(st.h) * .45, 2.4, 10); }
 let COUNTS = new Map(), FOLLOWS = new Map();
 function followersOf(id){ let n = 0; FOLLOWS.forEach((list, who) => { if (who !== id && list.includes(id)) n++; }); return n; }
@@ -2368,6 +2370,7 @@ async function loadSocialMemory(){
 async function toggleFollow(id, s){
   if(guestMode || !authUser){toast('Connecte-toi pour suivre une étoile');return;}
   if(!sb || !id || id===authUser.id)return;
+  if(!pdUuid(id)){toast('Cette galaxie ne se suit pas : écoute plutôt son album');return;}
   const was=myFollows().includes(id);
   try{
     const q=was?sb.from('galaxy_follows').delete().eq('follower_id',authUser.id).eq('followed_id',id):sb.from('galaxy_follows').insert({follower_id:authUser.id,followed_id:id});
@@ -2379,7 +2382,8 @@ async function toggleFollow(id, s){
 }
 function sysGenres(s){ const c = new Map(); (s.planets || []).forEach(p => (p.terr || []).forEach(t => { if (t.kind === 'genre' || !t.kind) c.set(t.name, (c.get(t.name) || 0) + (t.n || (t.tracks ? t.tracks.length : 0))); }));
   return [...c].sort((a, b) => b[1] - a[1]).map(x => x[0]).filter(n => !/^Terres|^Autres/.test(n)).slice(0, 4); }
-function galaxyList(){ const mine = {id: ME || 'me', s: snapshotLite(), mine: true}; return [mine, ...[...OTHERS].map(([id, s]) => ({id, s, mine: false}))]; }
+function galaxyList(){ const others = [...OTHERS].map(([id, s]) => ({id, s, mine: false})); if (guestMode) return others;   // a spectator has no system of his own
+  return [{id: ME || 'me', s: snapshotLite(), mine: true}, ...others]; }
 function renderGalaxy(dt){
   updateCam(dt, 2.6);
   drawSky(CR, CU, CF, .55, 2);
@@ -2495,10 +2499,9 @@ function renderGP(){
 }
 function enterGalaxy(){ transFx(); if (cine){ cine = null; document.body.classList.remove('cine'); } PDA.nav('galaxy');
   closeSheet(); setRail(false); mode = 'galaxy'; focus = null; gLock = null;
-  const mp = sysPos(ME || 'me'); cam.g.t = mp; cam.g.dist = 120; cam.g.pitch = 1.05; cam.g.yaw = wrapA(Math.atan2(mp[0], mp[2]) + .4, cam.yaw);
+  const mp = guestMode ? [0, 0, 0] : sysPos(ME || 'me'); cam.g.t = mp; cam.g.dist = guestMode ? 150 : 120; cam.g.pitch = 1.05; cam.g.yaw = wrapA(Math.atan2(mp[0], mp[2]) + .4, cam.yaw);
   updUI(); renderFilters();
-  if (!DB && !OTHERS.size) toast('La galaxie partagée s’allume quand planèteDot est partagé depuis claude.ai. Pour l’instant, tu es seul ici.', 6000);
-  else if (!OTHERS.size) toast('Aucun autre système n’est encore né. Partage planèteDot pour peupler ta galaxie.', 6000);
+  if (!guestMode && !OTHERS.size) toast('Aucun autre système public pour l’instant. Invite tes amis à rejoindre PlanèteDot.', 5000);
 }
 function renderFilters(){
   const f = $('#filters'); if (mode !== 'galaxy'){ f.classList.add('hide'); return; }
@@ -2515,8 +2518,17 @@ function enterSystem(sys, ro, owner){
   if (radio) stopRadio();
   VIEW = sys; readonly = ro; ownerId = owner || null; mode = 'system'; focus = null; selT = -1; overview(); transFx(.8);
   cam.dist = cam.g.dist * 3.2; cam.t = [0,0,0]; flyT = 0; closeSheet(); setRail(false); updUI(); renderFilters(); $('#gp').classList.add('off'); PDA.nav('system');
+  if (ro) pdArrival(sys, owner);
 }
-function goHome(){ enterSystem(SYS, false); }
+/* V6.1: arriving somewhere is an event — who lives here, how alive it is, and whether it is broadcasting now */
+function pdArrive(k, t, sub){ let el = document.getElementById('pdArrive'); if (!el){ el = document.createElement('div'); el.id = 'pdArrive'; el.setAttribute('aria-live', 'polite'); document.body.appendChild(el); }
+  el.innerHTML = `<small>${esc(k)}</small><b>${esc(t)}</b>${sub ? `<span>${esc(sub)}</span>` : ''}`; el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('on'), 4200); }
+function pdArrival(sys, owner){ try { if (!sys) return; const gd = owner === GD_ID || !!sys.gd, k = COUNTS.get(owner) || {}, n = (sys.planets || []).length, bits = [plural(n, 'planète')];
+  if (!gd) bits.push('niveau ' + (sys.level || 1)); const f = Math.max(followersOf(owner), k.f || 0); if (f) bits.push(plural(f, 'abonné')); if (k.v) bits.push(plural(k.v, 'visite'));
+  let live = null; try { live = liveNow(); } catch(e){} if (live) bits.push('● en direct : ' + live.t);
+  pdArrive(gd ? 'Cœur d’Andromède · album officiel' : 'Arrivée · système de ' + (sys.user || 'quelqu’un'), sys.name || 'Système', bits.join(' · '));
+  if (!gd) setTimeout(() => { try { pdLivePoll(); } catch(e){} }, 900); } catch(e){ console.warn('Arrivée', e); } }
+function goHome(){ if (guestMode){ enterGalaxy(); return; } enterSystem(SYS, false); }
 /* radio interception */
 const ra = $('#ra'), radioEl = $('#radio'); let radio = null, rfx = null;
 function liveNow(){ if (!readonly) return null; const o = (ownerId && OTHERS.get(ownerId)) || VIEW; const n = o && o.now; if (!n) return null;
@@ -2688,10 +2700,10 @@ function tap(x, y){
 /* ================= chrome ================= */
 const top = $('#top'), dock = $('#dock'), bLeft = $('#bLeft'), bNew = $('#bNew'), rail = $('#rail');
 function updUI(){
-  const inApp = mode !== 'splash';
+  const inApp = mode !== 'splash'; if (inApp){ $('#hint').classList.add('hide'); hudEl.style.opacity = 0; }
   top.classList.toggle('hide', !inApp); dock.classList.toggle('hide', !inApp);
   $('#tBar').hidden = true; $('#cross').classList.toggle('hide', mode !== 'galaxy');
-  if (mode === 'galaxy'){ $('#tName').textContent = 'Andromède'; $('#tSub').textContent = plural(OTHERS.size + 1, 'galaxie') + ' · fais glisser pour naviguer';
+  if (mode === 'galaxy'){ $('#tName').textContent = 'Andromède'; $('#tSub').textContent = plural(OTHERS.size + (guestMode ? 0 : 1), 'galaxie') + ' · fais glisser pour naviguer';
     bLeft.innerHTML = ICON.back; bLeft.setAttribute('aria-label', 'Retour'); bNew.classList.remove('hide'); bNew.setAttribute('aria-label', 'Rechercher'); }
   else if (mode === 'planet' && focus){ const p = VIEW.planets.find(x => x.id === focus); if (!p) return; const lib = planetLiberation(p);
     $('#tName').textContent = p.name; $('#tSub').textContent = readonly ? `${plural(p.terr.length, 'territoire')} · ${plural(p.tracks.length, 'morceau', 'morceaux')}` : `${eraName(p)} · ${Math.round(lib * 100)} % libérée · ${plural(p.terr.length, 'territoire')}`;
@@ -2702,6 +2714,7 @@ function updUI(){
     $('#tSub').textContent = readonly ? `Système de ${VIEW.user || 'quelqu’un'} · niveau ${VIEW.level || 1}` : `${VIEW.planets.length}/${slots(VIEW)} orbites · ${plural(nt, 'morceau', 'morceaux')}`;
     bLeft.innerHTML = readonly ? ICON.back : ICON.gal; bLeft.setAttribute('aria-label', readonly ? 'Retour à la galaxie' : 'Galaxie'); bNew.classList.remove('hide'); bNew.setAttribute('aria-label', readonly ? 'Envoyer un signal' : 'Nouvelle planète'); }
   bNew.innerHTML = mode === 'galaxy' ? ICON_SEARCH : readonly && mode === 'system' ? (myFollows().includes(ownerId) ? ICON.followed : ICON.follow) : ICON.plus;
+  bNew.classList.toggle('hide', mode === 'planet' || (readonly && mode === 'system' && !pdUuid(ownerId))); bLeft.classList.toggle('hide', !!(guestMode && mode === 'galaxy'));
   updBadge();
 }
 bLeft.onclick = () => { if (mode === 'planet') backToSystem(); else if (mode === 'galaxy') goHome(); else if (readonly) enterGalaxy(); else enterGalaxy(); };
@@ -3023,7 +3036,7 @@ function openStar(){
      <div class="grp"><h3>Ciel de ta galaxie</h3><div class="chips" id="sTh">${THEMES.map((t, i) => `<button class="chip${SYS.theme === i ? ' on' : ''}" data-t="${i}"><i style="background:${css(t.n[0])}"></i>${t.name}</button>`).join('')}</div></div>
      <div class="grp"><h3>Matière du logo</h3><div class="chips" id="sLg">${['Chrome', 'Or', 'Obsidienne', 'Holographique', 'Glace', 'Néon'].map((n, i) => `<button class="chip${LOGO_MAT === i ? ' on' : ''}" data-m="${i}">${n}</button>`).join('')}</div></div>
      <div class="grp"><h3>Qualité d’affichage</h3><div class="seg" id="sQ">${['Auto', 'Économie', 'Équilibrée', 'Maximale'].map((n, i) => `<button data-q="${i - 1}" class="${(LS.get(QKEY) ?? -1) === i - 1 ? 'on' : ''}">${n}</button>`).join('')}</div><p class="note">Appliquée au prochain lancement. Auto s’adapte à ton téléphone et baisse la résolution si l’image ralentit.</p></div>
-     <div class="grp"><h3>Sons</h3><div class="chips"><button class="chip${SND.amb ? ' on' : ''}" id="sAmb">${ICON.sound}Ambiance des astres</button><button class="chip${SND.ui ? ' on' : ''}" id="sUi">Sons de l’interface</button></div><label class="field" style="margin-top:12px"><span>Intensité de l’ambiance · <b id="sVolV">${Math.round(SND.vol * 100)} %</b></span><input type="range" id="sVol" min="0" max="100" step="1" value="${Math.round(SND.vol * 100)}" style="width:100%;accent-color:#8ccaff"></label></div>
+     <div class="grp"><h3>Sons</h3><div class="chips"><button class="chip${SND.amb ? ' on' : ''}" id="sAmb">${ICON.sound}Atmosphère spatiale</button><button class="chip${SND.ui ? ' on' : ''}" id="sUi">Effets et interface</button></div><label class="field" style="margin-top:12px"><span>Intensité de l’atmosphère · <b id="sVolV">${Math.round(SND.vol * 100)} %</b></span><input type="range" id="sVol" min="0" max="100" step="1" value="${Math.round(SND.vol * 100)}" style="width:100%;accent-color:#8ccaff"></label></div>
      <button class="lnk" id="sGuide" style="margin:4px 0 10px">Revoir le guide</button>
      <div class="foot"><button class="btn wide" id="sGal">${ICON.gal}Galaxie</button><button class="btn pri wide" id="sOk">Enregistrer</button></div>`, () => {
     $('#sTh').onclick = e => { const b = e.target.closest('[data-t]'); if (!b) return; SYS.theme = +b.dataset.t; $('#sTh').querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c === b)); save(); };
@@ -3217,55 +3230,83 @@ async function importFiles(list, target){
 const SND = {ui: LS.get('pd.sfx') ?? true, amb: LS.get('pd.amb') ?? true, vol: LS.get('pd.ambVol') ?? .75, bus: null, rev: null, a: null, ab: null, mix: 0, ev: {}};
 // V6: the sound never worked in V5–V5.8, so preferences saved during those tests are reset once
 if (!LS.get('pd.audio.v6')){ SND.ui = true; SND.amb = true; LS.set('pd.sfx', true); LS.set('pd.amb', true); LS.set('pd.audio.v6', 1); }
-/* ================= PDA · le son de l’univers (v6) =================
+if (!LS.get('pd.audio.v61')){ SND.ui = true; SND.amb = true; LS.set('pd.sfx', true); LS.set('pd.amb', true); LS.set('pd.audio.v61', 1); }   // V6.1: the new atmosphere starts audible once
+/* ================= PDA · l’atmosphère de l’univers (v6.1) =================
    One AudioContext (actx) for every sound except the music, which stays on the native <audio>
-   element: on iPhone it keeps playing on the lock screen, in the background, after a call, and
-   with remote files. Mixer: interface (SND.bus) + ambience (ducked under the music) → master →
-   limiter → speakers. Ambiences are generative music driven by the real camera and navigation:
-   each star sets the key of its system, each planet plays a mode of that key (so every crossfade
-   stays consonant), moons add crystal overtones, travel has its own sound. Notes are born and die
-   (phrases, rests, breaths): there is no permanent unchanging drone and no noise bed. */
+   element (lock screen, background, calls, remote files keep working on iPhone).
+   Mixer: interface (SND.bus) + atmosphere (ducked under the music) + transitions → master → limiter.
+   No score, no notes, no chords: the atmosphere is sound design. Continuous layers of dark filtered
+   noise (deep rumble, solar wind, frost, storm howl, stellar plasma) whose colour, width and motion
+   follow the real camera; they breathe (slow swells and near-silences) and are dotted with sparse,
+   distant events (rumbles, comets, whistlers, pulsars, metal, ice, lava, waves…). Transitions are
+   cinematic whooshes and impacts; moons shimmer as they pass. */
 const PDA = (() => {
-  const MODES = {ionian: [0, 2, 4, 5, 7, 9, 11], dorian: [0, 2, 3, 5, 7, 9, 10], phrygian: [0, 1, 3, 5, 7, 8, 10], lydian: [0, 2, 4, 6, 7, 9, 11], mixolydian: [0, 2, 4, 5, 7, 9, 10], aeolian: [0, 2, 3, 5, 7, 8, 10]};
-  const OFF = {ionian: 0, dorian: 2, phrygian: 4, lydian: 5, mixolydian: 7, aeolian: 9};
-  const MODE_FR = {ionian: 'ionien', dorian: 'dorien', phrygian: 'phrygien', lydian: 'lydien', mixolydian: 'mixolydien', aeolian: 'éolien'};
-  const NOTE_FR = ['do', 'do♯', 'ré', 'mi♭', 'mi', 'fa', 'fa♯', 'sol', 'la♭', 'la', 'si♭', 'si'];
-  // characteristic degrees of each mode (never the diminished one), with weights
-  const PROG = {ionian: [[0, 3], [3, 2.2], [4, 1.5], [5, 1.8], [1, 1], [2, .6]], dorian: [[0, 3], [3, 2.4], [1, 1], [6, 1.4], [2, .8], [4, .6]],
-    phrygian: [[0, 3], [1, 2.4], [6, 1.3], [3, 1], [5, .9]], lydian: [[0, 3], [1, 2.6], [4, 1.1], [5, 1.2], [2, .8]],
-    mixolydian: [[0, 3], [6, 2.4], [3, 1.8], [4, .9], [1, .7]], aeolian: [[0, 3], [5, 2.2], [6, 1.8], [3, 1.6], [2, 1], [4, .7]]};
-  // planet type → sound identity: mode, pad timbre, sparkle, texture, pad register, chord length, pad brightness, chord shape
-  const TYPE_ID = [
-    {mode: 'mixolydian', pad: 'warm', spark: 'pluck', tex: 'earth', lo: 52, hi: 72, cdur: 13, cut: 1700, ext: 7, mood: 'chaleureuse'},      // Tellurique
-    {mode: 'aeolian', pad: 'soft', spark: 'drop', tex: 'ocean', lo: 50, hi: 70, cdur: 15, cut: 2300, ext: 9, mood: 'profonde'},          // Océanique
-    {mode: 'lydian', pad: 'choir', spark: 'chime', tex: 'breath', lo: 45, hi: 67, cdur: 18, cut: 1500, ext: 9, mood: 'immense'},         // Géante gazeuse
-    {mode: 'lydian', pad: 'glass', spark: 'crystal', tex: 'frost', lo: 60, hi: 81, cdur: 14, cut: 6000, ext: 9, mood: 'aérienne'},       // Glacée
-    {mode: 'phrygian', pad: 'warm', spark: 'ember', tex: 'growl', lo: 45, hi: 67, cdur: 14, cut: 1100, ext: 7, mood: 'brûlante'},        // Volcanique
-    {mode: 'ionian', pad: 'glass', spark: 'bell', tex: 'glint', lo: 57, hi: 79, cdur: 12, cut: 5000, ext: 9, mood: 'lumineuse'},         // Cristalline
-    {mode: 'aeolian', pad: 'ghost', spark: 'bell', tex: 'reverse', lo: 55, hi: 76, cdur: 17, cut: 3000, ext: 9, mood: 'fantomatique'},   // Spectrale
-    {mode: 'dorian', pad: 'choir', spark: 'crystal', tex: 'reverse', lo: 50, hi: 72, cdur: 16, cut: 1800, ext: 9, mood: 'mystérieuse'},  // Mystique
-    {mode: 'ionian', pad: 'brass', spark: 'chime', tex: 'flare', lo: 50, hi: 72, cdur: 12, cut: 2400, ext: 7, mood: 'radieuse'},         // Étoile
-    {mode: 'dorian', pad: 'soft', spark: 'ping', tex: 'pulse', lo: 52, hi: 72, cdur: 12, cut: 2600, ext: 7, mood: 'métallique'},         // Métallique
-    {mode: 'mixolydian', pad: 'soft', spark: 'pluck', tex: 'wind', lo: 48, hi: 67, cdur: 16, cut: 1500, ext: 5, mood: 'minérale'},       // Rocheuse
-    {mode: 'ionian', pad: 'soft', spark: 'flute', tex: 'life', lo: 55, hi: 74, cdur: 13, cut: 2800, ext: 9, mood: 'vivante'}             // Terre
-  ];
-  const EXT = {5: [0, 4, 7], 7: [0, 2, 4, 6], 9: [0, 2, 4, 8]};
-  const mtof = m => 440 * Math.pow(2, (m - 69) / 12), pc = m => ((m % 12) + 12) % 12, rr = (a, b) => a + Math.random() * (b - a);
-  const S = {ok: false, contexts: 0, state: 'absent', scene: '—', ident: '', star: 0, moons: 0, music: false, hidden: false, err: '', log: [], preview: null, session: '—', level: -120, voices: 0};
-  const ACT = []; let ZB = null;
-  let c = null, master, limiter, ambIn, ambDuck, ambTone, ambOut, navBus, revIn, rev, revOut, meter, mbuf, starL = null, trav = null, mainI = null, bornT = 0, upT = 0, wantId = null, wantT = 0;
-  const insts = [];
+  const rr = (a, b) => a + Math.random() * (b - a), ri = (a, b) => Math.floor(rr(a, b + 1));
+  // slow, never-repeating motion in [0, 1]
+  const sm = (t, s) => .5 + .5 * (.5 * Math.sin(t * .031 + s * 1.7) + .3 * Math.sin(t * .077 + s * 3.1) + .2 * Math.sin(t * .19 + s * 5.3));
+  const S = {ok: false, contexts: 0, state: 'absent', scene: '—', ident: '', star: 0, moons: 0, music: false, hidden: false, err: '', log: [], preview: null, session: '—', level: -120, voices: 0, breath: 1, calmUntil: 0, calmNext: 0, flareT: 0};
+  const ACT = []; let ZB = null, NB = null, L = null;
+  let c = null, master, limiter, ambIn, ambDuck, ambTone, ambOut, navBus, revIn, rev, revOut, meter, mbuf, upT = 0, bornT = 0;
   function note(msg){ S.log.unshift(new Date().toLocaleTimeString('fr-FR') + ' · ' + msg); S.log.length = Math.min(S.log.length, 14); }
   function fail(where, e){ S.err = where + ' : ' + (e && e.message || e); note('⚠ ' + S.err); try { console.warn('[PlanèteDot audio]', where, e); } catch(_){} }
+  /* ---------- atmosphere profiles (all numbers, so they blend smoothly) ---------- */
+  const D = {lowG: .5, lowF: 150, airG: .2, airF: 650, airQ: .8, airW: .6, highG: 0, highF: 4800, howlG: 0, howlF0: 300, howlF1: 900, subG: 0};
+  const prof = (o, ev, label) => Object.assign({}, D, o, {ev: ev || {}, label: label || ''});
+  const DEEP = prof({lowG: 0.0434, lowF: 110, airG: 0.1238, airF: 520, airQ: .7, airW: 1, highG: 0.0024}, {rumble: .03, comet: .03, whistler: .012, pulsar: .007, metal: .01, glint: .015}, 'espace profond · vide, rumeurs lointaines');
+  const SYSP = prof({lowG: 0.0433, lowF: 150, airG: 0.1823, airF: 650, airQ: .8, airW: .7, highG: 0.0041}, {rumble: .02, comet: .025, whistler: .008, metal: .01, glint: .012, pulsar: .005});
+  const TYP = [
+    prof({lowG: 0.0508, lowF: 180, airG: 0.387, airF: 700, airQ: 1, highG: 0.0066, highF: 3800}, {gust: .08, pebble: .06, rumble: .015}, 'vent sec, poussière'),                          // Tellurique
+    prof({lowG: 0.0508, lowF: 220, airG: 0.1932, airF: 900, airQ: .8, highG: 0.0064, highF: 3500}, {wave: .12, drop: .08, bloop: .02}, 'houle, embruns'),                                  // Océanique
+    prof({lowG: 0.0539, lowF: 130, airG: 0.3318, airF: 520, airQ: .9, howlG: 0.0746, howlF0: 260, howlF1: 900, subG: 0.0086}, {thunder: .06, rumble: .05, gust: .08, whistler: .02}, 'tempête, vents hurlants'), // Géante gazeuse
+    prof({lowG: 0.0371, lowF: 160, airG: 0.4495, airF: 1400, airQ: 1.2, highG: 0.0468, highF: 5200, howlG: 0.0561, howlF0: 700, howlF1: 1800}, {crack: .1, creak: .04, glint: .07}, 'vent glacé, craquements'), // Glacée
+    prof({lowG: 0.0624, lowF: 120, airG: 0.156, airF: 600, subG: 0.0074}, {crackle: 1, bloop: .25, thump: .05, eruption: .02}, 'magma, grondements'),                                    // Volcanique
+    prof({lowG: 0.0314, lowF: 170, airG: 0.2881, airF: 1600, airQ: 1.3, highG: 0.0412, highF: 6500}, {glint: .3}, 'scintillements cristallins'),                                               // Cristalline
+    prof({lowG: 0.043, lowF: 150, airG: 0.3507, airF: 800, airQ: 2.2, howlG: 0.0479, howlF0: 400, howlF1: 1200}, {whisper: .12, comet: .03}, 'murmures, présences'),                       // Spectrale
+    prof({lowG: 0.0496, lowF: 140, airG: 0.2754, airF: 600, airQ: 1.5}, {breath: .05, whisper: .06, metal: .03, glint: .04}, 'souffles, résonances'),                                   // Mystique
+    prof({lowG: 0.0532, lowF: 140, airG: 0.204, airF: 900, highG: 0.0117, highF: 4000, subG: 0.0091}, {crackle: 1, flare: .03, rumble: .03}, 'plasma, éruptions'),                            // Étoile
+    prof({lowG: 0.0406, lowF: 170, airG: 0.3086, airF: 1100, airQ: 1.8, highG: 0.0147, highF: 4200}, {metal: .1, zap: .05, creak: .05, pulsar: .03}, 'résonances métalliques'),          // Métallique
+    prof({lowG: 0.0546, lowF: 170, airG: 0.3312, airF: 620, airQ: .9}, {pebble: .08, thump: .03, gust: .06}, 'vent minéral, éboulis'),                                                  // Rocheuse
+    prof({lowG: 0.0454, lowF: 200, airG: 0.3123, airF: 850, airQ: .9, highG: 0.0074, highF: 3500}, {wave: .05, bird: .12, gust: .04}, 'brise, vie lointaine')                              // Terre
+  ];
+  function blend(a, b, w){ if (w <= 0) return a; if (w >= 1) return b; const o = {ev: {}};
+    for (const k in D) o[k] = a[k] + (b[k] - a[k]) * w;
+    new Set([...Object.keys(a.ev), ...Object.keys(b.ev)]).forEach(k => { o.ev[k] = (a.ev[k] || 0) * (1 - w) + (b.ev[k] || 0) * w; }); return o; }
   /* ---------- the mixer ---------- */
-  function mkIR(sec, pre){ const sr = c.sampleRate, L = Math.floor(sr * sec), ir = c.createBuffer(2, L, sr), P = Math.floor(sr * pre);
+  function mkIR(sec, pre){ const sr = c.sampleRate, n = Math.floor(sr * sec), ir = c.createBuffer(2, n, sr), P = Math.floor(sr * pre);
     for (let ch = 0; ch < 2; ch++){ const d = ir.getChannelData(ch); let lp = 0;
-      for (let i = P; i < L; i++){ const u = (i - P) / (L - P), w = Math.random() * 2 - 1, k = .55 + .42 * u; lp = lp * k + w * (1 - k); d[i] = lp * Math.pow(1 - u, 2.4) * (1 + 1.6 * (1 - u)); }
-      for (let k = 0; k < 9; k++){ const at = P + Math.floor(sr * rr(.004, .06)); if (at < L) d[at] += rr(-.5, .5) * (1 - k / 9); } }
+      for (let i = P; i < n; i++){ const u = (i - P) / (n - P), w = Math.random() * 2 - 1, k = .55 + .42 * u; lp = lp * k + w * (1 - k); d[i] = lp * Math.pow(1 - u, 2.4) * (1 + 1.6 * (1 - u)); }
+      for (let k = 0; k < 9; k++){ const at = P + Math.floor(sr * rr(.004, .06)); if (at < n) d[at] += rr(-.5, .5) * (1 - k / 9); } }
     return ir; }
+  // three colours of noise, 6 s seamless loops, normalised to the same RMS
+  function noiseBufs(){ const sr = c.sampleRate, n = Math.floor(sr * 6), F = Math.floor(sr * .05);
+    const mk = kind => { const x = new Float32Array(n + F); let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0, br = 0;
+      for (let i = 0; i < n + F; i++){ const w = Math.random() * 2 - 1;
+        if (kind === 0) x[i] = w;
+        else if (kind === 1){ b0 = .99886 * b0 + w * .0555179; b1 = .99332 * b1 + w * .0750759; b2 = .969 * b2 + w * .153852; b3 = .8665 * b3 + w * .3104856; b4 = .55 * b4 + w * .5329522; b5 = -.7616 * b5 - w * .016898; x[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * .5362; b6 = w * .115926; }
+        else { br = (br + .02 * w) / 1.02; x[i] = br; } }
+      let m = 0; for (let i = 0; i < x.length; i++) m += x[i]; m /= x.length; let s = 0; for (let i = 0; i < x.length; i++){ x[i] -= m; s += x[i] * x[i]; } const k = .25 / Math.sqrt(s / x.length + 1e-12);
+      const b = c.createBuffer(1, n, sr), d = b.getChannelData(0); for (let i = 0; i < n; i++) d[i] = (i < F ? x[i] * (i / F) + x[n + i] * (1 - i / F) : x[i]) * k; return b; };
+    return {white: mk(0), pink: mk(1), brown: mk(2)}; }
   function pannerNode(v){ try { if (c.createStereoPanner){ const p = c.createStereoPanner(); p.pan.value = clamp(v, -1, 1); return p; }
       const p = c.createPanner(); p.panningModel = 'equalpower'; const a = clamp(v, -1, 1) * Math.PI / 2; if (p.positionX){ p.positionX.value = Math.sin(a); p.positionZ.value = -Math.cos(a); } else p.setPosition(Math.sin(a), 0, -Math.cos(a)); return p; } catch(e){ return c.createGain(); } }
   function setPan(p, v, t, tc){ try { if (p.pan) p.pan.setTargetAtTime(clamp(v, -1, 1), t, tc); } catch(e){} }
+  function panRamp(p, a, b, t, d){ try { if (p.pan){ p.pan.setValueAtTime(clamp(a, -1, 1), t); p.pan.linearRampToValueAtTime(clamp(b, -1, 1), t + d); } } catch(e){} }
+  function set(param, v, tc){ try { param.setTargetAtTime(v, c.currentTime, tc); } catch(e){} }
+  function bed(buf, type, f, q, pan, send){ const s = c.createBufferSource(); s.buffer = buf; s.loop = true; const fl = c.createBiquadFilter(); fl.type = type; fl.frequency.value = f; fl.Q.value = q;
+    const g = c.createGain(); g.gain.value = 0; const p = pannerNode(pan); s.connect(fl); fl.connect(g); g.connect(p); p.connect(ambIn);
+    if (send){ const sg = c.createGain(); sg.gain.value = send; p.connect(sg); sg.connect(revIn); } s.start(c.currentTime, rr(0, 5.5)); return {s, fl, g, p}; }
+  function lfo(f, param, depth){ const o = c.createOscillator(); o.frequency.value = f; const d = c.createGain(); d.gain.value = depth; o.connect(d); d.connect(param); o.start(); return d; }
+  function build(){ NB = noiseBufs();
+    L = {lowL: bed(NB.brown, 'lowpass', 150, .5, -.55, .25), lowR: bed(NB.brown, 'lowpass', 150, .5, .55, .25),
+      airL: bed(NB.pink, 'bandpass', 650, .8, -.45, .5), airR: bed(NB.pink, 'bandpass', 700, .8, .45, .5),
+      high: bed(NB.white, 'bandpass', 4800, .8, 0, .7), howl: bed(NB.pink, 'bandpass', 500, 7, 0, .6),
+      roar: bed(NB.brown, 'lowpass', 300, .6, 0, .35), corona: bed(NB.pink, 'bandpass', 1800, 1.1, 0, .5),
+      tvA: bed(NB.pink, 'bandpass', 500, .9, 0, .2), tvB: bed(NB.brown, 'lowpass', 120, .6, 0, 0)};
+    // the star boils: slow and fast flicker on the plasma (depths follow the level)
+    L.roarD1 = lfo(.71, L.roar.g.gain, 0); L.roarD2 = lfo(5.3, L.roar.g.gain, 0); L.corD = lfo(9.7, L.corona.g.gain, 0);
+    // stellar pressure, felt more than heard (headphones)
+    const so = c.createOscillator(); so.type = 'sine'; so.frequency.value = 34; L.sub = c.createGain(); L.sub.gain.value = 0; L.subO = so; so.connect(L.sub); const sp = pannerNode(0); L.sub.connect(sp); sp.connect(ambIn); so.start(); L.subD = lfo(.13, L.sub.gain, 0);
+    note('atmosphère prête'); }
   function init(ctx){
     if (c === ctx && S.ok) return; c = ctx; S.contexts++;
     try {
@@ -3274,237 +3315,184 @@ const PDA = (() => {
       ambOut = c.createGain(); ambOut.gain.value = 0; ambTone = c.createBiquadFilter(); ambTone.type = 'lowpass'; ambTone.frequency.value = 16000; ambTone.Q.value = .4;
       ambDuck = c.createGain(); ambDuck.gain.value = 1; ambIn = c.createGain(); ambIn.connect(ambDuck); ambDuck.connect(ambTone); ambTone.connect(ambOut); ambOut.connect(master);
       revIn = c.createGain(); revIn.gain.value = 1; rev = c.createConvolver(); rev.buffer = mkIR(TIER ? 4.6 : 3.2, .028); revOut = c.createGain(); revOut.gain.value = .5; revIn.connect(rev); rev.connect(revOut); revOut.connect(ambIn);
-      navBus = c.createGain(); navBus.gain.value = 1.5; navBus.connect(master);
+      navBus = c.createGain(); navBus.gain.value = 1; navBus.connect(master);
       meter = c.createAnalyser(); meter.fftSize = 1024; ambOut.connect(meter); mbuf = new Float32Array(meter.fftSize);
       ZB = c.createBuffer(1, 1, c.sampleRate); S.offline = !!(window.OfflineAudioContext && c instanceof window.OfflineAudioContext);
-      S.ok = true; bornT = c.currentTime; note('moteur audio prêt · ' + c.sampleRate + ' Hz');
+      build(); bornT = c.currentTime; S.calmNext = bornT + rr(60, 100); S.flareT = bornT + rr(8, 16);
+      S.ok = true; note('moteur audio prêt · ' + c.sampleRate + ' Hz');
       c.onstatechange = () => { if (c.state !== S.state){ S.state = c.state; if (!S.offline) note('contexte : ' + c.state); } };
     } catch(e){ S.ok = false; fail('init', e); }
   }
   // iOS: let Web Audio play like a music app (the ringer switch does not mute it)
   function session(){ try { const s = navigator.audioSession; if (s && s.type !== 'playback'){ s.type = 'playback'; } S.session = s ? s.type : 'non disponible'; } catch(e){ S.session = 'refusée'; } }
   function kick(){ try { const b = c.createBuffer(1, 1, c.sampleRate), s = c.createBufferSource(); s.buffer = b; s.connect(c.destination); s.start(0); } catch(e){} }
-  /* ---------- voices ---------- */
-  function env(g, t, a, h, r, v){ g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + a); g.gain.setValueAtTime(v, t + a + h); g.gain.setTargetAtTime(0, t + a + h, r / 4); }
-  function osc(type, f, t, end, det){ const o = c.createOscillator(); o.type = type; o.frequency.setValueAtTime(f, t); if (det) o.detune.setValueAtTime(det, t); o.start(t); o.stop(end); return o; }
-  // every voice frees itself when its last sound has ended (audio clock, so it also works offline)
-  function out(inst, pan, send, t, end){ const g = c.createGain(), p = pannerNode(pan); g.connect(p); p.connect(inst.out); let sg = null; if (send){ sg = c.createGain(); sg.gain.value = send; p.connect(sg); sg.connect(inst.send); }
-    ACT.push(end); const z = c.createBufferSource(); z.buffer = ZB; z.connect(g); z.onended = () => { try { g.disconnect(); p.disconnect(); if (sg) sg.disconnect(); } catch(e){} }; z.start(end + .3); return g; }
-  // a pad note: attack a, hold h, release r
-  function pad(inst, kind, f, t, a, h, r, v, pan, cut){
-    const end = t + a + h + r * 1.6, g = out(inst, pan, .55, t, end), e = c.createGain(); env(e, t, a, h, r, 1); e.connect(g); g.gain.value = v;
-    if (kind === 'warm' || kind === 'brass'){ const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = kind === 'brass' ? 1.1 : .6;
-      lp.frequency.setValueAtTime(cut * .35, t); lp.frequency.linearRampToValueAtTime(cut * (kind === 'brass' ? 1.25 : 1), t + a); lp.frequency.setTargetAtTime(cut * .6, t + a, h + r);
-      osc('sawtooth', f, t, end, -7).connect(lp); osc('sawtooth', f, t, end, 7).connect(lp); if (kind === 'brass') osc('sawtooth', f * 2, t, end, 3).connect(lp); lp.connect(e); }
-    else if (kind === 'soft'){ const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = cut; lp.Q.value = .5; const g2 = c.createGain(); g2.gain.value = .28;
-      osc('triangle', f, t, end, -4).connect(lp); osc('sine', f * 2, t, end, 5).connect(g2); g2.connect(lp); lp.connect(e); }
-    else if (kind === 'glass'){ const tr = c.createGain(); tr.gain.value = .78; const lfo = osc('sine', rr(.18, .45), t, end), ld = c.createGain(); ld.gain.value = .22; lfo.connect(ld); ld.connect(tr.gain);
-      osc('sine', f, t, end).connect(tr); const g2 = c.createGain(); g2.gain.value = .3; osc('sine', f * 2.003, t, end).connect(g2); g2.connect(tr); const g3 = c.createGain(); g3.gain.value = .1; osc('sine', f * 3.004, t, end).connect(g3); g3.connect(tr); tr.connect(e); }
-    else if (kind === 'choir'){ const vow = [[300, 870], [400, 800], [530, 1840], [700, 1220], [730, 1090]], a0 = vow[Math.floor(rr(0, 2))], a1 = vow[Math.floor(rr(2, 5))], mix = c.createGain(); mix.gain.value = 1.6;
-      [0, 1].forEach(k => { const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = k ? 9 : 6; bp.frequency.setValueAtTime(a0[k], t); bp.frequency.linearRampToValueAtTime(a1[k], t + a + h); const gg = c.createGain(); gg.gain.value = k ? .55 : 1; bp.connect(gg); gg.connect(mix);
-        osc('sawtooth', f, t, end, -5).connect(bp); osc('sawtooth', f, t, end, 6).connect(bp); });
-      const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = cut * 1.6; mix.connect(lp); lp.connect(e); }
-    else { const o = osc('sine', f, t, end), vib = osc('sine', rr(.12, .22), t, end), vd = c.createGain(); vd.gain.value = f * .004; vib.connect(vd); vd.connect(o.frequency); o.connect(e);   // ghost
-      const g2 = c.createGain(); g2.gain.value = .16; osc('sine', f * 1.5, t, end, 4).connect(g2); g2.connect(e); }
-  }
-  // short, articulated notes: the life of the place
-  function spark(inst, kind, f, t, v, pan, send = .8){
-    const dur = {bell: 3.2, chime: 2.8, crystal: 4.2, pluck: 1.4, flute: 1.6, drop: .5, ember: 1.6, ping: 2.4}[kind] || 2, end = t + dur + .1, g = out(inst, pan, send, t, end);
-    const part = (ratio, vol, d, type = 'sine') => { const e = c.createGain(); e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(vol * v, t + (kind === 'flute' ? .07 : .005)); e.gain.exponentialRampToValueAtTime(.0001, t + d); e.connect(g); return osc(type, f * ratio, t, end).connect(e) && e; };
-    if (kind === 'bell'){ part(1, 1, dur); part(2.76, .38, dur * .55); part(5.4, .14, dur * .3); part(.5, .18, dur * .8); }
-    else if (kind === 'chime'){ part(1, 1, dur); part(2, .3, dur * .7); part(3.01, .16, dur * .45); }
-    else if (kind === 'crystal'){ part(1, .8, dur); part(2.76, .45, dur * .7); part(5.4, .25, dur * .5); part(8.93, .12, dur * .35); }
-    else if (kind === 'pluck'){ const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(f * 6, t); lp.frequency.exponentialRampToValueAtTime(f * 1.5, t + dur); lp.connect(g);
-      const e = c.createGain(); e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(v, t + .004); e.gain.exponentialRampToValueAtTime(.0001, t + dur); e.connect(lp); osc('triangle', f, t, end).connect(e); const e2 = c.createGain(); e2.gain.setValueAtTime(v * .12, t); e2.gain.exponentialRampToValueAtTime(.0001, t + .25); e2.connect(g); osc('sine', f * 4.02, t, end).connect(e2); }
-    else if (kind === 'flute'){ const o = osc('sine', f, t, end), vib = osc('sine', 5.3, t, end), vd = c.createGain(); vd.gain.setValueAtTime(0, t); vd.gain.linearRampToValueAtTime(f * .009, t + .5); vib.connect(vd); vd.connect(o.frequency);
-      const e = c.createGain(); e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(v, t + .08); e.gain.setTargetAtTime(0, t + .35, .35); o.connect(e); e.connect(g); const e2 = c.createGain(); e2.gain.value = .12; osc('sine', f * 2, t, end).connect(e2); e2.connect(e); }
-    else if (kind === 'drop'){ const o = osc('sine', f, t, end); o.frequency.setValueAtTime(f * .75, t); o.frequency.exponentialRampToValueAtTime(f * 1.45, t + .12); const e = c.createGain(); e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(v, t + .01); e.gain.exponentialRampToValueAtTime(.0001, t + dur); o.connect(e); e.connect(g); }
-    else if (kind === 'ember'){ const o = osc('triangle', f, t, end); o.frequency.setValueAtTime(f * 1.02, t); o.frequency.exponentialRampToValueAtTime(f * .985, t + dur); const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = f * 3;
-      const e = c.createGain(); e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(v, t + .01); e.gain.exponentialRampToValueAtTime(.0001, t + dur); o.connect(lp); lp.connect(e); e.connect(g); }
-    else { const car = osc('sine', f, t, end), mod = osc('sine', f * 3.5, t, end), md = c.createGain(); md.gain.setValueAtTime(f * 2.2, t); md.gain.exponentialRampToValueAtTime(f * .05, t + dur); mod.connect(md); md.connect(car.frequency);   // ping
-      const e = c.createGain(); e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(v * .8, t + .005); e.gain.exponentialRampToValueAtTime(.0001, t + dur); car.connect(e); e.connect(g); }
-  }
-  /* ---------- identities ---------- */
-  function sysKeyOf(s){ if (!s) return 2; const own = s === SYS, src = own ? String(s.created || s.name || 'moi') : String((ownerId || '') + (s.name || '')); return [2, 4, 5, 7, 9, 0][Math.floor(hashStr(src) * 6) % 6]; }
-  function starOf(s){ try { return clamp(starIdx(s), 0, 5); } catch(e){ return 2; } }
-  function identity(kind, p){
-    const s = VIEW || SYS, k = sysKeyOf(s), st = starOf(s);
-    if (kind === 'planet' && p){ const T = TYPE_ID[p.type] || TYPE_ID[0], tonic = pc(k + OFF[T.mode]); const sd = hashStr(p.id || p.name || 'p');
-      return Object.assign({}, T, {key: 'p:' + (s && s.name) + ':' + p.id, kind, tonic, name: p.name, sd, moons: p.moons || 0, label: `${p.name} · ${(TYPES[p.type] || TYPES[0]).name.toLowerCase()} · ${NOTE_FR[pc(tonic)]} ${MODE_FR[T.mode]} · ${T.mood}`}); }
-    if (kind === 'deep'){ const tonic = pc(sysKeyOf(SYS) + OFF.lydian); return {key: 'deep', kind, mode: 'lydian', pad: 'ghost', spark: 'chime', tex: 'nebula', lo: 48, hi: 72, cdur: 19, cut: 2600, ext: 9, tonic, sd: .3, label: `espace profond · ${NOTE_FR[pc(tonic)]} lydien`}; }
-    const mode = ['dorian', 'mixolydian', 'ionian', 'ionian', 'lydian', 'lydian'][st], tonic = pc(k + OFF[mode]);
-    return {key: 's:' + (s && s.name), kind: 'system', mode, pad: 'soft', spark: 'bell', tex: 'none', lo: 52, hi: 74, cdur: 15, cut: 2600, ext: 9, tonic, sd: .6, label: `${(s && s.name) || 'système'} · ${NOTE_FR[pc(k)]} · ${STARS[st][0].toLowerCase()}`}; }
-  function scaleNote(id, deg, oct){ const sc = MODES[id.mode], n = sc.length, d = ((deg % n) + n) % n, o = Math.floor(deg / n); return 12 * (oct + o) + id.tonic + sc[d]; }
-  function voicing(prev, notes, lo, hi){ let best = null, bs = 1e9; const n = notes.length;
-    for (let inv = 0; inv < n; inv++) for (let oc = -3; oc <= 3; oc++){ const v = []; for (let k = 0; k < n; k++) v.push(notes[(inv + k) % n] + 12 * oc + (inv + k >= n ? 12 : 0));
-      for (let k = 1; k < n; k++) while (v[k] <= v[k - 1]) v[k] += 12; if (v[0] < lo || v[n - 1] > hi) continue;
-      const sc = prev && prev.length === n ? v.reduce((a, m, k) => a + Math.abs(m - prev[k]), 0) : Math.abs((v[0] + v[n - 1]) / 2 - (lo + hi) / 2); if (sc < bs){ bs = sc; best = v; } }
-    return best || notes.map(m => { while (m < lo) m += 12; while (m > hi) m -= 12; return m; }); }
-  function pickDeg(id, last){ const P = PROG[id.mode]; let tot = 0; const w = P.map(([d, x]) => { const y = d === last ? 0 : x; tot += y; return y; }); let r = Math.random() * tot; for (let i = 0; i < P.length; i++){ r -= w[i]; if (r <= 0) return P[i][0]; } return 0; }
-  function makeInst(id){
-    const g = c.createGain(); g.gain.value = 0; g.connect(ambIn); const sd = c.createGain(); sd.gain.value = 1; sd.connect(revIn);
-    const now = c.currentTime, inst = {id, out: g, send: sd, target: 0, dead: true, deadT: now, deg: 0, n: 0, prev: null, chordT: now + .15, sparkT: now + rr(1.2, 3), texT: now + rr(3, 7), breathT: now + rr(45, 80), restUntil: 0, mel: 2, born: now};
-    insts.push(inst); note('ambiance : ' + id.label); return inst; }
-  function chord(inst, t){
-    const id = inst.id, d = inst.n % 4 === 0 ? 0 : pickDeg(id, inst.deg); inst.deg = d; inst.n++;
-    const rel = EXT[id.ext || 9].map(k => scaleNote(id, d + k, 0)), v = voicing(inst.prev, rel, id.lo, id.hi); inst.prev = v; inst.chord = v;
-    const cd = id.cdur, a = cd * .42, h = cd * .22, r = cd * .75, pv = (id.pad === 'choir' ? .034 : id.pad === 'glass' ? .03 : id.pad === 'ghost' ? .04 : .036) / Math.sqrt(v.length / 3);
-    v.forEach((m, k) => pad(inst, id.pad, mtof(m), t + k * rr(.05, .35), a, h, r, pv * rr(.85, 1.1), (k / (v.length - 1 || 1) - .5) * 1.3 * (Math.random() < .5 ? 1 : -1), id.cut));
-    const root = scaleNote(id, d, -1); let b = root; while (b > 50) b -= 12; while (b < 36) b += 12;      // bass: felt in headphones, its harmonics carry on small speakers
-    if (id.kind !== 'deep' && Math.random() < .65) pad(inst, 'soft', mtof(b), t, a * .8, h, r, .034, 0, 900);
-  }
-  function sparkle(inst, t, dens){
-    const id = inst.id, nN = Math.random() < .55 ? 1 : Math.floor(rr(2, 5)), base = id.hi - 2; let tt = t;
-    for (let k = 0; k < nN; k++){ inst.mel = clamp(inst.mel + Math.round(rr(-2.4, 2.4)), -1, 9); const m0 = scaleNote(id, inst.mel, 0); let m = m0; while (m < base) m += 12; while (m > base + 19) m -= 12;
-      spark(inst, id.spark, mtof(m), tt, (id.spark === 'drop' ? .05 : .07) * rr(.7, 1.05) * dens, rr(-.85, .85)); tt += rr(.32, .95); }
-  }
-  function texture(inst, t){
-    const id = inst.id, ch = inst.chord || [id.lo + 7], top = ch[ch.length - 1], root = ch[0];
-    switch (id.tex){
-      case 'ocean': ch.slice(-3).forEach((m, k) => { const f = mtof(m + 12), end = t + 9, g = out(inst, (k - 1) * .7, .7, t, end), e = c.createGain(), lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(300, t); lp.frequency.exponentialRampToValueAtTime(2800, t + 3.2); lp.frequency.exponentialRampToValueAtTime(260, t + 8);
-        e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(.05, t + 3); e.gain.linearRampToValueAtTime(0, t + 8.5); osc('triangle', f, t, end, k * 4).connect(lp); lp.connect(e); e.connect(g); }); inst.texT = t + rr(7, 10); break;
-      case 'growl': { const end = t + 9, g = out(inst, 0, .3, t, end), e = c.createGain(), lp = c.createBiquadFilter(), am = c.createGain(); lp.type = 'lowpass'; lp.frequency.value = 260; am.gain.value = .7; const lfo = osc('sine', rr(5, 8), t, end), ld = c.createGain(); ld.gain.value = .3; lfo.connect(ld); ld.connect(am.gain);
-        e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(.09, t + 3.5); e.gain.linearRampToValueAtTime(0, t + 8.5); osc('sawtooth', mtof(root - 12), t, end).connect(lp); lp.connect(am); am.connect(e); e.connect(g);
-        for (let k = 0; k < 3; k++) spark(inst, 'ember', mtof(root + [0, 7, 12][k]), t + 2 + k * rr(.8, 1.6), .06, rr(-.6, .6)); inst.texT = t + rr(11, 16); break; }
-      case 'breath': pad(inst, 'choir', mtof(top + 12), t, 4, 2, 5, .028, rr(-.4, .4), 2400); inst.texT = t + rr(14, 20); break;
-      case 'frost': ch.forEach((m, k) => { const f = mtof(m + 24), end = t + 7, g = out(inst, rr(-.9, .9), .9, t, end), e = c.createGain(), tr = osc('sine', rr(6, 9), t, end), td = c.createGain(); td.gain.value = .5;
-        const am = c.createGain(); am.gain.value = .5; tr.connect(td); td.connect(am.gain); e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(.012, t + 2.5); e.gain.linearRampToValueAtTime(0, t + 6.5); osc('sine', f, t, end).connect(am); am.connect(e); e.connect(g); }); inst.texT = t + rr(7, 12); break;
-      case 'glint': for (let k = 0; k < 5; k++) spark(inst, 'chime', mtof(ch[k % ch.length] + 24), t + k * .11, .035, -.8 + k * .4, 1); inst.texT = t + rr(8, 13); break;
-      case 'reverse': ch.slice(-2).forEach((m, k) => { const f = mtof(m + 12), end = t + 5.2, g = out(inst, k ? .5 : -.5, 1, t, end), e = c.createGain(); e.gain.setValueAtTime(.0001, t); e.gain.exponentialRampToValueAtTime(.045, t + 4.4); e.gain.linearRampToValueAtTime(0, t + 4.6);
-        osc('sine', f, t, end).connect(e); const e2 = c.createGain(); e2.gain.value = .35; osc('triangle', f * 2, t, end).connect(e2); e2.connect(e); e.connect(g); }); inst.texT = t + rr(12, 18); break;
-      case 'flare': pad(inst, 'brass', mtof(top), t, 2.2, 1, 4, .03, rr(-.3, .3), 3600); inst.texT = t + rr(12, 18); break;
-      case 'pulse': { const n = Math.floor(rr(5, 9)); for (let k = 0; k < n; k++){ const m = ch[k % ch.length] + 12, tt = t + k * .48, end = tt + .5, g = out(inst, Math.sin(k) * .6, .5, tt, end), e = c.createGain(), lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1300;
-          e.gain.setValueAtTime(0, tt); e.gain.linearRampToValueAtTime(.022 * (1 - k / n * .5), tt + .01); e.gain.exponentialRampToValueAtTime(.0001, tt + .4); osc('square', mtof(m), tt, end).connect(lp); lp.connect(e); e.connect(g); } inst.texT = t + rr(9, 15); break; }
-      case 'wind': { const end = t + 9, g = out(inst, 0, .6, t, end), e = c.createGain(), bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 7; bp.frequency.setValueAtTime(mtof(root + 12), t); bp.frequency.exponentialRampToValueAtTime(mtof(root + 31), t + 4); bp.frequency.exponentialRampToValueAtTime(mtof(root + 19), t + 8.5);
-        e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(.07, t + 3.5); e.gain.linearRampToValueAtTime(0, t + 8.5); [0, 7, 12].forEach((iv, k) => osc('sawtooth', mtof(root + iv), t, end, k * 5).connect(bp)); bp.connect(e); e.connect(g); inst.texT = t + rr(9, 14); break; }
-      case 'life': { let tt = t; const n = Math.floor(rr(2, 4)); for (let k = 0; k < n; k++){ const m = scaleNote(id, Math.floor(rr(4, 11)), 6); spark(inst, 'flute', mtof(m), tt, .045, rr(-.8, .8), .7); spark(inst, 'flute', mtof(m + 2), tt + .09, .025, rr(-.8, .8), .7); tt += rr(.25, .6); } inst.texT = t + rr(5, 11); break; }
-      case 'earth': pad(inst, 'warm', mtof(root - 12), t, 3, 2, 4, .03, 0, 500); inst.texT = t + rr(10, 15); break;
-      case 'nebula': ch.slice(-2).forEach((m, k) => pad(inst, 'glass', mtof(m + 12), t + k * .7, 5, 3, 7, .012, k ? .7 : -.7, 6000)); inst.texT = t + rr(18, 28); break;
-      default: inst.texT = t + 30;
-    }
-  }
-  function fadeInst(I, on, now){ try { I.out.gain.cancelScheduledValues(now); I.out.gain.setValueAtTime(I.out.gain.value, now); I.out.gain.setTargetAtTime(on, now, on ? 1.3 : 1.1); } catch(e){}
-    I.dead = !on; I.target = on; if (!on) I.deadT = now; }
-  function tick(inst, now, dens){
-    const id = inst.id, LA = .3;
-    if (inst.chordT < now - 1) inst.chordT = now + .1; if (inst.sparkT < now - 1) inst.sparkT = now + rr(.6, 2); if (inst.texT < now - 1) inst.texT = now + rr(2, 5);
-    if (now > inst.breathT){ inst.restUntil = now + rr(8, 14); inst.breathT = now + rr(55, 95); note('respiration'); }
-    if (inst.chordT < now + LA){ if (now < inst.restUntil || Math.random() < .12) inst.chordT += id.cdur * rr(.45, .7); else { chord(inst, Math.max(inst.chordT, now + .05)); inst.chordT += id.cdur * rr(.62, .78); } }
-    if (inst.sparkT < now + LA){ if (now >= inst.restUntil && dens > .05 && S.voices < 70) sparkle(inst, Math.max(inst.sparkT, now + .05), dens); inst.sparkT += rr(2.5, 7.5) / Math.max(.3, dens) * (id.kind === 'deep' ? 1.8 : 1); }
-    if (id.tex !== 'none' && inst.texT < now + LA){ if (now >= inst.restUntil && S.voices < 70) texture(inst, Math.max(inst.texT, now + .05)); else inst.texT += 4; }
-  }
-  /* ---------- the star: a living harmonic resonance ---------- */
-  function starBuild(s){
-    const k = sysKeyOf(s), st = starOf(s), f0 = mtof(36 + pc(k));
-    const now = c.currentTime, g = c.createGain(); g.gain.value = 0; const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 900; lp.Q.value = .7; const pn = pannerNode(0), sd = c.createGain(); sd.gain.value = .5;
-    const low = c.createGain(), high = c.createGain(), br = c.createGain(); low.gain.value = 0; high.gain.value = .3; br.gain.value = .6; low.connect(lp); high.connect(lp);
-    const bl = c.createOscillator(), bd = c.createGain(); bl.frequency.value = rr(.022, .036); bd.gain.value = .38; bl.connect(bd); bd.connect(br.gain);   // slow breathing: swells, never a flat drone
-    lp.connect(br); br.connect(g); g.connect(pn); pn.connect(ambIn); pn.connect(sd); sd.connect(revIn);
-    const parts = [1, 2, 3, 4, 5, 6, 8, 10, 12].slice(0, 6 + Math.round(st / 1.7)), oscs = [bl];
-    parts.forEach((n, i) => { const o = c.createOscillator(); o.type = 'sine'; o.frequency.value = f0 * n * (1 + (i % 2 ? .0008 : -.0006)); const pg = c.createGain(), base = n <= 2 ? .05 / n : .1 / Math.pow(n, .4); pg.gain.value = base;
-      const lfo = c.createOscillator(); lfo.frequency.value = rr(.025, .09) * (1 + st * .15); const ld = c.createGain(); ld.gain.value = base * .85; lfo.connect(ld); ld.connect(pg.gain); o.connect(pg); pg.connect(n <= 2 ? low : high); o.start(now); lfo.start(now); oscs.push(o, lfo); });
-    const mg = c.createOscillator(); mg.frequency.value = f0 * 3 + .27; const mgg = c.createGain(); mgg.gain.value = .026; mg.connect(mgg); mgg.connect(high); mg.start(now); oscs.push(mg); bl.start(now);   // magnetic beating
-    note('étoile : ' + STARS[st][0].toLowerCase() + ' · ' + NOTE_FR[pc(k)]);
-    return {key: (s && s.name) + ':' + st, g, lp, pn, oscs, low, high, f0, k, st, flareT: now + rr(14, 26), id: {tonic: k, mode: 'ionian', spark: 'chime'}, out: ambIn, send: revIn, level: 0};
-  }
-  function starKill(L){ if (!L) return; const t = c.currentTime; try { L.g.gain.cancelScheduledValues(t); L.g.gain.setTargetAtTime(0, t, .9); } catch(e){} setTimeout(() => { L.oscs.forEach(o => { try { o.stop(); } catch(e){} }); try { L.g.disconnect(); L.pn.disconnect(); } catch(e){} }, 6000); }
-  function starFlare(L, t){ try { L.lp.frequency.cancelScheduledValues(t); L.lp.frequency.setTargetAtTime(L.cut * 2.4, t, .9); L.lp.frequency.setTargetAtTime(L.cut, t + 3, 2.4);
-      const sc = MODES.ionian; [0, 4, 2, 7, 9].forEach((d, i) => spark({out: ambIn, send: revIn}, 'chime', mtof(12 * 6 + L.k + sc[d % 7] + (d >= 7 ? 12 : 0)), t + .6 + i * .16, .045 * L.level, -.6 + i * .3, 1)); } catch(e){} }
-  /* ---------- travel: speed has a sound ---------- */
-  function travBuild(){ const now = c.currentTime, g = c.createGain(); g.gain.value = 0; const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 3.5; bp.frequency.value = 400;
-    const o1 = c.createOscillator(), o2 = c.createOscillator(); o1.type = o2.type = 'sawtooth'; o1.frequency.value = 110; o2.frequency.value = 165.4; o1.connect(bp); o2.connect(bp); bp.connect(g); g.connect(ambIn); o1.start(now); o2.start(now); return {g, bp, o1, o2}; }
-  function navTone(t, f0, f1, dur, v, pan0, pan1, q = 3, type = 'sawtooth'){ const end = t + dur + .2, g = c.createGain(), p = pannerNode(pan0), bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = q;
-    bp.frequency.setValueAtTime(f0 * 2, t); bp.frequency.exponentialRampToValueAtTime(f1 * 2, t + dur * .8); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + dur * .45); g.gain.linearRampToValueAtTime(0, t + dur);
-    [1, 1.5, 2.005].forEach((m, i) => { const o = osc(type, f0 * m, t, end, i * 4); o.frequency.exponentialRampToValueAtTime(f1 * m, t + dur); o.connect(bp); }); bp.connect(g); g.connect(p); p.connect(navBus); const s = c.createGain(); s.gain.value = .6; p.connect(s); s.connect(revIn); setPan(p, pan1, t, dur / 3); }
-  function bloom(id, t, v){ const sc = MODES[id.mode] || MODES.ionian, nn = [0, 2, 4, 7, 9, 11].map(d => 12 * 5 + pc(id.tonic) + sc[d % 7] + (d >= 7 ? 12 : 0)), dest = {out: navBus, send: revIn};
-    nn.forEach((m, i) => spark(dest, i < 3 ? 'bell' : 'chime', mtof(m), t + i * .085, v * (1 - i * .08), -.7 + i * .28, .9));
-    const end = t + 4.5, g = c.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v * .5, t + .05); g.gain.setTargetAtTime(0, t + .25, .7); osc('sine', mtof(36 + pc(id.tonic)), t, end).connect(g); const g2 = c.createGain(); g2.gain.value = .35; osc('sine', mtof(48 + pc(id.tonic)), t, end).connect(g2); g2.connect(g); g.connect(navBus); }
-  function swell(id, t, v){ const sc = MODES[id.mode] || MODES.ionian, dest = {out: navBus, send: revIn}; [0, 2, 4].forEach((d, i) => pad(dest, 'soft', mtof(12 * 5 + pc(id.tonic) + sc[d]), t + i * .06, 1, .3, 2.2, v, -.5 + i * .5, 3200)); }
+  /* ---------- one-shot voices: each frees itself when its sound has ended (audio clock, works offline) ---------- */
+  function vout(v, pan, wet, end, dest){ const g = c.createGain(); g.gain.value = v; const p = pannerNode(pan); g.connect(p); p.connect(dest || ambIn); let sg = null;
+    if (wet){ sg = c.createGain(); sg.gain.value = wet; p.connect(sg); sg.connect(revIn); }
+    ACT.push(end); const z = c.createBufferSource(); z.buffer = ZB; z.connect(g); z.onended = () => { try { g.disconnect(); p.disconnect(); if (sg) sg.disconnect(); } catch(e){} }; z.start(end + .3); return {g, p}; }
+  // filtered noise: attack then exponential decay
+  function nz(t, out, buf, type, f0, f1, q, dur, att, peak){ const s = c.createBufferSource(); s.buffer = buf; s.loop = true; const fl = c.createBiquadFilter(); fl.type = type; fl.Q.value = q;
+    fl.frequency.setValueAtTime(f0, t); if (f1) fl.frequency.exponentialRampToValueAtTime(f1, t + dur); const g = c.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(peak, t + att); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    s.connect(fl); fl.connect(g); g.connect(out); s.start(t, rr(0, 5)); s.stop(t + dur + .05); }
+  // filtered noise swell: rises to a peak at pk·dur (filter fA → fB), then falls (fB → fC)
+  function nzs(t, out, buf, type, fA, fB, fC, q, dur, pk, peak){ const s = c.createBufferSource(); s.buffer = buf; s.loop = true; const fl = c.createBiquadFilter(); fl.type = type; fl.Q.value = q;
+    fl.frequency.setValueAtTime(fA, t); fl.frequency.exponentialRampToValueAtTime(fB, t + dur * pk); fl.frequency.exponentialRampToValueAtTime(fC, t + dur);
+    const g = c.createGain(); g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + dur * pk); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    s.connect(fl); fl.connect(g); g.connect(out); s.start(t, rr(0, 5)); s.stop(t + dur + .05); }
+  function os(t, out, type, f0, f1, dur, att, peak){ const o = c.createOscillator(); o.type = type; o.frequency.setValueAtTime(f0, t); if (f1) o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+    const g = c.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(peak, t + att); g.gain.exponentialRampToValueAtTime(.0001, t + dur); o.connect(g); g.connect(out); o.start(t); o.stop(t + dur + .05); }
+  /* ---------- distant events ---------- */
+  const EV = {
+    rumble(t, v, pan, dest){ const d = rr(3.5, 6), o = vout(v, pan, 1, t + d, dest); nzs(t, o.g, NB.brown, 'lowpass', 520, 300, 60, .6, d, .18, 1); },
+    comet(t, v, pan, dest){ const d = rr(3, 5.5), dir = Math.random() < .5 ? -1 : 1, o = vout(v, -dir * .9, .8, t + d, dest); panRamp(o.p, -dir * .95, dir * .95, t, d);
+      nzs(t, o.g, NB.pink, 'bandpass', rr(1800, 3200), rr(900, 1500), rr(300, 500), 1.6, d, .55, 1); nzs(t + d * .3, o.g, NB.brown, 'lowpass', 300, 200, 80, .6, d * .7, .4, .6); },
+    whistler(t, v, pan, dest){ const d = rr(.9, 1.7), o = vout(v, pan, 1, t + d + .4, dest), f0 = rr(4200, 6500), f1 = rr(650, 1100); os(t, o.g, 'sine', f0, f1, d, .03, .35); nz(t, o.g, NB.white, 'bandpass', f0, f1, 10, d, .03, 1.6); },
+    whisper(t, v, pan, dest){ const d = rr(2, 3.4), o = vout(v, pan, .9, t + d, dest); [[rr(380, 520), rr(700, 900), 6], [rr(1300, 1700), rr(1900, 2400), 9]].forEach(([a, b, q], k) => {
+        nzs(t + k * .05, o.g, NB.pink, 'bandpass', a, b, a * rr(.8, 1.1), q, d, rr(.35, .55), k ? .6 : 1); }); },
+    pulsar(t, v, pan, dest){ const n = ri(5, 10), per = rr(.33, .85), d = n * per + .6, o = vout(v, pan, .7, t + d, dest);
+      for (let k = 0; k < n; k++){ const tk = t + k * per, a = Math.pow(1 - k / n, .7) * Math.min(1, .45 + k * .3); nz(tk, o.g, NB.white, 'bandpass', rr(1800, 2600), 0, 1.2, .03, .001, a); nz(tk, o.g, NB.brown, 'lowpass', 220, 0, .7, .1, .002, a * .7); } },
+    metal(t, v, pan, dest){ const d = rr(3.5, 6), o = vout(v, pan, 1, t + d, dest), f = rr(110, 260);
+      [1, 1.47, 2.31, 3.17].forEach((m, i) => nz(t, o.g, NB.white, 'bandpass', f * m * rr(.98, 1.02), 0, 30 + i * 10, d * (1 - i * .18), .02, 5 / (i + 1)));
+      nz(t, o.g, NB.brown, 'lowpass', 400, 80, .6, .5, .005, .5); },
+    glint(t, v, pan, dest, n){ n = n || ri(3, 7); const o = vout(v, pan, 1, t + 2, dest);
+      for (let k = 0; k < n; k++){ const f = rr(2800, 8500); nz(t + rr(0, 1.3), o.g, NB.white, 'bandpass', f, f * rr(.97, 1.03), rr(35, 70), rr(.12, .35), .002, rr(5, 9)); } },
+    crack(t, v, pan, dest){ const o = vout(v, pan, .8, t + 1, dest); nz(t, o.g, NB.white, 'highpass', 1600, 0, .7, .06, .001, 1); os(t, o.g, 'sine', rr(700, 1100), rr(200, 320), .18, .001, .3); nz(t + .02, o.g, NB.white, 'bandpass', rr(3000, 5000), 0, 8, .4, .002, 1.5); },
+    creak(t, v, pan, dest){ const d = rr(.5, 1.2), o = vout(v, pan, .6, t + d, dest), osc = c.createOscillator(), bp = c.createBiquadFilter(), g = c.createGain();
+      osc.type = 'sawtooth'; osc.frequency.setValueAtTime(rr(55, 95), t); osc.frequency.linearRampToValueAtTime(rr(40, 120), t + d); bp.type = 'bandpass'; bp.frequency.value = rr(350, 900); bp.Q.value = 7;
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.35, t + d * .3); g.gain.linearRampToValueAtTime(0, t + d); osc.connect(bp); bp.connect(g); g.connect(o.g); osc.start(t); osc.stop(t + d + .05); },
+    pebble(t, v, pan, dest){ const o = vout(v, pan, .4, t + 1.2, dest); let tt = t, am = 1; const n = ri(3, 7); for (let k = 0; k < n; k++){ nz(tt, o.g, NB.white, 'bandpass', rr(900, 2600), 0, 2, .03, .001, am); tt += rr(.05, .16) * (1 - k / n * .5); am *= .78; } },
+    drop(t, v, pan, dest){ const o = vout(v, pan, .25, t + .2, dest), f = rr(1600, 3800); os(t, o.g, 'sine', f, f * .55, rr(.02, .045), .001, .45); },
+    bloop(t, v, pan, dest){ const o = vout(v, pan, .4, t + .5, dest); os(t, o.g, 'sine', rr(110, 160), rr(40, 55), rr(.18, .32), .01, .8); nz(t, o.g, NB.brown, 'lowpass', 300, 80, .7, .3, .01, .6); },
+    crackle(t, v, pan, dest){ const o = vout(v, pan, .3, t + .4, dest), n = ri(1, 4); for (let k = 0; k < n; k++) nz(t + k * rr(.01, .05), o.g, NB.white, 'bandpass', rr(1800, 6000), 0, 1.4, rr(.01, .03), .001, rr(.4, 1)); },
+    thump(t, v, pan, dest){ const d = rr(1.2, 2.2), o = vout(v, pan, .9, t + d, dest); nz(t, o.g, NB.brown, 'lowpass', 260, 50, .6, d, .02, 1); os(t, o.g, 'sine', 55, 32, 1.1, .02, .4); },
+    zap(t, v, pan, dest){ const o = vout(v, pan, .5, t + .5, dest); for (let k = 0; k < 7; k++) nz(t + k * rr(.008, .03), o.g, NB.white, 'highpass', 2500, 0, .7, .01, .001, rr(.3, .9)); os(t, o.g, 'sawtooth', 110, 90, .2, .01, .1); },
+    gust(t, v, pan, dest){ const d = rr(1.8, 3.4), o = vout(v, pan, .3, t + d, dest); panRamp(o.p, pan, clamp(pan + rr(-.8, .8), -1, 1), t, d); nzs(t, o.g, NB.pink, 'bandpass', rr(450, 800), rr(1300, 2300), rr(500, 800), 1.2, d, .45, 1); },
+    thunder(t, v, pan, dest){ const d = rr(2.8, 4.5), o = vout(v, pan, .9, t + d, dest); nz(t, o.g, NB.brown, 'lowpass', rr(500, 900), 70, .5, d, .03, 1); nz(t + rr(.05, .3), o.g, NB.pink, 'lowpass', 1600, 200, .5, d * .7, .02, .4); },
+    eruption(t, v, pan, dest){ const d = rr(3, 4.5), o = vout(v, pan, .9, t + d, dest); nz(t, o.g, NB.brown, 'lowpass', 320, 45, .6, d, .05, 1); os(t, o.g, 'sine', 48, 30, 2, .03, .5);
+      for (let k = 0; k < 10; k++) nz(t + .3 + k * rr(.05, .25), o.g, NB.white, 'bandpass', rr(1500, 5000), 0, 1.3, rr(.01, .04), .001, rr(.2, .6)); },
+    bird(t, v, pan, dest){ const o = vout(v, pan, .35, t + 1.2, dest), n = ri(2, 5), f = rr(2400, 4200), sl = rr(.85, 1.5); let tt = t; for (let k = 0; k < n; k++){ os(tt, o.g, 'sine', f * rr(.92, 1.08), f * sl * rr(.95, 1.1), rr(.05, .12), .006, .5); tt += rr(.09, .2); } },
+    wave(t, v, pan, dest){ const d = rr(5.5, 8.5), o = vout(v, pan, .5, t + d, dest); panRamp(o.p, pan, -pan * .6, t, d); nzs(t, o.g, NB.brown, 'lowpass', 220, 1400, 260, .7, d, .45, 1); nzs(t + d * .25, o.g, NB.pink, 'bandpass', 900, 2600, 700, .9, d * .7, .35, .35); },
+    breath(t, v, pan, dest){ const d = rr(5, 8), o = vout(v, pan, .8, t + d, dest); nzs(t, o.g, NB.brown, 'lowpass', 160, 520, 140, .7, d, .5, 1); nzs(t + .4, o.g, NB.pink, 'bandpass', 500, 900, 450, 2, d * .8, .55, .25); },
+    flare(t, v, pan, dest){ const d = 4.5, o = vout(v, pan, 1, t + d, dest); nzs(t, o.g, NB.pink, 'bandpass', 600, 4200, 300, .9, d, .2, .8); nzs(t, o.g, NB.brown, 'lowpass', 150, 500, 60, .6, d, .15, 1);
+      for (let k = 0; k < 12; k++) nz(t + rr(.2, 2.5), o.g, NB.white, 'bandpass', rr(1800, 6000), 0, 1.4, rr(.01, .03), .001, rr(.3, .8)); }
+  };
+  // event levels, calibrated by offline measurement: short-term peaks between −40 and −26 dBFS at 75 % (far away, never in your face)
+  const EVV = {rumble: 0.13, comet: 0.21, whistler: 0.078, whisper: 0.43, pulsar: 0.44, metal: 0.33, glint: 0.2, crack: 0.25, creak: 0.49, pebble: 1.19, drop: 0.28, bloop: 0.075, crackle: 1, thump: 0.105, zap: 0.33, gust: 0.45, thunder: 0.157, eruption: 0.106, bird: 0.1, wave: 0.11, breath: 0.096, flare: 0.18};
+  /* ---------- transitions (navigation) ---------- */
+  const TR = {
+    approach(t, v){ const d = 1.1, o = vout(v, .5, .6, t + d + .8, navBus); panRamp(o.p, .5, -.3, t, d); nzs(t, o.g, NB.pink, 'bandpass', 380, 1500, 600, 1.1, d, .5, 1); nz(t + .55, o.g, NB.brown, 'lowpass', 200, 60, .7, .8, .03, .9); },
+    land(t, v){ const d = 1.6, o = vout(v, 0, .6, t + d + 1.6, navBus); nzs(t, o.g, NB.brown, 'lowpass', 180, 2400, 300, .6, d, .8, .9); nzs(t, o.g, NB.pink, 'bandpass', 400, 2600, 500, .8, d, .75, .7);
+      nz(t + d * .8, o.g, NB.brown, 'lowpass', 500, 50, .6, 1.6, .01, .8); os(t + d * .8, o.g, 'sine', 62, 30, 1.2, .01, .3); },
+    liftoff(t, v){ const d = 1.4, o = vout(v, -.4, .6, t + d, navBus); panRamp(o.p, -.4, .5, t, d); nzs(t, o.g, NB.brown, 'lowpass', 100, 900, 400, .6, d, .7, 1); nzs(t, o.g, NB.pink, 'bandpass', 300, 2200, 1500, .9, d, .8, .6); os(t, o.g, 'sine', 40, 70, d, .2, .2); },
+    depart(t, v){ const d = .9, o = vout(v, -.3, .5, t + d, navBus); panRamp(o.p, -.3, .4, t, d); nzs(t, o.g, NB.pink, 'bandpass', 500, 1800, 900, 1, d, .6, 1); nzs(t, o.g, NB.brown, 'lowpass', 90, 400, 120, .6, d, .5, .6); },
+    galaxy(t, v){ const d = 2.2, o = vout(v, -.8, 1, t + d + 2.2, navBus); panRamp(o.p, -.8, .8, t, d); nzs(t, o.g, NB.pink, 'bandpass', 200, 3000, 400, .8, d, .65, 1); nzs(t, o.g, NB.brown, 'lowpass', 80, 700, 60, .6, d, .7, .9);
+      nz(t + d * .68, o.g, NB.brown, 'lowpass', 400, 40, .6, 2.2, .02, .9); EV.glint(t + d * .7, v * .9, .3, navBus, 5); },
+    jump(t, v){ const d = 1, o = vout(v, -.9, .8, t + d + 1.4, navBus); panRamp(o.p, -.9, .9, t, d); nzs(t, o.g, NB.pink, 'highpass', 300, 4000, 800, .7, d, .85, 1); os(t, o.g, 'sine', 50, 120, d * .85, .3, .3);
+      nz(t + d * .85, o.g, NB.brown, 'lowpass', 600, 45, .6, 1.4, .005, .85); os(t + d * .85, o.g, 'sine', 70, 28, 1, .005, .32); },
+    system(t, v){ const o = vout(v, 0, .8, t + 3, navBus); nz(t, o.g, NB.brown, 'lowpass', 350, 45, .6, 1.8, .02, .9); nzs(t + .05, o.g, NB.pink, 'bandpass', 3200, 1200, 350, .9, 2.2, .1, .6); EV.glint(t + .25, v * .8, 0, navBus, 6); },
+    lock(t, v){ const o = vout(v, 0, .3, t + .6, navBus); nz(t, o.g, NB.white, 'bandpass', 2600, 0, 3, .015, .001, 1); nz(t + .07, o.g, NB.white, 'bandpass', 3400, 0, 3, .015, .001, .8); nzs(t + .05, o.g, NB.pink, 'bandpass', 900, 1900, 1500, 4, .35, .5, .6); },
+    zone(t, v){ EV.glint(t, v, rr(-.4, .4), navBus, 2); }
+  };
+  const NV = {approach: 0.64, land: 0.45, liftoff: 0.58, depart: 0.65, galaxy: 0.51, jump: 0.67, system: 0.69, lock: 1.27, zone: 0.38};
   /* ---------- per-frame update, driven by the real camera ---------- */
-  let lastNav = '', lastNavT = 0, starWant = null;
+  const W = {gal: 1, star: 0, t: new Array(12).fill(0)};
+  let lastNav = '', lastNavT = 0;
+  function starClass(){ try { return clamp(starIdx(VIEW || SYS), 0, 5); } catch(e){ return 2; } }
   function update(dt){
-    if (!S.ok || !c) return; S.state = c.state; if (c.state !== 'running' && !S.offline) return;
-    const now = c.currentTime;
-    // music in the foreground: ambience recedes (−11 dB) and leaves the voice band free
-    const music = !au.paused || !!(radio && !ra.paused); if (music !== S.music){ S.music = music; note(music ? 'musique : l’ambiance s’efface' : 'musique arrêtée : l’ambiance revient'); }
-    const vol = SND.amb ? Math.pow(clamp(SND.vol ?? .75, 0, 1), 1.4) * 2.4 : 0;
-    if (now - upT > .12){ upT = now; for (let i = ACT.length - 1; i >= 0; i--) if (ACT[i] < now) ACT.splice(i, 1); S.voices = ACT.length;
-      ambOut.gain.setTargetAtTime(S.hidden ? 0 : vol, now, S.hidden ? .15 : .6); ambDuck.gain.setTargetAtTime(music ? .28 : 1, now, music ? .9 : 1.8); ambTone.frequency.setTargetAtTime(music ? 3000 : 16000, now, .8);
-      navBus.gain.setTargetAtTime(SND.amb ? (music ? .8 : 1.5) * (S.hidden ? 0 : 1) : 0, now, .3);
-      // which identity is around us?
-      let want = null, starK = 0, moons = 0, mp = null;
-      if (S.preview && now < S.preview.until){ want = S.preview.id; starK = S.preview.star || 0; moons = S.preview.moons || 0; }
-      else { S.preview = null;
-        if (mode === 'galaxy' || mode === 'splash' || !VIEW) want = mode === 'galaxy' ? identity('deep') : null;
-        else { const dS = Math.hypot(EYE[0], EYE[1], EYE[2]); starK = clamp(1 - dS / (starR(VIEW) * 16), 0, 1); let bp = null, bd = 1e9;
-          VIEW.planets.forEach((p, i) => { const q = planetPos(p, i), d = Math.hypot(EYE[0] - q[0], EYE[1] - q[1], EYE[2] - q[2]) / bodyR(p); if (d < bd){ bd = d; bp = p; } });
-          if (focus){ const fp = VIEW.planets.find(x => x.id === focus); if (fp){ bp = fp; bd = Math.min(bd, mode === 'planet' ? 2 : 6); } }
-          const k = bp ? clamp(1 - (bd - 3) / 16, 0, 1) : 0;
-          if (bp && (k > .35 || mode === 'planet')){ want = identity('planet', bp); mp = bp; moons = (mode === 'planet' || focus === bp.id || k > .6) ? (bp.moons || 0) : 0; }
-          else want = identity('system');
-          if (mode === 'planet') starK *= .35; } }
-      // hysteresis: an identity must stay wanted 0.7 s before we move to it
-      const wk = want ? want.key : '';
-      if (wk !== (mainI && !mainI.dead ? mainI.id.key : '')){ if (wantId !== wk){ wantId = wk; wantT = now; }
-        if (now - wantT > .7 || !mainI){ if (mainI) fadeInst(mainI, 0, now); mainI = want ? (insts.find(x => x.id.key === wk && !x.gone) || makeInst(want)) : null; if (mainI){ fadeInst(mainI, 1, now); S.ident = want.label; } else S.ident = ''; } }
-      else wantId = wk;
-      S.scene = S.preview ? 'aperçu' : mode === 'planet' ? 'planète' : mode === 'galaxy' ? 'galaxie' : mode === 'splash' ? 'accueil' : focus ? 'système · approche' : 'système';
-      // star layer follows the system on screen
-      const sKey = (mode === 'system' || mode === 'planet' || (S.preview && S.preview.star)) && VIEW ? VIEW.name + ':' + starOf(VIEW) : '';
-      if (sKey !== (starL ? starL.key : '')){ starKill(starL); starL = sKey ? starBuild(VIEW) : null; if (starL) starL.cut = 600 + 600 * starL.st / 5; }
-      if (starL){ const lvl = (.16 + .84 * Math.pow(starK, 1.3)) * (mode === 'planet' ? .5 : 1); starL.level = lvl; S.star = Math.round(starK * 100);
-        starL.g.gain.setTargetAtTime(lvl * .82, now, .7); starL.low.gain.setTargetAtTime(Math.pow(starK, 1.6) * .6, now, .8); starL.high.gain.setTargetAtTime(.3 + .7 * starK, now, .8); const cut = starL.cut * (1 + 3.6 * Math.pow(starK, 1.2)); if (now > (starL.flareHold || 0)) starL.lp.frequency.setTargetAtTime(cut, now, .6); starL.cutNow = cut;
-        try { const v = toView([-EYE[0], -EYE[1], -EYE[2]]), l = Math.hypot(v[0], v[1], v[2]) || 1; setPan(starL.pn, v[0] / l * .8, now, .2); } catch(e){}
-        if (now > starL.flareT){ starL.flareT = now + rr(26, 44); starL.flareHold = now + 7; starL.cut = starL.cut; starFlare({lp: starL.lp, cut: starL.cutNow || 900, k: starL.k, level: lvl}, now + .05); note('éruption stellaire'); } }
-      else S.star = 0;
-      // moons: crystals around the planet you are looking at
-      S.moons = moons;
-      if (moons && mainI && now > (S.moonT || 0)){ S.moonT = now + rr(1.3, 4.2) / Math.sqrt(moons); const id = mainI.id, mi = Math.floor(Math.random() * moons);
-        let pan = Math.sin(time * .3 + mi * 2.1) * .8; try { if (mp){ const i = VIEW.planets.indexOf(mp), pos = planetPos(mp, i), R = bodyR(mp), mr = R * (1.9 + mi * .7 + (mp.ring ? 1.1 : 0)), ma = time * .8 * Math.pow(R * 1.9 / mr, 1.5) + mp.seed + mi * 2.1;
-            const v = toView([pos[0] + Math.cos(ma) * mr - EYE[0], pos[1] - EYE[1], pos[2] + Math.sin(ma) * mr - EYE[2]]), l = Math.hypot(v[0], v[1], v[2]) || 1; pan = v[0] / l; } } catch(e){}
-        if (!music || Math.random() < .5) spark(mainI, 'crystal', mtof(scaleNote(id, Math.floor(rr(3, 11)), 6)), now + .05, .05 * (music ? .6 : 1), clamp(pan, -1, 1), 1); }
-      // travel layer
-      if (!trav) trav = travBuild();
-      const sp = camSpeed, kv = clamp(sp * .45 - .12, 0, 1), base = mtof(36 + pc((mainI ? mainI.id.tonic : 2)));
-      trav.g.gain.setTargetAtTime(SND.amb ? kv * kv * .11 : 0, now, .12); trav.bp.frequency.setTargetAtTime(300 + sp * 520 * (camAppr > 0 ? 1.25 : .8), now, .15);
-      trav.o1.frequency.setTargetAtTime(base * (1 + .02 * camAppr * kv), now, .3); trav.o2.frequency.setTargetAtTime(base * 1.5 * (1 + .02 * camAppr * kv), now, .3);
-      // level meter for the diagnostic
-      try { meter.getFloatTimeDomainData(mbuf); let s = 0; for (let i = 0; i < mbuf.length; i++) s += mbuf[i] * mbuf[i]; S.level = 10 * Math.log10(s / mbuf.length + 1e-12); } catch(e){}
-    }
-    const dens = (S.music ? .45 : 1);
-    for (let i = insts.length - 1; i >= 0; i--){ const I = insts[i];
-      if (!I.dead && SND.amb) { try { tick(I, now, dens); } catch(e){ fail('ambiance', e); fadeInst(I, 0, now); } }
-      else if (now - I.deadT > 10){ I.gone = true; try { I.out.disconnect(); I.send.disconnect(); } catch(e){} insts.splice(i, 1); } }
+    if (!S.ok || !c || !L) return; S.state = c.state; if (c.state !== 'running' && !S.offline) return;
+    const now = c.currentTime; if (now - upT < .1) return; const step = Math.min(.5, now - upT); upT = now;
+    // music in the foreground: the atmosphere recedes (−13 dB) and leaves the voice band free
+    const music = !au.paused || !!(radio && !ra.paused); if (music !== S.music){ S.music = music; note(music ? 'musique : l’atmosphère s’efface' : 'musique arrêtée : l’atmosphère revient'); }
+    const vol = SND.amb ? Math.pow(clamp(SND.vol ?? .75, 0, 1), 1.4) * 3.4 : 0, fx = SND.ui !== false;
+    for (let i = ACT.length - 1; i >= 0; i--) if (ACT[i] < now) ACT.splice(i, 1); S.voices = ACT.length;
+    ambOut.gain.setTargetAtTime(S.hidden ? 0 : vol, now, S.hidden ? .15 : .6); ambDuck.gain.setTargetAtTime(music ? .22 : 1, now, music ? .9 : 1.8); ambTone.frequency.setTargetAtTime(music ? 2500 : 16000, now, .8);
+    navBus.gain.setTargetAtTime(fx && !S.hidden ? (music ? .7 : 1) : 0, now, .3);
+    // where are we?
+    let tGal = 0, tPl = null, tK = 0, starK = 0, moons = 0, mp = null, quiet = false;
+    const pv = S.preview && now < S.preview.until ? S.preview : null;
+    if (pv){ tGal = pv.gal ? 1 : 0; tPl = pv.type == null ? null : pv.type; tK = tPl == null ? 0 : 1; starK = pv.star || 0; moons = pv.moons || 0; }
+    else { S.preview = null;
+      if (mode === 'galaxy' || !VIEW) tGal = 1;
+      else if (mode === 'splash'){ tGal = 1; quiet = true; }
+      else { const dS = Math.hypot(EYE[0], EYE[1], EYE[2]); starK = clamp(1 - dS / (starR(VIEW) * 16), 0, 1); let bp = null, bd = 1e9;
+        VIEW.planets.forEach((p, i) => { const q = planetPos(p, i), d = Math.hypot(EYE[0] - q[0], EYE[1] - q[1], EYE[2] - q[2]) / bodyR(p); if (d < bd){ bd = d; bp = p; } });
+        if (focus){ const fp = VIEW.planets.find(x => x.id === focus); if (fp){ bp = fp; bd = Math.min(bd, mode === 'planet' ? 2 : 6); } }
+        const k = bp ? clamp(1 - (bd - 3) / 16, 0, 1) : 0;
+        if (bp && (k > .2 || mode === 'planet')){ tPl = clamp(Math.round(bp.type || 0), 0, 11); tK = mode === 'planet' ? 1 : k; mp = bp; moons = (mode === 'planet' || focus === bp.id || k > .6) ? (bp.moons || 0) : 0; }
+        if (mode === 'planet') starK *= .35; } }
+    const a = 1 - Math.exp(-step / 1.4); W.gal += (tGal - W.gal) * a;
+    let sumT = 0; for (let i = 0; i < 12; i++){ const tg = i === tPl ? tK : 0; W.t[i] += (tg - W.t[i]) * (tg > W.t[i] ? a * .8 : a); sumT += W.t[i]; }
+    W.star += (starK - W.star) * (1 - Math.exp(-step / .9));
+    let P = blend(SYSP, DEEP, W.gal);
+    if (sumT > .001){ let T = null, acc = 0; for (let i = 0; i < 12; i++) if (W.t[i] > .001){ acc += W.t[i]; T = T ? blend(T, TYP[i], W.t[i] / acc) : TYP[i]; } P = blend(P, T, Math.min(1, sumT)); }
+    // breathing: slow swells and near-silences, never a flat bed
+    const tt = now - bornT;
+    if (now > S.calmNext){ S.calmUntil = now + rr(9, 16); S.calmNext = now + rr(70, 130); note('respiration'); }
+    const calm = now < S.calmUntil, B = (.3 + .7 * Math.pow(sm(tt * 2.2, 1.3), 1.3)) * (calm ? .25 : 1) * (quiet ? .5 : 1), tc = calm ? 2.4 : 1.2; S.breath = B;
+    const gust = .25 + .75 * Math.pow(sm(tt * 2.3, 4.1), 1.5), gust2 = .25 + .75 * Math.pow(sm(tt * 2.1, 7.7), 1.5);
+    set(L.lowL.g.gain, P.lowG * B * (.8 + .2 * sm(tt * 1.7, 2)), tc); set(L.lowR.g.gain, P.lowG * B * (.8 + .2 * sm(tt * 1.7, 5)), tc);
+    set(L.lowL.fl.frequency, P.lowF * (.8 + .45 * sm(tt * 1.1, 3.3)), 2); set(L.lowR.fl.frequency, P.lowF * (.8 + .45 * sm(tt * 1.2, 6.6)), 2);
+    set(L.airL.g.gain, P.airG * B * gust, tc * .7); set(L.airR.g.gain, P.airG * B * gust2, tc * .7);
+    set(L.airL.fl.frequency, P.airF * (.7 + .6 * sm(tt * 1.6, 8.2)), 1.2); set(L.airR.fl.frequency, P.airF * 1.07 * (.7 + .6 * sm(tt * 1.5, 9.9)), 1.2);
+    set(L.airL.fl.Q, P.airQ, 1); set(L.airR.fl.Q, P.airQ, 1);
+    setPan(L.airL.p, -(.2 + .7 * P.airW * sm(tt * 1.2, 11)), now, 1.2); setPan(L.airR.p, .2 + .7 * P.airW * sm(tt * 1.3, 13), now, 1.2);
+    set(L.high.g.gain, P.highG * B * (.3 + .7 * sm(tt * 2.7, 14)), tc); set(L.high.fl.frequency, P.highF * (.85 + .3 * sm(tt * 1.9, 15)), 1.5); setPan(L.high.p, Math.sin(tt * .05) * .6, now, 1);
+    set(L.howl.g.gain, P.howlG * B * Math.pow(sm(tt * 2.6, 16), 2), tc); set(L.howl.fl.frequency, P.howlF0 + (P.howlF1 - P.howlF0) * sm(tt * 3.1, 17), 1.4); setPan(L.howl.p, Math.sin(tt * .07 + 1) * .7, now, 1);
+    // the star: plasma that grows into power as you approach it
+    const sk = W.star * (1 - W.gal), cls = starClass(), cm = [.7, .8, 1, 1.2, 1.4, 1.6][cls]; S.star = Math.round(sk * 100);
+    const roar = mode === 'galaxy' && !pv ? 0 : (.0065 + .115 * Math.pow(sk, 1.4)) * (1 - W.gal) * Math.pow(B, .3), cor = Math.pow(sk, 2.4) * .36 * Math.pow(B, .3);
+    set(L.roar.g.gain, roar, .6); set(L.roarD1.gain, roar * .25, .6); set(L.roarD2.gain, roar * .12 * sk, .6); set(L.roar.fl.frequency, (110 + 1400 * Math.pow(sk, 1.5)) * cm, .6);
+    set(L.corona.g.gain, cor, .5); set(L.corD.gain, cor * .45, .5); set(L.corona.fl.frequency, 1500 * cm * (.85 + .3 * sm(tt * 4, 18)), .5);
+    const sub = (Math.pow(sk, 2) * .05 + P.subG * B) * [.7, .8, 1, 1.1, 1.3, 1.5][cls]; set(L.sub.gain, sub, .8); set(L.subD.gain, sub * .5, .8); set(L.subO.frequency, [38, 36, 34, 32, 30, 28][cls], 2);
+    try { const v = toView([-EYE[0], -EYE[1], -EYE[2]]), l = Math.hypot(v[0], v[1], v[2]) || 1; setPan(L.roar.p, v[0] / l * .8, now, .2); setPan(L.corona.p, v[0] / l * .9, now, .2); } catch(e){}
+    if (sk > .35 && now > S.flareT && SND.amb){ S.flareT = now + rr(22, 40); EV.flare(now + .05, EVV.flare * sk, 0); note('éruption stellaire'); }
+    if (sk > .2 && SND.amb && Math.random() < 1.6 * sk * sk * step && S.voices < 36) EV.crackle(now + .02, EVV.crackle * sk, rr(-.5, .5));
+    // speed has a sound
+    const sp = camSpeed, kv = clamp(sp * .45 - .12, 0, 1);
+    set(L.tvA.g.gain, kv * kv * .3, .12); set(L.tvA.fl.frequency, 300 + sp * 600 * (camAppr > 0 ? 1.25 : .8), .15); set(L.tvB.g.gain, Math.pow(kv, 1.5) * .07, .15); set(L.tvB.fl.frequency, 70 + sp * 110, .2);
+    // moons: crystalline grains where the moons are
+    S.moons = moons;
+    if (moons && SND.amb && now > (S.moonT || 0)){ S.moonT = now + rr(1.8, 5) / Math.sqrt(moons); const mi = Math.floor(Math.random() * moons); let pan = Math.sin(tt * .3 + mi * 2.1) * .8;
+      try { if (mp){ const i = VIEW.planets.indexOf(mp), pos = planetPos(mp, i), R = bodyR(mp), mr = R * (1.9 + mi * .7 + (mp.ring ? 1.1 : 0)), ma = time * .8 * Math.pow(R * 1.9 / mr, 1.5) + mp.seed + mi * 2.1;
+          const v = toView([pos[0] + Math.cos(ma) * mr - EYE[0], pos[1] - EYE[1], pos[2] + Math.sin(ma) * mr - EYE[2]]), l = Math.hypot(v[0], v[1], v[2]) || 1; pan = v[0] / l; } } catch(e){}
+      if (!music || Math.random() < .5) EV.glint(now + .05, EVV.glint * (music ? .6 : 1), clamp(pan, -1, 1), null, ri(2, 5)); }
+    // sparse events, far away
+    if (SND.amb){ const mul = (music ? .4 : 1) * (calm ? .2 : 1) * (quiet ? .3 : 1);
+      for (const k in P.ev){ const r = P.ev[k] * mul; if (r > 0 && Math.random() < r * step && S.voices < 36 && EV[k]){ try { EV[k](now + rr(.02, .1), EVV[k] * rr(.6, 1), rr(-.9, .9)); } catch(e){ fail('événement ' + k, e); } } } }
+    // what the diagnostic shows
+    let dom = -1, dw = .3; for (let i = 0; i < 12; i++) if (W.t[i] > dw){ dw = W.t[i]; dom = i; }
+    S.ident = pv ? 'aperçu · ' + (pv.gal ? DEEP.label : pv.type != null ? TYPES[pv.type].name + ' · ' + TYP[pv.type].label : 'étoile · plasma') : W.gal > .5 ? DEEP.label : dom >= 0 ? ((mp && mp.type === dom ? mp.name + ' · ' : '') + TYPES[dom].name.toLowerCase() + ' · ' + TYP[dom].label) : ((VIEW && VIEW.name) || 'système') + ' · ' + STARS[cls][0].toLowerCase() + (sk > .3 ? ' · plasma' : '');
+    S.scene = pv ? 'aperçu' : mode === 'planet' ? 'planète' : mode === 'galaxy' ? 'galaxie' : mode === 'splash' ? 'accueil' : focus ? 'système · approche' : 'système';
+    try { meter.getFloatTimeDomainData(mbuf); let s = 0; for (let i = 0; i < mbuf.length; i++) s += mbuf[i] * mbuf[i]; S.level = 10 * Math.log10(s / mbuf.length + 1e-12); } catch(e){}
   }
   /* ---------- navigation events (called by the real navigation functions) ---------- */
   const PRI = {jump: 5, system: 5, galaxy: 4, land: 4, liftoff: 3, approach: 2, depart: 2, lock: 1, zone: 1};
   function nav(kind, o = {}){
-    if (!S.ok || !c || (c.state !== 'running' && !S.offline) || !SND.amb) return; const now = c.currentTime;
+    if (!S.ok || !c || (c.state !== 'running' && !S.offline) || SND.ui === false || !TR[kind]) return; const now = c.currentTime;
     if (now - lastNavT < .6 && (PRI[kind] || 0) <= (PRI[lastNav] || 0)) return; lastNav = kind; lastNavT = now;
-    try {
-      const t = now + .03;
-      if (kind === 'approach' || kind === 'land'){ const p = o.p || (VIEW && VIEW.planets.find(x => x.id === o.id)); if (!p) return; const id = identity('planet', p);
-        navTone(t, mtof(48 + pc(id.tonic)), mtof(43 + pc(id.tonic)), kind === 'land' ? 1.3 : .9, kind === 'land' ? .05 : .035, .5, -.3, 4);
-        if (kind === 'land') bloom(id, t + .9, .07); else swell(id, t + .25, .026); note((kind === 'land' ? 'arrivée sur ' : 'approche de ') + p.name); }
-      else if (kind === 'depart' || kind === 'liftoff'){ const id = mainI ? mainI.id : identity('system'); navTone(t, mtof(43 + pc(id.tonic)), mtof(55 + pc(id.tonic)), kind === 'liftoff' ? 1.1 : .8, .04, -.4, .5, 3.5); note(kind === 'liftoff' ? 'décollage' : 'départ'); }
-      else if (kind === 'galaxy'){ const id = identity('deep'); navTone(t, mtof(41 + pc(id.tonic)), mtof(60 + pc(id.tonic)), 1.8, .055, -.7, .7, 2.5); swell(id, t + 1.2, .022); note('traversée vers la galaxie'); }
-      else if (kind === 'jump'){ const id = identity('deep'); navTone(t, mtof(38 + pc(id.tonic)), mtof(64 + pc(id.tonic)), 1.1, .06, -.9, .9, 2.2); note('saut hyperspatial'); }
-      else if (kind === 'system'){ setTimeout(() => { try { const id = identity('system'); bloom(id, c.currentTime + .05, .075); note('arrivée · ' + ((VIEW && VIEW.name) || 'système')); } catch(e){} }, 120); }
-      else if (kind === 'lock'){ const s = o.s; const k = s ? [2, 4, 5, 7, 9, 0][Math.floor(hashStr(String(o.oid || s.name || '')) * 6) % 6] : 2; [0, 7, 16].forEach((iv, i) => spark({out: navBus, send: revIn}, 'chime', mtof(72 + k + iv), t + i * .07, .05 - i * .012, -.4 + i * .4, .9)); }
-      else if (kind === 'zone' && mainI){ const id = mainI.id; spark(mainI, 'bell', mtof(scaleNote(id, (o.i || 0) * 2, 5)), t, .07, rr(-.4, .4), .8); }
+    try { const t = now + .03;
+      if (kind === 'system') setTimeout(() => { try { TR.system(c.currentTime + .05, NV.system); note('arrivée · ' + ((VIEW && VIEW.name) || 'système')); } catch(e){} }, 120);
+      else { TR[kind](t, NV[kind]); const p = o.p || (o.id && VIEW && VIEW.planets.find(x => x.id === o.id));
+        note({approach: 'approche', land: 'atterrissage', liftoff: 'décollage', depart: 'départ', galaxy: 'traversée vers la galaxie', jump: 'saut hyperspatial', lock: 'cible verrouillée', zone: 'zone'}[kind] + (p ? ' · ' + p.name : '')); }
     } catch(e){ fail('navigation', e); }
   }
+  /* planets and moons crossing the camera */
+  function pass(kind, m, a, sp, px, dir){ if (!S.ok || !c || SND.ui === false) return; const t = c.currentTime + .01;
+    try { if (kind === 'moon'){ const d = clamp(.8 / sp, .6, 2.2), v = clamp(m * 4, .25, .6) * 1.7, o = vout(v, px - dir * .6, .9, t + d, navBus); panRamp(o.p, px - dir * .6, px + dir * .8, t, d);
+        nzs(t, o.g, NB.white, 'bandpass', 7000, 4200, 2600, 2.5, d, .45, 1); EV.glint(t + d * .25, v * .7, clamp(px, -1, 1), navBus, 3); }
+      else { const d = clamp(.5 / sp, .35, 1.8), v = 3.2 * clamp(.16 + m * 1.2, .16, .45) * (.6 + clamp(a * 3, 0, 1)), o = vout(v, px - dir * .6, .3, t + d * 1.2, navBus); panRamp(o.p, px - dir * .6, px + dir * .8, t, d);
+        nzs(t, o.g, NB.pink, 'bandpass', clamp(900 + sp * 900, 400, 3200), clamp(1200 + sp * 900, 600, 3600), clamp(400 + sp * 300, 200, 1400), 1.6, d, .45, 1);
+        if (a > .08) nzs(t, o.g, NB.brown, 'lowpass', 300, 160, 60, .6, d * 1.1, .5, clamp(a * 4, .3, 1.4)); } } catch(e){ fail('passage', e); } }
   function preview(kind){
     if (!S.ok) return; const now = c.currentTime, ps = (VIEW && VIEW.planets) || [], p = ps.find(x => x.id === focus) || ps.find(x => x.moons) || ps[0];
-    if (kind === 'planet' && p) S.preview = {id: identity('planet', p), until: now + 12, star: 0, moons: 0};
-    else if (kind === 'star') S.preview = {id: identity('system'), until: now + 12, star: 1, moons: 0};
-    else if (kind === 'moon' && p) S.preview = {id: identity('planet', p), until: now + 12, star: 0, moons: 3};
-    else if (kind === 'deep') S.preview = {id: identity('deep'), until: now + 12, star: 0, moons: 0};
-    else if (kind === 'travel'){ const id = identity('system'); navTone(now + .05, mtof(43 + pc(id.tonic)), mtof(60 + pc(id.tonic)), 1.6, .06, -.8, .8, 2.6); setTimeout(() => { try { bloom(identity('system'), c.currentTime + .05, .075); } catch(e){} }, 1500); }
-    note('aperçu : ' + kind); if (kind === 'star' && S.preview) S.preview.starForce = true;
-  }
+    if (kind === 'planet') S.preview = {type: p ? p.type : 1, until: now + 12, star: 0, moons: 0};
+    else if (kind === 'star') S.preview = {type: null, until: now + 12, star: 1, moons: 0};
+    else if (kind === 'moon') S.preview = {type: p ? p.type : 3, until: now + 12, star: 0, moons: 3};
+    else if (kind === 'deep') S.preview = {gal: true, until: now + 12, star: 0, moons: 0};
+    else if (kind === 'travel'){ TR.galaxy(now + .05, NV.galaxy); setTimeout(() => { try { TR.system(c.currentTime + .05, NV.system); } catch(e){} }, 2300); }
+    note('aperçu : ' + kind); }
   function setHidden(h){ S.hidden = h; if (!c) return; if (h){ note('application en arrière-plan'); } else { note('retour au premier plan'); if (c.state !== 'running') c.resume().then(() => note('son réactivé'), () => note('touchez l’écran pour réactiver le son')); } }
-  return {init, session, kick, update, nav, preview, setHidden, note, fail, S, tonic: () => mainI ? mainI.id.tonic : 2, identityOf: p => identity('planet', p), get ctx(){ return c; }, get master(){ return master; }, get rev(){ return revIn; }, get evIn(){ return ambIn; }};
+  return {init, session, kick, update, nav, pass, preview, setHidden, note, fail, S, EV, TR, EVV, NV, tonic: () => 2, get ctx(){ return c; }, get master(){ return master; }, get rev(){ return revIn; }, get evIn(){ return ambIn; }, get fxIn(){ return navBus; }, get nb(){ return NB; }};
 })();
 
 /* the sound of the place, not a score: colored noise beds shaped like weather + sparse natural events */
@@ -3645,38 +3633,23 @@ function facingBiome(p, q){ const cq = conquest(p); if (!cq.n) return -1; if (HL
   const w = norm([EYE[0] - q[0], EYE[1] - q[1], EYE[2] - q[2]]), bd = ry(p._ang || 0, rz(p.tilt || 0, w)); let best = 0, bi = -1;
   cq.items.forEach(x => { const st = (dot(bd, x.dir) - (1 - 2 * x.share)) / Math.max(2 * x.share, 1e-3); if (st > best){ best = st; bi = x.biome; } }); return bi; }
 const PASS = new Map(); let passBudget = 0, FDT = .016;
-function passTrack(id, x, y, r, kind){ if (!actx || !SND.ab || !SND.amb) return; const pv = PASS.get(id); const P = {x, y, tm: time, last: pv ? pv.last : -9}; PASS.set(id, P);
+function passTrack(id, x, y, r, kind){ if (!actx || !SND.ab || SND.ui === false) return; const pv = PASS.get(id); const P = {x, y, tm: time, last: pv ? pv.last : -9}; PASS.set(id, P);
   if (!pv || time - pv.tm > .2 || FDT <= 0) return; if (x < -r || x > W + r || y < -r || y > H + r) return;
   const sp = Math.hypot(x - pv.x, y - pv.y) / FDT / H, a = r / H, m = a * sp;
   if (kind === 'moon'){ if (m > .006 && sp > .08 && time - P.last > 1.4 && passBudget <= 0){ P.last = time; passBudget = .25; moonPass(m, a, sp, x / W * 2 - 1, Math.sign(x - pv.x) || 1); } return; }
   if (m > .022 && sp > .14 && time - P.last > 1.8 && passBudget <= 0){ P.last = time; passBudget = .35; passBy(m, a, sp, x / W * 2 - 1, Math.sign(x - pv.x) || 1); } }
-function moonPass(m, a, sp, px, dir){ const c = actx, t = c.currentTime + .01, dur = clamp(.8 / sp, .6, 2.4), v = clamp(m * 4, .25, 1) * .05;
-  const out = c.createGain(); let o = out; try { const p = c.createStereoPanner(); p.pan.setValueAtTime(clamp(px - dir * .6, -1, 1), t); p.pan.linearRampToValueAtTime(clamp(px + dir * .8, -1, 1), t + dur); out.connect(p); o = p; } catch(e){}
-  o.connect(SND.ab); const wg = c.createGain(); wg.gain.value = .9; o.connect(wg); wg.connect(SND.arev);
-  const k = PDA.tonic(), sc = [0, 2, 4, 7, 9], n = 5;
-  for (let i = 0; i < n; i++){ const tt = t + i * dur / n * .8, f = 440 * Math.pow(2, (84 + k + sc[(n - 1 - i) % 5] - 69) / 12) * (1 + .025 * (1 - i / n));
-    [[1, 1], [2.76, .4], [5.4, .16]].forEach(([r, vv]) => { const o2 = c.createOscillator(), e = c.createGain(); o2.frequency.value = f * r; e.gain.setValueAtTime(0, tt); e.gain.linearRampToValueAtTime(v * vv, tt + .004); e.gain.exponentialRampToValueAtTime(.0001, tt + 1.4 / r + .35); o2.connect(e); e.connect(out); o2.start(tt); o2.stop(tt + 2); }); } }
-function astSound(dur, side, big){ if (!actx || !SND.ab || !SND.amb) return; const c = actx, t = c.currentTime + .02, out = c.createGain(); let o = out;
+function moonPass(m, a, sp, px, dir){ PDA.pass('moon', m, a, sp, px, dir); }
+function astSound(dur, side, big){ if (!actx || !SND.ab || SND.ui === false) return; const c = actx, t = c.currentTime + .02, out = c.createGain(); let o = out;
   try { const p = c.createPanner(); p.panningModel = PANM; p.distanceModel = 'linear'; p.rolloffFactor = 0; if (p.positionX){ p.positionX.setValueAtTime(-side * 1.4, t); p.positionX.linearRampToValueAtTime(side * 1.4, t + dur);
       p.positionZ.setValueAtTime(-.9, t); p.positionZ.linearRampToValueAtTime(.12, t + dur * .5); p.positionZ.linearRampToValueAtTime(.9, t + dur); p.positionY.setValueAtTime(.2, t); } out.connect(p); o = p; } catch(e){}
-  o.connect(SND.ab); const wg = c.createGain(); wg.gain.value = .5; o.connect(wg); wg.connect(SND.arev); const v = .16 * (.6 + big * .6), pk = dur * .5;
+  o.connect(PDA.fxIn || SND.ab); const wg = c.createGain(); wg.gain.value = .5; o.connect(wg); wg.connect(SND.arev); const v = .16 * (.6 + big * .6), pk = dur * .5;
   const mkN = (buf, type, f0, f1, q, vol) => { const s0 = c.createBufferSource(), fl = c.createBiquadFilter(), g = c.createGain(); s0.buffer = buf; fl.type = type; fl.Q.value = q; fl.frequency.setValueAtTime(f0, t); fl.frequency.exponentialRampToValueAtTime(f1, t + dur);
     g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + pk); g.gain.exponentialRampToValueAtTime(.0001, t + dur); s0.connect(fl); fl.connect(g); g.connect(out); s0.start(t, Math.random() * 3); s0.stop(t + dur + .05); };
   mkN(SND.pink, 'bandpass', 1500, 320, 1.1, v); mkN(SND.brown, 'lowpass', 500, 90, .6, v * 1.6); mkN(SND.noise, 'highpass', 3500, 2200, .5, v * .12);
   const o1 = c.createOscillator(), g1 = c.createGain(), f = 70 - big * 22; o1.type = 'sine'; o1.frequency.setValueAtTime(f * 1.3, t); o1.frequency.exponentialRampToValueAtTime(f * .7, t + dur);
   g1.gain.setValueAtTime(.0001, t); g1.gain.exponentialRampToValueAtTime(v * 1.5, t + pk); g1.gain.exponentialRampToValueAtTime(.0001, t + dur); const tr = c.createOscillator(), tg = c.createGain(); tr.frequency.value = 9 + big * 5; tg.gain.value = v * .5; tr.connect(tg); tg.connect(g1.gain);
   o1.connect(g1); g1.connect(out); [o1, tr].forEach(n => { n.start(t); n.stop(t + dur + .1); }); }
-function passBy(m, a, sp, px, dir){ const c = actx, t = c.currentTime + .01, dur = clamp(.5 / sp, .35, 1.8), v = clamp(m * 2.2, .16, 1) * .1 * (.6 + clamp(a * 3, 0, 1));
-  const out = c.createGain(); let o = out; try { const p = c.createStereoPanner(); p.pan.setValueAtTime(clamp(px - dir * .6, -1, 1), t); p.pan.linearRampToValueAtTime(clamp(px + dir * .8, -1, 1), t + dur); out.connect(p); o = p; } catch(e){}
-  o.connect(SND.ab); const wg = c.createGain(); wg.gain.value = .3; o.connect(wg); wg.connect(SND.arev);
-  const f = 440 * Math.pow(2, (48 + PDA.tonic() - 69) / 12), bp = c.createBiquadFilter(), g = c.createGain(); bp.type = 'bandpass'; bp.Q.value = 2.2;
-  bp.frequency.setValueAtTime(clamp(900 + sp * 900, 400, 3200), t); bp.frequency.exponentialRampToValueAtTime(clamp(400 + sp * 300, 200, 1400), t + dur);
-  g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(v, t + dur * .45); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
-  [1, 1.5, 2.01].forEach(r => { const o2 = c.createOscillator(); o2.type = 'sawtooth'; o2.frequency.setValueAtTime(f * r * 1.06, t); o2.frequency.exponentialRampToValueAtTime(f * r * .94, t + dur); o2.connect(bp); o2.start(t); o2.stop(t + dur + .05); });
-  const s0 = c.createBufferSource(), fl = c.createBiquadFilter(), ga = c.createGain(); s0.buffer = SND.pink; fl.type = 'bandpass'; fl.Q.value = 1; fl.frequency.setValueAtTime(1800, t); fl.frequency.exponentialRampToValueAtTime(700, t + dur); ga.gain.value = .22;
-  s0.connect(fl); fl.connect(ga); ga.connect(g); s0.start(t, Math.random() * 2); s0.stop(t + dur + .05); bp.connect(g); g.connect(out);
-  if (a > .08){ const fb = clamp(70 - a * 60, 32, 70), o2 = c.createOscillator(), g2 = c.createGain(); o2.frequency.setValueAtTime(fb * 1.2, t); o2.frequency.exponentialRampToValueAtTime(fb * .8, t + dur);
-    g2.gain.setValueAtTime(.0001, t); g2.gain.exponentialRampToValueAtTime(v * clamp(a * 4, .3, 1.4), t + dur * .5); g2.gain.exponentialRampToValueAtTime(.0001, t + dur * 1.1); o2.connect(g2); g2.connect(out); o2.start(t); o2.stop(t + dur * 1.2); } }
+function passBy(m, a, sp, px, dir){ PDA.pass('planet', m, a, sp, px, dir); }
 const gustN = x => .55 + .25 * Math.sin(x * .23) + .12 * Math.sin(x * .61 + 1.3) + .08 * Math.sin(x * 1.37 + 2.1);
 function thunder(v){ if (!SND.amb || !SND.ab) return; AMBEV.thunder(actx.currentTime, .12 * v); }
 function ambUpdate(dt){
@@ -3852,6 +3825,7 @@ function updProgress(){ const d = au.duration, c = au.currentTime; const f = d &
 
 /* ================= social: systems, signals, flags ================= */
 let DB = null, pubT = 0, canShare = true, INBOX = [], MYSIG = [];
+let pdPubSig = '', pdPubT = 0, pdStatsT = 0, pdGalUiT = 0, pdGuestT = 0;
 function snapshotLite(){ return {name: SYS.name, user: SYS.user, hue: SYS.hue, level: level(SYS.xp), planets: SYS.planets.map(p => ({terr: p.terr.map(t => ({name: t.name, kind: t.kind, n: t.tracks.length}))}))}; }
 function nowInfo(){ if (au.paused || !Q.length) return null; const t = TRACKS.get(Q[qi]); if (!t) return null; const p = SYS.planets.find(x => x.id === qPlanet);
   return {t: t.title.slice(0, 80), a: (t.artist || '').slice(0, 60), pid: p ? p.id : '', pn: p ? p.name.slice(0, 40) : '', src: t.src && t.src.k !== 'local' ? t.src.k : '', u: t.src && t.src.u ? t.src.u.slice(0, 200) : '', ts: Date.now() - (au.currentTime || 0) * 1000, dur: au.duration || 240}; }
@@ -3871,10 +3845,10 @@ function sanitize(v){ if (!v || !Array.isArray(v.planets)) return null; return {
       atH: num(p.atH, 0, 1, .6), atmo: num(p.atmo, 0, 1, .4), ring: Math.round(num(p.ring, 0, 2, 0)), ringH: num(p.ringH, 0, 1, .6), ringTilt: num(p.ringTilt, -1, 1, .25), ringRoll: num(p.ringRoll, -1, 1, 0),
       moons: Math.round(num(p.moons, 0, 3, 0)), arch: Math.round(num(p.arch, 0, 5, 0)), clouds: num(p.clouds, 0, 1, .4), spin: num(p.spin, 0, 1, .2), tilt: num(p.tilt, -1, 1, .2), seed: num(p.seed, 0, 100, 1), phase: num(p.phase, 0, 7, 0),
       emo: Math.round(num(p.emo, -1, 7, -1)), origin: String(p.origin || '').slice(0, 40), level: Math.round(num(p.level, 1, 99, 1)), xp: num(p.xp, 0, 1e7, 0), path: Array.isArray(p.path) ? p.path.slice(0, 3).map(x => Math.round(num(x, -1, 2, -1))) : [-1, -1, -1], act: num(p.act, 0, 1, 0), terr, tracksRO, tracks: tracksRO.map(() => 0), org: 'manual', auto: false}; })}; }
-function publishSoon(){ clearTimeout(pubT); pubT = setTimeout(async () => { if (!DB || !ME || !canShare || !SYS.name) return;
+function publishSoon(){ clearTimeout(pubT); pubT = setTimeout(async () => { if (authUser && remoteReady){ publishPublicGalaxy(); return; } if (!DB || !ME || !canShare || !SYS.name) return;
   try { await DB.doc('systems/' + ME).set(snapshot()); } catch(e){ if (e && (e.code === 'invalid_argument' || e.code === 'revoked' || e.code === 'not_granted')) canShare = false; } }, 2500); }
 async function pushSignal(item){
-  if(!authUser || guestMode || !sb || !item.to)return false;
+  if(!authUser || guestMode || !sb || !pdUuid(item.to))return false;
   if(item.to===authUser.id)return false;
   const type=['signal','flag','follow','copy','visit'].includes(item.type)?item.type:'signal';
   const payload={...item};delete payload.to;delete payload.from;delete payload.type;delete payload.id;
@@ -3883,7 +3857,7 @@ async function pushSignal(item){
     if(error)throw error;
     MYSIG=[{...item,id:data.id,from:authUser.id,ts:Date.parse(data.created_at)},...MYSIG].slice(0,80);
     if(type!=='visit')addXP(5);return true;
-  }catch(e){console.warn('Transmission non envoyée',e);toast(e?.message?.includes('Connexion') || e?.message?.includes('Maximum') ? e.message : 'Transmission impossible : vérifie la connexion');return false;}
+  }catch(e){console.warn('Transmission non envoyée',e);if(type==='visit')return false;toast(e?.message?.includes('Connexion') || e?.message?.includes('Maximum') ? e.message : 'Transmission impossible : vérifie la connexion');return false;}
 }
 function routeIds(){ const s = new Set(); MYSIG.forEach(x => s.add(x.to)); INBOX.forEach(x => s.add(x.from)); return [...s]; }
 function flagsOn(p, t){ if (readonly) return 0; return INBOX.filter(x => x.type === 'flag' && x.planet === p.id && x.terr === t.id).length; }
@@ -3904,7 +3878,7 @@ function composeSignal(toId, s){
   });
 }
 async function plantFlag(p, t){
-  if (!ownerId) return; if (MYSIG.some(x => x.type === 'flag' && x.to === ownerId && x.planet === p.id && x.terr === t.id)){ toast('Ton pavillon flotte déjà ici.'); return; }
+  if (!ownerId) return; if (guestMode || !authUser){ toast('Connecte-toi pour planter un pavillon'); return; } if (!pdUuid(ownerId)){ toast('Les pavillons se plantent chez les autres voyageurs.'); return; } if (MYSIG.some(x => x.type === 'flag' && x.to === ownerId && x.planet === p.id && x.terr === t.id)){ toast('Ton pavillon flotte déjà ici.'); return; }
   const ok = await pushSignal({id: uid(), type: 'flag', to: ownerId, planet: p.id, planetName: p.name, terr: t.id, terrName: t.name, fromName: SYS.user, fromSys: SYS.name, ts: Date.now()});
   if (ok) toast(`Pavillon planté sur ${t.name}. ${VIEW.user || 'Son créateur'} le verra dans ses transmissions.`);
 }
@@ -3914,7 +3888,7 @@ function openInbox(){
   lastSeen = Date.now(); LS.set('planetedot.seen', lastSeen); updBadge();
   const items = [...INBOX].filter(x => x.type !== 'visit').sort((a, b) => b.ts - a.ts).slice(0, 80);
   const when = ts => { const m = Math.round((Date.now() - ts) / 60000); return m < 1 ? 'à l’instant' : m < 60 ? `il y a ${m} min` : m < 1440 ? `il y a ${Math.round(m / 60)} h` : `il y a ${Math.round(m / 1440)} j`; };
-  openSheet('inbox', head('Transmissions', (DB || OTHERS.size) ? 'Signaux et pavillons reçus de la galaxie' : 'La galaxie partagée s’allume quand planèteDot est partagé depuis claude.ai') +
+  openSheet('inbox', head('Transmissions', 'Signaux et pavillons reçus de la galaxie') +
     (items.length ? `<ul class="list">${items.map(x => `<li class="tr" data-from="${esc(x.from)}"><div class="m"><b>${esc(x.fromName || 'Un voyageur')} <span style="color:var(--faint);font-weight:400">· ${esc(x.fromSys || '')}</span></b>
         <span>${x.type === 'flag' ? `a planté un pavillon sur ${esc(x.terrName)} (${esc(x.planetName)})` : x.type === 'copy' ? `a copié ta planète ${esc(x.planetName)}` : x.type === 'follow' ? 'te suit' : esc(x.msg || '')}${x.track ? ` · ${esc(x.track[0])} — ${esc(x.track[1])}${x.track[2] ? ` <span class="src">${srcName(x.track[2])}</span>` : ''}` : ''} · ${when(x.ts)}</span></div>
         <button class="ib" data-go aria-label="Voyager">${ICON.jump}</button></li>`).join('')}</ul>` : `<div class="empty">Aucune transmission pour l’instant. Envoie un signal depuis la galaxie pour lancer la conversation.</div>`), () => {
@@ -3926,9 +3900,10 @@ async function publishPublicGalaxy(){
   if(!sb || !authUser || !remoteReady || !SYS || !SYS.name || publicSyncBusy) return;
   publicSyncBusy=true;
   try{
-    const payload=snapshot();
+    const payload=snapshot(); const sig=JSON.stringify(Object.assign({},payload,{updated:0,now:payload.now?Object.assign({},payload.now,{ts:0}):null}));
+    if(sig===pdPubSig && Date.now()-pdPubT<240000) return;
     const {error}=await sb.from('public_galaxies').upsert({owner_id:authUser.id,display_name:SYS.name.slice(0,40),username:SYS.user.slice(0,30),system:payload,updated_at:new Date().toISOString()},{onConflict:'owner_id'});
-    if(error) console.warn('Publication galaxie:',error.message);
+    if(error) console.warn('Publication galaxie:',error.message); else { pdPubSig=sig; pdPubT=Date.now(); }
   }catch(e){console.warn('Publication galaxie indisponible',e)}
   finally{publicSyncBusy=false;}
 }
@@ -3940,13 +3915,28 @@ async function refreshPublicGalaxies(){
     const next=new Map();
     (data||[]).forEach(row=>{ if(!row || (authUser && row.owner_id===authUser.id)) return; const v=sanitize(row.system); if(v && v.name) next.set(row.owner_id,v); });
     OTHERS=next;
+    if(Date.now()-pdStatsT>25000){pdStatsT=Date.now();loadGalaxyStats();if(!authUser)loadFollowsPublic();}
     if(typeof mode!=='undefined' && mode==='galaxy'){updUI();renderFilters();}
   }catch(e){console.warn('Carte publique non disponible. Applique le SQL fourni.',e);}
 }
+/* V6.1: counts that everyone can see, computed by the server (no personal data) */
+async function loadGalaxyStats(){ if(!sb) return; try{ const {data,error}=await sb.rpc('pd_galaxy_stats'); if(error) throw error; const m=new Map();
+  (data||[]).forEach(r=>{ if(r&&r.owner_id) m.set(r.owner_id,{v:+r.visits||0,u:+r.visitors||0,c:+r.copies||0,fl:+r.flags||0,f:+r.followers||0}); }); COUNTS=m; if(mode==='galaxy') renderGP(); }catch(e){ console.warn('Statistiques des galaxies indisponibles',e); } }
+/* spectators see who follows whom (constellations), the list is public */
+async function loadFollowsPublic(){ if(!sb) return; try{ const {data,error}=await sb.from('galaxy_follows').select('follower_id,followed_id').limit(5000); if(error) throw error; const next=new Map();
+  (data||[]).forEach(x=>{ const ids=next.get(x.follower_id)||[]; ids.push(x.followed_id); next.set(x.follower_id,ids); }); FOLLOWS=next; }catch(e){ console.warn('Suivis publics indisponibles',e); } }
+/* realtime: apply the one galaxy that changed instead of downloading all of them again */
+function pdApplyGalaxyChange(pl){ try{ const row=pl&&pl.new&&pl.new.owner_id?pl.new:null, old=pl&&pl.old;
+    if(pl&&pl.eventType==='DELETE'){ if(old&&old.owner_id) OTHERS.delete(old.owner_id); }
+    else if(row&&row.system){ if(authUser&&row.owner_id===authUser.id) return; const v=sanitize(row.system); if(v&&v.name) OTHERS.set(row.owner_id,v);
+      if(readonly&&ownerId===row.owner_id&&VIEW&&VIEW!==SYS&&v){ VIEW.now=v.now; VIEW.secs=v.secs; VIEW.level=v.level; } }
+    else { refreshPublicGalaxies(); return; }
+    if(mode==='galaxy'){ clearTimeout(pdGalUiT); pdGalUiT=setTimeout(()=>{ updUI(); renderFilters(); renderGP(); },400); }
+  }catch(e){ console.warn('Temps réel galaxie',e); } }
 function startPublicRealtime(){
   if(!sb || !authUser || publicChannel) return;
   setInterval(()=>{ if(authUser){ refreshPublicGalaxies();loadSocialMemory(); } },45000);
-  publicChannel=sb.channel('planetedot-public-galaxies').on('postgres_changes',{event:'*',schema:'public',table:'public_galaxies'},()=>refreshPublicGalaxies()).subscribe();
+  publicChannel=sb.channel('planetedot-public-galaxies').on('postgres_changes',{event:'*',schema:'public',table:'public_galaxies'},payload=>pdApplyGalaxyChange(payload)).subscribe();
 }
 
 
@@ -4156,6 +4146,8 @@ addEventListener('keydown', e => { if (e.key === 'Escape' && sheetOpen) closeShe
 /* V5: publication explicite de fichiers audio, sans publication automatique des imports.
    Les objets privés restent exclusivement dans le bucket privé; le bucket partagé est public. */
 const PD_REMOTE={rows:[],owner:null};
+/* V6.1: only real accounts are queried (the official album galaxy « guillaumdot » is not an account: it caused HTTP 400 every 6 s) */
+function pdUuid(v){ return typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v); }
 async function pdPublishPlanetAudio(p){
   if(!sb || !authUser || !p || p.isPublic===false){toast('Connexion et planète publique nécessaires');return;}
   let ok=0,fail=0;
@@ -4189,17 +4181,17 @@ async function pdRevokePlanet(p){
 }
 async function pdPlayRemotePlanet(p,index=0){
   if(!p || p.isPublic===false){toast('🔒 Audio privé');return;}
-  if(!ownerId || !sb){toast('Audio distant indisponible');return;}
+  if(!pdUuid(ownerId) || !sb){toast('Audio distant indisponible');return;}
   try{
     const {data,error}=await sb.from('shared_tracks').select('track_id,title,artist,audio_path').eq('owner_id',ownerId).limit(300);
     if(error)throw error;
     const rows=(p.tracksRO||[]).map(x=>(data||[]).find(t=>t.title===x[0]&&t.artist===(x[1]||''))).filter(Boolean);
-    if(!rows.length){toast('Aucun fichier audio public publié pour cette planète');return;}
+    if(!rows.length){toast((VIEW&&VIEW.user?VIEW.user:'Ce voyageur')+' n’a pas encore partagé l’audio de cette planète',4500);return;}
     pdRemoteStart(rows,Math.min(index,rows.length-1),ownerId,p.name);
   }catch(e){console.warn(e);toast('Écoute publique indisponible');}
 }
 async function pdPlayRemoteGalaxy(){
-  if(!ownerId||!sb)return;
+  if(!pdUuid(ownerId)||!sb)return;
   const ps=VIEW.planets.filter(p=>p.isPublic!==false);
   try{
     const {data,error}=await sb.from('shared_tracks').select('track_id,title,artist,audio_path').eq('owner_id',ownerId).limit(300);
@@ -4239,7 +4231,7 @@ async function pdLivePublish(force){
   }catch(e){console.warn('Live playback',e)}
 }
 async function pdLivePoll(){
-  if(!sb||!readonly||!ownerId||PDLIVE.fetching)return;
+  if(!sb||!readonly||!pdUuid(ownerId)||PDLIVE.fetching||document.hidden||(mode!=='system'&&mode!=='planet'))return;
   PDLIVE.fetching=true;
   try{
     const {data,error}=await sb.from('pd_live_playback').select('track_id,position_seconds,is_playing,updated_at').eq('owner_id',ownerId).maybeSingle();
@@ -4247,13 +4239,14 @@ async function pdLivePoll(){
     const valid=data?.is_playing&&data.track_id&&Date.now()-new Date(data.updated_at).getTime()<40000;
     const btn=document.getElementById('pd-live-radio');
     if(btn){btn.style.display=valid?'block':'none';btn.textContent=valid?(PDLIVE.owner===ownerId&&PDLIVE.track===data.track_id?'◉ Radio galaxie en cours':'♫ Écouter la radio de cette galaxie'):'♫ Radio inactive';}
+    document.body.classList.toggle('pd-live', !!valid);
     if(!valid){PDLIVE.active=false;return;}
     if(PDLIVE.active&&PDLIVE.owner===ownerId&&PDLIVE.track!==data.track_id)await pdLiveTune(data);
     if(PDLIVE.active&&PDLIVE.owner===ownerId&&PDLIVE.track===data.track_id&&!au.paused&&Math.abs((au.currentTime||0)-Number(data.position_seconds||0))>14){try{au.currentTime=Number(data.position_seconds||0)}catch(e){}}
   }catch(e){console.warn('Radio visite',e)}finally{PDLIVE.fetching=false;}
 }
 async function pdLiveTune(state){
-  if(!sb||!ownerId||!state?.track_id)return;
+  if(!sb||!pdUuid(ownerId)||!state?.track_id)return;
   const owner=ownerId;
   const {data,error}=await sb.from('shared_tracks').select('track_id,title,artist,audio_path').eq('owner_id',owner).eq('track_id',state.track_id).maybeSingle();
   if(error||!data){toast('Cette musique n’est pas partagée publiquement');return;}
@@ -4262,13 +4255,13 @@ async function pdLiveTune(state){
   au.addEventListener('loadedmetadata',function align(){au.removeEventListener('loadedmetadata',align);try{au.currentTime=Math.min(Math.max(0,Number(state.position_seconds||0)),Math.max(0,(au.duration||0)-1))}catch(e){}},{once:true});
 }
 async function pdLiveClick(){
-  if(!readonly||!ownerId)return;
+  if(!readonly||!pdUuid(ownerId))return;
   try{const {data}=await sb.from('pd_live_playback').select('track_id,position_seconds,is_playing,updated_at').eq('owner_id',ownerId).maybeSingle();if(data?.is_playing&&Date.now()-new Date(data.updated_at).getTime()<40000)await pdLiveTune(data);else toast('La galaxie ne diffuse pas actuellement');}catch(e){toast('Radio indisponible')}
 }
 (function(){
   const b=document.createElement('button');b.id='pd-live-radio';b.type='button';b.textContent='♫ Radio galaxie';b.onclick=pdLiveClick;document.body.appendChild(b);
-  const style=document.createElement('style');style.textContent='#pd-live-radio{display:none;position:fixed;bottom:calc(95px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:30;border:1px solid rgba(140,205,255,.5);border-radius:30px;background:rgba(7,22,45,.82);color:#e8f6ff;padding:12px 20px;backdrop-filter:blur(18px);box-shadow:0 0 32px rgba(75,160,245,.22);font:600 13px system-ui;max-width:90vw;white-space:nowrap}';document.head.appendChild(style);
-  setInterval(()=>{if(authUser&&!readonly)pdLivePublish();if(readonly){pdLivePoll()}else{b.style.display='none';PDLIVE.active=false}},6000);
+  const style=document.createElement('style');style.textContent='body.pd-live #radio{display:none!important}body:has(#sheet:not(.off)) #pd-live-radio{opacity:0;pointer-events:none}#pd-live-radio{display:none;position:fixed;bottom:calc(142px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:30;border:1px solid rgba(140,205,255,.5);border-radius:30px;background:rgba(7,22,45,.82);color:#e8f6ff;padding:12px 20px;backdrop-filter:blur(18px);box-shadow:0 0 32px rgba(75,160,245,.22);font:600 13px system-ui;max-width:90vw;white-space:nowrap}';document.head.appendChild(style);
+  setInterval(()=>{if(authUser&&!readonly)pdLivePublish();if(readonly){pdLivePoll()}else{b.style.display='none';PDLIVE.active=false;document.body.classList.remove('pd-live')}},6000);
   au.addEventListener('play',()=>{if(authUser)pdLivePublish()});
   au.addEventListener('pause',()=>{if(authUser)pdLivePublish()});
   au.addEventListener('ended',()=>{if(authUser)pdLivePublish()});
@@ -4284,38 +4277,41 @@ async function pdLiveClick(){
 #pdaPanel button{border:1px solid rgba(160,210,255,.35);background:rgba(120,170,255,.12);color:#e6f2ff;border-radius:14px;padding:7px 10px;font:600 11px system-ui}
 #pdaPanel .meter{flex:1;height:8px;border-radius:5px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:5px}#pdaPanel .meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,#4fc3ff,#9b8cff);transition:width .3s}
 body:has(#sheet:not(.off)) #pd-audio-test{opacity:0;pointer-events:none}
+#pdArrive{position:fixed;left:50%;top:calc(18vh + env(safe-area-inset-top,0px));transform:translate(-50%,-10px);z-index:6;width:min(92vw,440px);text-align:center;pointer-events:none;opacity:0;transition:opacity .9s ease,transform 1.2s cubic-bezier(.2,.7,.2,1);color:#eef6ff;text-shadow:0 2px 22px rgba(0,0,0,.75)}
+#pdArrive.on{opacity:1;transform:translate(-50%,0)}#pdArrive small{display:block;font:600 10px/1.4 system-ui;letter-spacing:.26em;text-transform:uppercase;color:#9fd0ff}
+#pdArrive b{display:block;font:600 25px/1.2 system-ui;margin:7px 0 5px;letter-spacing:.01em}#pdArrive span{display:block;font:12.5px/1.45 system-ui;color:#c8dcf5}
 #pdaPanel ol{margin:6px 0 0;padding-left:16px;color:#b8cde8;font-size:11px}#pdaPanel .x{border:0;background:none;font-size:18px;padding:0 4px}`;
   document.head.appendChild(css);
   const b = document.createElement('button'); b.id = 'pd-audio-test'; b.type = 'button'; b.textContent = '♫ Tester le son';
   const P = document.createElement('div'); P.id = 'pdaPanel'; P.hidden = true; P.setAttribute('role', 'dialog'); P.setAttribute('aria-label', 'Diagnostic du son');
-  P.innerHTML = `<h4>Son · diagnostic V6 <button class="x" type="button" aria-label="Fermer">✕</button></h4><div id="pdaRows"></div>
+  P.innerHTML = `<h4>Son · diagnostic V6.1 <button class="x" type="button" aria-label="Fermer">✕</button></h4><div id="pdaRows"></div>
     <div class="row"><span class="k" style="min-width:auto">Écouter :</span><button data-p="planet">Planète</button><button data-p="star">Étoile</button><button data-p="moon">Lunes</button><button data-p="travel">Voyage</button><button data-p="deep">Espace</button></div>
     <div class="row"><button data-a="wake">Réactiver le son</button><button data-a="copy">Copier le rapport</button></div><ol id="pdaLog"></ol>`;
   document.body.appendChild(b); document.body.appendChild(P);
   const S = PDA.S; let timer = 0;
   const yes = (v, a, n) => v ? `<b class="ok">${a}</b>` : `<b class="bad">${n}</b>`;
-  function report(){ const c = actx; return {version: '6.0', date: new Date().toISOString(), ua: navigator.userAgent, contexte: c ? c.state : 'absent', frequence: c ? c.sampleRate : 0, session: S.session, moteurs: S.contexts,
+  function report(){ const c = actx; return {version: '6.1', respiration: Math.round((S.breath || 0) * 100) / 100, date: new Date().toISOString(), ua: navigator.userAgent, contexte: c ? c.state : 'absent', frequence: c ? c.sampleRate : 0, session: S.session, moteurs: S.contexts,
     scene: S.scene, ambiance: S.ident, etoile: S.star, lunes: S.moons, musique: S.music, niveau_db: Math.round(S.level), voix: S.voices, reglages: {ambiance: SND.amb, interface: SND.ui, volume: SND.vol}, erreur: S.err || null, journal: S.log.slice(0, 12)}; }
   function draw(){ const c = actx, st = c ? c.state : 'absent', lv = clamp((S.level + 70) / 55, 0, 1);
     $('#pdaRows').innerHTML = `
       <div class="r"><span class="k">Contexte audio</span>${yes(st === 'running', 'actif', st === 'absent' ? 'pas encore créé · touche l’écran' : st)}${c ? ` · ${c.sampleRate} Hz` : ''}</div>
-      <div class="r"><span class="k">Session iPhone</span><b>${S.session === 'playback' ? 'lecture (le bouton silencieux n’éteint pas l’ambiance)' : S.session}</b></div>
+      <div class="r"><span class="k">Session iPhone</span><b>${S.session === 'playback' ? 'lecture (le bouton silencieux n’éteint pas l’atmosphère)' : S.session}</b></div>
       <div class="r"><span class="k">Moteur</span><b>${S.contexts} contexte${S.contexts > 1 ? 's' : ''} · ${S.voices} voix</b></div>
       <div class="r"><span class="k">Scène</span><b>${S.scene}</b></div>
-      <div class="r"><span class="k">Ambiance</span><b>${S.ident || '—'}</b></div>
+      <div class="r"><span class="k">Atmosphère</span><b>${S.ident || '—'}</b></div>
       <div class="r"><span class="k">Étoile · lunes</span><b>${S.star} % · ${S.moons}</b></div>
-      <div class="r"><span class="k">Musique</span><b>${S.music ? 'en lecture · ambiance atténuée' : 'à l’arrêt'}</b></div>
-      <div class="r"><span class="k">Réglages</span><b>ambiance ${SND.amb ? 'ON' : 'OFF'} · interface ${SND.ui ? 'ON' : 'OFF'} · ${Math.round((SND.vol ?? .75) * 100)} %</b></div>
+      <div class="r"><span class="k">Musique</span><b>${S.music ? 'en lecture · atmosphère atténuée' : 'à l’arrêt'}</b></div>
+      <div class="r"><span class="k">Réglages</span><b>atmosphère ${SND.amb ? 'ON' : 'OFF'} · effets ${SND.ui ? 'ON' : 'OFF'} · ${Math.round((SND.vol ?? .75) * 100)} %</b></div>
       <div class="r"><span class="k">Niveau</span><span class="meter"><i style="width:${Math.round(lv * 100)}%"></i></span><b>${S.level > -110 ? Math.round(S.level) + ' dB' : '—'}</b></div>
       ${S.err ? `<div class="r"><span class="k">Erreur</span><b class="bad">${esc(S.err)}</b></div>` : ''}
       ${S.session !== 'playback' ? `<div class="r" style="color:#ffd9a0">Rien à l’écoute ? Vérifie le bouton silencieux sur le côté de l’iPhone et le volume.</div>` : ''}`;
     $('#pdaLog').innerHTML = S.log.slice(0, 8).map(x => `<li>${esc(x)}</li>`).join(''); }
   function open(){ unlockAudio(); P.hidden = false; draw(); clearInterval(timer); timer = setInterval(() => { if (P.hidden){ clearInterval(timer); return; } draw(); }, 450); }
-  b.onclick = () => { if (!P.hidden){ P.hidden = true; return; } open(); if (actx && actx.state === 'running'){ if (SND.amb) PDA.preview('travel'); else sfx('confirm'); } };
+  b.onclick = () => { if (!P.hidden){ P.hidden = true; return; } open(); if (actx && actx.state === 'running') PDA.preview('travel'); };
   P.onclick = async e => { const x = e.target.closest('button'); if (!x) return;
     if (x.classList.contains('x')){ P.hidden = true; return; }
     unlockAudio();
-    if (x.dataset.p){ if (!SND.amb){ SND.amb = true; LS.set('pd.amb', true); toast('Ambiance des astres réactivée'); } PDA.preview(x.dataset.p); }
+    if (x.dataset.p){ if (x.dataset.p === 'travel' && SND.ui === false){ SND.ui = true; LS.set('pd.sfx', true); } if (x.dataset.p !== 'travel' && !SND.amb){ SND.amb = true; LS.set('pd.amb', true); toast('Atmosphère spatiale réactivée'); } PDA.preview(x.dataset.p); }
     if (x.dataset.a === 'wake'){ try { if (actx) await actx.resume(); PDA.note('réactivation demandée · ' + (actx ? actx.state : 'absent')); } catch(err){ PDA.fail('réactivation', err); } }
     if (x.dataset.a === 'copy'){ const txt = JSON.stringify(report(), null, 1); try { await navigator.clipboard.writeText(txt); toast('Rapport copié : colle-le dans ta conversation'); }
       catch(err){ const ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); toast('Rapport copié'); } catch(_){ toast('Copie impossible'); } ta.remove(); } }
