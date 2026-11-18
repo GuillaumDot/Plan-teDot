@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#010208">
 <title>planèteDot · ton univers musical</title>
-<meta name="pd-version" content="6.5">
+<meta name="pd-version" content="6.6">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400..700&display=swap" rel="stylesheet">
@@ -2618,8 +2618,8 @@ function renderGalaxy(dt){
   { const box = Math.max(10, cam.dist * .45); for (let k = 0; k < 30; k++){ const h1 = frc(Math.sin(k * 91.7) * 4375.5), h2 = frc(Math.sin(k * 37.3) * 2463.6), h3 = frc(Math.sin(k * 13.9) * 9137.1);
       const q = project([cam.t[0] + ((h1 * box - cam.t[0]) % box + box) % box - box / 2, (h2 - .5) * box * .4, cam.t[2] + ((h3 * box - cam.t[2]) % box + box) % box - box / 2]);
       if (q) bodies.push({w: q.w, kind: 2, x: q.x, y: q.y, r: Math.max(1.3 * RS, pxR(.12, q.w)), q: 1, c1: [.8, .85, 1], atmo: .15, alpha: .35}); } }
-  const core = project([0,0,0]); if (core){ bodies.push({w: core.w, kind: 2, x: core.x, y: core.y, r: pxR(30, core.w), q: 1, c1: [.55, .75, 1.25], atmo: .5, alpha: .78 + bassLvl * .15}); bodies.push({w: core.w + .5, kind: 2, x: core.x, y: core.y, r: Math.min(H * .7, pxR(70, core.w)), q: 1, c1: [.5, .72, 1.2], atmo: .6, alpha: .24 + .04 * Math.sin(time * .7)}); bodies.push({w: core.w + 1, kind: 2, x: core.x, y: core.y, r: Math.min(H * 1.2, pxR(150, core.w)), q: 1, c1: [.42, .62, 1.1], atmo: .7, alpha: .09}); picks.push({x: core.x, y: core.y, r: 40 * RS, w: core.w, act: () => lockSys(GDO, true)}); place(lab('gcore', '<b>GuillaumDot</b>Album PlanèteDot', 'star'), core.x, core.y + Math.max(pxR(10, core.w), 26 * RS) * 1.25 + 6 * RS, 1); }
-  let best = null, bd = 1e9; const cx = W / 2, cy = H / 2;
+  const core = project([0,0,0]); if (core){ bodies.push({w: core.w, kind: 2, x: core.x, y: core.y, r: pxR(30, core.w), q: 1, c1: [.55, .75, 1.25], atmo: .5, alpha: .78 + bassLvl * .15}); bodies.push({w: core.w + .5, kind: 2, x: core.x, y: core.y, r: Math.min(H * .7, pxR(70, core.w)), q: 1, c1: [.5, .72, 1.2], atmo: .6, alpha: .24 + .04 * Math.sin(time * .7)}); bodies.push({w: core.w + 1, kind: 2, x: core.x, y: core.y, r: Math.min(H * 1.2, pxR(150, core.w)), q: 1, c1: [.42, .62, 1.1], atmo: .7, alpha: .09}); picks.push({x: core.x, y: core.y, r: 40 * RS, w: core.w, act: () => lockSys(GDO, true)}); { const on = Math.hypot(core.x - W / 2, core.y - H / 2) < 70 * RS || !!(HOVP && Math.hypot(HOVP[0] - core.x, HOVP[1] - core.y) < 50 * RS) || !!(gLock && gLock.gd), a0 = GLA.get('core') || 0, a1 = lerp(a0, on ? 1 : 0, 1 - Math.exp(-dt * (on ? 8 : 7))); GLA.set('core', a1); place(lab('gcore', '<b>GuillaumDot</b>Album PlanèteDot', 'star'), core.x, core.y + Math.max(pxR(10, core.w), 26 * RS) * 1.25 + 6 * RS, a1 < .03 ? 0 : a1); } }
+  let best = null, bd = 1e9, hov = null; const cx = W / 2, cy = H / 2; const GLP = [];
   galaxyList().forEach(o => {
     const pos = sysPos(o.id), pr = project(pos); if (!pr) return;
     const s = o.s, lv = s.level || 1; const r = pxR(galRadius(o), pr.w);
@@ -2627,10 +2627,14 @@ function renderGalaxy(dt){
     bodies.push({w: pr.w, kind: 6, L: core ? gL(pr, core) : null, sun: LOGO_SUN, sunI: 1 + 1.1 * clamp(1 - Math.hypot(pos[0], pos[2]) / 85, 0, 1) * (1 + bassLvl * .35), x: pr.x, y: pr.y, r, q: 1, c1: hsl(s.hue ?? .58, .7, .65), seed: hashStr(o.id) * 10, roll: hashStr(o.id + 'r') * 3, ringS: clamp(Math.abs(Math.sin(cam.pitch + hashStr(o.id + 't') * .6)), .25, 1), alpha: match ? 1 : .2, hi: locked ? 1 : (o.mine ? .4 : 0)}); galDeco(o, pr, bodies[bodies.length - 1], bodies, true);
     const d = Math.hypot(pr.x - cx, pr.y - cy); if (d < bd && d < 70 * RS){ bd = d; best = o; }
     picks.push({x: pr.x, y: pr.y, r: Math.max(r * 1.5, 26 * RS), w: pr.w, act: () => lockSys(o, true)});
-    { const hov = HOVP && Math.hypot(HOVP[0] - pr.x, HOVP[1] - pr.y) < Math.max(r * 1.6, 34 * RS), aim = !!((gLock && gLock.id === o.id) || hov), a0 = GLA.get(o.id) || 0, a1 = lerp(a0, aim ? 1 : 0, 1 - Math.exp(-dt * (aim ? 7 : 4))); GLA.set(o.id, a1);
-      place(lab('g' + o.id, `<b>${esc(o.mine ? 'Toi' : s.user || s.name || 'Inconnu')}</b>${galTraits(o).join(' · ')}`, match ? '' : 'dim'), pr.x, pr.y + r * 1.5 + 4 * RS, a1 < .02 ? 0 : a1); }
+    if (HOVP && Math.hypot(HOVP[0] - pr.x, HOVP[1] - pr.y) < Math.max(r * 1.6, 34 * RS)) hov = o;
+    GLP.push([o, pr.x, pr.y + r * 1.5 + 4 * RS, `<b>${esc(o.mine ? 'Toi' : s.user || s.name || 'Inconnu')}</b>${galTraits(o).join(' · ')}`, match ? '' : 'dim']);
   });
+  if (hov) best = hov;
+  { const aim = best ? best.id : (gManual && gLock ? gLock.id : null);
+    GLP.forEach(([o, x, y, html, cls]) => { const on = o.id === aim, a0 = GLA.get(o.id) || 0, a1 = lerp(a0, on ? 1 : 0, 1 - Math.exp(-dt * (on ? 8 : 7))); GLA.set(o.id, a1); place(lab('g' + o.id, html, cls), x, y, a1 < .03 ? 0 : a1); }); }
   labsEnd();
+  if (!best && !gManual && gLock){ gLock = null; renderGP(); }   // nothing aimed at: no card
   if (!dragging && best && (!gLock || gLock.id !== best.id) && !gManual) lockSys(best, false);
   bodies.sort((a, b) => b.w - a.w); useSP(); bodies.forEach(drawBody);
   if (core) drawLogo(core.x, core.y, Math.max(pxR(10, core.w), 26 * RS), [time * .2, .45, 0], new Float32Array([core.x - 200 * RS, core.y - 300 * RS, 1, 0, core.x + 300 * RS, core.y + 100 * RS, .6, 0, W / 2, H, .4, 0]), 1);
@@ -2643,6 +2647,7 @@ const TUTO = [
   {t: 'Le logo, ton raccourci', d: 'Il aligne toutes tes playlists pour choisir en un geste.', todo: 'Touche le logo', wait: () => MENU.open, at: () => LOGO_PT, cam: 'logo', ic: '⟲'},
   {t: 'Un logo, un album', d: 'Ce logo est la pochette de « PlanèteDot », l’album de GuillaumDot, sortie le ??/??/2026. Son système brille au cœur de la galaxie : écoute-le, copie sa planète.', todo: 'Écoute un extrait quand tu veux', act: ['Écouter l’album', () => playAlbum(0)], at: () => LOGO_PT, cam: 'logo', ic: '◎'},
   {t: 'Ta musique', d: 'Tes sons vivent ici. Chaque écoute leur fait conquérir un bout de planète.', todo: 'Touche ce bouton', wait: () => sheetOpen && sheetKind === 'library', at: () => rectPt('#bLib'), cam: 'wide', ic: '♪'},
+  {t: 'Ta musique SoundCloud', d: 'Dans le menu d’une planète (touche le logo), le bouton SoundCloud relie ton compte et importe tes playlists. Tu peux aussi coller un lien. Elles s’écoutent dans la planète, et les visiteurs de ta galaxie les entendent aussi.', todo: 'Touche Suivant', at: () => null, cam: 'wide', ic: '☁'},
   {t: 'Écoute = évolution', d: 'Villages, cités, satellites : tes planètes grandissent avec toi. Ton étoile aussi.', todo: 'Écoute, c’est tout', at: () => null, cam: 'wide', ic: '✺'},
   {t: 'Écouter les galaxies', d: 'Les planètes publiques sont ouvertes à tous, même aux spectateurs, lorsque leurs fichiers audio sont accessibles. Les planètes privées affichent leurs titres et territoires mais restent verrouillées : ni écoute ni copie.', todo: 'Touche Suivant', at: () => null, cam: 'wide', ic: '♫'},
   {t: 'Communiquer', d: 'Depuis une galaxie, ouvre le profil d’un voyageur pour lui envoyer un signal. Retrouve les réponses dans Transmissions.', todo: 'Touche Suivant', at: () => null, cam: 'wide', ic: '✉'},
@@ -2768,10 +2773,11 @@ function pdAccount(){
   const nm = SYS.user || 'Ton étoile', em = authUser && authUser.email ? authUser.email : '';
   openSheet('account', `<div class="sh" style="margin:0 0 6px"><div></div><button class="x" data-close aria-label="Fermer">${ICON.x}</button></div>
     <div class="accH"><span class="av">${esc(nm.slice(0, 1).toUpperCase())}</span><div><b>${esc(nm)}</b><span>${esc(em)}</span></div></div>
-    <div class="acc"><button id="aStar"><i>✦</i>Mon étoile et réglages</button><button id="aGuide"><i>?</i>Revoir le guide</button><button id="aSnd"><i>♫</i>Vérifier le son</button><button id="aOut" class="dng"><i>⇥</i>Se déconnecter</button></div>`, () => {
+    <div class="acc"><button id="aStar"><i>✦</i>Mon étoile et réglages</button><button id="aGuide"><i>?</i>Revoir le guide</button><button id="aSc"><i>☁</i>SoundCloud · mes playlists</button><button id="aSnd"><i>♫</i>Vérifier le son</button><button id="aOut" class="dng"><i>⇥</i>Se déconnecter</button></div>`, () => {
     $('#aStar').onclick = () => { closeSheet(true); if (VIEW !== SYS || readonly) goHome(); setTimeout(openStar, VIEW === SYS && !readonly ? 50 : 1500); };
     $('#aGuide').onclick = () => { closeSheet(true); if (VIEW !== SYS || readonly){ goHome(); setTimeout(() => startTuto(true), 1700); } else startTuto(true); };
     $('#aSnd').onclick = () => { closeSheet(true); const t = document.getElementById('pd-audio-test'); if (t) t.click(); };
+    $('#aSc').onclick = async () => { closeSheet(true); const c = await scStatus(); if (c === null){ scErr(new Error('not_configured')); return; } if (c) scImport(null); else scConnect(null); };
     const out = $('#aOut'); out.onclick = () => { if (!out.dataset.c){ out.dataset.c = 1; out.innerHTML = '<i>⇥</i>Touche encore pour confirmer'; return; } closeSheet(true); window.pdLogout && window.pdLogout(); }; }); }
 function pdGuide(){ if (guestMode){ if (tutoI >= 0) endTuto(); startTutoV(); return; } if (VIEW !== SYS || readonly){ goHome(); setTimeout(() => startTuto(true), 1700); } else startTuto(true); }
 (() => { const vv = window.visualViewport; if (!vv) return; let tm = 0;
@@ -3161,7 +3167,7 @@ function openPlaylist(p, fromLib){
   openSheet('scan', `<div class="sh" style="margin:0"><div></div><button class="x" data-close aria-label="Fermer">${ICON.x}</button></div>
     <div class="ph2"><i class="art" style="${artCSS(p)}"></i>${privateView ? '<span class="pd-lock" aria-hidden="true">🔒</span>' : ''}<h2 id="pName" ${ro ? '' : 'title="Renommer"'}>${esc(p.name)}</h2>
       <p>${plural(tr.length, 'titre')}${dur ? ' · ' + fmtLong(dur) : ''}${live ? ' · <span style="color:#4aa3ff">en écoute</span>' : ''}</p>${(() => { const EI = eraInfo(p); if (EI.e >= 6) return '<p class="eran">' + esc(eraName(p)) + ' · ère finale</p><p class="eran" style="opacity:.7">' + EI.counts + '</p>'; return `<div class="erab"><i style="width:${Math.round(EI.pc * 100)}%"></i></div><p class="eran">${esc(eraName(p))} · ${EI.need}</p><p class="eran" style="opacity:.7">${EI.counts}</p>`; })()}</div>
-    <div class="pact2">${ro ? `${p.gd ? `<button class="btn pri" id="sAlb">${ICON.play}Écouter</button>` : ''}<button class="btn${p.gd ? '' : ' pri'}" id="sLand">${ICON.land}Explorer</button>${privateView ? '<span class="chip" aria-label="Planète verrouillée">🔒 Privée · écoute et copie verrouillées</span>' : `<button class="btn" id="sRemote">${ICON.play}Écouter</button><button class="btn" id="sCopy">${ICON.plus}Copier</button>`}`
+    <div class="pact2">${ro ? `${p.gd ? `<button class="btn pri" id="sAlb">${ICON.play}Écouter</button>` : ''}<button class="btn${p.gd ? '' : ' pri'}" id="sLand">${ICON.land}Explorer</button>${privateView ? '<span class="chip" aria-label="Planète verrouillée">🔒 Privée · écoute et copie verrouillées</span>' : `${p.gd ? '' : `<button class="btn" id="sRemote">${ICON.play}Écouter</button>`}<button class="btn" id="sCopy">${ICON.plus}Copier</button>`}`
       : tr.length ? `<button class="btn pri" id="sPlay">${live ? ICON.pauseS + 'Pause' : ICON.play + 'Lecture'}</button><button class="btn" id="sShuf">${ICON.shuf}Aléatoire</button>`
       : `<label class="btn pri">${ICON.file}Importer${imp}</label>`}<button class="icb" id="sMore" aria-label="Plus">⋯</button></div>
     <div class="more off" id="pMore">${ro ? `<button id="sSig">${ICON.signal}Envoyer un signal</button>` : `<label>${ICON.file}Importer de la musique${imp}</label>${TRACKS.size ? `<button id="sAdd">${ICON.plus}Ajouter depuis ma musique</button>` : ''}
@@ -3189,9 +3195,7 @@ function openPlaylist(p, fromLib){
 }
 function openPlayer(){
   const t = TRACKS.get(Q[qi]); if (!t){ openLibrary(); return; } const p = SYS.planets.find(x => x.id === qPlanet);
-  openSheet('player', `<div class="sh" style="margin:0"><div></div><button class="x" data-close aria-label="Fermer">${ICON.x}</button></div>
-    <i class="art npart" style="${p ? artCSS(p, true) : 'background:linear-gradient(160deg,#1b2a4a,#04050a)'}"></i>
-    <div class="nph"><div style="flex:1;overflow:hidden"><h2>${esc(t.title)}</h2><p class="note" style="margin:2px 0 0">${esc(t.artist || 'Artiste inconnu')}${p ? ' · ' + esc(p.name) : ''}${srcTag(t)}</p></div></div>
+  openSheet('player', `<div class="nph"><div style="flex:1;overflow:hidden"><h2>${esc(t.title)}</h2><p class="note" style="margin:2px 0 0">${esc(t.artist || 'Artiste inconnu')}${p ? ' · ' + esc(p.name) : ''}${srcTag(t)}</p></div><button class="x" data-close aria-label="Fermer">${ICON.x}</button></div>
     <input type="range" class="scrub" id="npR" min="0" max="1000" value="0" aria-label="Position"><div class="times"><span id="npC">0:00</span><span id="npD">${fmt(au.duration) || fmt(t.dur)}</span></div>
     <div class="ctrls"><button class="icb${shuf ? ' on' : ''}" id="npS" aria-label="Aléatoire">${ICON.shuf}</button><button class="icb" id="npP" aria-label="Précédent">${ICON.prev}</button>
       <button class="playbig" id="npX" aria-label="Lecture">${au.paused ? ICON.play : ICON.pauseS}</button><button class="icb" id="npN" aria-label="Suivant">${ICON.next}</button><button class="icb" id="npG" aria-label="Voir la planète">${ICON.land}</button></div>
@@ -4568,8 +4572,8 @@ function shareStory(again){ if (STORY || OUTRO) return; const info = storyInfo()
     if ((!inV || (mode !== 'system' && mode !== 'planet')) && SYS.planets.some(p => p.id === info.pid)){ goHome(); setTimeout(() => shareStory(true), 1900); return; } }
   const ok = info.album ? startCine(true) : info.pid ? startCine(true, info.pid) : false;
   const cv2 = document.createElement('canvas'); cv2.width = 720; cv2.height = 1280; cv2.setAttribute('aria-hidden', 'true'); cv2.style.cssText = 'position:fixed;left:-3000px;top:0;width:72px;height:128px;opacity:0;pointer-events:none'; document.body.appendChild(cv2);   // in the page: some browsers only film a canvas that is attached
-  STORY = {cv: cv2, c: cv2.getContext('2d'), info, t0: performance.now(), dur: 7000, chunks: [], rec: null, focus: ok};
-  const ov = document.createElement('div'); ov.id = 'pdRec'; ov.innerHTML = '<div class="pill"><i></i><span>Ta story se prépare…</span><button type="button">Annuler</button></div>'; document.body.appendChild(ov);
+  STORY = {cv: cv2, c: cv2.getContext('2d'), info, t0: performance.now(), dur: 15000, chunks: [], rec: null, focus: ok}; { const S0 = STORY; storyAudio(info).then(bf => { S0.abuf = bf; S0.aready = true; }); }
+  const ov = document.createElement('div'); ov.id = 'pdRec'; ov.innerHTML = '<div class="pill"><i></i><span>Ta story se prépare · 15 s</span><button type="button">Annuler</button></div>'; document.body.appendChild(ov);
   ov.querySelector('button').onclick = () => storyEnd(true); }
 function storyText(c, info){ const g = c.createLinearGradient(0, 760, 0, 1280); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,.78)'); c.fillStyle = g; c.fillRect(0, 760, 720, 520);
   const F = '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", system-ui, sans-serif'; c.textAlign = 'left'; c.textBaseline = 'alphabetic';
@@ -4582,14 +4586,20 @@ function storyTick(){ const S = STORY; if (!S || S.done) return; const el = perf
   const c = S.c, pt = SHOT_PT && time - (SHOT_PT.t || 0) < .6 ? SHOT_PT : {x: W / 2, y: H * .45};
   let sw = W, sh = W * 16 / 9; if (sh > H){ sh = H; sw = H * 9 / 16; } const sx = clamp(pt.x - sw / 2, 0, W - sw), sy = clamp(pt.y - sh * .44, 0, H - sh);
   c.fillStyle = '#000'; c.fillRect(0, 0, 720, 1280); try { c.drawImage(cv, sx, sy, sw, sh, 0, 0, 720, 1280); } catch(e){} storyText(c, S.info); if (S.trk && S.trk.requestFrame) try { S.trk.requestFrame(); } catch(e){}
+  if (!S.started && !S.aready && el < 9000) return;   // the music is being prepared
   if (!S.started){ S.started = performance.now();
-    const mt = ['video/mp4;codecs=avc1.42E01E', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm'].find(m => { try { return window.MediaRecorder && MediaRecorder.isTypeSupported(m); } catch(e){ return false; } }) || '';
-    try { if (!S.cv.captureStream || !window.MediaRecorder) throw 0; const st = S.cv.captureStream(30); S.trk = st.getVideoTracks()[0]; const r = new MediaRecorder(st, mt ? {mimeType: mt, videoBitsPerSecond: 6e6} : {videoBitsPerSecond: 6e6});
+    const mt = (S.abuf ? ['video/mp4;codecs=avc1.42E01E,mp4a.40.2', 'video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'] : ['video/mp4;codecs=avc1.42E01E', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm']).find(m => { try { return window.MediaRecorder && MediaRecorder.isTypeSupported(m); } catch(e){ return false; } }) || '';
+    try { if (!S.cv.captureStream || !window.MediaRecorder) throw 0; let st = S.cv.captureStream(30); S.trk = st.getVideoTracks()[0]; let len = 15;
+      if (S.abuf && actx){ try { const d = actx.createMediaStreamDestination(), src = actx.createBufferSource(), g = actx.createGain(), n = actx.currentTime, du = S.abuf.duration; src.buffer = S.abuf;
+        let a0 = Math.max(0, Math.min(au.currentTime || 0, du - 1)); if (du - a0 < 15) a0 = Math.max(0, du - 15); len = Math.max(1, Math.min(15, du - a0));
+        g.gain.setValueAtTime(0, n); g.gain.linearRampToValueAtTime(1, n + .2); g.gain.setValueAtTime(1, n + Math.max(.3, len - .6)); g.gain.linearRampToValueAtTime(0, n + len);
+        src.connect(g); g.connect(d); src.start(n, a0, len); S.src = src; st = new MediaStream([...st.getVideoTracks(), ...d.stream.getAudioTracks()]); S.withSound = true; } catch(e){ console.warn('Story · musique', e); } }
+      S.dur = len * 1000; const r = new MediaRecorder(st, Object.assign(mt ? {mimeType: mt} : {}, {videoBitsPerSecond: 4e6, audioBitsPerSecond: 160000}));
       S.rec = r; S.mt = (r.mimeType || mt || 'video/mp4').split(';')[0]; r.ondataavailable = e => { if (e.data && e.data.size) S.chunks.push(e.data); }; r.onstop = () => storyEnd(false); r.start(250); }
     catch(e){ S.rec = null; S.done = true; S.cv.toBlob(b => { S.blob = b; S.mt = 'image/png'; storyEnd(false); }, 'image/png'); return; } }
   const p = (performance.now() - S.started) / S.dur, bar = document.querySelector('#pdRec i'); if (bar) bar.style.setProperty('--p', Math.min(1, p).toFixed(3));
   if (p >= 1 && S.rec && S.rec.state === 'recording'){ S.done = true; try { S.rec.stop(); } catch(e){ storyEnd(false); } } }
-function storyEnd(cancel){ const S = STORY; if (!S) return; STORY = null; S.done = true; try { S.cv.remove(); } catch(e){} try { if (S.rec && S.rec.state === 'recording'){ S.rec.onstop = null; S.rec.stop(); } } catch(e){}
+function storyEnd(cancel){ const S = STORY; if (!S) return; STORY = null; S.done = true; try { S.cv.remove(); } catch(e){} try { if (S.src) S.src.stop(); } catch(e){} try { if (S.rec && S.rec.state === 'recording'){ S.rec.onstop = null; S.rec.stop(); } } catch(e){}
   const ov = document.getElementById('pdRec'); if (ov) ov.remove(); if (cine) exitCine(); if (cancel) return;
   const blob = S.blob || (S.chunks.length ? new Blob(S.chunks, {type: S.mt || 'video/mp4'}) : null); if (!blob || !blob.size){ toast('La story n’a pas pu être créée sur cet appareil'); return; }
   const isImg = blob.type.startsWith('image'), ext = isImg ? 'png' : /webm/.test(blob.type) ? 'webm' : 'mp4', url = URL.createObjectURL(blob), file = new File([blob], 'planetedot-story.' + ext, {type: blob.type});
@@ -4597,7 +4607,7 @@ function storyEnd(cancel){ const S = STORY; if (!S) return; STORY = null; S.done
     `${isImg ? `<img class="stv" src="${url}" alt="">` : `<video class="stv" src="${url}" autoplay muted loop playsinline></video>`}
      <div class="row"><button class="btn pri wide" id="stShare">${ICON_SHARE}Partager en story</button></div>
      <div class="row"><button class="btn wide" id="stTxt">Partager en texte</button><a class="btn wide" id="stDl" download="planetedot-story.${ext}" href="${url}">Enregistrer</a></div>
-     <p class="note">Choisis Instagram ou Facebook, puis « Story ».</p>`, () => {
+     <p class="note">${S.withSound ? 'Avec la musique · ' + Math.round(S.dur / 1000) + ' s. ' : S.info.sc ? 'Sans le son : SoundCloud ne laisse pas enregistrer sa musique. ' : 'Sans le son : ce morceau n’a pas pu être lu. '}Choisis Instagram ou Facebook, puis « Story ».</p>`, () => {
       $('#stShare').onclick = async () => { try { if (navigator.canShare && navigator.canShare({files: [file]})){ await navigator.share({files: [file]}); return; } } catch(e){ if (e && e.name === 'AbortError') return; }
         $('#stDl').click(); toast('Vidéo enregistrée : ajoute-la à ta story depuis ta galerie', 5200); };
       $('#stTxt').onclick = shareText; }); }
@@ -4612,10 +4622,15 @@ function scGuess(u){ try { const p = new URL(u).pathname.split('/').filter(Boole
 async function scMeta(u){ const g = scGuess(u); try { const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 5000); const r = await fetch('https://soundcloud.com/oembed?format=json&url=' + encodeURIComponent(u), {signal: ctl.signal}); clearTimeout(tm);
     if (r.ok){ const j = await r.json(); return {t: String(j.title || g.t).replace(/\s+by\s+.+$/i, '').slice(0, 80), a: String(j.author_name || g.a).slice(0, 60)}; } } catch(e){}
   return {t: g.t.slice(0, 80), a: g.a.slice(0, 60)}; }
-function scAdd(p){ openSheet('scadd', head('Ajouter depuis SoundCloud', 'Un son ou une playlist, à écouter dans ' + esc(p.name)) +
-  `<input id="scU" type="url" inputmode="url" autocomplete="off" placeholder="https://soundcloud.com/…" style="width:100%">
-   <div class="row"><button class="btn pri wide" id="scOk">${ICON_SC}Ajouter</button></div><p class="note">Copie le lien depuis l’appli SoundCloud (Partager → Copier le lien). Le son reste sur SoundCloud.</p>`, () => {
-    const inp = $('#scU'); setTimeout(() => { try { inp.focus(); } catch(e){} }, 300);
+function scAdd(p){ openSheet('scadd', head('SoundCloud', 'Tes sons et playlists, à écouter dans ' + esc(p.name)) +
+  `<div class="row"><button class="btn pri wide" id="scAcc" type="button">${ICON_SC}Connecter mon compte SoundCloud</button></div><p class="note" id="scAccN" style="margin:-4px 4px 14px">Connecte ton compte, puis choisis la playlist à importer.</p>
+   <p class="note" style="margin:0 4px 6px">Ou colle le lien d’un son ou d’une playlist :</p>
+   <input id="scU" type="url" inputmode="url" autocomplete="off" placeholder="https://soundcloud.com/…" style="width:100%">
+   <div class="row"><button class="btn wide" id="scOk">${ICON_SC}Ajouter ce lien</button></div><p class="note">Copie le lien depuis l’appli SoundCloud (Partager → Copier le lien). Le son reste sur SoundCloud.</p>`, () => {
+    const inp = $('#scU'); const acc = $('#scAcc'); acc.onclick = () => { if (!authUser){ scErr(new Error('no_account')); return; } if (SCU) scImport(p.id); else scConnect(p.id); };
+    if (authUser) scStatus().then(c => { if (!document.getElementById('scAcc')) return; if (c === null){ acc.disabled = true; acc.innerHTML = ICON_SC + 'Connexion SoundCloud bientôt disponible'; $('#scAccN').textContent = 'En attendant, colle un lien ci-dessous.'; }
+      else if (c){ acc.innerHTML = ICON_SC + 'Importer une de mes playlists'; $('#scAccN').textContent = 'Compte relié : ' + ((SCU && SCU.name) || 'SoundCloud'); } });
+    else { acc.innerHTML = ICON_SC + 'Crée ton compte pour relier SoundCloud'; }
     $('#scOk').onclick = async () => { const u = scUrl(inp.value); if (!u){ toast('Colle un lien SoundCloud (soundcloud.com/…)'); return; } p.links = scLinks(p.links); if (p.links.length >= 12){ toast('12 liens au maximum par planète'); return; }
       if (p.links.some(l => l.u === u)){ toast('Ce lien est déjà sur la planète'); return; } $('#scOk').disabled = true; const m = await scMeta(u); p.links.push({k: 'sc', u, t: m.t, a: m.a});
       save(); try { publishSoon(); } catch(e){} sfx('confirm'); toast('« ' + m.t + ' » ajouté à ' + p.name); closeSheet(true); const i = VIEW.planets.indexOf(p); if (i >= 0) setTimeout(() => { openMenu(); if (MENU.open){ MENU.sel = i; renderMenu(); } }, 300); }; }); }
@@ -4648,6 +4663,61 @@ function cineFocusPlanet(dt){ const c = cine, i = VIEW.planets.findIndex(p => p.
   const lr = conquest(p).items.find(x => x.live); if (lr && lr.dir){ const w = rz(-(p.tilt || 0), ry(-(p._ang || 0), lr.dir)); cam.g.yaw = wrapA(Math.atan2(w[0], w[2]) + Math.sin(c.t * .11) * .12, cam.yaw); cam.g.pitch = clamp(Math.asin(clamp(w[1], -1, 1)) * .75, -.35, .9) + Math.sin(c.t * .08) * .03; }
   else cam.g.yaw += dt * .04; FOV = lerp(FOV, FOV0, 1 - Math.exp(-dt * 1.5)); }
 
+/* ================= V6.6 · stories with the music (15 s), SoundCloud account and playlists ================= */
+// the story's music: decoded from the track itself, sent only into the recording (never twice in the speakers)
+let SBUF = {id: null, buf: null};
+async function storyAudio(info){ if (info.sc || !actx) return null; const t = TRACKS.get(Q[qi]); if (!t) return null;
+  try { if (actx.state !== 'running') await actx.resume().catch(() => {}); if (SBUF.id === t.id && SBUF.buf) return SBUF.buf;
+    let bl = t.blob; if (!bl && t.url) bl = await fetchBlob(t.url); if (!bl){ await ensureBlob(t); bl = t.blob; } if (!bl) return null;
+    const ab = await bl.arrayBuffer(), buf = await new Promise((ok, ko) => { const p = actx.decodeAudioData(ab, ok, ko); if (p && p.then) p.then(ok, ko); });
+    SBUF = {id: t.id, buf}; return buf; } catch(e){ console.warn('Story · son', e); return null; } }
+
+/* ---------- SoundCloud account: connect once, then import your playlists into a planet ---------- */
+const SC_FN = 'soundcloud'; let SCU = null;
+const scRedirect = () => location.origin + location.pathname;
+const b64u = a => btoa(String.fromCharCode(...new Uint8Array(a))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+async function scCall(action, extra){ if (!sb || !sb.functions || !authUser) throw new Error('no_account');
+  const {data, error} = await sb.functions.invoke(SC_FN, {body: Object.assign({action}, extra || {})});
+  if (error){ let code = 'down'; try { const j = error.context && await error.context.json(); if (j && j.error) code = j.error; } catch(_){} throw new Error(code); }
+  if (data && data.error) throw new Error(data.error); return data; }
+function scErr(e){ const m = e && e.message;
+  toast(m === 'no_account' ? 'Connecte-toi à ton compte PlanèteDot pour relier SoundCloud'
+    : m === 'not_configured' ? 'La connexion SoundCloud n’est pas encore activée sur PlanèteDot. En attendant, colle un lien.'
+    : m === 'not_connected' ? 'Relie d’abord ton compte SoundCloud' : 'SoundCloud ne répond pas pour le moment, réessaie plus tard', 5200); }
+async function scConnect(pid){ if (!authUser){ scErr(new Error('no_account')); return; }
+  try { const v = b64u(crypto.getRandomValues(new Uint8Array(48))), st = b64u(crypto.getRandomValues(new Uint8Array(18))), ch = b64u(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(v)));
+    const d = await scCall('authurl', {challenge: ch, state: st, redirect: scRedirect()}); if (!d || !d.url) throw new Error('down');
+    LS.set('pd.scAuth', {v, st, pid: pid || null, t: Date.now()}); toast('Direction SoundCloud…', 2500); setTimeout(() => location.assign(d.url), 300); }
+  catch(e){ scErr(e); } }
+// back from SoundCloud: the code becomes a connection (on the server), then your playlists are offered
+async function scCallback(){ const q = new URLSearchParams(location.search), st = q.get('state'); if (!st || (!q.get('code') && !q.get('error'))) return;
+  const a = LS.get('pd.scAuth'); if (!a || a.st !== st) return; LS.set('pd.scAuth', null); try { history.replaceState(null, '', location.pathname); } catch(e){}
+  const after = f => { const go = () => { if (INTRO.on || OUTRO || warpT >= 0 || mode === 'splash'){ setTimeout(go, 700); return; } f(); }; go(); };
+  if (q.get('error')){ after(() => toast('Connexion SoundCloud annulée')); return; }
+  if (!authUser){ after(() => toast('Reconnecte-toi, puis relie SoundCloud à nouveau')); return; }
+  try { const d = await scCall('token', {code: q.get('code'), verifier: a.v, redirect: scRedirect()}); SCU = d.user || null;
+    after(() => { toast('SoundCloud connecté' + (SCU && SCU.name ? ' : ' + SCU.name : ' ✦'), 3500); setTimeout(() => scImport(a.pid), 700); }); }
+  catch(e){ after(() => scErr(e)); } }
+async function scStatus(){ try { const d = await scCall('status'); SCU = d.connected ? d.user : null; return !!d.connected; } catch(e){ return e && e.message === 'not_configured' ? null : false; } }
+function scImport(pid){ const p0 = pid ? SYS.planets.find(x => x.id === pid) : null;
+  openSheet('scimp', head('Tes playlists SoundCloud', SCU && SCU.name ? 'Compte : ' + esc(SCU.name) : '') + '<div class="empty" id="scL">Chargement de tes playlists…</div>', async () => {
+    try { const d = await scCall('playlists'); if (d.user && d.user.name) SCU = Object.assign({}, SCU, {name: d.user.name});
+      const L = (d.playlists || []).slice(); if (d.tracks && d.tracksUrl) L.push({title: 'Mes sons', url: d.tracksUrl, n: d.tracks, mine: true});
+      const el = document.getElementById('scL'); if (!el) return;
+      if (!L.length){ el.textContent = 'Aucune playlist sur ce compte SoundCloud.'; return; }
+      el.outerHTML = `<ul class="list" id="scL">${L.map((x, i) => `<li class="tr" data-i="${i}"><span class="n">${ICON_SC}</span><div class="m"><b>${esc(x.title)}</b><span>${x.n ? plural(x.n, 'titre') : 'SoundCloud'}</span></div><button class="btn sm pri" type="button">Importer</button></li>`).join('')}</ul>
+        <div class="row"><button class="btn wide" id="scOut" type="button">Déconnecter SoundCloud</button></div>`;
+      document.getElementById('scL').onclick = e => { const li = e.target.closest('[data-i]'); if (li) scPick(L[+li.dataset.i], p0); };
+      document.getElementById('scOut').onclick = async () => { try { await scCall('disconnect'); } catch(e){} SCU = null; closeSheet(true); toast('SoundCloud déconnecté'); }; }
+    catch(e){ const el = document.getElementById('scL'); if (el) el.textContent = 'Impossible de lire tes playlists pour le moment.'; scErr(e); } }); }
+function scPick(x, p){ if (p){ scImportInto(x, p); return; } const P = SYS.planets.filter(q => !q.gd); if (!P.length){ toast('Crée d’abord une planète avec le bouton +'); return; }
+  openSheet('scpick', head('Dans quelle planète ?', esc(x.title)) + `<ul class="list" id="scP">${P.map((q, i) => `<li class="tr" data-i="${i}"><i class="art" style="${artCSS(q)};width:30px;height:30px;border-radius:50%;flex:none"></i><div class="m"><b>${esc(q.name)}</b><span>${plural(q.tracks.length, 'titre')}</span></div></li>`).join('')}</ul>`,
+    () => { document.getElementById('scP').onclick = e => { const li = e.target.closest('[data-i]'); if (li) scImportInto(x, P[+li.dataset.i]); }; }); }
+function scImportInto(x, p){ const u = scUrl(x.url); if (!u || !p) return; p.links = scLinks(p.links);
+  if (p.links.some(l => l.u === u)){ toast('« ' + x.title + ' » est déjà sur ' + p.name); return; } if (p.links.length >= 12){ toast('12 liens SoundCloud au maximum par planète'); return; }
+  p.links.push({k: 'sc', u, t: String(x.title).slice(0, 80), a: (SCU && SCU.name) || 'SoundCloud'}); save(); try { publishSoon(); } catch(e){} sfx('confirm');
+  toast('« ' + x.title + ' » importée dans ' + p.name, 3500); closeSheet(true); }
+
 (async () => {
   try {
     pdStatus('Préparation de l’univers');
@@ -4673,7 +4743,7 @@ function cineFocusPlanet(dt){ const c = cine, i = VIEW.planets.findIndex(p => p.
         (tracks||[]).forEach(t=>{if(t&&t.id)TRACKS.set(t.id,t);});
       }catch(e){console.warn('Stockage audio indisponible',e);}
     })();
-    SESSP = initAccount(); await SESSP;
+    SESSP = initAccount(); await SESSP; try { scCallback(); } catch(e){ console.warn('SoundCloud', e); }
     pdStatus('Prêt');
     setTimeout(()=>{if(pdBootStatus.isConnected)pdBootStatus.remove();},2500);
   } catch(e) {
@@ -4830,13 +4900,13 @@ body:has(#sheet:not(.off)) #pd-audio-test{opacity:0;pointer-events:none}
   document.head.appendChild(css);
   const b = document.createElement('button'); b.id = 'pd-audio-test'; b.type = 'button'; b.textContent = '♫ Tester le son';
   const P = document.createElement('div'); P.id = 'pdaPanel'; P.hidden = true; P.setAttribute('role', 'dialog'); P.setAttribute('aria-label', 'Diagnostic du son');
-  P.innerHTML = `<h4>Son · diagnostic V6.5 <button class="x" type="button" aria-label="Fermer">✕</button></h4><div id="pdaRows"></div>
+  P.innerHTML = `<h4>Son · diagnostic V6.6 <button class="x" type="button" aria-label="Fermer">✕</button></h4><div id="pdaRows"></div>
     <div class="row"><span class="k" style="min-width:auto">Écouter :</span><button data-p="planet">Planète</button><button data-p="star">Étoile</button><button data-p="moon">Lunes</button><button data-p="travel">Voyage</button><button data-p="deep">Espace</button></div>
     <div class="row"><button data-a="wake">Réactiver le son</button><button data-a="copy">Copier le rapport</button></div><ol id="pdaLog"></ol>`;
   document.body.appendChild(b); document.body.appendChild(P);
   const S = PDA.S; let timer = 0;
   const yes = (v, a, n) => v ? `<b class="ok">${a}</b>` : `<b class="bad">${n}</b>`;
-  function report(){ const c = actx; return {version: '6.5', respiration: Math.round((S.breath || 0) * 100) / 100, date: new Date().toISOString(), ua: navigator.userAgent, contexte: c ? c.state : 'absent', frequence: c ? c.sampleRate : 0, session: S.session, moteurs: S.contexts,
+  function report(){ const c = actx; return {version: '6.6', respiration: Math.round((S.breath || 0) * 100) / 100, date: new Date().toISOString(), ua: navigator.userAgent, contexte: c ? c.state : 'absent', frequence: c ? c.sampleRate : 0, session: S.session, moteurs: S.contexts,
     scene: S.scene, ambiance: S.ident, etoile: S.star, lunes: S.moons, musique: S.music, niveau_db: Math.round(S.level), voix: S.voices, reglages: {ambiance: SND.amb, interface: SND.ui, volume: SND.vol}, erreur: S.err || null, journal: S.log.slice(0, 12)}; }
   function draw(){ const c = actx, st = c ? c.state : 'absent', lv = clamp((S.level + 70) / 55, 0, 1);
     $('#pdaRows').innerHTML = `
