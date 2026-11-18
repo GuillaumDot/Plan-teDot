@@ -3204,7 +3204,7 @@ async function importFiles(list, target){
 const SND = {ui: LS.get('pd.sfx') ?? true, amb: LS.get('pd.amb') ?? true, bus: null, rev: null, a: null, ab: null, mix: 0, ev: {}};
 /* the sound of the place, not a score: colored noise beds shaped like weather + sparse natural events */
 function sndInit(){ if (!actx || SND.bus) return; try {
-  const c = actx, bus = c.createGain(); bus.gain.value = .5; try { const cmp = c.createDynamicsCompressor(); cmp.threshold.value = -16; cmp.knee.value = 18; cmp.ratio.value = 3; cmp.attack.value = .008; cmp.release.value = .22; bus.connect(cmp); cmp.connect(c.destination); } catch(e){ bus.connect(c.destination); }
+  const c = actx, bus = c.createGain(); bus.gain.value = .65; try { const cmp = c.createDynamicsCompressor(); cmp.threshold.value = -16; cmp.knee.value = 18; cmp.ratio.value = 3; cmp.attack.value = .008; cmp.release.value = .22; bus.connect(cmp); cmp.connect(c.destination); } catch(e){ bus.connect(c.destination); }
   const mkIR = (sec, dec) => { const L = Math.floor(c.sampleRate * sec), ir = c.createBuffer(2, L, c.sampleRate); for (let ch = 0; ch < 2; ch++){ const d = ir.getChannelData(ch); for (let i = 0; i < L; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / L, dec); } return ir; };
   const rev = c.createConvolver(); rev.buffer = mkIR(TIER ? 1.8 : 1.1, 3.2); const rg = c.createGain(); rg.gain.value = .35; rev.connect(rg); rg.connect(bus);
   SND.bus = bus; SND.rev = rev;
@@ -3409,7 +3409,7 @@ function ambUpdate(dt){
   const musicOn = !au.paused || (radio && !ra.paused); SND.mix = clamp(SND.mix + (musicOn ? dt / 4.5 : -dt / 2.6), 0, 1);
   const m = SND.mix, me = m * m * (3 - 2 * m);
   if (SND.mG){ SND.mG.gain.setTargetAtTime(Math.max(.0001, me), t, .05); SND.mF.frequency.setTargetAtTime(Math.min(20000, 240 * Math.pow(20000 / 240, Math.min(1, m * 1.2))), t, .05); }
-  SND.ab.gain.setTargetAtTime(1 - .9 * me, t, .08); SND.abF.frequency.setTargetAtTime(18000 * Math.pow(900 / 18000, me * .85), t, .08);
+  SND.ab.gain.setTargetAtTime(1 - .65 * me, t, .25); SND.abF.frequency.setTargetAtTime(18000 * Math.pow(900 / 18000, me * .85), t, .08);
   const tg = {city: 0, space: 0, windL: 0, windH: 0, rain: 0, surf: 0, foam: 0, rumble: 0, heat: 0, res: 0, hum: 0};
   let wLf = 380, wHf = 1800, rf = 520, bp = null;
   if (mode === 'splash' || mode === 'galaxy' || !VIEW) tg.space = .045;
@@ -3974,9 +3974,10 @@ function pdSpatialTick(){
   if(!actx || !PDSPACE.gain) return;
   const visiting=typeof VIEW!=='undefined' && typeof SYS!=='undefined' && VIEW!==SYS;
   const music=typeof au!=='undefined' && !au.paused && !au.ended;
-  const active=PDSPACE.enabled && !document.hidden && visiting && music && actx.state==='running';
-  const now=actx.currentTime, target=active?.042:0;
-  PDSPACE.gain.gain.setTargetAtTime(target,now,active?1.8:.65);
+  const active=PDSPACE.enabled && (typeof SND==='undefined' || SND.amb) && !document.hidden && actx.state==='running';
+  // Audibilité améliorée sans masquer la musique : plus présent en visite, atténué pendant les titres.
+  const now=actx.currentTime, target=active?(visiting?(music?.105:.13):(music?.055:.075)):0;
+  PDSPACE.gain.gain.setTargetAtTime(target,now,active?1.4:.65);
   if(active){const t=performance.now()/1000;PDSPACE.osc.forEach(({pan,f,i})=>{
     pan.pan.setTargetAtTime(Math.sin(t*.11+i*2.1)*.72,now,.35);
     f.frequency.setTargetAtTime(170+65*Math.sin(t*.16+i),now,.5);
