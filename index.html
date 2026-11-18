@@ -4001,29 +4001,61 @@ document.addEventListener('pointerdown',pdWakeAudioFromGesture,{passive:true});
 document.addEventListener('touchend',pdWakeAudioFromGesture,{passive:true});
 
 /* V5.3 — audio diagnostic: direct audible check, no dependency on SND sound buffers. */
-(function pdAudioDiagnostic(){
+/* V5.4: isolated iOS-safe Web Audio ambience. Never connects to the MP3 element. */
+(function pdIndependentAudio(){
+  let ctx=null, master=null, voices=[], lastError='';
+  const AudioCtor=window.AudioContext||window.webkitAudioContext;
+  function setup(){
+    if(ctx && ctx.state!=='closed')return ctx;
+    if(!AudioCtor)throw Error('Web Audio non pris en charge');
+    ctx=new AudioCtor(); master=ctx.createGain();master.gain.value=0;master.connect(ctx.destination);
+    const freqs=[196,293.66,440];
+    freqs.forEach((hz,i)=>{
+      const osc=ctx.createOscillator(),gain=ctx.createGain();osc.type='sine';osc.frequency.value=hz;
+      gain.gain.value=[.11,.045,.025][i];osc.connect(gain);gain.connect(master);osc.start();voices.push({osc,gain,i});
+    });
+    return ctx;
+  }
+  async function wake(){
+    const c=setup();if(c.state!=='running')await c.resume();
+    if(c.state!=='running')throw Error('Contexte audio : '+c.state);
+    update();return c;
+  }
+  function update(){
+    if(!ctx||!master||ctx.state!=='running')return;
+    const enabled=!document.hidden && (typeof SND==='undefined'||SND.amb!==false);
+    const music=typeof au!=='undefined'&&!au.paused&&!au.ended;
+    const target=enabled?(music?.12:.24):0;
+    master.gain.setTargetAtTime(target,ctx.currentTime,.7);
+    const t=performance.now()/1000;
+    voices.forEach(v=>v.osc.frequency.setTargetAtTime([196,293.66,440][v.i]*(1+.008*Math.sin(t*.2+v.i)),ctx.currentTime,.5));
+  }
+  function playNotes(c){
+    const start=c.currentTime+.05;
+    [440,554.37,659.25].forEach((hz,i)=>{
+      const o=c.createOscillator(),g=c.createGain(),t=start+i*.28;
+      o.type='sine';o.frequency.value=hz;
+      g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.23,t+.035);
+      g.gain.exponentialRampToValueAtTime(.0001,t+.24);
+      o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+.26);
+    });
+  }
   function add(){
     if(document.getElementById('pd-audio-test'))return;
     const b=document.createElement('button');b.id='pd-audio-test';b.type='button';b.textContent='♫ Tester le son';
-    b.setAttribute('aria-label','Tester les effets sonores de PlanèteDot');
-    b.style.cssText='position:fixed;right:12px;bottom:calc(76px + env(safe-area-inset-bottom, 0px));z-index:9999;background:rgba(13,31,57,.9);color:#d9f5ff;border:1px solid rgba(110,210,255,.65);border-radius:22px;padding:10px 14px;font:600 12px system-ui;box-shadow:0 0 18px #2bc9ff33;cursor:pointer';
+    b.style.cssText='position:fixed;right:12px;bottom:calc(76px + env(safe-area-inset-bottom, 0px));z-index:9999;background:#0d1f39;color:#d9f5ff;border:1px solid #6ed2ff;border-radius:22px;padding:10px 14px;font:600 12px system-ui';
     b.onclick=async()=>{
-      try{
-        unlockAudio();
-        if(!actx)throw Error('AudioContext indisponible');
-        await actx.resume();
-        const t=actx.currentTime+.04;
-        [392,523.25,659.25].forEach((hz,i)=>{
-          const o=actx.createOscillator(),g=actx.createGain();o.type='sine';o.frequency.value=hz;
-          g.gain.setValueAtTime(.0001,t+i*.15);g.gain.exponentialRampToValueAtTime(.085,t+i*.15+.03);
-          g.gain.exponentialRampToValueAtTime(.0001,t+i*.15+.6);
-          o.connect(g);g.connect(actx.destination);o.start(t+i*.15);o.stop(t+i*.15+.65);
-        });
-        pdSpatialInit();pdSpatialTick();b.textContent='♫ Son activé';setTimeout(()=>b.textContent='♫ Tester le son',2500);
-      }catch(e){b.textContent='Audio indisponible';console.warn('Diagnostic audio',e);}
+      try{const c=await wake();playNotes(c);b.textContent='♫ Test lancé · '+c.state;setTimeout(()=>b.textContent='♫ Tester le son',3500);}
+      catch(e){lastError=String(e&&e.message||e);b.textContent='Erreur : '+lastError;b.title=lastError;console.error('PlanèteDot audio V5.4',e);}
     };
     document.body.appendChild(b);
   }
+  // First genuine touch/click unlocks this independent context; never block UI.
+  function gesture(){wake().catch(e=>{lastError=String(e&&e.message||e);console.warn('PlanèteDot ambience',lastError)});}
+  document.addEventListener('pointerdown',gesture,{once:true,passive:true});
+  document.addEventListener('touchstart',gesture,{once:true,passive:true});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&ctx&&ctx.state==='suspended')ctx.resume().then(update).catch(()=>{});else update()});
+  setInterval(update,450);
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',add,{once:true});else add();
 })();
 
