@@ -2663,11 +2663,11 @@ cv.addEventListener('pointerup', endPtr); cv.addEventListener('pointercancel', e
 cv.addEventListener('wheel', e => { e.preventDefault(); if (mode === 'planet' || (mode === 'system' && focus)){ pz = clamp(pz * Math.exp(e.deltaY * .0015), .2, 1.8); return; } if (mode === 'system' || mode === 'galaxy') cam.g.dist = clamp(cam.g.dist * Math.exp(e.deltaY * .0012), 2.5, 600); }, {passive: false});
 function tap(x, y){
   if (mode === 'splash'){ if (splashHit && Math.hypot(x - splashHit.x, y - splashHit.y) < splashHit.r) startWarp(); return; }
-  if (mode === 'planet'){ if (!tapPlanet(x, y) && sheetOpen) closeSheet(true); return; }
+  if (mode === 'planet'){ const hit=tapPlanet(x,y); if(hit && window.PD_EFFECTS)window.PD_EFFECTS.play('moon'); if(!hit && sheetOpen)closeSheet(true); return; }
   if (mode === 'galaxy' && jump) return;
   let best = null, bd = 1e9;
   for (const k of picks){ const d = Math.hypot(x - k.x, y - k.y); if (d < k.r && d / k.r < bd){ bd = d / k.r; best = k; } }
-  if (best) best.act();
+  if (best){ if(window.PD_EFFECTS)window.PD_EFFECTS.play(mode==='system'?'planet':'star'); best.act(); }
   else if (MENU.open) closeMenu();
   else if (sheetOpen) closeSheet();
   else if (focus) overview();
@@ -3249,7 +3249,7 @@ function noiseHit(t, dur, vol, type, f, f2, q = 1){ const c = actx, s = c.create
 function swell(t, dur, vol, f0, f1){ const c = actx, s0 = c.createBufferSource(), fl = c.createBiquadFilter(), g = c.createGain(); s0.buffer = SND.noise; fl.type = 'bandpass'; fl.Q.value = .9;
   fl.frequency.setValueAtTime(f0, t); fl.frequency.exponentialRampToValueAtTime(f1, t + dur); g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + dur * .92); g.gain.linearRampToValueAtTime(0, t + dur);
   s0.connect(fl); fl.connect(g); g.connect(SND.bus); g.connect(SND.rev); s0.start(t); s0.stop(t + dur + .05); }
-function sfx(name){ if (!SND.ui || !actx) return; sndInit(); if (!SND.bus) return; const t = actx.currentTime + .005;
+function sfx(name){ if (!SND.ui) return; if(window.PD_EFFECTS && window.PD_EFFECTS.ready()){ window.PD_EFFECTS.play(name); return; } if(!actx) return; sndInit(); if (!SND.bus) return; const t = actx.currentTime + .005;
   if (name === 'tap'){ tone(1568, t, .05, .035); tone(2350, t + .012, .04, .012); }
   else if (name === 'tick'){ tone(1975, t, .035, .02, 'sine', false); }
   else if (name === 'open'){ tone(659, t, .22, .03); tone(988, t + .05, .3, .025); noiseHit(t, .18, .015, 'bandpass', 1800, 3200, 2); }
@@ -4040,6 +4040,21 @@ document.addEventListener('touchend',pdWakeAudioFromGesture,{passive:true});
       o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+.26);
     });
   }
+  // V5.5: one independent effects bus for interface, planets, stars and moons.
+  function ready(){return !!(ctx && ctx.state==='running');}
+  function play(name){
+    if(!ready() || (typeof SND!=='undefined' && SND.ui===false))return;
+    const types={tap:[780,1046,.12],tick:[1250,1600,.07],open:[520,780,.32],close:[780,390,.27],confirm:[659,988,.26],whoosh:[260,95,.45],sig:[440,880,.55],hook:[660,990,.45],planet:[330,495,.5],moon:[660,880,.38],star:[220,660,.85],orbit:[392,587,.32]};
+    const a=types[name]||types.tap, start=ctx.currentTime+.008;
+    for(let j=0;j<2;j++){
+      const o=ctx.createOscillator(),g=ctx.createGain(),t=start+j*.065;
+      o.type=j?'sine':'triangle';o.frequency.setValueAtTime(a[j],t);
+      o.frequency.exponentialRampToValueAtTime(Math.max(60,a[j]*(name==='whoosh'?.45:1.08)),t+a[2]);
+      g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(j?.035:.07,t+.025);
+      g.gain.exponentialRampToValueAtTime(.0001,t+a[2]);o.connect(g);g.connect(ctx.destination);o.start(t);o.stop(t+a[2]+.025);
+    }
+  }
+  window.PD_EFFECTS={ready,play,wake};
   function add(){
     if(document.getElementById('pd-audio-test'))return;
     const b=document.createElement('button');b.id='pd-audio-test';b.type='button';b.textContent='♫ Tester le son';
@@ -4052,6 +4067,10 @@ document.addEventListener('touchend',pdWakeAudioFromGesture,{passive:true});
   }
   // First genuine touch/click unlocks this independent context; never block UI.
   function gesture(){wake().catch(e=>{lastError=String(e&&e.message||e);console.warn('PlanèteDot ambience',lastError)});}
+  document.addEventListener('click',e=>{
+    if(!ready() || e.target.closest('#pd-audio-test'))return;
+    if(e.target.closest('button,[role="button"],a,input,select'))play('tap');
+  },{passive:true});
   document.addEventListener('pointerdown',gesture,{once:true,passive:true});
   document.addEventListener('touchstart',gesture,{once:true,passive:true});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&ctx&&ctx.state==='suspended')ctx.resume().then(update).catch(()=>{});else update()});
@@ -4059,6 +4078,7 @@ document.addEventListener('touchend',pdWakeAudioFromGesture,{passive:true});
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',add,{once:true});else add();
 })();
 
+/* V5.5 experimental: interface and celestial sounds use independent audio. */
 /* V5.1 experimental: owner playback presence, visitor radio, no private track broadcast. */
 const PDLIVE={owner:null,track:null,seen:0,active:false,fetching:false,lastPublish:0};
 async function pdLivePublish(){
