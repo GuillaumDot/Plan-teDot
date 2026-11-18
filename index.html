@@ -4015,13 +4015,14 @@ document.addEventListener('touchend',pdWakeAudioFromGesture,{passive:true});
       const osc=ctx.createOscillator(),gain=ctx.createGain();osc.type='sine';osc.frequency.value=hz;
       gain.gain.value=[.11,.045,.025][i];osc.connect(gain);gain.connect(master);osc.start();voices.push({osc,gain,i});
     });
-    // V5.6: contextual celestial audio, routed to the proven independent output.
+    // V5.8: pure harmonic, low-level scene tones; no noise source, no triangle buzz.
     sceneBus=ctx.createGain();sceneBus.gain.value=0;sceneBus.connect(ctx.destination);
     [0,1,2].forEach(i=>{
-      const o=ctx.createOscillator(),g=ctx.createGain(),pan=ctx.createStereoPanner?ctx.createStereoPanner():null;
-      o.type=i===0?'sine':i===1?'triangle':'sine';o.frequency.value=[130.81,196,329.63][i];
-      g.gain.value=[.22,.105,.07][i];o.connect(g);
-      if(pan){pan.pan.value=[-.5,.45,0][i];g.connect(pan);pan.connect(sceneBus)}else g.connect(sceneBus);
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      const pan=ctx.createStereoPanner?ctx.createStereoPanner():null;
+      o.type='sine';o.frequency.value=[110,164.81,220][i];
+      g.gain.value=[.10,.045,.018][i];o.connect(g);
+      if(pan){pan.pan.value=[-.35,.35,0][i];g.connect(pan);pan.connect(sceneBus)}else g.connect(sceneBus);
       o.start();sceneVoices.push({o,pan,i});
     });
     return ctx;
@@ -4035,24 +4036,25 @@ document.addEventListener('touchend',pdWakeAudioFromGesture,{passive:true});
     if(!ctx||!master||ctx.state!=='running')return;
     const enabled=!document.hidden && (typeof SND==='undefined'||SND.amb!==false);
     const music=typeof au!=='undefined'&&!au.paused&&!au.ended;
-    const target=enabled?(music?.12:.24):0;
+    const target=enabled?(music?.025:.055):0;
     master.gain.setTargetAtTime(target,ctx.currentTime,.7);
     const t=performance.now()/1000;
     voices.forEach(v=>v.osc.frequency.setTargetAtTime([196,293.66,440][v.i]*(1+.008*Math.sin(t*.2+v.i)),ctx.currentTime,.5));
     const scene=typeof mode==='undefined'?'splash':mode;
     const selected=typeof focus!=='undefined'&&!!focus;
     const planet=scene==='planet',system=scene==='system',galaxy=scene==='galaxy';
-    const key=scene+':'+(selected?String(focus):'none')+':'+(typeof selT!=='undefined'?selT:-1);
+    const key=scene+':'+(selected?String(focus):'none');
     const on=enabled && (planet||system||galaxy);
-    const base=planet?164.81:system?(selected?130.81:110):galaxy?98:130.81;
-    const ratios=planet?[1,1.498,2.003]:system?[1,1.335,1.997]:[1,1.5,2];
+    const base=planet?130.81:system?(selected?146.83:110):galaxy?98:130.81;
+    const ratios=planet?[1,1.5,2]:system?[1,1.25,1.875]:[1,1.5,2];
     sceneVoices.forEach(v=>{
       v.o.frequency.setTargetAtTime(base*ratios[v.i]*(1+.012*Math.sin(t*(.13+v.i*.07))),ctx.currentTime,.55);
       if(v.pan)v.pan.pan.setTargetAtTime(Math.sin(t*.23+v.i*2)*.62,ctx.currentTime,.6);
     });
-    if(sceneBus)sceneBus.gain.setTargetAtTime(on?(music?.28:.52):0,ctx.currentTime,.45);
+    // Quiet, smooth scene bed. Music is always foreground; no permanent loud drone.
+    if(sceneBus)sceneBus.gain.setTargetAtTime(on?(music?.08:.19):0,ctx.currentTime,2.5);
     if(on&&key!==lastScene){lastScene=key;lastPulse=t;play(planet?'planet':system?(selected?'planet':'star'):'star');}
-    if(on&&t-lastPulse>(planet?4.2:system?6.2:8.5)){
+    if(on&&t-lastPulse>(planet?13:system?17:22)){
       lastPulse=t;
       // A small shimmering event for satellites/territories; soft star resonance elsewhere.
       if(planet)play('moon');else if(system)play(selected?'orbit':'star');else play('orbit');
@@ -4128,6 +4130,7 @@ document.addEventListener('touchend',pdWakeAudioFromGesture,{passive:true});
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',add,{once:true});else add();
 })();
 
+/* V5.8: clean harmonic atmospheres, reduced sustained volume and smooth transitions. */
 /* V5.7: repair ambience preferences and celestial transitions. */
 /* V5.6 experimental: contextual ambient layers for planets, stars, moons and territories. */
 /* V5.1 experimental: owner playback presence, visitor radio, no private track broadcast. */
