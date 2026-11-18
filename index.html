@@ -2274,6 +2274,7 @@ function tapPlanet(x, y){
   if (best >= 0) selectTerr(best, true); return true;
 }
 function selectTerr(i, scroll){
+  if(window.PD_EFFECTS && window.PD_EFFECTS.ready())window.PD_EFFECTS.play('moon');
   const p = curP ? curP.p : null; if (!p) return; selT = i; const t = p.terr[i]; if (!t) return;
   const s = seedDir(t), u = rz(p.tilt, [-CF[0], -CF[1], -CF[2]]); angT = wrapA(Math.atan2(s[0], s[2]) - Math.atan2(u[0], u[2]), p._ang || 0);
   document.querySelectorAll('.mc').forEach(c => c.classList.toggle('sel', +c.dataset.i === i));
@@ -2765,7 +2766,7 @@ function showEra(p){ const el = $('#evo'), st = stage(p);
   if (mode === 'system' && !sheetOpen && !MENU.open && !cine && VIEW === SYS){ focusOn(p.id, .2); pz = .8; }
   clearTimeout(el._t); el._t = setTimeout(() => el.classList.add('off'), 13000); }
 function transFx(k = 1){ camSpeed = Math.max(camSpeed, 2.2 * k); FOV = FOV0 * (1 + .2 * k); POST.flash = Math.max(POST.flash, .1 * k); POST.ca = Math.max(POST.ca, .3 * k); POST.bloom += .2 * k; }
-function land(p){ sfx('whoosh'); transFx(); closeSheet(true); mode = 'planet'; focus = p.id; selT = -1; mapA = 0; angT = null; cam.g.pitch = .12;
+function land(p){ if(window.PD_EFFECTS&&window.PD_EFFECTS.ready())window.PD_EFFECTS.play('planet'); sfx('whoosh'); transFx(); closeSheet(true); mode = 'planet'; focus = p.id; selT = -1; mapA = 0; angT = null; cam.g.pitch = .12;
   if (!readonly) reorganize(p); updUI(); renderRail(); setRail(true); if (p.terr.length) setTimeout(() => selectTerr(0, true), 700); }
 function backToSystem(){ transFx(.7); sfx('whoosh'); mode = 'system'; setRail(false); closeSheet(true); selT = -1; curP = null; const p = focus && VIEW.planets.find(x => x.id === focus); updUI(); if (p) scanPlanet(p); else overview(); }
 function setRail(on){ rail.classList.toggle('off', !on); dock.classList.toggle('down', false); }
@@ -4003,7 +4004,7 @@ document.addEventListener('touchend',pdWakeAudioFromGesture,{passive:true});
 /* V5.3 — audio diagnostic: direct audible check, no dependency on SND sound buffers. */
 /* V5.4: isolated iOS-safe Web Audio ambience. Never connects to the MP3 element. */
 (function pdIndependentAudio(){
-  let ctx=null, master=null, voices=[], lastError='';
+  let ctx=null, master=null, voices=[], sceneBus=null, sceneVoices=[], lastScene='', lastPulse=0, lastError='';
   const AudioCtor=window.AudioContext||window.webkitAudioContext;
   function setup(){
     if(ctx && ctx.state!=='closed')return ctx;
@@ -4013,6 +4014,15 @@ document.addEventListener('touchend',pdWakeAudioFromGesture,{passive:true});
     freqs.forEach((hz,i)=>{
       const osc=ctx.createOscillator(),gain=ctx.createGain();osc.type='sine';osc.frequency.value=hz;
       gain.gain.value=[.11,.045,.025][i];osc.connect(gain);gain.connect(master);osc.start();voices.push({osc,gain,i});
+    });
+    // V5.6: contextual celestial audio, routed to the proven independent output.
+    sceneBus=ctx.createGain();sceneBus.gain.value=0;sceneBus.connect(ctx.destination);
+    [0,1,2].forEach(i=>{
+      const o=ctx.createOscillator(),g=ctx.createGain(),pan=ctx.createStereoPanner?ctx.createStereoPanner():null;
+      o.type=i===0?'sine':i===1?'triangle':'sine';o.frequency.value=[130.81,196,329.63][i];
+      g.gain.value=[.22,.105,.07][i];o.connect(g);
+      if(pan){pan.pan.value=[-.5,.45,0][i];g.connect(pan);pan.connect(sceneBus)}else g.connect(sceneBus);
+      o.start();sceneVoices.push({o,pan,i});
     });
     return ctx;
   }
@@ -4029,6 +4039,24 @@ document.addEventListener('touchend',pdWakeAudioFromGesture,{passive:true});
     master.gain.setTargetAtTime(target,ctx.currentTime,.7);
     const t=performance.now()/1000;
     voices.forEach(v=>v.osc.frequency.setTargetAtTime([196,293.66,440][v.i]*(1+.008*Math.sin(t*.2+v.i)),ctx.currentTime,.5));
+    const scene=typeof mode==='undefined'?'splash':mode;
+    const selected=typeof focus!=='undefined'&&!!focus;
+    const planet=scene==='planet',system=scene==='system',galaxy=scene==='galaxy';
+    const key=scene+':'+(selected?String(focus):'none')+':'+(typeof selT!=='undefined'?selT:-1);
+    const on=enabled && (planet||system||galaxy);
+    const base=planet?164.81:system?(selected?130.81:110):galaxy?98:130.81;
+    const ratios=planet?[1,1.498,2.003]:system?[1,1.335,1.997]:[1,1.5,2];
+    sceneVoices.forEach(v=>{
+      v.o.frequency.setTargetAtTime(base*ratios[v.i]*(1+.012*Math.sin(t*(.13+v.i*.07))),ctx.currentTime,.55);
+      if(v.pan)v.pan.pan.setTargetAtTime(Math.sin(t*.23+v.i*2)*.62,ctx.currentTime,.6);
+    });
+    if(sceneBus)sceneBus.gain.setTargetAtTime(on?(music?.14:.30):0,ctx.currentTime,.8);
+    if(on&&key!==lastScene){lastScene=key;lastPulse=t;play(planet?'planet':system?(selected?'planet':'star'):'star');}
+    if(on&&t-lastPulse>(planet?4.2:system?6.2:8.5)){
+      lastPulse=t;
+      // A small shimmering event for satellites/territories; soft star resonance elsewhere.
+      if(planet)play('moon');else if(system)play(selected?'orbit':'star');else play('orbit');
+    }
   }
   function playNotes(c){
     const start=c.currentTime+.05;
@@ -4043,7 +4071,7 @@ document.addEventListener('touchend',pdWakeAudioFromGesture,{passive:true});
   // V5.5: one independent effects bus for interface, planets, stars and moons.
   function ready(){return !!(ctx && ctx.state==='running');}
   function play(name){
-    if(!ready() || (typeof SND!=='undefined' && SND.ui===false))return;
+    if(!ready() || (typeof SND!=='undefined' && (['planet','moon','star','orbit'].includes(name)?SND.amb===false:SND.ui===false)))return;
     const types={tap:[780,1046,.12],tick:[1250,1600,.07],open:[520,780,.32],close:[780,390,.27],confirm:[659,988,.26],whoosh:[260,95,.45],sig:[440,880,.55],hook:[660,990,.45],planet:[330,495,.5],moon:[660,880,.38],star:[220,660,.85],orbit:[392,587,.32]};
     const a=types[name]||types.tap, start=ctx.currentTime+.008;
     for(let j=0;j<2;j++){
@@ -4078,7 +4106,7 @@ document.addEventListener('touchend',pdWakeAudioFromGesture,{passive:true});
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',add,{once:true});else add();
 })();
 
-/* V5.5 experimental: interface and celestial sounds use independent audio. */
+/* V5.6 experimental: contextual ambient layers for planets, stars, moons and territories. */
 /* V5.1 experimental: owner playback presence, visitor radio, no private track broadcast. */
 const PDLIVE={owner:null,track:null,seen:0,active:false,fetching:false,lastPublish:0};
 async function pdLivePublish(){
