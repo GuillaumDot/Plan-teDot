@@ -3983,6 +3983,53 @@ function pdSpatialTick(){
   });}
 }
 
+
+/* V5.1 experimental: owner playback presence, visitor radio, no private track broadcast. */
+const PDLIVE={owner:null,track:null,seen:0,active:false,fetching:false,lastPublish:0};
+async function pdLivePublish(){
+  if(!sb||!authUser||!SYS)return;
+  const id=Q?.[qi], playing=!!id&&!au.paused&&!au.ended&&!String(id).startsWith('pd-public:');
+  try{
+    const {data}=await sb.from('shared_tracks').select('track_id').eq('owner_id',authUser.id).eq('track_id',id||'').maybeSingle();
+    await sb.from('pd_live_playback').upsert({owner_id:authUser.id,track_id:playing&&data?id:null,position_seconds:playing&&data?Math.floor(au.currentTime||0):0,is_playing:!!(playing&&data),updated_at:new Date().toISOString()},{onConflict:'owner_id'});
+  }catch(e){console.warn('Live playback',e)}
+}
+async function pdLivePoll(){
+  if(!sb||!readonly||!ownerId||PDLIVE.fetching)return;
+  PDLIVE.fetching=true;
+  try{
+    const {data,error}=await sb.from('pd_live_playback').select('track_id,position_seconds,is_playing,updated_at').eq('owner_id',ownerId).maybeSingle();
+    if(error)throw error;
+    const valid=data?.is_playing&&data.track_id&&Date.now()-new Date(data.updated_at).getTime()<40000;
+    const btn=document.getElementById('pd-live-radio');
+    if(btn){btn.style.display=valid?'block':'none';btn.textContent=valid?(PDLIVE.owner===ownerId&&PDLIVE.track===data.track_id?'◉ Radio galaxie en cours':'♫ Écouter la radio de cette galaxie'):'♫ Radio inactive';}
+    if(!valid){PDLIVE.active=false;return;}
+    if(PDLIVE.active&&PDLIVE.owner===ownerId&&PDLIVE.track!==data.track_id)await pdLiveTune(data);
+    if(PDLIVE.active&&PDLIVE.owner===ownerId&&PDLIVE.track===data.track_id&&!au.paused&&Math.abs((au.currentTime||0)-Number(data.position_seconds||0))>14){try{au.currentTime=Number(data.position_seconds||0)}catch(e){}}
+  }catch(e){console.warn('Radio visite',e)}finally{PDLIVE.fetching=false;}
+}
+async function pdLiveTune(state){
+  if(!sb||!ownerId||!state?.track_id)return;
+  const owner=ownerId;
+  const {data,error}=await sb.from('shared_tracks').select('track_id,title,artist,audio_path').eq('owner_id',owner).eq('track_id',state.track_id).maybeSingle();
+  if(error||!data){toast('Cette musique n’est pas partagée publiquement');return;}
+  pdRemoteStart([data],0,owner,VIEW?.name||'galaxie');
+  PDLIVE.owner=owner;PDLIVE.track=state.track_id;PDLIVE.active=true;
+  au.addEventListener('loadedmetadata',function align(){au.removeEventListener('loadedmetadata',align);try{au.currentTime=Math.min(Math.max(0,Number(state.position_seconds||0)),Math.max(0,(au.duration||0)-1))}catch(e){}},{once:true});
+}
+async function pdLiveClick(){
+  if(!readonly||!ownerId)return;
+  try{const {data}=await sb.from('pd_live_playback').select('track_id,position_seconds,is_playing,updated_at').eq('owner_id',ownerId).maybeSingle();if(data?.is_playing&&Date.now()-new Date(data.updated_at).getTime()<40000)await pdLiveTune(data);else toast('La galaxie ne diffuse pas actuellement');}catch(e){toast('Radio indisponible')}
+}
+(function(){
+  const b=document.createElement('button');b.id='pd-live-radio';b.type='button';b.textContent='♫ Radio galaxie';b.onclick=pdLiveClick;document.body.appendChild(b);
+  const style=document.createElement('style');style.textContent='#pd-live-radio{display:none;position:fixed;bottom:calc(95px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:30;border:1px solid rgba(140,205,255,.5);border-radius:30px;background:rgba(7,22,45,.82);color:#e8f6ff;padding:12px 20px;backdrop-filter:blur(18px);box-shadow:0 0 32px rgba(75,160,245,.22);font:600 13px system-ui;max-width:90vw;white-space:nowrap}';document.head.appendChild(style);
+  setInterval(()=>{const now=Date.now();if(authUser&&now-PDLIVE.lastPublish>12000){PDLIVE.lastPublish=now;pdLivePublish()}if(readonly){pdLivePoll()}else{b.style.display='none';PDLIVE.active=false}},6000);
+  au.addEventListener('play',()=>{if(authUser)pdLivePublish()});
+  au.addEventListener('pause',()=>{if(authUser)pdLivePublish()});
+  au.addEventListener('ended',()=>{if(authUser)pdLivePublish()});
+})();
+
 </script>
 </body>
 </html>
