@@ -4050,7 +4050,7 @@ document.addEventListener('touchend',pdWakeAudioFromGesture,{passive:true});
       v.o.frequency.setTargetAtTime(base*ratios[v.i]*(1+.012*Math.sin(t*(.13+v.i*.07))),ctx.currentTime,.55);
       if(v.pan)v.pan.pan.setTargetAtTime(Math.sin(t*.23+v.i*2)*.62,ctx.currentTime,.6);
     });
-    if(sceneBus)sceneBus.gain.setTargetAtTime(on?(music?.14:.30):0,ctx.currentTime,.8);
+    if(sceneBus)sceneBus.gain.setTargetAtTime(on?(music?.28:.52):0,ctx.currentTime,.45);
     if(on&&key!==lastScene){lastScene=key;lastPulse=t;play(planet?'planet':system?(selected?'planet':'star'):'star');}
     if(on&&t-lastPulse>(planet?4.2:system?6.2:8.5)){
       lastPulse=t;
@@ -4082,13 +4082,35 @@ document.addEventListener('touchend',pdWakeAudioFromGesture,{passive:true});
       g.gain.exponentialRampToValueAtTime(.0001,t+a[2]);o.connect(g);g.connect(ctx.destination);o.start(t);o.stop(t+a[2]+.025);
     }
   }
-  window.PD_EFFECTS={ready,play,wake};
+  // V5.7: one-time repair for celestial ambience disabled by a persisted legacy setting.
+  // Subsequent user changes to the ambience setting remain respected.
+  try {
+    if(localStorage.getItem('pd.celestial.audio.v57')!=='1'){
+      SND.amb=true;LS.set('pd.amb',true);
+      localStorage.setItem('pd.celestial.audio.v57','1');
+    }
+  }catch(e){SND.amb=true;}
+  // Celestial transitions use the independent audio engine that already powers UI sounds.
+  let lastNavigationMode='',lastNavigationFocus='',lastNavTime=0;
+  function celestialNavigation(){
+    if(!ready()||document.hidden)return;
+    const m=typeof mode==='undefined'?'splash':mode;
+    if(!['planet','system','galaxy'].includes(m))return;
+    const f=typeof focus==='undefined'?'':String(focus||'');
+    const now=performance.now();
+    if(m!==lastNavigationMode||(f!==lastNavigationFocus&&now-lastNavTime>550)){
+      lastNavigationMode=m;lastNavigationFocus=f;lastNavTime=now;
+      play(m==='planet'?'planet':m==='system'?(f?'planet':'star'):'whoosh');
+    }
+  }
+  setInterval(celestialNavigation,350);
+  window.PD_EFFECTS={ready,play,wake,diagnostics:()=>({state:ctx?.state||'absent',mode:typeof mode==='undefined'?'unknown':mode,ambience:SND.amb,sceneGain:sceneBus?.gain.value||0})};
   function add(){
     if(document.getElementById('pd-audio-test'))return;
     const b=document.createElement('button');b.id='pd-audio-test';b.type='button';b.textContent='♫ Tester le son';
     b.style.cssText='position:fixed;right:12px;bottom:calc(76px + env(safe-area-inset-bottom, 0px));z-index:9999;background:#0d1f39;color:#d9f5ff;border:1px solid #6ed2ff;border-radius:22px;padding:10px 14px;font:600 12px system-ui';
     b.onclick=async()=>{
-      try{const c=await wake();playNotes(c);b.textContent='♫ Test lancé · '+c.state;setTimeout(()=>b.textContent='♫ Tester le son',3500);}
+      try{const c=await wake();playNotes(c);b.textContent='♫ '+c.state+' · ambiance '+(SND.amb?'ON':'OFF')+' · '+(typeof mode==='undefined'?'?':mode);setTimeout(()=>b.textContent='♫ Tester le son',3500);}
       catch(e){lastError=String(e&&e.message||e);b.textContent='Erreur : '+lastError;b.title=lastError;console.error('PlanèteDot audio V5.4',e);}
     };
     document.body.appendChild(b);
@@ -4106,6 +4128,7 @@ document.addEventListener('touchend',pdWakeAudioFromGesture,{passive:true});
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',add,{once:true});else add();
 })();
 
+/* V5.7: repair ambience preferences and celestial transitions. */
 /* V5.6 experimental: contextual ambient layers for planets, stars, moons and territories. */
 /* V5.1 experimental: owner playback presence, visitor radio, no private track broadcast. */
 const PDLIVE={owner:null,track:null,seen:0,active:false,fetching:false,lastPublish:0};
