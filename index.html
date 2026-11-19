@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#010208">
 <title>planèteDot · ton univers musical</title>
-<meta name="pd-version" content="6.9">
+<meta name="pd-version" content="7.0">
 <meta name="description" content="PlanèteDot · l’album de GuillaumDot et ton univers musical en 3D : chaque planète est un morceau.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PlanèteDot">
@@ -989,7 +989,7 @@ function resize(){ DPR = window.devicePixelRatio || 1; RS = Math.min(DPR, maxSca
 // dynamic resolution
 let perfAcc = 0, perfN = 0, perfT = 0;
 let slowN = 0, fastN = 0;
-function perf(dt){ perfAcc += dt; perfN++; perfT += dt; if (perfT < 1.2) return; const avg = perfAcc / perfN; perfAcc = perfN = perfT = 0; const tgt = 1 / FCAP;
+function perf(dt){ perfAcc += dt; perfN++; perfT += dt; if (perfT < 1.2) return; const avg = perfAcc / perfN; perfAcc = perfN = perfT = 0; const tgt = 1 / pdCap(); if (pdHold() && avg < tgt * 1.8) return;
   if (avg > tgt * 1.22 && scale > SMIN){ scale = Math.max(SMIN, scale * (avg > tgt * 1.8 ? .82 : .92)); resize(); }
   else if (avg < tgt * .84 && scale < 1){ scale = Math.min(1, scale * 1.05); resize(); }
   if (FCAP === 60){ slowN = avg > .024 && scale <= SMIN + .01 ? slowN + 1 : 0; if (slowN >= 3){ FCAP = 30; slowN = 0; scale = Math.min(1, scale * 1.3); resize(); } }
@@ -2872,12 +2872,12 @@ let cine = null, cineArm = 0;
 const SHOTS = [['wide', 3], ['establish', 2], ['medium', 3], ['sunrise', 2], ['tracking', 2.2], ['low', 1.2], ['close', .5], ['pass', 1.5], ['region', 2.4], ['regionWide', 1.4]];
 function pickShot(prev){ const c = SHOTS.filter(x => x[0] !== prev); let r = Math.random() * c.reduce((a, x) => a + x[1], 0); for (const x of c){ r -= x[1]; if (r <= 0) return x[0]; } return 'wide'; }
 function beatClock(){ const A = (META[Q[qi]] || {}).a; if (!A || !A.bpm || au.paused) return null; return {bpm: A.bpm, beat: (au.currentTime || 0) * A.bpm / 60}; }
-function startCine(force, pidO){ const alb = !pidO && Q.length && isAlbumTrack(Q[qi]); const pid = pidO || (alb ? 'album' : playingPlanet()); if (!pid) return false;
-  if (!alb){ if ((!pidO && VIEW !== SYS) || !VIEW || !VIEW.planets.some(p => p.id === pid)) return false; if (mode !== 'system' && mode !== 'planet') return false;
+function startCine(force, pidO){ const alb = !pidO && Q.length && isAlbumTrack(Q[qi]); const pid = pidO || (alb ? 'album' : (playingPlanet() || pdVisitPid())); if (!pid) return false; cineRe = false;
+  if (!alb){ if ((!pidO && VIEW !== SYS && !pdVisitPid()) || !VIEW || !VIEW.planets.some(p => p.id === pid)) return false; if (mode !== 'system' && mode !== 'planet') return false;
     mode = 'planet'; focus = pid; selT = -1; mapA = 1; angT = null; setRail(false); curP = null; }   // the exploration view of the planet, calm, without its menus
   closeSheet(true); if (MENU.open) closeMenu(true);
   cine = {pid, album: alb, shot: 'focus', t: 0, t0: time, cut: true}; if (!alb) focus = pid; document.body.classList.add('cine'); if (!pidO) cineCaption(); return true; }
-function exitCine(){ if (!cine) return; const wa = cine.album; cine = null; document.body.classList.remove('cine'); $('#cineCap').style.opacity = 0; cineArm = 0; lastInteract = performance.now();
+function exitCine(){ if (!cine) return; const wa = cine.album; cine = null; document.body.classList.remove('cine'); $('#cineCap').style.opacity = 0; cineArm = (!au.paused && Q.length) ? performance.now() : 0; cineRe = true; lastInteract = performance.now();
   if (!wa){ if (mode === 'planet'){ mode = 'system'; curP = null; selT = -1; } focus = null; if (mode === 'system') overview(); } updUI(); }
 function cineCaption(){ const t = TRACKS.get(Q[qi]); const p = SYS.planets.find(x => x.id === qPlanet); const c = $('#cineCap'); if (!t) return;
   c.innerHTML = `<b>${esc(t.title)}</b><span>${esc(t.artist || '')}${p ? ' · ' + esc(p.name) : ''}</span>`; c.style.opacity = 1; clearTimeout(c._t); c._t = setTimeout(() => c.style.opacity = 0, 6000); }
@@ -2896,7 +2896,7 @@ document.addEventListener('pointerdown', () => { lastInteract = performance.now(
 function fade(dt){ const f = $('#flash'); const fo = parseFloat(f.style.opacity || 0); if (fo > 0) f.style.opacity = Math.max(0, fo - dt * 1.6); }
 function frame(now, once){
   if (!running && !once) return;
-  if (!once && now - lastDraw < 1000 / FCAP - 3){ requestAnimationFrame(frame); return; } lastDraw = now; SHOT_PT = null; ambTick(Math.min(.05, (now - last) / 1000));
+  if (!once && now - lastDraw < 1000 / pdCap() - 3){ requestAnimationFrame(frame); return; } lastDraw = now; SHOT_PT = null; ambTick(Math.min(.05, (now - last) / 1000));
   const rawDt = Math.min(.25, (now - last) / 1000); const dt = Math.min(.05, rawDt); last = now; time = now / 1000 - T0;
   FDT = rawDt; perf(dt); readAudio(dt); scLevels(); listenTick(dt); ambUpdate(dt); radioSpatial(dt); POST.begin();
   if (mode !== 'splash' && !cine) FOV = lerp(FOV, FOV0, 1 - Math.exp(-dt * 2.2));
@@ -2916,8 +2916,8 @@ function frame(now, once){
   else if (starIgnite < 1 && SYS.user && mode !== 'splash') starIgnite = Math.min(1, starIgnite + dt * .7);
   updProgress(); if ((frameN = (frameN + 1) % 20) === 0) updRadio();
   if (!cine && !HL && !OUTRO && !STORY && !INTRO.on && warpT < 0 && !au.paused && Q.length && document.activeElement.tagName !== 'INPUT' && card.classList.contains('off')){
-    const alb = isAlbumTrack(Q[qi]), ok = alb ? (mode === 'system' || mode === 'planet' || mode === 'galaxy') : ((mode === 'system' || mode === 'planet') && VIEW === SYS && playingPlanet());
-    if (ok){ const idle = performance.now() - lastInteract, need = sheetOpen ? 9000 : 3000; if ((cineArm && performance.now() - cineArm > need && idle > need) || idle > 30000) startCine(); } }
+    const alb = isAlbumTrack(Q[qi]), ok = alb ? (mode === 'system' || mode === 'planet' || mode === 'galaxy') : ((mode === 'system' || mode === 'planet') && ((VIEW === SYS && playingPlanet()) || pdVisitPid()));
+    if (ok){ const idle = performance.now() - lastInteract, need = sheetOpen ? 7000 : cineRe ? 12000 : 3000; if ((cineArm && performance.now() - cineArm > need && idle > need) || idle > 30000) startCine(); } }
   if (cine && !Q.length) exitCine();
   if (MENU.open && mode !== 'system') closeMenu(true);
   if (tutoI >= 0){ if (mode === 'splash' || (mode !== 'system' && TUTO_ACT === TUTO)) endTuto(); else tutoTick(); }
@@ -4071,17 +4071,17 @@ let LOGO_ART = null; function logoArt(){ if (LOGO_ART) return LOGO_ART; try { co
     c.toBlob(bl => { if (bl){ LOGO_ART = URL.createObjectURL(bl); msMeta(); } }, 'image/jpeg', .9); }; im.src = LOGO; } catch(e){} return null; }
 const isAlbumTrack = id => GD_IDS.includes(id);
 function msMeta(){ try { const t = TRACKS.get(Q[qi]); if (!t) return; const alb = isAlbumTrack(Q[qi]), p = SYS.planets.find(x => x.id === qPlanet), art = alb ? (ART && ARTF.length && artPid === qPlanet ? ART : logoArt()) : ART;
-  navigator.mediaSession.metadata = new MediaMetadata({title: t.title, artist: t.artist || (alb ? 'GuillaumDot' : ''), album: alb ? 'PlanèteDot' : p ? p.name : 'planèteDot', artwork: art ? [{src: art, sizes: art === LOGO_ART ? '512x512' : '240x240', type: 'image/jpeg'}] : []}); } catch(e){} }
+  navigator.mediaSession.metadata = new MediaMetadata({title: t.title, artist: t.artist || (alb ? 'GuillaumDot' : ''), album: alb ? 'PlanèteDot' : p ? p.name : 'planèteDot', artwork: art ? [{src: art, sizes: art === LOGO_ART ? '512x512' : (PDART.url && art === PDART.url) ? PDART.size : '240x240', type: 'image/jpeg'}] : []}); } catch(e){} }
 /* the playing planet, as it is on screen right now, becomes the artwork of the system media card */
 const shotCv = document.createElement('canvas'); shotCv.width = shotCv.height = 240;
 const ARTF = []; let artT = -99, artI = 0, artPid = null;
-function shotTick(){ if (!SHOT_PT || time - (SHOT_PT.t || 0) > .6 || (isAlbumTrack(Q[qi]) && !(cine && cine.album)) || au.paused || !Q.length || !('mediaSession' in navigator)) return; const nowS = performance.now() / 1000; if (nowS - shotT < (document.hidden ? 4 : 2.4)) return; shotT = nowS;
+function shotTick(){ if (PDART.on) return; if (!SHOT_PT || time - (SHOT_PT.t || 0) > .6 || (isAlbumTrack(Q[qi]) && !(cine && cine.album)) || au.paused || !Q.length || !('mediaSession' in navigator)) return; const nowS = performance.now() / 1000; if (nowS - shotT < (document.hidden ? 4 : 2.4)) return; shotT = nowS;
   if (artPid !== qPlanet){ artPid = qPlanet; ARTF.splice(0).forEach(u => setTimeout(() => { if (u !== ART) URL.revokeObjectURL(u); }, 9000)); }
   try { const sz = clamp(SHOT_PT.r * 2.7, 40, Math.min(W, H)), x = clamp(SHOT_PT.x - sz / 2, 0, W - sz), y = clamp(SHOT_PT.y - sz / 2, 0, H - sz), c = shotCv.getContext('2d'); c.drawImage(cv, x, y, sz, sz, 0, 0, 240, 240);
     shotCv.toBlob(bl => { if (!bl) return; const u = URL.createObjectURL(bl); ARTF.push(u); if (ARTF.length > 14){ const old = ARTF.shift(); setTimeout(() => { if (old !== ART) URL.revokeObjectURL(old); }, 9000); }
       if (!ART || nowS - artT > 20 || document.hidden){ ART = u; artT = nowS; msMeta(); } }, 'image/jpeg', .8); } catch(e){} }
 // locked screen: the captured frames play in a loop, so the planet turns on the media card
-setInterval(() => { if (!document.hidden || au.paused || !Q.length || ARTF.length < 3 || artPid !== qPlanet || !('mediaSession' in navigator)) return; const n = ARTF.length, p = 2 * n - 2; artI = (artI + 1) % p; ART = ARTF[artI < n ? artI : p - artI]; msMeta(); }, 1100);
+setInterval(() => { if (PDART.on || !document.hidden || au.paused || !Q.length || ARTF.length < 3 || artPid !== qPlanet || !('mediaSession' in navigator)) return; const n = ARTF.length, p = 2 * n - 2; artI = (artI + 1) % p; ART = ARTF[artI < n ? artI : p - artI]; msMeta(); }, 1100);
 /* the whole galaxy, planet after planet */
 function playGalaxy(){ if (VIEW && VIEW.gd){ playAlbum(0); return; } if(readonly){pdPlayRemoteGalaxy();return;} const ids = [], pl = [];
   if (!readonly) VIEW.planets.forEach(p => p.tracks.forEach(id => { if (TRACKS.has(id)){ ids.push(id); pl.push(p.id); } }));
@@ -4100,7 +4100,7 @@ function ambTick(dt){ if (!AMB) return; if (mode !== 'system' || VIEW !== SYS){ 
 addEventListener('pointerdown', e => { if (AMB && performance.now() - AMB.t > 900){ e.stopPropagation(); e.preventDefault(); ambient(false); } }, true);
 document.addEventListener('visibilitychange', () => { if (!document.hidden && AMB && navigator.wakeLock) try { navigator.wakeLock.request('screen').then(w => { wakeL = w; }).catch(() => {}); } catch(e){} });
 /* while the app is in the background and music plays, one frame every few seconds keeps the planet turning on the media card */
-setInterval(() => { if (document.hidden && !au.paused && Q.length && 'mediaSession' in navigator){ try { const n = performance.now(); last = n - 40; frame(n, true); } catch(e){} } }, 4000);
+setInterval(() => { if (!PDART.on && document.hidden && !au.paused && Q.length && 'mediaSession' in navigator){ try { const n = performance.now(); last = n - 40; frame(n, true); } catch(e){} } }, 4000);
 /* a zone (a track) can be copied onto any of your planets */
 function openCopyTo(ref, from){ const key = (ref.title + '|' + (ref.artist || '')).toLowerCase(); const lib = ref.id && TRACKS.has(ref.id) ? ref.id : ([...TRACKS.values()].find(t => (t.title + '|' + (t.artist || '')).toLowerCase() === key) || {}).id;
   const dst = SYS.planets.filter(p => !(from && VIEW === SYS && p.id === from.id));
@@ -4812,7 +4812,7 @@ async function pdPlayRemotePlanet(p,index=0){
     if(error)throw error;
     const rows=(p.tracksRO||[]).map(x=>(data||[]).find(t=>t.title===x[0]&&t.artist===(x[1]||''))).filter(Boolean);
     if(!rows.length){toast((VIEW&&VIEW.user?VIEW.user:'Ce voyageur')+' n’a pas encore partagé l’audio de cette planète',4500);return;}
-    pdRemoteStart(rows,Math.min(index,rows.length-1),ownerId,p.name);
+    pdRemoteStart(rows,Math.min(index,rows.length-1),ownerId,p.name,p.id);
   }catch(e){console.warn(e);toast('Écoute publique indisponible');}
 }
 async function pdPlayRemoteGalaxy(){
@@ -4827,7 +4827,7 @@ async function pdPlayRemoteGalaxy(){
     pdRemoteStart(rows,0,ownerId,VIEW.name);
   }catch(e){console.warn(e);toast('Écoute publique indisponible');}
 }
-function pdRemoteStart(rows,index,owner,name){
+function pdRemoteStart(rows,index,owner,name,pid){
   unlockAudio();if(radio)stopRadio();
   const ids=[];
   for(const r of rows){
@@ -4836,7 +4836,7 @@ function pdRemoteStart(rows,index,owner,name){
     TRACKS.set(id,{id,title:r.title,artist:r.artist,url,src:{k:'url',u:url},dur:0});ids.push(id);
   }
   PD_REMOTE.rows=ids;PD_REMOTE.owner=owner;
-  playList(ids,Math.max(0,index),null);
+  playList(ids,Math.max(0,index),pid||null);
   toast('♫ Galaxie en cours d’écoute · '+name,3500);
 }
 
@@ -4916,13 +4916,13 @@ body:has(#sheet:not(.off)) #pd-audio-test{opacity:0;pointer-events:none}
   document.head.appendChild(css);
   const b = document.createElement('button'); b.id = 'pd-audio-test'; b.type = 'button'; b.textContent = '♫ Tester le son';
   const P = document.createElement('div'); P.id = 'pdaPanel'; P.hidden = true; P.setAttribute('role', 'dialog'); P.setAttribute('aria-label', 'Diagnostic du son');
-  P.innerHTML = `<h4>Son · diagnostic V6.9 <button class="x" type="button" aria-label="Fermer">✕</button></h4><div id="pdaRows"></div>
+  P.innerHTML = `<h4>Son · diagnostic V7.0 <button class="x" type="button" aria-label="Fermer">✕</button></h4><div id="pdaRows"></div>
     <div class="row"><span class="k" style="min-width:auto">Écouter :</span><button data-p="planet">Planète</button><button data-p="star">Étoile</button><button data-p="moon">Lunes</button><button data-p="travel">Voyage</button><button data-p="deep">Espace</button></div>
     <div class="row"><button data-a="wake">Réactiver le son</button><button data-a="copy">Copier le rapport</button></div><ol id="pdaLog"></ol>`;
   document.body.appendChild(b); document.body.appendChild(P);
   const S = PDA.S; let timer = 0;
   const yes = (v, a, n) => v ? `<b class="ok">${a}</b>` : `<b class="bad">${n}</b>`;
-  function report(){ const c = actx; return {version: '6.9', respiration: Math.round((S.breath || 0) * 100) / 100, date: new Date().toISOString(), ua: navigator.userAgent, contexte: c ? c.state : 'absent', frequence: c ? c.sampleRate : 0, session: S.session, moteurs: S.contexts,
+  function report(){ const c = actx; return {version: '7.0', respiration: Math.round((S.breath || 0) * 100) / 100, date: new Date().toISOString(), ua: navigator.userAgent, contexte: c ? c.state : 'absent', frequence: c ? c.sampleRate : 0, session: S.session, moteurs: S.contexts,
     scene: S.scene, ambiance: S.ident, etoile: S.star, lunes: S.moons, musique: S.music, niveau_db: Math.round(S.level), voix: S.voices, reglages: {ambiance: SND.amb, interface: SND.ui, volume: SND.vol}, erreur: S.err || null, journal: S.log.slice(0, 12)}; }
   function draw(){ const c = actx, st = c ? c.state : 'absent', lv = clamp((S.level + 70) / 55, 0, 1);
     $('#pdaRows').innerHTML = `
@@ -5047,6 +5047,96 @@ document.addEventListener('visibilitychange', () => { if (document.hidden || !sb
   try { if (sb && sb.auth) sb.auth.onAuthStateChange(ev => { if (ev === 'PASSWORD_RECOVERY') setTimeout(askNew, 600); }); } catch(e){}
   if (PD_RECOVERY){ const t0 = Date.now(), w = setInterval(() => { if (authUser){ clearInterval(w); askNew(); } else if (Date.now() - t0 > 20000) clearInterval(w); }, 500); }
 })();
+/* ================= V7.0 · mode cinématique fiable, suppression de compte, ouverture plus fluide ================= */
+var cineRe = false;   // after leaving the cinematic view, it comes back only after a longer calm
+const pdVisitPid = () => (readonly && qPlanet && VIEW && VIEW.planets && VIEW.planets.some(p => p.id === qPlanet)) ? qPlanet : null;
+/* the cinematic view only lives while the app is on screen: it closes when the app goes to the background, and re-arms on return */
+document.addEventListener('visibilitychange', () => { if (document.hidden){ if (cine) exitCine(); setTimeout(pdArtStill, 60); return; } pdArtBack(); lastInteract = performance.now(); cineRe = false; cineArm = (!au.paused && Q.length) ? performance.now() : 0; });
+/* whatever starts the music (Écouter, the play button, the lock screen), the cinematic view is armed */
+au.addEventListener('play', () => { if (!cineArm) cineArm = performance.now(); });
+/* the opening: while the login page rises, the 3D behind it runs at 30 images/s and the resolution does not change */
+const pdGateUp = () => { const g = document.getElementById('authGate'); return !!g && !g.hidden && !g.classList.contains('pdi'); };
+const pdCap = () => (mode === 'splash' && !INTRO.on && pdGateUp()) ? 30 : FCAP;
+const pdHold = () => INTRO.on || OUTRO || (document.getElementById('authGate') || {classList: {contains: () => false}}).classList.contains('rise');
+{ const st = document.createElement('style');
+  st.textContent = '@keyframes pdRise{from{opacity:0;transform:translateY(48px) scale(.94)}}#authGate.rise .auth-card{will-change:transform,opacity}#authGate{backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}' +
+    '#tuto .tb{flex-wrap:wrap;gap:8px}#tuto .tdots{flex:1 0 100%;justify-content:center;margin:0 0 2px}#tuto .tb>span{flex:1 1 100%;display:flex;flex-wrap:wrap;align-items:center;gap:8px}#tuto .tb>span .btn{margin:0!important;white-space:nowrap}#tuto #tuAct{order:-1;flex:1 1 100%;justify-content:center}#tuto #tuSkip{margin-right:auto;height:36px}#tuto #tuNext{margin-left:auto}' +
+    '.acc button.del{color:rgba(255,143,163,.75);font-size:13.5px}.acc button.del i{background:rgba(255,90,120,.08)}#pdDel p{margin:0 4px 12px;color:var(--mute);font-size:14px;line-height:1.5}#pdDel ul{margin:0 4px 14px;padding-left:18px;color:var(--mute);font-size:13.5px;line-height:1.55}#pdDel .field{margin-bottom:10px}#pdDel input{width:100%;min-height:48px;border-radius:14px;border:.5px solid var(--line);background:rgba(255,255,255,.07);color:var(--ink);font:16px var(--font);padding:0 14px;box-sizing:border-box;outline:none}#pdDelMsg{min-height:1.4em;margin:8px 4px 0;font-size:13px;color:#ffb4a8}';
+  document.head.appendChild(st); }
+/* ---------- delete my account: only the signed-in person, only their own account, after their password ---------- */
+async function pdDeleteAccount(){
+  if (!sb || !authUser || guestMode){ toast('Connecte-toi pour gérer ton compte'); return; }
+  const email = authUser.email || '';
+  openSheet('delacc', head('Supprimer mon compte', esc(email)) + `<div id="pdDel">
+    <p>C’est définitif : ton étoile, tes planètes et playlists, ta galaxie publique, tes morceaux partagés, tes transmissions et abonnements seront effacés. La musique sur cet appareil, l’album PlanèteDot et les autres comptes ne sont pas touchés.</p>
+    <label class="field"><span>Ton mot de passe</span><input id="pdDelPw" type="password" autocomplete="current-password" placeholder="Mot de passe"></label>
+    <label class="field"><span>Écris SUPPRIMER pour confirmer</span><input id="pdDelOk" type="text" autocomplete="off" autocapitalize="characters" placeholder="SUPPRIMER"></label>
+    <p id="pdDelMsg" role="status"></p>
+    <div class="row"><button class="btn wide" data-close>Annuler</button><button class="btn wide" id="pdDelGo" style="color:#ff8fa3;border-color:rgba(255,120,150,.4)">Supprimer définitivement</button></div></div>`, () => {
+    const go = $('#pdDelGo'), msg = t => { const m = document.getElementById('pdDelMsg'); if (m) m.textContent = t; };
+    go.onclick = async () => {
+      const pw = $('#pdDelPw').value, ok = ($('#pdDelOk').value || '').trim().toUpperCase();
+      if (ok !== 'SUPPRIMER'){ msg('Écris SUPPRIMER pour confirmer.'); return; }
+      if (!pw){ msg('Entre ton mot de passe.'); return; }
+      go.disabled = true; msg('Vérification…');
+      try {
+        const {data: re, error: reErr} = await sb.auth.signInWithPassword({email, password: pw});
+        if (reErr || !re || !re.user || re.user.id !== authUser.id){ msg('Mot de passe incorrect.'); go.disabled = false; return; }
+        // the server must offer the deletion before anything is removed
+        const {error: dryErr} = await sb.rpc('pd_delete_my_account', {p_dry: true});
+        if (dryErr){ console.warn('Suppression de compte indisponible', dryErr); msg('La suppression de compte n’est pas encore activée. Rien n’a été effacé.'); go.disabled = false; return; }
+        msg('Suppression en cours…'); clearTimeout(saveT); remoteReady = false; try { au.pause(); } catch(e){}
+        const uid = authUser.id;
+        for (const bucket of ['planetedot-shared', 'planetedot-private']){
+          try { for (let k = 0; k < 50; k++){ const {data: files, error} = await sb.storage.from(bucket).list(uid, {limit: 100}); if (error || !files || !files.length) break;
+              const paths = files.filter(f => f && f.name).map(f => uid + '/' + f.name); if (!paths.length) break; const {error: rmErr} = await sb.storage.from(bucket).remove(paths); if (rmErr) break; } }
+          catch(e){ console.warn('Fichiers ' + bucket, e); } }
+        const {error: delErr} = await sb.rpc('pd_delete_my_account', {p_dry: false});
+        if (delErr) throw delErr;
+        try { await idbDel('kv', 'meta:' + uid); } catch(e){}
+        try { await sb.auth.signOut({scope: 'local'}); } catch(e){}
+        authUser = null; ME = null;
+        location.replace(location.origin + location.pathname + '?compte_supprime=1');
+      } catch(e){ console.error('Suppression du compte', e); msg('La suppression n’a pas abouti : ' + (e && e.message || 'réessaie') + '.'); go.disabled = false; }
+    };
+  });
+}
+/* the account sheet gets its button (it is rebuilt each time it opens) */
+new MutationObserver(() => { const out = document.getElementById('aOut'); if (!out || document.getElementById('aDel') || guestMode) return;
+  const b = document.createElement('button'); b.id = 'aDel'; b.type = 'button'; b.className = 'del'; b.innerHTML = '<i>✕</i>Supprimer mon compte'; out.insertAdjacentElement('afterend', b);
+  b.onclick = () => { closeSheet(true); setTimeout(pdDeleteAccount, 380); }; }).observe(document.getElementById('sbody') || document.body, {childList: true, subtree: true});
+if (/compte_supprime=1/.test(location.search)){ try { history.replaceState(null, '', location.pathname); } catch(e){} setTimeout(() => { try { authMessage('Ton compte a été supprimé. Merci d’avoir voyagé dans PlanèteDot ✦'); } catch(e){} }, 400); }
+/* ---------- lock screen: one sharp image of the planet, its played zone turned toward you (instead of the turning planet) ---------- */
+const PDART = {on: false, url: null, size: '', S: null, busy: false};
+const pdArtWanted = () => document.hidden && !au.paused && Q.length && ('mediaSession' in navigator) && !isAlbumTrack(Q[qi]) && !(SCP && SCP.playing);
+function pdArtStill(){
+  if (!pdArtWanted() || PDART.busy) return; const pid = playingPlanet() || pdVisitPid(); if (!pid) return;
+  if (!PDART.on && !(mode === 'system' || mode === 'planet')) return;
+  PDART.busy = true; const s0 = scale, m0 = maxScale; let big = false;
+  try {
+    if (!PDART.S) PDART.S = {mode, focus, selT, pz, cam: {yaw: cam.yaw, pitch: cam.pitch, dist: cam.dist, t: [...cam.t]}, g: {yaw: cam.g.yaw, pitch: cam.g.pitch, dist: cam.g.dist, t: [...cam.g.t]}};
+    if (cine && !cine.album && cine.pid !== pid){ cine.pid = pid; focus = pid; }
+    if (!cine && !startCine(true)) return;
+    PDART.on = true; document.body.classList.remove('cine');
+    const n0 = performance.now(), step = k => { last = n0 + k * 50 - 50; frame(n0 + k * 50, true); };
+    for (let k = 0; k < 3; k++) step(k);
+    cam.yaw = cam.g.yaw; cam.pitch = cam.g.pitch; cam.dist = cam.g.dist; cam.t = [...cam.g.t]; CV.yaw = CV.pitch = CV.dist = 0; CV.t = [0, 0, 0];
+    step(3);
+    maxScale = Math.max(m0, Math.min(3, window.devicePixelRatio || 1)); scale = 1; resize(); big = true;
+    step(4); step(5);
+    const P = SHOT_PT;
+    if (P){ const sz = clamp(P.r * 2.5, 64, Math.min(W, H)), x = clamp(P.x - sz / 2, 0, W - sz), y = clamp(P.y - sz / 2, 0, H - sz), out = Math.round(Math.min(1024, sz)), c2 = document.createElement('canvas');
+      c2.width = c2.height = out; const cx = c2.getContext('2d'); cx.imageSmoothingQuality = 'high'; cx.drawImage(cv, x, y, sz, sz, 0, 0, out, out);
+      // encoded right away (a deferred encoding may never run once the phone is locked)
+      const du = c2.toDataURL('image/jpeg', .93), bin = atob(du.slice(du.indexOf(',') + 1)), u8 = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+      const old = PDART.url; PDART.url = URL.createObjectURL(new Blob([u8], {type: 'image/jpeg'})); PDART.size = out + 'x' + out; ART = PDART.url; msMeta(); if (old) setTimeout(() => URL.revokeObjectURL(old), 9000); }
+  } catch(e){ console.warn('Image de l’écran verrouillé', e); }
+  finally { if (big){ scale = s0; maxScale = m0; resize(); } PDART.busy = false; } }
+function pdArtBack(){ if (!PDART.on) return; PDART.on = false; const S = PDART.S; PDART.S = null;
+  if (cine){ cine = null; document.body.classList.remove('cine'); try { $('#cineCap').style.opacity = 0; } catch(e){} }
+  if (S){ mode = S.mode; focus = S.focus; selT = S.selT; pz = S.pz; Object.assign(cam, {yaw: S.cam.yaw, pitch: S.cam.pitch, dist: S.cam.dist, t: S.cam.t}); Object.assign(cam.g, S.g); CV.yaw = CV.pitch = CV.dist = 0; CV.t = [0, 0, 0]; }
+  try { updUI(); } catch(e){} }
+au.addEventListener('playing', () => { if (document.hidden && PDART.on) setTimeout(pdArtStill, 400); });
 /* ---------- ?perf=1 : a small live meter, to describe the fluidity seen on iPhone ---------- */
 if (/[?&]perf=1/.test(location.search)) (function(){
   const el = document.createElement('div'); el.id = 'pdPerf'; el.style.cssText = 'position:fixed;left:8px;top:calc(env(safe-area-inset-top,0px) + 60px);z-index:99999;padding:6px 9px;border-radius:10px;background:rgba(0,0,0,.72);color:#9fffb8;font:11px/1.35 ui-monospace,Menlo,monospace;pointer-events:none;white-space:pre';
