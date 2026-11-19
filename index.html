@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#010208">
 <title>planèteDot · ton univers musical</title>
-<meta name="pd-version" content="7.0">
+<meta name="pd-version" content="7.1">
 <meta name="description" content="PlanèteDot · l’album de GuillaumDot et ton univers musical en 3D : chaque planète est un morceau.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PlanèteDot">
@@ -2559,15 +2559,17 @@ function gdInit(){
     terr: [{id: 'gd-t', name: 'Album', kind: 'manual', hue: .6, lat: .2, lon: .4, n: 8}], tracks: GD_TR.map(t => [t[0], 'GuillaumDot', 0, '', 0, t[2]])}]});
   GD.gd = true; GD.planets[0].gd = true; GD.planets[0].tracks = GD_IDS.slice(); GDO = {id: GD_ID, s: GD, gd: true, mine: false}; gdSync(); }
 function gdSync(){ if (!GD) return; const p = GD.planets[0]; let tot = 0;
-  p.tracksRO.forEach((x, i) => { const m = META[GD_IDS[i]] || {}; x[4] = Math.round(((m.plays || 0) + (m.secs || 0) / 300) * 10) / 10; tot += x[4]; });
+  p.tracksRO.forEach((x, i) => { const m = META[GD_IDS[i]] || {}; x[4] = Math.round(Math.max((m.plays || 0) + (m.secs || 0) / 300, (typeof PDAL !== 'undefined' && PDAL.ok) ? PDAL.tot[i] || 0 : 0) * 10) / 10; tot += x[4]; });
   delete p._era; CQ.delete(p); GD.sp = tot + 30 * eraInfo(p).e; GD.secs = GD_IDS.reduce((a, id) => a + ((META[id] || {}).secs || 0), 0); STP = null; }
 function playAlbum(i){ unlockAudio(); if (radio) stopRadio(); playList(GD_IDS, i || 0, GD_PID); }
 function fetchBlob(url){ return new Promise((res, rej) => { try { const x = new XMLHttpRequest(); x.open('GET', url); x.responseType = 'blob'; x.onload = () => (x.status === 200 || x.status === 0) && x.response && x.response.size ? res(x.response) : rej(); x.onerror = rej; x.send(); } catch(e){ rej(e); } }); }
 function openAlbum(){ const p = GD.planets[0];
   openSheet('album', head('PlanèteDot', 'Album de GuillaumDot · sortie le ??/??/2026') +
-    `<div class="alb"><img src="${GD_COVER}" alt="Pochette de l’album PlanèteDot"><p>Le logo de planèteDot est la pochette de cet album. L’appli le fait vivre : chaque titre est une zone de la planète PlanèteDot, qui grandit à chaque écoute, comme tes propres planètes.</p></div>
+    `<div class="alb"><img src="${GD_COVER}" alt="Pochette de l’album PlanèteDot"><p>Le logo de planèteDot est la pochette de cet album. L’appli le fait vivre : chaque titre est une zone de la planète PlanèteDot, qui grandit avec les écoutes de toute la communauté.</p></div>
      <div class="row"><button class="btn pri wide" id="aPlay">${ICON.play}Écouter l’album</button>${VIEW === GD ? `<button class="btn wide" id="aCopy">${ICON.plus}Copier la planète</button>` : `<button class="btn wide" id="aGo">${ICON.jump}Y aller</button>`}</div>
-     <ul class="list" id="aList">${GD_TR.map((t, i) => `<li class="tr${Q[qi] === GD_IDS[i] && !au.paused ? ' on' : ''}" data-i="${i}" style="cursor:pointer"><span class="n">${i + 1}</span><div class="m"><b>${esc(t[0])}</b><span>GuillaumDot</span></div><span class="d">${fmt(t[1])}</span></li>`).join('')}</ul>`, () => {
+     <div id="pdAlStats"></div><h4 class="pdal-t">Titres</h4>
+     <ul class="list" id="aList">${GD_TR.map((t, i) => `<li class="tr${Q[qi] === GD_IDS[i] && !au.paused ? ' on' : ''}" data-i="${i}" style="cursor:pointer"><span class="n">${i + 1}</span><div class="m"><b>${esc(t[0])}</b><span data-pc="${i}">GuillaumDot</span></div><span class="spk-w" data-sp="${i}"></span><span class="d">${fmt(t[1])}</span></li>`).join('')}</ul>`, () => {
+    pdAlbumPaint(); pdAlbumLoad(true);
     $('#aPlay').onclick = () => { playAlbum(0); setTimeout(() => sheetKind === 'album' && openAlbum(), 200); };
     const cp = $('#aCopy'); if (cp) cp.onclick = () => { closeSheet(true); copyPlanet(p); };
     const go = $('#aGo'); if (go) go.onclick = () => { closeSheet(true); if (mode === 'galaxy') jumpTo(GDO); else enterSystem(GD, true, GD_ID); };
@@ -2729,7 +2731,7 @@ function lockSys(o, manual){ if (manual && (!gLock || gLock.id !== o.id)){ FOV =
 function renderGP(){
   const gp = $('#gp'); if (mode !== 'galaxy' || !gLock){ gp.classList.add('off'); return; }
   const o = gLock, s = o.s;
-  if (o.gd){ gp.innerHTML = `<h3>PlanèteDot</h3><p>Système de GuillaumDot · au cœur d’Andromède</p><div class="alb sm"><img src="${GD_COVER}" alt=""><p>Le logo de planèteDot est la pochette de cet album, sortie le ??/??/2026. 8 titres, une planète Terre qui évolue à chaque écoute. Libre à l’écoute et à la copie.</p></div>
+  if (o.gd){ gp.innerHTML = `<h3>PlanèteDot</h3><p>Système de GuillaumDot · au cœur d’Andromède</p><div class="alb sm"><img src="${GD_COVER}" alt=""><p>Le logo de planèteDot est la pochette de cet album, sortie le ??/??/2026. 8 titres, une planète Terre qui évolue avec les écoutes de toute la communauté. Libre à l’écoute et à la copie.</p></div><button type="button" class="pdal-gp" id="gStat">${pdAlGpTxt()}</button>
       <div class="row" style="margin:0;align-items:center"><button class="btn pri wide" id="gGo">${ICON.jump}Voyager</button><button class="btn" id="gAl">${ICON.play}Écouter</button></div>`;
     gp.classList.remove('off'); $('#gGo').onclick = () => jumpTo(o); $('#gAl').onclick = () => playAlbum(0); return; }
   const gen = sysGenres(s); const me = sysPos(ME || 'me'), q = sysPos(o.id); const ly = Math.round(Math.hypot(me[0]-q[0], me[2]-q[2]) * 137);
@@ -4591,7 +4593,8 @@ function shareStory(again){ if (STORY || OUTRO) return; const info = storyInfo()
   closeSheet(true); if (MENU.open) closeMenu(true); if (cine) exitCine();
   if (!info.album && info.pid && !again){ const inV = VIEW && VIEW.planets && VIEW.planets.some(p => p.id === info.pid);   // the planet must be on screen: go home first if it is yours
     if ((!inV || (mode !== 'system' && mode !== 'planet')) && SYS.planets.some(p => p.id === info.pid)){ goHome(); setTimeout(() => shareStory(true), 1900); return; } }
-  const ok = info.album ? startCine(true) : info.pid ? startCine(true, info.pid) : false;
+  let apid = null; if (info.album){ apid = again ? (SYS.planets.some(p => p.id === qPlanet) && VIEW === SYS ? qPlanet : VIEW === GD ? GD_PID : null) : pdAlbStoryPrep(); if (apid === 'wait'){ setTimeout(() => shareStory(true), 1900); return; } }
+  const ok = info.album ? ((apid && startCine(true, apid)) || startCine(true)) : info.pid ? startCine(true, info.pid) : false;
   const cv2 = document.createElement('canvas'); cv2.width = 720; cv2.height = 1280; cv2.setAttribute('aria-hidden', 'true'); cv2.style.cssText = 'position:fixed;left:-3000px;top:0;width:72px;height:128px;opacity:0;pointer-events:none'; document.body.appendChild(cv2);   // in the page: some browsers only film a canvas that is attached
   STORY = {cv: cv2, c: cv2.getContext('2d'), info, t0: performance.now(), dur: 15000, chunks: [], rec: null, focus: ok}; { const S0 = STORY; storyAudio(info).then(bf => { S0.abuf = bf; S0.aready = true; }); }
   const ov = document.createElement('div'); ov.id = 'pdRec'; ov.innerHTML = '<div class="pill"><i></i><span>Ta story se prépare · 15 s</span><button type="button">Annuler</button></div>'; document.body.appendChild(ov);
@@ -4620,7 +4623,7 @@ function storyTick(){ const S = STORY; if (!S || S.done) return; const el = perf
     catch(e){ S.rec = null; S.done = true; S.cv.toBlob(b => { S.blob = b; S.mt = 'image/png'; storyEnd(false); }, 'image/png'); return; } }
   const p = (performance.now() - S.started) / S.dur, bar = document.querySelector('#pdRec i'); if (bar) bar.style.setProperty('--p', Math.min(1, p).toFixed(3));
   if (p >= 1 && S.rec && S.rec.state === 'recording'){ S.done = true; try { S.rec.stop(); } catch(e){ storyEnd(false); } } }
-function storyEnd(cancel){ const S = STORY; if (!S) return; STORY = null; S.done = true; try { S.cv.remove(); } catch(e){} try { if (S.src) S.src.stop(); } catch(e){} try { if (S.rec && S.rec.state === 'recording'){ S.rec.onstop = null; S.rec.stop(); } } catch(e){}
+function storyEnd(cancel){ const S = STORY; if (!S) return; STORY = null; if (PDSC_PZ0 !== null){ pz = PDSC_PZ0; PDSC_PZ0 = null; } S.done = true; try { S.cv.remove(); } catch(e){} try { if (S.src) S.src.stop(); } catch(e){} try { if (S.rec && S.rec.state === 'recording'){ S.rec.onstop = null; S.rec.stop(); } } catch(e){}
   const ov = document.getElementById('pdRec'); if (ov) ov.remove(); if (cine) exitCine(); if (cancel) return;
   const blob = S.blob || (S.chunks.length ? new Blob(S.chunks, {type: S.mt || 'video/mp4'}) : null); if (!blob || !blob.size){ toast('La story n’a pas pu être créée sur cet appareil'); return; }
   const isImg = blob.type.startsWith('image'), ext = isImg ? 'png' : /webm/.test(blob.type) ? 'webm' : 'mp4', url = URL.createObjectURL(blob), file = new File([blob], 'planetedot-story.' + ext, {type: blob.type});
@@ -4681,6 +4684,7 @@ addEventListener('pointermove', e => { HOVP = e.pointerType === 'mouse' && !e.bu
 
 // the planet you listen to, seen like in its exploration view: the zone being played turned toward you, its waves around it
 function cineFocusPlanet(dt){ const c = cine, i = VIEW.planets.findIndex(p => p.id === c.pid); if (i < 0){ exitCine(); return; } const p = VIEW.planets[i]; c.t = time - (c.t0 ?? time);
+  if (pdStoryCamP(dt, p)) return;
   const lr = conquest(p).items.find(x => x.live); if (lr && lr.dir){ const w = rz(-(p.tilt || 0), ry(-(p._ang || 0), lr.dir)); cam.g.yaw = wrapA(Math.atan2(w[0], w[2]) + Math.sin(c.t * .11) * .12, cam.yaw); cam.g.pitch = clamp(Math.asin(clamp(w[1], -1, 1)) * .75, -.35, .9) + Math.sin(c.t * .08) * .03; }
   else cam.g.yaw += dt * .04; FOV = lerp(FOV, FOV0, 1 - Math.exp(-dt * 1.5)); }
 
@@ -4916,13 +4920,13 @@ body:has(#sheet:not(.off)) #pd-audio-test{opacity:0;pointer-events:none}
   document.head.appendChild(css);
   const b = document.createElement('button'); b.id = 'pd-audio-test'; b.type = 'button'; b.textContent = '♫ Tester le son';
   const P = document.createElement('div'); P.id = 'pdaPanel'; P.hidden = true; P.setAttribute('role', 'dialog'); P.setAttribute('aria-label', 'Diagnostic du son');
-  P.innerHTML = `<h4>Son · diagnostic V7.0 <button class="x" type="button" aria-label="Fermer">✕</button></h4><div id="pdaRows"></div>
+  P.innerHTML = `<h4>Son · diagnostic V7.1 <button class="x" type="button" aria-label="Fermer">✕</button></h4><div id="pdaRows"></div>
     <div class="row"><span class="k" style="min-width:auto">Écouter :</span><button data-p="planet">Planète</button><button data-p="star">Étoile</button><button data-p="moon">Lunes</button><button data-p="travel">Voyage</button><button data-p="deep">Espace</button></div>
     <div class="row"><button data-a="wake">Réactiver le son</button><button data-a="copy">Copier le rapport</button></div><ol id="pdaLog"></ol>`;
   document.body.appendChild(b); document.body.appendChild(P);
   const S = PDA.S; let timer = 0;
   const yes = (v, a, n) => v ? `<b class="ok">${a}</b>` : `<b class="bad">${n}</b>`;
-  function report(){ const c = actx; return {version: '7.0', respiration: Math.round((S.breath || 0) * 100) / 100, date: new Date().toISOString(), ua: navigator.userAgent, contexte: c ? c.state : 'absent', frequence: c ? c.sampleRate : 0, session: S.session, moteurs: S.contexts,
+  function report(){ const c = actx; return {version: '7.1', respiration: Math.round((S.breath || 0) * 100) / 100, date: new Date().toISOString(), ua: navigator.userAgent, contexte: c ? c.state : 'absent', frequence: c ? c.sampleRate : 0, session: S.session, moteurs: S.contexts,
     scene: S.scene, ambiance: S.ident, etoile: S.star, lunes: S.moons, musique: S.music, niveau_db: Math.round(S.level), voix: S.voices, reglages: {ambiance: SND.amb, interface: SND.ui, volume: SND.vol}, erreur: S.err || null, journal: S.log.slice(0, 12)}; }
   function draw(){ const c = actx, st = c ? c.state : 'absent', lv = clamp((S.level + 70) / 55, 0, 1);
     $('#pdaRows').innerHTML = `
@@ -5137,6 +5141,104 @@ function pdArtBack(){ if (!PDART.on) return; PDART.on = false; const S = PDART.S
   if (S){ mode = S.mode; focus = S.focus; selT = S.selT; pz = S.pz; Object.assign(cam, {yaw: S.cam.yaw, pitch: S.cam.pitch, dist: S.cam.dist, t: S.cam.t}); Object.assign(cam.g, S.g); CV.yaw = CV.pitch = CV.dist = 0; CV.t = [0, 0, 0]; }
   try { updUI(); } catch(e){} }
 au.addEventListener('playing', () => { if (document.hidden && PDART.on) setTimeout(pdArtStill, 400); });
+/* ---------- V7.1 · écoutes de l'album communes à tous (comptes et visiteurs) ---------- */
+var PDAL = {tot: [0, 0, 0, 0, 0, 0, 0, 0], daily: {}, ears: 0, month: 0, ok: false, t: -1e9, busy: false, sel: -1};
+const PDAL_SES = (() => { const mk = () => 's' + Math.random().toString(36).slice(2) + Date.now().toString(36); try { let k = localStorage.getItem('pdAlD'); if (!k){ k = mk(); localStorage.setItem('pdAlD', k); } return k; } catch(e){ return mk(); } })();
+const pdDay = ms => new Date(ms).toLocaleDateString('en-CA', {timeZone: 'Europe/Paris'});
+const pdNum = n => Math.round(n || 0).toLocaleString('fr-FR');
+function pdAlDays(n){ const out = [], now = Date.now(); for (let k = n - 1; k >= 0; k--) out.push(pdDay(now - k * 864e5)); return [...new Set(out)]; }
+function pdAlDay(d){ return PDAL.daily[d] || (PDAL.daily[d] = [0, 0, 0, 0, 0, 0, 0, 0]); }
+async function pdAlbumLoad(force){
+  if (!sb || PDAL.busy || document.hidden) return; const gap = sheetOpen && sheetKind === 'album' ? 30000 : 120000;
+  if (!force && performance.now() - PDAL.t < gap) return; PDAL.busy = true;
+  try { const {data, error} = await sb.rpc('pd_album_stats', {p_days: 30});
+    if (!error && data && Array.isArray(data.tot)){ PDAL.tot = data.tot.map(x => +x || 0); const dl = {}; (data.daily || []).forEach(r => { const c = [0, 0, 0, 0, 0, 0, 0, 0]; (r.c || []).forEach(p => { if (p[0] >= 1 && p[0] <= 8) c[p[0] - 1] = +p[1] || 0; }); dl[r.d] = c; });
+      PDAL.daily = dl; PDAL.ears = +data.ears || 0; PDAL.month = +data.month || 0; PDAL.ok = true; PDAL.t = performance.now(); try { gdSync(); } catch(e){} PDAL.err = false; pdAlbumPaint(); } else { PDAL.t = performance.now(); PDAL.err = true; pdAlbumPaint(); } }
+  catch(e){ PDAL.t = performance.now(); PDAL.err = true; pdAlbumPaint(); }
+  PDAL.busy = false; }
+function pdAlbumSend(n){ if (!sb) return; sb.rpc('pd_album_play', {p_track: n, p_session: PDAL_SES}).then(({data}) => { if (data !== true) return; PDAL.tot[n - 1]++; pdAlDay(pdDay(Date.now()))[n - 1]++; try { gdSync(); } catch(e){} pdAlbumPaint(); }, () => {}); }
+/* une écoute = 30 s réellement jouées d'un titre de l'album (la moitié pour un titre de moins d'une minute) */
+const PDALP = {id: null, acc: 0, last: 0, w: 0, sent: false};
+au.addEventListener('timeupdate', () => { const id = Q[qi], t = au.currentTime || 0, w = performance.now() / 1000;
+  if (id !== PDALP.id){ PDALP.id = id; PDALP.acc = 0; PDALP.sent = false; PDALP.last = t; PDALP.w = w; return; }
+  const d = t - PDALP.last, dw = w - PDALP.w; PDALP.last = t; PDALP.w = w; if (d < 0 && t < 2){ PDALP.acc = 0; PDALP.sent = false; return; }
+  const i = GD_IDS.indexOf(id); if (i < 0 || PDALP.sent || au.paused) return; if (d > 0 && d <= dw * (au.playbackRate || 1) + .75) PDALP.acc += d;
+  const dur = au.duration || 0; if (PDALP.acc >= 30 || (dur > 0 && dur < 60 && PDALP.acc >= dur * .5)){ PDALP.sent = true; pdAlbumSend(i + 1); } });
+au.addEventListener('ended', () => { PDALP.id = null; });
+function pdAlGpTxt(){ if (!PDAL.ok) return 'Écoutes de la communauté · voir l’évolution'; const tot = PDAL.tot.reduce((a, b) => a + b, 0); return `${pdNum(tot)} écoute${tot > 1 ? 's' : ''} · voir l’évolution des titres`; }
+function pdSpark(vals, w, h){ const mx = Math.max(1, ...vals), n = vals.length, st = w / Math.max(1, n - 1);
+  const pts = vals.map((v, k) => [k * st, h - 2 - (v / mx) * (h - 5)]); const d = pts.map((p, k) => (k ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(''); const L = pts[n - 1];
+  return `<svg class="spk" style="stroke:none" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" aria-hidden="true"><path d="${d}" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${L[0].toFixed(1)}" cy="${L[1].toFixed(1)}" r="2.6" fill="currentColor"/></svg>`; }
+function pdAlCapTxt(days, k){ const d = days[k], v = (PDAL.daily[d] || []).reduce((a, b) => a + b, 0); const dt = new Date(d + 'T12:00:00'); const lab = k === days.length - 1 ? 'Aujourd’hui' : dt.toLocaleDateString('fr-FR', {weekday: 'long', day: 'numeric', month: 'long'});
+  const by = (PDAL.daily[d] || []).map((n, i) => [n, i]).filter(x => x[0] > 0).sort((a, b) => b[0] - a[0]).slice(0, 2).map(x => `${esc(GD_TR[x[1]][0])} ${pdNum(x[0])}`).join(' · ');
+  return `<b>${lab.charAt(0).toUpperCase() + lab.slice(1)} : ${pdNum(v)} écoute${v > 1 ? 's' : ''}</b>${by ? `<span>${by}</span>` : ''}`; }
+function pdAlbumPaint(){
+  const gs = document.getElementById('gStat'); if (gs) gs.textContent = pdAlGpTxt();
+  const el = document.getElementById('pdAlStats'); if (!el) return;
+  if (!PDAL.ok){ el.innerHTML = `<p class="note">${PDAL.err ? 'Le compteur d’écoutes de la communauté n’est pas joignable pour le moment.' : 'Compteur de la communauté en chargement…'}</p>`; return; }
+  const days = pdAlDays(30), per = days.map(d => (PDAL.daily[d] || []).reduce((a, b) => a + b, 0)), tot = PDAL.tot.reduce((a, b) => a + b, 0);
+  const w7 = per.slice(-7).reduce((a, b) => a + b, 0), mx = Math.max(1, ...per), W = 300, H = 64, bw = W / days.length;
+  const t7 = GD_TR.map((t, i) => [days.slice(-7).reduce((a, d) => a + ((PDAL.daily[d] || [])[i] || 0), 0), i]).sort((a, b) => b[0] - a[0])[0];
+  const sel = PDAL.sel >= 0 && PDAL.sel < days.length ? PDAL.sel : days.length - 1;
+  const bars = per.map((v, k) => { const h = v ? Math.max(3, (v / mx) * (H - 6)) : 1.5; return `<rect data-k="${k}" x="${(k * bw + 1).toFixed(1)}" y="${(H - h).toFixed(1)}" width="${Math.max(2, bw - 2).toFixed(1)}" height="${h.toFixed(1)}" rx="${v ? 2 : .75}" class="${k === sel ? 'on' : v ? '' : 'z'}"/>`; }).join('');
+  const pop = PDAL.tot.map((n, i) => [n, i]).sort((a, b) => b[0] - a[0] || a[1] - b[1]).slice(0, 5);
+  el.innerHTML = `<p class="pdal-ml"><b>${pdNum(PDAL.month)}</b> auditeur${PDAL.month > 1 ? 's' : ''} mensuel${PDAL.month > 1 ? 's' : ''}</p>
+    <div class="pdal-h"><div><b>${pdNum(tot)}</b><span>écoutes au total</span></div><div><b>${pdNum(w7)}</b><span>sur 7 jours</span></div><div><b>${pdNum(PDAL.ears)}</b><span>auditeurs en tout</span></div></div>
+    <h4 class="pdal-t">Populaires</h4><ol class="pdal-pop">${pop.map((x, r) => `<li data-i="${x[1]}" class="${Q[qi] === GD_IDS[x[1]] && !au.paused ? 'on' : ''}"><span class="r">${r + 1}</span><b>${esc(GD_TR[x[1]][0])}</b><span class="spk-w" data-sp="${x[1]}"></span><span class="c">${pdNum(x[0])}</span></li>`).join('')}</ol>
+    <h4 class="pdal-t">Évolution des écoutes</h4>
+    <div class="pdal-c"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Écoutes de l’album par jour, 30 derniers jours">${bars}${days.map((d, k) => `<rect data-k="${k}" x="${(k * bw).toFixed(1)}" y="0" width="${bw.toFixed(1)}" height="${H}" class="hit"/>`).join('')}</svg>
+    <div class="pdal-ax"><span>il y a 30 jours</span><span>aujourd’hui</span></div><p class="pdal-cap" id="pdAlCap">${pdAlCapTxt(days, sel)}</p></div>
+    ${t7 && t7[0] > 0 ? `<p class="note" style="margin:4px 0 8px">Titre le plus écouté cette semaine : <b style="color:var(--text,#fff)">${esc(GD_TR[t7[1]][0])}</b></p>` : ''}`;
+  const svg = el.querySelector('svg'); const pick = e => { const r = svg.getBoundingClientRect(), x = ((e.touches ? e.touches[0].clientX : e.clientX) - r.left) / r.width; const k = clamp(Math.floor(x * days.length), 0, days.length - 1); if (k === PDAL.sel) return; PDAL.sel = k;
+    svg.querySelectorAll('rect.on:not(.hit)').forEach(b => b.classList.remove('on')); const b = svg.querySelector(`rect[data-k="${k}"]:not(.hit)`); if (b){ b.classList.add('on'); b.classList.remove('z'); } const c = document.getElementById('pdAlCap'); if (c) c.innerHTML = pdAlCapTxt(days, k); };
+  svg.addEventListener('pointermove', pick); svg.addEventListener('pointerdown', pick); svg.addEventListener('touchmove', e => { pick(e); }, {passive: true});
+  const pl = el.querySelector('.pdal-pop'); if (pl) pl.onclick = e => { const li = e.target.closest('[data-i]'); if (!li) return; playAlbum(+li.dataset.i); setTimeout(() => sheetKind === 'album' && pdAlbumPaint(), 250); };
+  const d14 = days.slice(-14);
+  document.querySelectorAll('#aList [data-pc]').forEach(s => { const i = +s.dataset.pc, n = PDAL.tot[i] || 0, wk = days.slice(-7).reduce((a, d) => a + ((PDAL.daily[d] || [])[i] || 0), 0); s.textContent = `${pdNum(n)} écoute${n > 1 ? 's' : ''}${wk ? ` · +${pdNum(wk)} cette semaine` : ''}`; });
+  document.querySelectorAll('#aList [data-sp], #pdAlStats [data-sp]').forEach(s => { const i = +s.dataset.sp; s.innerHTML = pdSpark(d14.map(d => (PDAL.daily[d] || [])[i] || 0), 46, 18); s.title = 'Écoutes des 14 derniers jours'; }); }
+document.addEventListener('click', e => { if (e.target.closest && e.target.closest('#gStat')){ e.preventDefault(); try { openAlbum(); } catch(_){} } });
+setInterval(() => pdAlbumLoad(false), 15000); setTimeout(() => pdAlbumLoad(true), 2500); document.addEventListener('visibilitychange', () => { if (!document.hidden) setTimeout(() => pdAlbumLoad(false), 800); });
+(function(){ const st = document.createElement('style'); st.textContent = `
+#pdAlStats{margin:4px 0 6px}
+.pdal-h{display:flex;gap:8px;margin:0 0 10px}.pdal-h>div{flex:1;min-width:0;padding:10px 8px;border-radius:14px;background:rgba(255,255,255,.05);text-align:center}
+.pdal-h b{display:block;font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--text,#fff)}.pdal-h span{display:block;font-size:12px;color:var(--mute)}
+.pdal-c{padding:10px 10px 8px;border-radius:14px;background:rgba(255,255,255,.035)}.pdal-c svg{display:block;width:100%;height:64px;touch-action:pan-y;cursor:crosshair}
+.pdal-c rect{fill:var(--blue);opacity:.55;stroke:none}.pdal-c rect.z{fill:rgba(255,255,255,.18);opacity:1}.pdal-c rect.on{opacity:1}.pdal-c rect.hit{fill:transparent;opacity:1}
+.pdal-ax{display:flex;justify-content:space-between;font-size:11px;color:var(--faint);margin:4px 0 0}
+.pdal-cap{margin:6px 0 0;font-size:13px;color:var(--mute);min-height:34px}.pdal-cap b{display:block;color:var(--text,#fff);font-weight:600}.pdal-cap span{display:block;font-size:12px}
+.pdal-ml{margin:2px 0 10px;font-size:14px;color:var(--mute)}.pdal-ml b{font-size:22px;font-weight:700;color:var(--text,#fff);font-variant-numeric:tabular-nums;margin-right:4px}
+.pdal-t{margin:14px 0 6px;font-size:15px;font-weight:700;color:var(--text,#fff)}
+.pdal-pop{list-style:none;margin:0;padding:0}.pdal-pop li{display:flex;align-items:center;gap:10px;padding:9px 6px;border-radius:12px;cursor:pointer}.pdal-pop li:active{background:rgba(255,255,255,.06)}
+.pdal-pop .r{width:16px;text-align:right;font-size:14px;color:var(--faint);font-variant-numeric:tabular-nums;flex:none}.pdal-pop b{flex:1;min-width:0;font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pdal-pop li.on b{color:var(--blue)}
+.pdal-pop .c{flex:none;font-size:13px;color:var(--mute);font-variant-numeric:tabular-nums;min-width:44px;text-align:right}
+#aList .spk-w,.pdal-pop .spk-w{flex:none;display:flex;align-items:center;color:var(--blue);margin:0 4px;width:46px;height:18px}
+#gp .pdal-gp{display:block;width:100%;margin:2px 0 10px;padding:8px 10px;border:0;border-radius:12px;background:rgba(255,255,255,.06);color:var(--mute);font:inherit;font-size:13px;text-align:left;cursor:pointer}
+`; document.head.appendChild(st); })();
+/* ---------- V7.1 · story de l'album : la planète de l'album (ou sa copie), focus sur la zone jouée, plans variés calés sur le tempo ---------- */
+function pdAlbStoryPrep(){ const cp = SYS.planets.find(p => p.id === qPlanet);
+  if (cp){ if (VIEW === SYS && (mode === 'system' || mode === 'planet')) return cp.id; if (!guestMode){ goHome(); return 'wait'; } }
+  if (!GD) return null; if (VIEW === GD && (mode === 'system' || mode === 'planet')) return GD_PID;
+  enterSystem(GD, true, GD_ID); return 'wait'; }
+const PDSC = ['zone', 'orbit', 'low', 'reveal', 'top', 'pass']; var PDSC_PZ0 = null;
+function pdStoryCamP(dt, p){ const S = STORY; if (!S || S.done || !S.focus || !cine || cine.album){ if (PDSC_PZ0 !== null){ pz = PDSC_PZ0; PDSC_PZ0 = null; } return false; }
+  if (PDSC_PZ0 === null) PDSC_PZ0 = pz; const c = cine, st = c.st || (c.st = {i: -1, j: 0, base: cam.yaw});
+  const lr = conquest(p).items.find(x => x.live); let yawZ = st.base, pitchZ = .2;
+  if (lr && lr.dir){ const w = rz(-(p.tilt || 0), ry(-(p._ang || 0), lr.dir)); yawZ = Math.atan2(w[0], w[2]); pitchZ = clamp(Math.asin(clamp(w[1], -1, 1)) * .75, -.35, .9); }
+  const bc = beatClock(), bps = bc ? (bc.bpm > 110 ? 8 : 4) : 0; let k, u;
+  if (bc){ const b = bc.beat / bps; k = Math.floor(b); u = b - k; } else { const q = (time - (c.t0 ?? time)) / 3.2; k = Math.floor(q); u = q - k; }
+  let cut = false; if (k !== st.i){ if (st.i === -1) st.j = 0; else { st.j = (st.j + 1 + (k % 2)) % PDSC.length; cut = true; } st.i = k; }
+  const sh = PDSC[st.j], e = u * u * (3 - 2 * u), side = k % 2 ? -1 : 1; let yaw = yawZ, pitch = pitchZ, z = .7, fov = FOV0;
+  if (sh === 'zone'){ z = .5 - .14 * e; yaw += side * (.16 - .12 * e); pitch += .04; }
+  else if (sh === 'orbit'){ z = .9; yaw += side * (-.6 + 1.2 * e); pitch += .14; }
+  else if (sh === 'low'){ z = .68; yaw += side * (.45 - .2 * e); pitch = pitchZ - .34 + .1 * e; }
+  else if (sh === 'reveal'){ z = .42 + .9 * e; pitch += .08 + .12 * e; fov = FOV0 * 1.08; }
+  else if (sh === 'top'){ z = .85; yaw += side * (.3 * e - .15); pitch = Math.min(1.1, pitchZ + .5); }
+  else { z = .62; yaw += side * (-.8 + 1.6 * e); pitch += .02; }
+  pz = z; cam.g.yaw = wrapA(yaw, cam.yaw); cam.g.pitch = clamp(pitch, -.6, 1.15);
+  if (cut){ cam.yaw = cam.g.yaw; cam.pitch = cam.g.pitch; try { CV.yaw = CV.pitch = CV.dist = 0; } catch(_){} FOV = fov; POST.flash = Math.max(POST.flash, .16); }
+  else FOV = lerp(FOV, fov, 1 - Math.exp(-dt * 2));
+  c.shot = sh; return true; }
+
 /* ---------- ?perf=1 : a small live meter, to describe the fluidity seen on iPhone ---------- */
 if (/[?&]perf=1/.test(location.search)) (function(){
   const el = document.createElement('div'); el.id = 'pdPerf'; el.style.cssText = 'position:fixed;left:8px;top:calc(env(safe-area-inset-top,0px) + 60px);z-index:99999;padding:6px 9px;border-radius:10px;background:rgba(0,0,0,.72);color:#9fffb8;font:11px/1.35 ui-monospace,Menlo,monospace;pointer-events:none;white-space:pre';
