@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#010208">
 <title>planèteDot · ton univers musical</title>
-<meta name="pd-version" content="7.4">
+<meta name="pd-version" content="7.6">
 <meta name="description" content="PlanèteDot · l’album de GuillaumDot et ton univers musical en 3D : chaque planète est un morceau.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PlanèteDot">
@@ -2574,7 +2574,7 @@ function openAlbum(){ const p = GD.planets[0];
     const cp = $('#aCopy'); if (cp) cp.onclick = () => { closeSheet(true); copyPlanet(p); };
     const go = $('#aGo'); if (go) go.onclick = () => { closeSheet(true); if (mode === 'galaxy') jumpTo(GDO); else enterSystem(GD, true, GD_ID); };
     $('#aList').onclick = e => { const li = e.target.closest('[data-i]'); if (!li) return; playAlbum(+li.dataset.i); setTimeout(() => sheetKind === 'album' && openAlbum(), 200); }; }); }
-function sysPos(id){ if (id === GD_ID) return [0, 0, 0]; const h = hashStr(id), h2 = hashStr(id + '#'), arm = Math.floor(h * 4), r = 24 + h2 * 88; const an = arm * TAU / 4 + r * .045 + (hashStr(id + '!') - .5) * .5 + time * 5 / Math.pow(r, 1.5); return [Math.cos(an) * r, (hashStr(id + '?') - .5) * 3, Math.sin(an) * r]; }
+function sysPos(id){ if (id === GD_ID) return [0, 0, 0]; return pdOrbAt(id, 0); }
 function statsOf(o){ const s = o.s || {}; if (o.mine) return {pl: SYS.planets.length, v: (COUNTS.get(ME) || {}).v || 0, c: (COUNTS.get(ME) || {}).c || 0, f: Math.max(followersOf(ME || 'me'), (COUNTS.get(ME) || {}).f || 0), h: (SYS.secs || 0) / 3600};
   const st = s.stats || {}; const k = COUNTS.get(o.id) || {}; return {pl: (s.planets || []).length, v: (k.v || 0) + (st.v || 0), c: (k.c || 0) + (st.c || 0), f: Math.max(followersOf(o.id), k.f || 0) + (st.f || 0), h: (s.secs || 0) / 3600}; }
 function galRadius(o){ const st = statsOf(o); return clamp(2.2 + st.pl * .35 + Math.sqrt(st.v) * .22 + st.c * .3 + st.f * .32 + Math.sqrt(st.h) * .45, 2.4, 10); }
@@ -2615,7 +2615,7 @@ function sysGenres(s){ const c = new Map(); (s.planets || []).forEach(p => (p.te
 function galaxyList(){ const others = [...OTHERS].map(([id, s]) => ({id, s, mine: false})); if (guestMode) return others;   // a spectator has no system of his own
   return [{id: ME || 'me', s: snapshotLite(), mine: true}, ...others]; }
 function renderGalaxy(dt){
-  updateCam(dt, 2.6);
+  pdGalFollow(); updateCam(dt, 2.6);
   drawSky(CR, CU, CF, .55, 2);
   drawBG(cam.t[0] * .002, cam.t[2] * .002, speedFx(), null, null, 1.3);
   // polar grid
@@ -2630,6 +2630,7 @@ function renderGalaxy(dt){
     FOLLOWS.forEach((ids, id) => ids.forEach(t => add(P.get(id), P.get(t))));
     gl2.forEach(o => { if (!galTraits(o).includes('Constellation')) return; const a = P.get(o.id); gl2.filter(x => x.id !== o.id).map(x => [Math.hypot(P.get(x.id)[0] - a[0], P.get(x.id)[2] - a[2]), x.id]).sort((x, y) => x[0] - y[0]).slice(0, 2).forEach(x => add(a, P.get(x[1]))); });
     if (br.length){ gl.useProgram(SEG.p); gl.bindVertexArray(segV); gl.bindBuffer(gl.ARRAY_BUFFER, segB); gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(br)); gl.uniformMatrix4fv(SEG.u.uVP, false, VP); gl.uniform4f(SEG.u.uC, 1, .8, .45, .16 + .06 * Math.sin(time * .8)); gl.drawArrays(gl.LINES, 0, br.length / 3); } }
+  pdOrbitDraw();
   // routes (signals)
   const myPos = sysPos(ME || 'me'); const routes = [];
   routeIds().forEach(id => { if (!OTHERS.has(id)) return; const q = sysPos(id); routes.push(...myPos, ...q); });
@@ -2647,7 +2648,7 @@ function renderGalaxy(dt){
     const pos = sysPos(o.id), pr = project(pos); if (!pr) return;
     const s = o.s, lv = s.level || 1; const r = pxR(galRadius(o), pr.w);
     const match = !gFilter || sysGenres(s).includes(gFilter); const locked = gLock && gLock.id === o.id;
-    bodies.push({w: pr.w, kind: 6, L: core ? gL(pr, core) : null, sun: LOGO_SUN, sunI: 1 + 1.1 * clamp(1 - Math.hypot(pos[0], pos[2]) / 85, 0, 1) * (1 + bassLvl * .35), x: pr.x, y: pr.y, r, q: 1, c1: hsl(s.hue ?? .58, .7, .65), seed: hashStr(o.id) * 10, roll: hashStr(o.id + 'r') * 3, ringS: clamp(Math.abs(Math.sin(cam.pitch + hashStr(o.id + 't') * .6)), .25, 1), alpha: match ? 1 : .2, hi: locked ? 1 : (o.mine ? .4 : 0)}); galDeco(o, pr, bodies[bodies.length - 1], bodies, true);
+    bodies.push({w: pr.w, kind: 6, L: core ? gL(pr, core) : null, sun: LOGO_SUN, sunI: 1 + 1.1 * clamp(1 - Math.hypot(pos[0], pos[2]) / 85, 0, 1) * (1 + bassLvl * .35), x: pr.x, y: pr.y, r, q: 1, c1: hsl(s.hue ?? .58, .7, .65), seed: hashStr(o.id) * 10, roll: hashStr(o.id + 'r') * 3, ringS: clamp(Math.abs(Math.sin(cam.pitch + hashStr(o.id + 't') * .6)), .25, 1), alpha: (match ? 1 : .2) * (locked ? 1 : pdDepthA(pr.w)), hi: locked ? 1 : (o.mine ? .4 : 0)}); galDeco(o, pr, bodies[bodies.length - 1], bodies, true);
     const d = Math.hypot(pr.x - cx, pr.y - cy); if (d < bd && d < 70 * RS){ bd = d; best = o; }
     picks.push({x: pr.x, y: pr.y, r: Math.max(r * 1.5, 26 * RS), w: pr.w, act: () => lockSys(o, true)});
     if (HOVP && Math.hypot(HOVP[0] - pr.x, HOVP[1] - pr.y) < Math.max(r * 1.6, 34 * RS)) hov = o;
@@ -2674,7 +2675,7 @@ const TUTO = [
   {t: 'Écoute = évolution', d: 'Villages, cités, satellites : tes planètes grandissent avec toi. Ton étoile aussi.', todo: 'Écoute, c’est tout', at: () => null, cam: 'wide', ic: '✺'},
   {t: 'Écouter les galaxies', d: 'Les planètes publiques sont ouvertes à tous, même aux spectateurs, lorsque leurs fichiers audio sont accessibles. Les planètes privées affichent leurs titres et territoires mais restent verrouillées : ni écoute ni copie.', todo: 'Touche Suivant', at: () => null, cam: 'wide', ic: '♫'},
   {t: 'Communiquer', d: 'Depuis une galaxie, ouvre le profil d’un voyageur pour lui envoyer un signal. Retrouve les réponses dans Transmissions.', todo: 'Touche Suivant', at: () => null, cam: 'wide', ic: '✉'},
-  {t: 'Partage sur les réseaux', d: 'Dans le lecteur, « Story » crée une vidéo de 15 s : ta planète filmée en plans cinématiques, avec ta musique et le lien de l’appli. Publie-la sur Instagram ou Facebook. « WhatsApp » l’envoie à un contact ou en statut.', todo: 'Touche Suivant', at: () => null, cam: 'wide', ic: '⬆'},
+  {t: 'Partage sur les réseaux', d: 'Dans le lecteur, « Story » crée une vidéo de 15 s, 30 s ou 1 min (à choisir dans le lecteur) : ta planète filmée en plans cinématiques, avec ta musique. Publie-la sur Instagram ou Facebook : le lien de l’appli est copié, colle-le dans le sticker « Lien » pour qu’il soit cliquable. « WhatsApp » l’envoie avec le lien, à un contact ou en statut.', todo: 'Touche Suivant', at: () => null, cam: 'wide', ic: '⬆'},
   ...pdInstallStep(),
   {t: 'Ton compte', d: 'Le bouton profil, en haut : tes réglages, ce guide, et la déconnexion. Tes données restent liées à ton compte.', todo: 'Touche Suivant', at: () => rectPt('#bAcc'), cam: 'wide', ic: '⇥'},
   {t: 'Andromède', d: 'D’autres galaxies t’attendent, et l’album PlanèteDot brille en leur cœur. Va écouter ce qu’écoutent les autres.', todo: 'Ce bouton t’y emmène quand tu veux', at: () => rectPt('#bLeft'), cam: 'wide', ic: '✧'}];
@@ -2686,7 +2687,7 @@ const TUTO_V = [
   {t: 'Des planètes-playlists', d: 'Chaque planète est une playlist. Touche-en une pour t’en approcher et découvrir ses titres et ses territoires.', todo: 'Touche une planète', wait: () => !!focus, at: () => null, ic: '◉'},
   {t: 'La radio en direct', d: 'Quand ce voyageur écoute sa musique partagée, « ● en direct » s’affiche : la radio te permet de l’écouter avec lui.', todo: 'Touche Suivant', at: () => document.body.classList.contains('pd-live') ? rectPt('#pd-live-radio') : null, ic: '♫'},
   {t: 'Le cœur d’Andromède', d: 'Au centre de la galaxie brille le logo PlanèteDot : c’est l’album de GuillaumDot, en écoute libre.', todo: 'La flèche en haut ramène à la galaxie', act: ['Écouter l’album', () => playAlbum(0)], at: () => rectPt('#bLeft'), ic: '✦'},
-  {t: 'Partage sur les réseaux', d: 'Pendant l’écoute, ouvre le lecteur : « Story » crée une vidéo de 15 s de la planète en plans cinématiques, avec la musique et le lien de l’appli, pour Instagram ou Facebook. « WhatsApp » l’envoie à un contact ou en statut.', todo: 'Touche Suivant', at: () => null, ic: '⬆'},
+  {t: 'Partage sur les réseaux', d: 'Pendant l’écoute, ouvre le lecteur : « Story » crée une vidéo de 15 s, 30 s ou 1 min (à choisir dans le lecteur) de la planète en plans cinématiques, avec la musique, pour Instagram ou Facebook : le lien de l’appli est copié, colle-le dans le sticker « Lien » pour qu’il soit cliquable. « WhatsApp » l’envoie avec le lien, à un contact ou en statut.', todo: 'Touche Suivant', at: () => null, ic: '⬆'},
   ...pdInstallStep(),
   {t: 'Rejoins l’univers', d: 'Crée ton compte pour faire naître ton étoile, suivre des voyageurs, leur envoyer des signaux et planter tes pavillons.', todo: 'C’est gratuit', act: ['Créer mon compte', () => { endTuto(); window.__pdNextAuth = 'signup'; $('#guestExit').click(); }], at: () => rectPt('#bAcc'), ic: '✺'}];
 let TUTO_ACT = TUTO;
@@ -2747,7 +2748,7 @@ function renderGP(){
   gp.classList.remove('off');
   $('#gGo').onclick = () => { if (o.mine) jumpTo(null); else jumpTo(o); };
   const gf = $('#gFol'); if (gf) gf.onclick = () => toggleFollow(o.id, s);
-  const sg = $('#gSig'); if (sg) sg.onclick = () => composeSignal(o.id, s);
+  const sg = $('#gSig'); if (sg) sg.onclick = () => composeSignal(o.id, s); pdGpAudio(o);
 }
 function enterGalaxy(){ transFx(); if (cine){ cine = null; document.body.classList.remove('cine'); } PDA.nav('galaxy');
   closeSheet(); setRail(false); mode = 'galaxy'; focus = null; gLock = null;
@@ -3218,7 +3219,8 @@ function openPlaylist(p, fromLib){
     sbody.querySelectorAll('.pimp').forEach(im => im.onchange = e => importFiles(e.target.files, p).then(() => { if (sheetKind === 'scan') openPlaylist(p, fromLib); }));
     if ($('#pList') && p.gd) $('#pList').onclick = e => { const li = e.target.closest('.tr'); if (li) playAlbum(+li.dataset.i); };
     const L = $('#pList'); if (L && !ro) L.onclick = e => { const li = e.target.closest('.tr'); if (!li) return; highlightTrack(p, li.dataset.id); playList(p.tracks, +li.dataset.i, p.id); setTimeout(() => sheetKind === 'scan' && openPlaylist(p, fromLib), 150); };
-    else if (L) L.onclick = e => { const li = e.target.closest('.tr'); if (!li) return; if(p.isPublic===false){toast('🔒 Cette planète est privée');return;} pdPlayRemotePlanet(p,+li.dataset.i); };
+    else if (L && !p.gd) L.onclick = e => { const li = e.target.closest('.tr'); if (!li) return; if(p.isPublic===false){toast('🔒 Cette planète est privée');return;} pdPlayRemotePlanet(p,+li.dataset.i); };
+    if (ro && !p.gd && !privateView) pdShMark(p);
   });
 }
 function openPlayer(){
@@ -3227,8 +3229,8 @@ function openPlayer(){
     <input type="range" class="scrub" id="npR" min="0" max="1000" value="0" aria-label="Position"><div class="times"><span id="npC">0:00</span><span id="npD">${fmt(au.duration) || fmt(t.dur)}</span></div>
     <div class="ctrls"><button class="icb${shuf ? ' on' : ''}" id="npS" aria-label="Aléatoire">${ICON.shuf}</button><button class="icb" id="npP" aria-label="Précédent">${ICON.prev}</button>
       <button class="playbig" id="npX" aria-label="Lecture">${au.paused ? ICON.play : ICON.pauseS}</button><button class="icb" id="npN" aria-label="Suivant">${ICON.next}</button><button class="icb" id="npG" aria-label="Voir la planète">${ICON.land}</button></div>
-    <div class="row shr"><button class="btn wide" id="npStory">${ICON_SHARE}Story</button><button class="btn wide" id="npWa">WhatsApp</button><button class="btn wide" id="npTxt">Partager</button></div>`, () => {
-    $('#npStory').onclick = () => { PDWA = false; shareStory(); }; { const wb = $('#npWa'); if (wb) wb.onclick = () => { PDWA = true; shareStory(); }; } $('#npTxt').onclick = () => shareText();
+    ${pdDurRow()}<div class="row shr"><button class="btn wide" id="npStory">${ICON_SHARE}Story</button><button class="btn wide" id="npWa">WhatsApp</button><button class="btn wide" id="npTxt">Partager</button></div>`, () => {
+    pdDurBind(); $('#npStory').onclick = () => { PDWA = false; shareStory(); }; { const wb = $('#npWa'); if (wb) wb.onclick = () => { PDWA = true; shareStory(); }; } $('#npTxt').onclick = () => shareText();
     $('#npP').onclick = () => { if (au.currentTime > 3) au.currentTime = 0; else next(-1); setTimeout(openPlayer, 120); };
     $('#npN').onclick = () => { next(1); setTimeout(openPlayer, 120); };
     $('#npX').onclick = () => { if (au.paused) au.play().catch(() => {}); else au.pause(); setTimeout(openPlayer, 80); };
@@ -3301,7 +3303,7 @@ function removeTrack(id){ if (!(TRACKS.get(id) || {}).builtin){ TRACKS.delete(id
 
 /* star / progression sheet */
 function openStar(){
-  if (readonly){ toast(`L’étoile de ${VIEW.user || 'ce système'} brille ici.`); return; }
+  if (readonly){ pdRecap(); return; }
   overview();
   const L = level(SYS.xp), a = lvlXP(L), b = lvlXP(L + 1), pct = (SYS.xp - a) / (b - a);
   const flags = INBOX.filter(x => x.type === 'flag').length;
@@ -4601,8 +4603,8 @@ function shareStory(again){ if (STORY || OUTRO) return; const info = storyInfo()
   let apid = null; if (info.album){ apid = again ? (SYS.planets.some(p => p.id === qPlanet) && VIEW === SYS ? qPlanet : VIEW === GD ? GD_PID : null) : pdAlbStoryPrep(); if (apid === 'wait'){ setTimeout(() => shareStory(true), 1900); return; } }
   const ok = info.album ? ((apid && startCine(true, apid)) || startCine(true)) : info.pid ? startCine(true, info.pid) : false;
   const cv2 = document.createElement('canvas'); cv2.width = 720; cv2.height = 1280; cv2.setAttribute('aria-hidden', 'true'); cv2.style.cssText = 'position:fixed;left:-3000px;top:0;width:72px;height:128px;opacity:0;pointer-events:none'; document.body.appendChild(cv2);   // in the page: some browsers only film a canvas that is attached
-  STORY = {cv: cv2, c: cv2.getContext('2d'), info, t0: performance.now(), dur: 15000, chunks: [], rec: null, focus: ok, wa: PDWA}; { const S0 = STORY; storyAudio(info).then(bf => { S0.abuf = bf; S0.aready = true; }); }
-  const ov = document.createElement('div'); ov.id = 'pdRec'; ov.innerHTML = '<div class="pill"><i></i><span>Ta story se prépare · 15 s</span><button type="button">Annuler</button></div>'; document.body.appendChild(ov);
+  STORY = {cv: cv2, c: cv2.getContext('2d'), info, t0: performance.now(), dur: pdDur() * 1000, want: pdDur(), chunks: [], rec: null, focus: ok, wa: PDWA}; { const S0 = STORY; storyAudio(info).then(bf => { S0.abuf = bf; S0.aready = true; }); }
+  const ov = document.createElement('div'); ov.id = 'pdRec'; ov.innerHTML = '<div class="pill"><i></i><span>' + (STORY.wa ? 'Ta vidéo se prépare' : 'Ta story se prépare') + ' · ' + pdDurLbl(STORY.want) + '</span><button type="button">Annuler</button></div>'; document.body.appendChild(ov);
   ov.querySelector('button').onclick = () => storyEnd(true); }
 function storyText(c, info){ const g = c.createLinearGradient(0, 760, 0, 1280); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,.78)'); c.fillStyle = g; c.fillRect(0, 760, 720, 520);
   const F = '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", system-ui, sans-serif'; c.textAlign = 'left'; c.textBaseline = 'alphabetic';
@@ -4610,8 +4612,7 @@ function storyText(c, info){ const g = c.createLinearGradient(0, 760, 0, 1280); 
   words.forEach(w => { const tt = ln ? ln + ' ' + w : w; if (c.measureText(tt).width > 600 && ln){ lines.push(ln); ln = w; } else ln = tt; }); if (ln) lines.push(ln);
   const L = lines.slice(0, 2); if (lines.length > 2) L[1] = L[1].replace(/.{0,2}$/, '…'); const y0 = 1150 - (L.length - 1) * 52;
   L.forEach((l, i) => c.fillText(l, 60, y0 + i * 52)); c.font = `400 27px ${F}`; c.fillStyle = 'rgba(222,233,255,.78)'; c.fillText(String(info.list).slice(0, 48), 60, y0 + L.length * 52 - 6);
-  c.font = `500 18px ${F}`; c.fillStyle = 'rgba(200,222,255,.55)'; c.textAlign = 'center'; c.fillText('P L A N È T E D O T', 360, 96);
-  c.font = `400 19px ${F}`; c.fillStyle = 'rgba(214,230,255,.5)'; c.fillText(APP_URL().replace(/^https?:\/\//, '').replace(/\/$/, ''), 360, 1238); }
+  c.font = `500 18px ${F}`; c.fillStyle = 'rgba(200,222,255,.55)'; c.textAlign = 'center'; c.fillText('P L A N È T E D O T', 360, 96); }
 function storyTick(){ const S = STORY; if (!S || S.done) return; const el = performance.now() - S.t0; if (el < 1500) return;     // the camera settles first
   const c = S.c, pt = SHOT_PT && time - (SHOT_PT.t || 0) < .6 ? SHOT_PT : {x: W / 2, y: H * .45};
   let sw = W, sh = W * 16 / 9; if (sh > H){ sh = H; sw = H * 9 / 16; } const sx = clamp(pt.x - sw / 2, 0, W - sw), sy = clamp(pt.y - sh * .44, 0, H - sh);
@@ -4619,9 +4620,9 @@ function storyTick(){ const S = STORY; if (!S || S.done) return; const el = perf
   if (!S.started && !S.aready && el < 9000) return;   // the music is being prepared
   if (!S.started){ S.started = performance.now();
     const mt = (S.abuf ? ['video/mp4;codecs=avc1.42E01E,mp4a.40.2', 'video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'] : ['video/mp4;codecs=avc1.42E01E', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm']).find(m => { try { return window.MediaRecorder && MediaRecorder.isTypeSupported(m); } catch(e){ return false; } }) || '';
-    try { if (!S.cv.captureStream || !window.MediaRecorder) throw 0; let st = S.cv.captureStream(30); S.trk = st.getVideoTracks()[0]; let len = 15;
+    try { if (!S.cv.captureStream || !window.MediaRecorder) throw 0; let st = S.cv.captureStream(30); S.trk = st.getVideoTracks()[0]; const W0 = S.want || 15; let len = W0;
       if (S.abuf && actx){ try { const d = actx.createMediaStreamDestination(), src = actx.createBufferSource(), g = actx.createGain(), n = actx.currentTime, du = S.abuf.duration; src.buffer = S.abuf;
-        let a0 = Math.max(0, Math.min(au.currentTime || 0, du - 1)); if (du - a0 < 15) a0 = Math.max(0, du - 15); len = Math.max(1, Math.min(15, du - a0));
+        let a0 = Math.max(0, Math.min(au.currentTime || 0, du - 1)); if (du - a0 < W0) a0 = Math.max(0, du - W0); len = Math.max(1, Math.min(W0, du - a0));
         g.gain.setValueAtTime(0, n); g.gain.linearRampToValueAtTime(1, n + .2); g.gain.setValueAtTime(1, n + Math.max(.3, len - .6)); g.gain.linearRampToValueAtTime(0, n + len);
         src.connect(g); g.connect(d); src.start(n, a0, len); S.src = src; st = new MediaStream([...st.getVideoTracks(), ...d.stream.getAudioTracks()]); S.withSound = true; } catch(e){ console.warn('Story · musique', e); } }
       S.dur = len * 1000; const r = new MediaRecorder(st, Object.assign(mt ? {mimeType: mt} : {}, {videoBitsPerSecond: 4e6, audioBitsPerSecond: 160000}));
@@ -4637,8 +4638,8 @@ function storyEnd(cancel){ const S = STORY; if (!S) return; STORY = null; if (PD
     `${isImg ? `<img class="stv" src="${url}" alt="">` : `<video class="stv" src="${url}" autoplay muted loop playsinline></video>`}
      <div class="row">${S.wa ? `<button class="btn pri wide" id="stWa">${ICON_SHARE}Envoyer sur WhatsApp</button>` : `<button class="btn pri wide" id="stShare">${ICON_SHARE}Partager en story</button>`}</div><div class="row">${S.wa ? `<button class="btn wide" id="stShare">Story Instagram</button>` : `<button class="btn wide" id="stWa">WhatsApp</button>`}</div>
      <div class="row"><button class="btn wide" id="stTxt">Partager en texte</button><a class="btn wide" id="stDl" download="planetedot-story.${ext}" href="${url}">Enregistrer</a></div>
-     <p class="note">${S.withSound ? 'Avec la musique · ' + Math.round(S.dur / 1000) + ' s. ' : S.info.sc ? 'Sans le son : SoundCloud ne laisse pas enregistrer sa musique. ' : 'Sans le son : ce morceau n’a pas pu être lu. '}${S.wa ? 'Choisis WhatsApp : envoie-la à un contact ou mets-la en statut.' : 'Choisis Instagram ou Facebook, puis « Story ».'}</p>`, () => {
-      $('#stShare').onclick = async () => { try { if (navigator.canShare && navigator.canShare({files: [file]})){ await navigator.share({files: [file]}); return; } } catch(e){ if (e && e.name === 'AbortError') return; }
+     <p class="note">${S.withSound ? 'Avec la musique · ' + Math.round(S.dur / 1000) + ' s. ' : S.info.sc ? 'Sans le son : SoundCloud ne laisse pas enregistrer sa musique. ' : 'Sans le son : ce morceau n’a pas pu être lu. '}${S.wa ? 'Choisis WhatsApp : envoie-la à un contact ou mets-la en statut.' : 'Choisis Instagram ou Facebook, puis « Story ». Le lien de l’appli est copié : ajoute le sticker « Lien » et colle-le, il sera cliquable.'}</p>`, () => {
+      $('#stShare').onclick = async () => { pdCopyLink(S.info); try { if (navigator.canShare && navigator.canShare({files: [file]})){ await navigator.share({files: [file]}); return; } } catch(e){ if (e && e.name === 'AbortError') return; }
         $('#stDl').click(); toast('Vidéo enregistrée : ajoute-la à ta story depuis ta galerie', 5200); };
       $('#stTxt').onclick = shareText; $('#stWa').onclick = () => pdWaShare(isImg ? null : file, S.info); }); }
 const ICON_SHARE = '<svg viewBox="0 0 24 24"><path d="M12 15V4M7.5 8.5L12 4l4.5 4.5"/><path d="M5 12.5V19a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-6.5"/></svg>';
@@ -4822,7 +4823,7 @@ async function pdPlayRemotePlanet(p,index=0){
     if(error)throw error;
     const rows=(p.tracksRO||[]).map(x=>(data||[]).find(t=>t.title===x[0]&&t.artist===(x[1]||''))).filter(Boolean);
     if(!rows.length){toast((VIEW&&VIEW.user?VIEW.user:'Ce voyageur')+' n’a pas encore partagé l’audio de cette planète',4500);return;}
-    pdRemoteStart(rows,Math.min(index,rows.length-1),ownerId,p.name,p.id);
+    {const x=(p.tracksRO||[])[index], j=x?rows.findIndex(t=>t.title===x[0]&&t.artist===(x[1]||'')):-1; if(index>0&&j<0)toast('Ce titre n’est pas encore partagé : écoute des titres disponibles',3500); pdRemoteStart(rows,Math.max(0,j),ownerId,p.name,p.id);}
   }catch(e){console.warn(e);toast('Écoute publique indisponible');}
 }
 async function pdPlayRemoteGalaxy(){
@@ -4926,13 +4927,13 @@ body:has(#sheet:not(.off)) #pd-audio-test{opacity:0;pointer-events:none}
   document.head.appendChild(css);
   const b = document.createElement('button'); b.id = 'pd-audio-test'; b.type = 'button'; b.textContent = '♫ Tester le son';
   const P = document.createElement('div'); P.id = 'pdaPanel'; P.hidden = true; P.setAttribute('role', 'dialog'); P.setAttribute('aria-label', 'Diagnostic du son');
-  P.innerHTML = `<h4>Son · diagnostic V7.4 <button class="x" type="button" aria-label="Fermer">✕</button></h4><div id="pdaRows"></div>
+  P.innerHTML = `<h4>Son · diagnostic V7.6 <button class="x" type="button" aria-label="Fermer">✕</button></h4><div id="pdaRows"></div>
     <div class="row"><span class="k" style="min-width:auto">Écouter :</span><button data-p="planet">Planète</button><button data-p="star">Étoile</button><button data-p="moon">Lunes</button><button data-p="travel">Voyage</button><button data-p="deep">Espace</button></div>
     <div class="row"><button data-a="wake">Réactiver le son</button><button data-a="copy">Copier le rapport</button></div><ol id="pdaLog"></ol>`;
   document.body.appendChild(b); document.body.appendChild(P);
   const S = PDA.S; let timer = 0;
   const yes = (v, a, n) => v ? `<b class="ok">${a}</b>` : `<b class="bad">${n}</b>`;
-  function report(){ const c = actx; return {version: '7.4', respiration: Math.round((S.breath || 0) * 100) / 100, date: new Date().toISOString(), ua: navigator.userAgent, contexte: c ? c.state : 'absent', frequence: c ? c.sampleRate : 0, session: S.session, moteurs: S.contexts,
+  function report(){ const c = actx; return {version: '7.6', respiration: Math.round((S.breath || 0) * 100) / 100, date: new Date().toISOString(), ua: navigator.userAgent, contexte: c ? c.state : 'absent', frequence: c ? c.sampleRate : 0, session: S.session, moteurs: S.contexts,
     scene: S.scene, ambiance: S.ident, etoile: S.star, lunes: S.moons, musique: S.music, niveau_db: Math.round(S.level), voix: S.voices, reglages: {ambiance: SND.amb, interface: SND.ui, volume: SND.vol}, erreur: S.err || null, journal: S.log.slice(0, 12)}; }
   function draw(){ const c = actx, st = c ? c.state : 'absent', lv = clamp((S.level + 70) / 55, 0, 1);
     $('#pdaRows').innerHTML = `
@@ -5059,7 +5060,7 @@ document.addEventListener('visibilitychange', () => { if (document.hidden || !sb
 })();
 /* ================= V7.0 · mode cinématique fiable, suppression de compte, ouverture plus fluide ================= */
 var cineRe = false;   // after leaving the cinematic view, it comes back only after a longer calm
-const pdVisitPid = () => (readonly && qPlanet && VIEW && VIEW.planets && VIEW.planets.some(p => p.id === qPlanet)) ? qPlanet : null;
+const pdVisitPid = () => pdVisitPidV76();
 /* the cinematic view only lives while the app is on screen: it closes when the app goes to the background, and re-arms on return */
 document.addEventListener('visibilitychange', () => { if (document.hidden){ if (cine) exitCine(); try { pdArtStill(); } catch(e){} setTimeout(() => { if (!PDART.on) pdArtStill(); }, 400); return; } pdArtBack(); lastInteract = performance.now(); cineRe = false; cineArm = (!au.paused && Q.length) ? performance.now() : 0; });
 /* whatever starts the music (Écouter, the play button, the lock screen), the cinematic view is armed */
@@ -5273,7 +5274,7 @@ function pdDirCtx(sys){ const c = cine, i = sys.planets.findIndex(p => p.id === 
   c.zy = zy; const pd = Math.hypot(pos[0], pos[2]) || 1, sun = Math.atan2(-pos[0], -pos[2]), dA = ((sun - zy + Math.PI) % TAU + TAU) % TAU - Math.PI;
   return {p, pos, R, zy, zp, pd, ly: zy + dA * .42, sy: Math.atan2(pos[0], pos[2]), sd: pdSysD(sys)}; }
 function pdSysD(sys){ const n = Math.max(sys.planets.length, 1), maxR = orbitR(n - 1) + 1.8; return clamp(maxR / (Math.tan(55 * Math.PI / 360) * clamp(W / H, .6, 1.25)) * .95, 12, 500); }
-function pdDirCam(dt, sys){ const c = cine, X = pdDirCtx(sys); if (!X){ exitCine(); return; }
+function pdDirCam(dt, sys){ const c = cine; if (readonly){ const v = pdVisitPid(); if (v && v !== c.pid){ c.pid = v; c.zy = null; } } const X = pdDirCtx(sys); if (!X){ exitCine(); return; }
   const bc = beatClock(), barS = bc ? 240 / bc.bpm : 1.75; const B = bc ? bc.beat / 4 : (time - c.t0) / barS;   // position en mesures
   const st = c.dir; let k = Math.floor(B / PDSEQ_T), r = B - k * PDSEQ_T, j = 0; while (j < PDSEQ.length - 1 && r >= PDSEQ[j][1]){ r -= PDSEQ[j][1]; j++; }
   const sh = PDART.on ? ['planet', 2, 'cut'] : PDSEQ[j], u = PDART.on ? .5 : clamp(r / sh[1], 0, 1), e = u * u * (3 - 2 * u), side = (k % 2) ? -1 : 1, key = k * 100 + j;
@@ -5360,6 +5361,99 @@ setTimeout(pdInstallPaint, 0);
 #pdInst button{margin:10px auto 0;display:block;padding:7px 16px;border-radius:999px;border:1px solid rgba(160,200,255,.35);background:rgba(120,170,255,.12);color:#e6f0ff;font:600 12px var(--font);letter-spacing:.06em}
 @keyframes pdInstIn{to{opacity:1}}
 `; document.head.appendChild(st); })();
+
+/* ================= V7.5 · un lien cliquable au moment du partage (le texte dans une vidéo ne peut pas l'être) ================= */
+function pdCopyLink(info){ const url = pdShareUrl(info), done = () => toast('Lien copié · dans Instagram, ajoute le sticker « Lien » et colle-le', 6500);
+  try { if (navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(url).then(done, () => pdCopyOld(url) && done()); return; } } catch(e){}
+  if (pdCopyOld(url)) done(); }
+function pdCopyOld(t){ try { const a = document.createElement('textarea'); a.value = t; a.setAttribute('readonly', ''); a.style.cssText = 'position:fixed;top:-100px;opacity:0'; document.body.appendChild(a); a.select(); a.setSelectionRange(0, t.length); const ok = document.execCommand('copy'); a.remove(); return ok; } catch(e){ return false; } }
+
+/* ================= V7.6 · durée de la vidéo partagée + galaxies en orbite autour du logo ================= */
+// --- durée choisie pour la story / WhatsApp : 15 s, 30 s ou 1 min (retenue sur l'appareil)
+const PDDURS = [15, 30, 60];
+function pdDur(){ let v = 15; try { v = +localStorage.getItem('pdDur') || 15; } catch(e){} return PDDURS.includes(v) ? v : 15; }
+const pdDurLbl = s => s >= 60 ? '1 min' : s + ' s';
+function pdDurRow(){ const d = pdDur(); return `<div class="pdDur" role="radiogroup" aria-label="Durée de la vidéo"><span>Durée de la vidéo</span><div>${PDDURS.map(s => `<button type="button" role="radio" data-d="${s}" aria-checked="${s === d}"${s === d ? ' class="on"' : ''}>${pdDurLbl(s)}</button>`).join('')}</div></div>`; }
+function pdDurBind(){ document.querySelectorAll('.pdDur button').forEach(b => b.onclick = () => { try { localStorage.setItem('pdDur', b.dataset.d); } catch(e){}
+  try { sfx('tick'); } catch(e){} b.parentNode.querySelectorAll('button').forEach(x => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-checked', on); }); }); }
+(function(){ const st = document.createElement('style'); st.textContent = '.pdDur{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 0 -4px;font:12px var(--font);color:rgba(214,230,255,.7)}' +
+  '.pdDur>div{display:flex;padding:3px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid rgba(160,200,255,.14)}' +
+  '.pdDur button{border:0;background:none;color:#cfe3ff;font:500 12px var(--font);padding:6px 11px;border-radius:11px;transition:background .2s,color .2s}' +
+  '.pdDur button.on{background:rgba(90,169,255,.28);color:#fff}'; document.head.appendChild(st); })();
+
+// --- Andromède : chaque galaxie tourne autour du logo (courbe de rotation plate : même vitesse, les plus proches font le tour plus vite),
+//     sur une orbite légèrement inclinée, et le bord du disque se gauchit comme celui d'Andromède : de la profondeur, du relief
+const PDORB = {v: 1.25};
+function pdOrbAt(id, da){ const h = hashStr(id), h2 = hashStr(id + '#'), arm = Math.floor(h * 4), r = 24 + h2 * 88;
+  const an = arm * TAU / 4 + r * .045 + (hashStr(id + '!') - .5) * .5 + time * PDORB.v / r + (da || 0);
+  const inc = (hashStr(id + 'i') - .5) * .3 * (.45 + r / 112), nd = hashStr(id + 'n') * TAU, warp = sstep(62, 112, r) * 7 * Math.sin(an - 1.2);
+  const y = (hashStr(id + '?') - .5) * 3 + r * Math.sin(inc) * Math.sin(an - nd) + warp, c = Math.cos(inc * Math.sin(an - nd));
+  return [Math.cos(an) * r * c, y, Math.sin(an) * r * c]; }
+// brume de profondeur : les galaxies lointaines pâlissent un peu
+const pdDepthA = w => clamp(1.22 - w / (Math.max(cam.dist, 60) * 2.3), .5, 1);
+// sillage : l'orbite de la galaxie choisie (et de la tienne), et une traînée derrière elle qui montre qu'elle avance
+function pdOrbitDraw(){ if (mode !== 'galaxy') return; const ids = []; if (gLock && gLock.id !== GD_ID && !gLock.gd) ids.push([gLock.id, 1]); if (!guestMode){ const me = ME || 'me'; if (!ids.some(x => x[0] === me)) ids.push([me, .55]); }
+  if (!ids.length) return; gl.useProgram(SEG.p); gl.bindVertexArray(segV); gl.bindBuffer(gl.ARRAY_BUFFER, segB); gl.uniformMatrix4fv(SEG.u.uVP, false, VP);
+  ids.forEach(([id, k]) => { const n = 120, a = []; for (let i = 0; i < n; i++){ a.push(...pdOrbAt(id, -i * TAU / n), ...pdOrbAt(id, -(i + 1) * TAU / n)); }
+    gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(a)); gl.uniform4f(SEG.u.uC, .55, .78, 1, .045 * k); gl.drawArrays(gl.LINES, 0, n * 2);
+    for (let j = 0; j < 7; j++){ const a2 = []; for (let i = 0; i < 4; i++){ const s0 = -(j * 4 + i) * .02, s1 = s0 - .02; a2.push(...pdOrbAt(id, s0), ...pdOrbAt(id, s1)); }
+      gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(a2)); gl.uniform4f(SEG.u.uC, .7, .86, 1, .3 * k * (1 - j / 7)); gl.drawArrays(gl.LINES, 0, 8); } }); }
+// la caméra accompagne la galaxie visée (ou celle vers laquelle on voyage) : elle ne file pas hors de l'écran
+let PDGF = null;
+function pdGalFollow(){ const id = jump ? (jump.o ? jump.o.id : null) : (gLock ? gLock.id : null);
+  if (!id || id === GD_ID || dragging || cine || PDART.on){ PDGF = null; return; }
+  const p = sysPos(id); if (PDGF && PDGF.id === id){ const d = [p[0] - PDGF.p[0], p[1] - PDGF.p[1], p[2] - PDGF.p[2]];
+    if (Math.hypot(d[0], d[1], d[2]) < 4) for (let k = 0; k < 3; k++){ cam.g.t[k] += d[k]; if (cam.t !== cam.g.t) cam.t[k] += d[k]; } }
+  PDGF = {id, p}; }
+
+/* ---------- V7.6 · visites : quelle musique est écoutable, récap musical de la galaxie, plans cinématiques ---------- */
+const PDSH = new Map();   // propriétaire → {t, rows, keys} : les morceaux dont l'audio a été partagé
+const pdShKey = (t, a) => String(t || '') + '|' + String(a || '');
+function pdShLoad(owner, force){ if (!sb || !pdUuid(owner)) return Promise.resolve(null); const c = PDSH.get(owner);
+  if (c && !force && Date.now() - c.t < 60000) return c.p || Promise.resolve(c);
+  const e = {t: Date.now(), rows: [], keys: new Set()}; e.p = sb.from('shared_tracks').select('track_id,title,artist,audio_path').eq('owner_id', owner).limit(1000)
+    .then(({data, error}) => { if (error) throw error; e.rows = data || []; e.keys = new Set(e.rows.map(r => pdShKey(r.title, r.artist))); e.p = null; return e; })
+    .catch(err => { console.warn('Audio partagé', err); PDSH.delete(owner); return null; });
+  PDSH.set(owner, e); return e.p; }
+const pdShTag = ok => ok ? '<em class="pdAu ok">♫ Écoutable</em>' : '<em class="pdAu">Pas encore partagé</em>';
+(function(){ const st = document.createElement('style'); st.textContent = '.pdAu{display:inline-block;font-style:normal;font-size:10.5px;line-height:1;padding:3px 7px;border-radius:9px;margin:0 6px 0 0;vertical-align:1px;background:rgba(255,255,255,.06);color:rgba(214,230,255,.5);border:1px solid rgba(255,255,255,.08)}' +
+  '.pdAu.ok{background:rgba(74,163,255,.16);color:#9fd0ff;border-color:rgba(74,163,255,.35)}.tr.pdOff{opacity:.55}.pdAuH{margin:6px 0 0;font-size:12.5px;color:#9fd0ff}.pdAuH.no{color:rgba(214,230,255,.55)}' +
+  '.pdRc h3{display:flex;align-items:center;gap:8px;margin:18px 0 6px;font:600 13px var(--font);color:#e8f2ff}.pdRc h3 i{width:10px;height:10px;border-radius:50%;flex:none;box-shadow:0 0 8px currentColor}.pdRc h3 small{margin-left:auto;font-weight:400;color:var(--mute);font-size:11.5px}' +
+  '.pdRc .lock{font-size:12px;color:var(--mute);margin:0 0 4px}'; document.head.appendChild(st); })();
+// la fiche d'une planète visitée : chaque titre dit s'il s'écoute
+function pdShMark(p){ const owner = ownerId; if (!readonly || p.gd || !pdUuid(owner)) return;
+  pdShLoad(owner).then(S => { if (!S || ownerId !== owner || sheetKind !== 'scan') return; const L = document.getElementById('pList'); if (!L) return;
+    let n = 0; const tr = p.tracksRO || [], priv = p.isPublic === false;
+    L.querySelectorAll('.tr').forEach(li => { const x = tr[+li.dataset.i]; if (!x) return; const ok = !priv && S.keys.has(pdShKey(x[0], x[1])); if (ok) n++; li.classList.toggle('pdOff', !ok);
+      const sp = li.querySelector('.m span'); if (sp && !sp.querySelector('.pdAu')) sp.insertAdjacentHTML('afterbegin', pdShTag(ok)); });
+    const h = document.querySelector('#sheet .ph2'); if (h && !h.querySelector('.pdAuH')) h.insertAdjacentHTML('beforeend', `<p class="pdAuH${n ? '' : ' no'}">${priv ? '🔒 Planète privée : écoute verrouillée' : n ? (n === tr.length ? '♫ Toute la musique est écoutable' : `♫ ${n} titre${n > 1 ? 's' : ''} sur ${tr.length} écoutable${n > 1 ? 's' : ''}`) : 'La musique de cette planète n’a pas encore été partagée'}</p>`); }); }
+// la carte d'une galaxie, dans Andromède
+function pdGpAudio(o){ if (!o || o.mine || o.gd) return; const gp = document.getElementById('gp'); if (!gp) return; const sub = gp.querySelector('p'); if (!sub) return;
+  let el = gp.querySelector('.pdAuH'); if (!el){ sub.insertAdjacentHTML('afterend', '<p class="pdAuH no">♫ …</p>'); el = gp.querySelector('.pdAuH'); }
+  if (!pdUuid(o.id)){ el.textContent = 'Galaxie d’exemple · pas de musique à écouter'; return; }
+  const keys = new Set(((o.s && o.s.planets) || []).filter(p => p.isPublic !== false).flatMap(p => (p.tracksRO || []).map(x => pdShKey(x[0], x[1]))));
+  pdShLoad(o.id).then(S => { if (!gLock || gLock.id !== o.id || !el.isConnected) return; const n = S ? [...keys].filter(k => S.keys.has(k)).length : 0;
+    el.className = 'pdAuH' + (n ? '' : ' no'); el.textContent = S ? (n ? `♫ ${n} titre${n > 1 ? 's' : ''} écoutable${n > 1 ? 's' : ''}` : 'Musique pas encore partagée') : ''; }); }
+// l'astre d'une galaxie visitée : toute sa musique, planète par planète, de la première à la dernière
+function pdRecap(){ const V = VIEW, owner = ownerId; if (!V || !readonly) return; const ps = V.planets || [], total = ps.reduce((a, p) => a + (p.tracksRO || []).length, 0);
+  const body = S => { let n = 0; const html = ps.map((p, pi) => { const tr = p.tracksRO || [], priv = p.isPublic === false; let col = '#8cc8ff'; try { if (p.c1) col = css(p.c1[0]); } catch(e){}
+      const rows = tr.map((x, i) => { const ok = !!S && !priv && S.keys.has(pdShKey(x[0], x[1])); if (ok) n++;
+        return `<li class="tr${S && !ok ? ' pdOff' : ''}" data-p="${pi}" data-i="${i}"><span class="n">${i + 1}</span><div class="m"><b>${esc(x[0])}</b><span>${S ? pdShTag(ok) : ''}${esc(x[1] || 'Artiste inconnu')}</span></div></li>`; }).join('');
+      return `<h3><i style="background:${col};color:${col}"></i>${esc(p.name || 'Planète ' + (pi + 1))}<small>${priv ? '🔒 privée' : tr.length + ' titre' + (tr.length > 1 ? 's' : '')}</small></h3>${priv ? '<p class="lock">Planète privée : écoute verrouillée</p>' : ''}${tr.length ? `<ul class="list">${rows}</ul>` : '<p class="lock">Aucun titre visible</p>'}`; }).join('');
+    return {html, n}; };
+  const paint = S => { if (VIEW !== V) return; const b = body(S), sub = !pdUuid(owner) ? 'Galaxie d’exemple · musique non disponible' : !S ? 'Vérification de la musique disponible…' : b.n ? `${b.n} titre${b.n > 1 ? 's' : ''} écoutable${b.n > 1 ? 's' : ''} sur ${total}` : 'Aucune musique partagée pour l’instant';
+    const fresh = sheetKind !== 'recap'; openSheet('recap', head(V.user || 'Cette galaxie', 'Toute la musique de ' + esc(V.name || 'la galaxie')) +
+      `<p class="pdAuH${S && b.n ? '' : ' no'}">${sub}</p>${S && b.n ? `<div class="row" style="margin:12px 0 0"><button class="btn pri wide" id="rcAll">${ICON.play}Tout écouter</button></div>` : ''}<div class="pdRc">${b.html || '<div class="empty">Aucune planète visible.</div>'}</div>`, () => {
+      const a = document.getElementById('rcAll'); if (a) a.onclick = () => pdPlayRemoteGalaxy();
+      document.querySelectorAll('.pdRc .list').forEach(ul => ul.onclick = e => { const li = e.target.closest('.tr'); if (!li) return; const p = ps[+li.dataset.p]; if (!p) return;
+        if (p.isPublic === false){ toast('🔒 Cette planète est privée'); return; } if (!S || li.classList.contains('pdOff')){ toast((V.user || 'Ce voyageur') + ' n’a pas encore partagé ce titre', 3500); return; }
+        pdPlayRemotePlanet(p, +li.dataset.i); }); }); return fresh; };
+  const c = PDSH.get(owner); if (c && !c.p && Date.now() - c.t < 60000){ paint(c); return; }
+  paint(null); if (pdUuid(owner)) pdShLoad(owner).then(S => { if (S && sheetKind === 'recap' && VIEW === V) paint(S); }); }
+// la musique d'une galaxie visitée : on retrouve la planète du titre en cours (écoute de toute la galaxie, radio)
+function pdVisitPidV76(){ if (!readonly || !VIEW || !VIEW.planets) return null; const t = TRACKS.get(Q[qi]);
+  if (t && String(t.id).startsWith('pd-public:')){ const k = pdShKey(t.title, t.artist), p = VIEW.planets.find(p => p.isPublic !== false && (p.tracksRO || []).some(x => pdShKey(x[0], x[1]) === k)); if (p) return p.id; }
+  return (qPlanet && VIEW.planets.some(p => p.id === qPlanet)) ? qPlanet : null; }
 
 /* ---------- ?perf=1 : a small live meter, to describe the fluidity seen on iPhone ---------- */
 if (/[?&]perf=1/.test(location.search)) (function(){
