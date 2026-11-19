@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#010208">
 <title>planèteDot · ton univers musical</title>
-<meta name="pd-version" content="7.3">
+<meta name="pd-version" content="7.4">
 <meta name="description" content="PlanèteDot · l’album de GuillaumDot et ton univers musical en 3D : chaque planète est un morceau.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PlanèteDot">
@@ -2674,6 +2674,8 @@ const TUTO = [
   {t: 'Écoute = évolution', d: 'Villages, cités, satellites : tes planètes grandissent avec toi. Ton étoile aussi.', todo: 'Écoute, c’est tout', at: () => null, cam: 'wide', ic: '✺'},
   {t: 'Écouter les galaxies', d: 'Les planètes publiques sont ouvertes à tous, même aux spectateurs, lorsque leurs fichiers audio sont accessibles. Les planètes privées affichent leurs titres et territoires mais restent verrouillées : ni écoute ni copie.', todo: 'Touche Suivant', at: () => null, cam: 'wide', ic: '♫'},
   {t: 'Communiquer', d: 'Depuis une galaxie, ouvre le profil d’un voyageur pour lui envoyer un signal. Retrouve les réponses dans Transmissions.', todo: 'Touche Suivant', at: () => null, cam: 'wide', ic: '✉'},
+  {t: 'Partage sur les réseaux', d: 'Dans le lecteur, « Story » crée une vidéo de 15 s : ta planète filmée en plans cinématiques, avec ta musique et le lien de l’appli. Publie-la sur Instagram ou Facebook. « WhatsApp » l’envoie à un contact ou en statut.', todo: 'Touche Suivant', at: () => null, cam: 'wide', ic: '⬆'},
+  ...pdInstallStep(),
   {t: 'Ton compte', d: 'Le bouton profil, en haut : tes réglages, ce guide, et la déconnexion. Tes données restent liées à ton compte.', todo: 'Touche Suivant', at: () => rectPt('#bAcc'), cam: 'wide', ic: '⇥'},
   {t: 'Andromède', d: 'D’autres galaxies t’attendent, et l’album PlanèteDot brille en leur cœur. Va écouter ce qu’écoutent les autres.', todo: 'Ce bouton t’y emmène quand tu veux', at: () => rectPt('#bLeft'), cam: 'wide', ic: '✧'}];
 /* V6.2 · a guide for visitors (spectators): the galaxy, travelling, planets, the live radio, the album, joining */
@@ -2684,6 +2686,8 @@ const TUTO_V = [
   {t: 'Des planètes-playlists', d: 'Chaque planète est une playlist. Touche-en une pour t’en approcher et découvrir ses titres et ses territoires.', todo: 'Touche une planète', wait: () => !!focus, at: () => null, ic: '◉'},
   {t: 'La radio en direct', d: 'Quand ce voyageur écoute sa musique partagée, « ● en direct » s’affiche : la radio te permet de l’écouter avec lui.', todo: 'Touche Suivant', at: () => document.body.classList.contains('pd-live') ? rectPt('#pd-live-radio') : null, ic: '♫'},
   {t: 'Le cœur d’Andromède', d: 'Au centre de la galaxie brille le logo PlanèteDot : c’est l’album de GuillaumDot, en écoute libre.', todo: 'La flèche en haut ramène à la galaxie', act: ['Écouter l’album', () => playAlbum(0)], at: () => rectPt('#bLeft'), ic: '✦'},
+  {t: 'Partage sur les réseaux', d: 'Pendant l’écoute, ouvre le lecteur : « Story » crée une vidéo de 15 s de la planète en plans cinématiques, avec la musique et le lien de l’appli, pour Instagram ou Facebook. « WhatsApp » l’envoie à un contact ou en statut.', todo: 'Touche Suivant', at: () => null, ic: '⬆'},
+  ...pdInstallStep(),
   {t: 'Rejoins l’univers', d: 'Crée ton compte pour faire naître ton étoile, suivre des voyageurs, leur envoyer des signaux et planter tes pavillons.', todo: 'C’est gratuit', act: ['Créer mon compte', () => { endTuto(); window.__pdNextAuth = 'signup'; $('#guestExit').click(); }], at: () => rectPt('#bAcc'), ic: '✺'}];
 let TUTO_ACT = TUTO;
 function startTutoV(){ if (!guestMode) return; if (sheetOpen || !card.classList.contains('off')){ setTimeout(startTutoV, 1500); return; } if (tutoI >= 0) return; TUTO_ACT = TUTO_V; gManual = false; tutoI = 0; renderTuto(); }
@@ -4606,7 +4610,8 @@ function storyText(c, info){ const g = c.createLinearGradient(0, 760, 0, 1280); 
   words.forEach(w => { const tt = ln ? ln + ' ' + w : w; if (c.measureText(tt).width > 600 && ln){ lines.push(ln); ln = w; } else ln = tt; }); if (ln) lines.push(ln);
   const L = lines.slice(0, 2); if (lines.length > 2) L[1] = L[1].replace(/.{0,2}$/, '…'); const y0 = 1150 - (L.length - 1) * 52;
   L.forEach((l, i) => c.fillText(l, 60, y0 + i * 52)); c.font = `400 27px ${F}`; c.fillStyle = 'rgba(222,233,255,.78)'; c.fillText(String(info.list).slice(0, 48), 60, y0 + L.length * 52 - 6);
-  c.font = `500 18px ${F}`; c.fillStyle = 'rgba(200,222,255,.55)'; c.textAlign = 'center'; c.fillText('P L A N È T E D O T', 360, 96); }
+  c.font = `500 18px ${F}`; c.fillStyle = 'rgba(200,222,255,.55)'; c.textAlign = 'center'; c.fillText('P L A N È T E D O T', 360, 96);
+  c.font = `400 19px ${F}`; c.fillStyle = 'rgba(214,230,255,.5)'; c.fillText(APP_URL().replace(/^https?:\/\//, '').replace(/\/$/, ''), 360, 1238); }
 function storyTick(){ const S = STORY; if (!S || S.done) return; const el = performance.now() - S.t0; if (el < 1500) return;     // the camera settles first
   const c = S.c, pt = SHOT_PT && time - (SHOT_PT.t || 0) < .6 ? SHOT_PT : {x: W / 2, y: H * .45};
   let sw = W, sh = W * 16 / 9; if (sh > H){ sh = H; sw = H * 9 / 16; } const sx = clamp(pt.x - sw / 2, 0, W - sw), sy = clamp(pt.y - sh * .44, 0, H - sh);
@@ -4921,13 +4926,13 @@ body:has(#sheet:not(.off)) #pd-audio-test{opacity:0;pointer-events:none}
   document.head.appendChild(css);
   const b = document.createElement('button'); b.id = 'pd-audio-test'; b.type = 'button'; b.textContent = '♫ Tester le son';
   const P = document.createElement('div'); P.id = 'pdaPanel'; P.hidden = true; P.setAttribute('role', 'dialog'); P.setAttribute('aria-label', 'Diagnostic du son');
-  P.innerHTML = `<h4>Son · diagnostic V7.3 <button class="x" type="button" aria-label="Fermer">✕</button></h4><div id="pdaRows"></div>
+  P.innerHTML = `<h4>Son · diagnostic V7.4 <button class="x" type="button" aria-label="Fermer">✕</button></h4><div id="pdaRows"></div>
     <div class="row"><span class="k" style="min-width:auto">Écouter :</span><button data-p="planet">Planète</button><button data-p="star">Étoile</button><button data-p="moon">Lunes</button><button data-p="travel">Voyage</button><button data-p="deep">Espace</button></div>
     <div class="row"><button data-a="wake">Réactiver le son</button><button data-a="copy">Copier le rapport</button></div><ol id="pdaLog"></ol>`;
   document.body.appendChild(b); document.body.appendChild(P);
   const S = PDA.S; let timer = 0;
   const yes = (v, a, n) => v ? `<b class="ok">${a}</b>` : `<b class="bad">${n}</b>`;
-  function report(){ const c = actx; return {version: '7.3', respiration: Math.round((S.breath || 0) * 100) / 100, date: new Date().toISOString(), ua: navigator.userAgent, contexte: c ? c.state : 'absent', frequence: c ? c.sampleRate : 0, session: S.session, moteurs: S.contexts,
+  function report(){ const c = actx; return {version: '7.4', respiration: Math.round((S.breath || 0) * 100) / 100, date: new Date().toISOString(), ua: navigator.userAgent, contexte: c ? c.state : 'absent', frequence: c ? c.sampleRate : 0, session: S.session, moteurs: S.contexts,
     scene: S.scene, ambiance: S.ident, etoile: S.star, lunes: S.moons, musique: S.music, niveau_db: Math.round(S.level), voix: S.voices, reglages: {ambiance: SND.amb, interface: SND.ui, volume: SND.vol}, erreur: S.err || null, journal: S.log.slice(0, 12)}; }
   function draw(){ const c = actx, st = c ? c.state : 'absent', lv = clamp((S.level + 70) / 55, 0, 1);
     $('#pdaRows').innerHTML = `
@@ -5319,6 +5324,42 @@ async function pdCheckUpdate(){ try {
   else { toast('Nouvelle version de PlanèteDot : elle s’installe à la prochaine pause', 5000); au.addEventListener('pause', function f(){ au.removeEventListener('pause', f); setTimeout(() => { if (au.paused && !STORY) go(); }, 1500); }); } } catch(e){} }
 setTimeout(pdCheckUpdate, 4000); document.addEventListener('visibilitychange', () => { if (!document.hidden) setTimeout(pdCheckUpdate, 1500); });
 setTimeout(() => { try { const k = localStorage.getItem('pdVer'); if (k !== PD_VER){ localStorage.setItem('pdVer', PD_VER); if (k) toast('PlanèteDot est à jour · version ' + PD_VER, 4500); } } catch(e){} }, 14000);
+
+/* ================= V7.4 · installer l'appli sur l'écran d'accueil (version web hébergée sur GitHub) =================
+   À la sortie sur l'App Store / Google Play : mettre ON à false dans pdInstallOn() pour retirer toutes ces indications. */
+function pdInstallOn(){ const ON = true; if (!ON) return false;
+  try { if (navigator.standalone || matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches) return false; } catch(e){}
+  return !!pdInstallTip(); }
+function pdInstallTip(){ const ua = navigator.userAgent || '', ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1), and = /Android/.test(ua);
+  if (/Instagram|FBAN|FBAV|FB_IAB|Line\/|Snapchat|TikTok|musical_ly/i.test(ua)) return {how: ios ? 'Ouvre ce lien dans Safari (menu ⋯ › « Ouvrir dans le navigateur »), puis ajoute-le à ton écran d’accueil.' : 'Ouvre ce lien dans Chrome (menu ⋮ › « Ouvrir dans le navigateur »), puis ajoute-le à ton écran d’accueil.'};
+  if (ios){ if (/CriOS/.test(ua)) return {how: 'Touche Partager ⬆︎ dans la barre d’adresse, puis « Sur l’écran d’accueil ».'};
+    if (/FxiOS/.test(ua)) return {how: 'Touche ☰, puis Partager ⬆︎, puis « Sur l’écran d’accueil ».'};
+    if (/EdgiOS/.test(ua)) return {how: 'Touche ⋯, puis Partager ⬆︎, puis « Sur l’écran d’accueil ».'};
+    return {how: 'Touche Partager ⬆︎ (ou ⋯ › Partager), puis « Sur l’écran d’accueil ».'}; }
+  if (and){ if (/SamsungBrowser/.test(ua)) return {how: 'Touche ≡, puis « Ajouter la page à » › « Écran d’accueil ».'};
+    if (/Firefox/.test(ua)) return {how: 'Touche ⋮, puis « Ajouter à l’écran d’accueil ».'};
+    return {how: 'Touche ⋮, puis « Ajouter à l’écran d’accueil ».', bip: true}; }
+  if (/Edg\//.test(ua) || (/Chrome\//.test(ua) && !/OPR\//.test(ua))) return {how: 'Clique sur l’icône d’installation, à droite de la barre d’adresse.', bip: true};
+  if (/Safari\//.test(ua) && /Version\//.test(ua)) return {how: 'Menu Fichier › « Ajouter au Dock ».'};
+  return null; }
+function pdInstallGo(){ const e = window.__pdBIP; if (!e) return false; window.__pdBIP = null; try { e.prompt(); e.userChoice.finally(() => pdInstallPaint()); } catch(_){} pdInstallPaint(); return true; }
+function pdInstallStep(){ if (!pdInstallOn()) return []; const t = pdInstallTip();
+  return [{t: 'Sur ton écran d’accueil', d: 'Ajoute PlanèteDot à ton écran d’accueil : il s’ouvre en plein écran, comme une appli. ' + t.how, todo: 'Touche Suivant', act: t.bip ? ['Installer', () => { if (!pdInstallGo()) toast(t.how, 6000); }] : null, at: () => null, cam: 'wide', ic: '⊕'}]; }
+function pdInstallPaint(){ const host = document.getElementById('pdIntro'); if (!host || !pdInstallOn()) { const o = document.getElementById('pdInst'); if (o) o.remove(); if (host) host.classList.remove('inst'); return; }
+  let el = document.getElementById('pdInst'); const t = pdInstallTip(), can = !!window.__pdBIP;
+  if (!el){ el = document.createElement('div'); el.id = 'pdInst'; host.appendChild(el); host.classList.add('inst'); ['pointerdown', 'click', 'touchstart'].forEach(ev => el.addEventListener(ev, e => { if (e.target.closest('button')){ e.stopPropagation(); if (ev === 'click'){ e.preventDefault(); pdInstallGo(); } } }, true)); }
+  el.innerHTML = `<b>Installe PlanèteDot</b><span>${esc(t.how)}</span>${can ? '<button type="button">Installer</button>' : ''}`; }
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); window.__pdBIP = e; pdInstallPaint(); });
+window.addEventListener('appinstalled', () => { window.__pdBIP = null; const o = document.getElementById('pdInst'); if (o) o.remove(); });
+setTimeout(pdInstallPaint, 0);
+(function(){ const st = document.createElement('style'); st.textContent = `
+#pdIntro.inst #pdIntroHint{bottom:calc(env(safe-area-inset-bottom,0px) + 86px)}
+#pdInst{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 14px);width:min(320px,calc(100% - 48px));text-align:center;color:rgba(214,232,255,.72);font:400 12px/1.45 var(--font);opacity:0;animation:pdInstIn 1s ease 2.2s forwards;pointer-events:auto}
+#pdInst b{display:block;font-weight:600;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:rgba(224,238,255,.9);margin:0 0 4px}
+#pdInst span{display:block}
+#pdInst button{margin:10px auto 0;display:block;padding:7px 16px;border-radius:999px;border:1px solid rgba(160,200,255,.35);background:rgba(120,170,255,.12);color:#e6f0ff;font:600 12px var(--font);letter-spacing:.06em}
+@keyframes pdInstIn{to{opacity:1}}
+`; document.head.appendChild(st); })();
 
 /* ---------- ?perf=1 : a small live meter, to describe the fluidity seen on iPhone ---------- */
 if (/[?&]perf=1/.test(location.search)) (function(){
