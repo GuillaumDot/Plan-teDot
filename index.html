@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#010208">
 <title>planèteDot · ton univers musical</title>
-<meta name="pd-version" content="7.2">
+<meta name="pd-version" content="7.3">
 <meta name="description" content="PlanèteDot · l’album de GuillaumDot et ton univers musical en 3D : chaque planète est un morceau.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PlanèteDot">
@@ -4078,7 +4078,7 @@ function msMeta(){ try { const t = TRACKS.get(Q[qi]); if (!t) return; const alb 
 /* the playing planet, as it is on screen right now, becomes the artwork of the system media card */
 const shotCv = document.createElement('canvas'); shotCv.width = shotCv.height = 240;
 const ARTF = []; let artT = -99, artI = 0, artPid = null;
-function shotTick(){ if (PDART.on) return; if (!SHOT_PT || time - (SHOT_PT.t || 0) > .6 || (isAlbumTrack(Q[qi]) && !(cine && cine.album)) || au.paused || !Q.length || !('mediaSession' in navigator)) return; const nowS = performance.now() / 1000; if (nowS - shotT < (document.hidden ? 4 : 2.4)) return; shotT = nowS;
+function shotTick(){ if (PDART.on) return; if (!SHOT_PT || time - (SHOT_PT.t || 0) > .6 || (isAlbumTrack(Q[qi]) && !(cine && (cine.album || cine.dir))) || (cine && cine.dir && !PDZOOM.includes(cine.shot)) || au.paused || !Q.length || !('mediaSession' in navigator)) return; const nowS = performance.now() / 1000; if (nowS - shotT < (document.hidden ? 4 : 2.4)) return; shotT = nowS;
   if (artPid !== qPlanet){ artPid = qPlanet; ARTF.splice(0).forEach(u => setTimeout(() => { if (u !== ART) URL.revokeObjectURL(u); }, 9000)); }
   try { const sz = clamp(SHOT_PT.r * 2.7, 40, Math.min(W, H)), x = clamp(SHOT_PT.x - sz / 2, 0, W - sz), y = clamp(SHOT_PT.y - sz / 2, 0, H - sz), c = shotCv.getContext('2d'); c.drawImage(cv, x, y, sz, sz, 0, 0, 240, 240);
     shotCv.toBlob(bl => { if (!bl) return; const u = URL.createObjectURL(bl); ARTF.push(u); if (ARTF.length > 14){ const old = ARTF.shift(); setTimeout(() => { if (old !== ART) URL.revokeObjectURL(old); }, 9000); }
@@ -4921,13 +4921,13 @@ body:has(#sheet:not(.off)) #pd-audio-test{opacity:0;pointer-events:none}
   document.head.appendChild(css);
   const b = document.createElement('button'); b.id = 'pd-audio-test'; b.type = 'button'; b.textContent = '♫ Tester le son';
   const P = document.createElement('div'); P.id = 'pdaPanel'; P.hidden = true; P.setAttribute('role', 'dialog'); P.setAttribute('aria-label', 'Diagnostic du son');
-  P.innerHTML = `<h4>Son · diagnostic V7.2 <button class="x" type="button" aria-label="Fermer">✕</button></h4><div id="pdaRows"></div>
+  P.innerHTML = `<h4>Son · diagnostic V7.3 <button class="x" type="button" aria-label="Fermer">✕</button></h4><div id="pdaRows"></div>
     <div class="row"><span class="k" style="min-width:auto">Écouter :</span><button data-p="planet">Planète</button><button data-p="star">Étoile</button><button data-p="moon">Lunes</button><button data-p="travel">Voyage</button><button data-p="deep">Espace</button></div>
     <div class="row"><button data-a="wake">Réactiver le son</button><button data-a="copy">Copier le rapport</button></div><ol id="pdaLog"></ol>`;
   document.body.appendChild(b); document.body.appendChild(P);
   const S = PDA.S; let timer = 0;
   const yes = (v, a, n) => v ? `<b class="ok">${a}</b>` : `<b class="bad">${n}</b>`;
-  function report(){ const c = actx; return {version: '7.2', respiration: Math.round((S.breath || 0) * 100) / 100, date: new Date().toISOString(), ua: navigator.userAgent, contexte: c ? c.state : 'absent', frequence: c ? c.sampleRate : 0, session: S.session, moteurs: S.contexts,
+  function report(){ const c = actx; return {version: '7.3', respiration: Math.round((S.breath || 0) * 100) / 100, date: new Date().toISOString(), ua: navigator.userAgent, contexte: c ? c.state : 'absent', frequence: c ? c.sampleRate : 0, session: S.session, moteurs: S.contexts,
     scene: S.scene, ambiance: S.ident, etoile: S.star, lunes: S.moons, musique: S.music, niveau_db: Math.round(S.level), voix: S.voices, reglages: {ambiance: SND.amb, interface: SND.ui, volume: SND.vol}, erreur: S.err || null, journal: S.log.slice(0, 12)}; }
   function draw(){ const c = actx, st = c ? c.state : 'absent', lv = clamp((S.level + 70) / 55, 0, 1);
     $('#pdaRows').innerHTML = `
@@ -5056,7 +5056,7 @@ document.addEventListener('visibilitychange', () => { if (document.hidden || !sb
 var cineRe = false;   // after leaving the cinematic view, it comes back only after a longer calm
 const pdVisitPid = () => (readonly && qPlanet && VIEW && VIEW.planets && VIEW.planets.some(p => p.id === qPlanet)) ? qPlanet : null;
 /* the cinematic view only lives while the app is on screen: it closes when the app goes to the background, and re-arms on return */
-document.addEventListener('visibilitychange', () => { if (document.hidden){ if (cine) exitCine(); setTimeout(pdArtStill, 60); return; } pdArtBack(); lastInteract = performance.now(); cineRe = false; cineArm = (!au.paused && Q.length) ? performance.now() : 0; });
+document.addEventListener('visibilitychange', () => { if (document.hidden){ if (cine) exitCine(); try { pdArtStill(); } catch(e){} setTimeout(() => { if (!PDART.on) pdArtStill(); }, 400); return; } pdArtBack(); lastInteract = performance.now(); cineRe = false; cineArm = (!au.paused && Q.length) ? performance.now() : 0; });
 /* whatever starts the music (Écouter, the play button, the lock screen), the cinematic view is armed */
 au.addEventListener('play', () => { if (!cineArm) cineArm = performance.now(); });
 /* the opening: while the login page rises, the 3D behind it runs at 30 images/s and the resolution does not change */
@@ -5306,6 +5306,19 @@ async function pdWaShare(file, info){ const text = `${info.title} — ${info.lis
   try { if (file && navigator.canShare && navigator.canShare({files: [file]})){ await navigator.share({files: [file], text: text + ' ' + url}); return; } } catch(e){ if (e && e.name === 'AbortError') return; }
   location.href = 'https://wa.me/?text=' + encodeURIComponent(text + '\n' + url); }
 (function(){ const st = document.createElement('style'); st.textContent = 'body.cine #pdGArrow,body.cine #pdArrive{opacity:0!important;pointer-events:none!important;transition:opacity .6s}'; document.head.appendChild(st); })();
+
+/* ================= V7.3 · toujours la dernière version, et l'écran verrouillé de l'album ================= */
+const PD_VER = (document.querySelector('meta[name="pd-version"]') || {}).content || '';
+const PDZOOM = ['zone', 'graze', 'planet', 'moons'];
+async function pdCheckUpdate(){ try {
+  const r = await fetch(location.pathname + '?pdcheck=' + Date.now(), {cache: 'no-store'}); if (!r.ok) return;
+  const m = (await r.text()).slice(0, 8000).match(/name="pd-version" content="([^"]+)"/); if (!m || m[1] === PD_VER) return;
+  let tried = null; try { tried = sessionStorage.getItem('pdUpd'); } catch(e){} if (tried === m[1]) return;   // une seule tentative par version
+  const go = () => { try { sessionStorage.setItem('pdUpd', m[1]); } catch(e){} const v = new URL(location.href); v.searchParams.set('u', m[1]); location.replace(v.toString()); };
+  if (au.paused && !STORY) go();
+  else { toast('Nouvelle version de PlanèteDot : elle s’installe à la prochaine pause', 5000); au.addEventListener('pause', function f(){ au.removeEventListener('pause', f); setTimeout(() => { if (au.paused && !STORY) go(); }, 1500); }); } } catch(e){} }
+setTimeout(pdCheckUpdate, 4000); document.addEventListener('visibilitychange', () => { if (!document.hidden) setTimeout(pdCheckUpdate, 1500); });
+setTimeout(() => { try { const k = localStorage.getItem('pdVer'); if (k !== PD_VER){ localStorage.setItem('pdVer', PD_VER); if (k) toast('PlanèteDot est à jour · version ' + PD_VER, 4500); } } catch(e){} }, 14000);
 
 /* ---------- ?perf=1 : a small live meter, to describe the fluidity seen on iPhone ---------- */
 if (/[?&]perf=1/.test(location.search)) (function(){
