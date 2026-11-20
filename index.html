@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#010208">
 <title>planèteDot · ton univers musical</title>
-<meta name="pd-version" content="8.3">
+<meta name="pd-version" content="8.4">
 <meta name="description" content="PlanèteDot · l’album de GuillaumDot et ton univers musical en 3D : chaque planète est un morceau.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PlanèteDot">
@@ -1127,14 +1127,15 @@ in vec2 a; out vec2 vUv; void main(){vUv=a*.5+.5; gl_Position=vec4(a,0.,1.);}`;
 /* ================= V8.2 · vraies textures =================
    Images générées avec Figma (offre gratuite) puis retravaillées : raccords invisibles, ciel à 360°, nébuleuses teintées par le thème.
    Entrée allégée : rien n'est téléchargé avant que tu touches le logo (et que ton compte soit ouvert). Un seul fichier, choisi selon l'appareil
-   (textures83-mobile.bin sur téléphone et tablette, textures83-hd.bin sur ordinateur puissant), décodé hors de l'affichage,
+   (textures84-mobile.bin sur téléphone et tablette, textures84-hd.bin sur ordinateur puissant), décodé hors de l'affichage,
    puis envoyé à la carte graphique une image par image, et allumé à un moment où le changement ne se voit pas.
    Pas de textures sur les appareils modestes, en économie de données, sur réseau très lent, ou si le téléphone peine :
    l'appli garde alors exactement le rendu V8.0. */
 const PD_MOBILE = /iPhone|iPad|iPod|Android|Mobile|Silk|Kindle/i.test(navigator.userAgent || '') || (/Macintosh/.test(navigator.userAgent || '') && navigator.maxTouchPoints > 1);
 const PDTX = {on: 0, bad: 0, ready: 0, off: 0, sz: (TIER >= 2 && !PD_MOBILE) ? 1024 : 512, t: null, ms: 0, st: 0, q: [], n: 0, lm: '', lt: 0, w0: 0};
 const PD_RING = '//nnLf/55S//+OQ0//nkOP/55Tz/+ONB//XfTv/z3lz/7tqA//Hc5f/y3u7/8d2+//PesP/04aj/8+Gh//bmqv/36aj/+e21//nuqf/4643/9uiH//Xldv/042T/9+l8//TeRv/03nb/+O////ju///26f//9ejl//fu///16v7/9ur4//Xm+v/36eH/9+3///jw///68f//9+f//+/ctv/05P//+vD///ju///68P//8tz6//Ha8//v18r/9eSy//fq///t0Mj/79Pv/+3N3v/tyPH/89P///PV///76f//67/X//Hb///y4Pz/8NzM//Hbrf/y2dD/9eDq//fqrP/05Ov/9ebj//Xmi//35Lv/9NzK//npkv/253X/9N/Q//jo///454P/9eO8//biof7/8X//++Np//HZv//25LD/+Oi6//np2v/04eL/9uXO//jrrv/45lr/9ePL//ntmf/04KX/9ODS//rtuv/68bv/+vHl//310fH//Qv/7tkt//fs/v/89sv/9OYH/+zZCv/25wz//e0K//XpC//w4wv/9uwK//XmCv7/6gr/8ugK/+XeCf/y6gn/9uEJ/+/cCf/u2Qj/8OMI//LcCP/w3Qj/4c0I/+/iCv7/5Qr//OsL/+3aC//q4gz/8OoM//LdDP/1zQz/78oM//jvD//43Q3/99MO/v/ZDv/12g//+PHF//frhP/78dn/+++5//HgDf/05Av/+eoK//feDf/66pv/+Ov///jq0//35sX/9N3d//fncv/35///9N/r//Te0v/03v3/9eCm//Pd6P/z25z/9uA1//Lb1P/w1qH/89+Z//Tj8P/039j/893i//Pd7f/z3uX/8dr///Lb3f/w2f//8Nj///PZ///pwtn/++r//+zJ///syv//6cTc/+jC6P/owtX/68ip//DW+f/z2cT/8NXl/+/T7f/t0s//8Nn///Xf///x2P//8NP///DTn//qzLv/7dH///Tg///25///9+r///Pcq//79M7/+PP5//bq3v/16LP/9OX1//Tgyv/15uD/9N7//+/Qgf/nxyH/7N0G/+bOBv/n0QX/8tuL//LZiv/x2dP/9d/6//Pc5P/z3dv/79XY/+7Sxv/x2ez/89z///Xg///04eb/9OL///Ph9P/14v//892b//Pd///y3e//79nA//HZ0//x2rj/89/q//Ph6f/x2bb/8NWW/+/Uaf/z3Hf/9OBo//Xia//143L/9eR8//blhv/25IP/9uST//Thif/03pb/8tmW//HWnf/x06r/8Nbf/+/V0P/v1Iz/8txX//XgSP/34kH/+OU6//flNv/45DX/+OUy//jnLv/46Cj/+Osl/+3cBQ==';
-const PD_TXN = ['s0_terrain', 's1_moon', 's2_lava', 's3_ice', 's4_desert', 's5_metal', 's6_crystal', 's7_clouds', 's8_sun', 's9_gas', 's10_forest', 's11_savanna', 's12_prairie'];
+const PD_TXN = ['s0_terrain', 's1_moon', 's2_lava', 's3_ice', 's4_desert', 's5_metal', 's6_crystal', 's7_clouds', 's8_sun', 's9_gas', 's10_forest', 's11_savanna', 's12_prairie',
+  's13_mercury', 's14_basalt', 's15_canyon', 's16_metalflow', 's17_sulfur', 's18_lavariver', 's19_obsidian'];   // V8.4 · sols rocheux, métalliques et volcaniques
 function pdCompile2(vs, fs, fb){ try { const r = compile(vs, fs); r.v82 = true; return r; } catch(e){ console.warn('[PlanèteDot] rendu 8.2 refusé par ce téléphone, rendu V8.0 gardé', e); PDTX.bad = 1; return compile(vs, fb); } }
 function pdTxMk(unit, tg, ws, wt, mip){ const G = gl, t = G.createTexture(), au = G.getParameter(G.ACTIVE_TEXTURE); G.activeTexture(G.TEXTURE0 + unit); G.bindTexture(tg, t);
   G.texParameteri(tg, G.TEXTURE_MIN_FILTER, mip ? G.LINEAR_MIPMAP_LINEAR : G.LINEAR); G.texParameteri(tg, G.TEXTURE_MAG_FILTER, G.LINEAR);
@@ -1160,7 +1161,7 @@ function pdTxWhy(){ if (PDTX.bad || !PDTX.t) return 'rendu 8.2 refusé'; if (PDT
   const c = navigator.connection || {}; if (c.saveData) return 'économie de données'; if (/(^|-)2g$/.test(c.effectiveType || '')) return 'réseau très lent'; return ''; }
 // called when the logo is touched (or a little after the opening when there is no animation)
 function pdTxSoon(ms){ if (PDTX.st) return; PDTX.st = 1; setTimeout(pdTxFetch, ms || 0); }
-const PD_TXSRC = 'pack';   // 'pack' : un seul fichier .bin à côté de index.html (GitHub) ; 'dir' : les 17 images une à une (version test dans Claude)
+const PD_TXSRC = 'pack';   // 'pack' : un seul fichier .bin à côté de index.html (GitHub) ; 'dir' : les 28 images une à une (version test dans Claude)
 const PD_GZN = ['gz_0', 'gz_1', 'gz_2', 'gz_3'];   // V8.3 · géantes gazeuses (2:1)
 const PD_TXALL = PD_TXN.concat(['gal_a', 'gal_b', 'sky_mw', 'sky_neb'], PD_GZN);
 async function pdTxFetch(){ try { await Promise.race([Promise.resolve(SESSP).catch(() => {}), new Promise(r => setTimeout(r, 15000))]); } catch(e){}   // the account first, the textures after
@@ -1168,7 +1169,7 @@ async function pdTxFetch(){ try { await Promise.race([Promise.resolve(SESSP).cat
   const t0 = performance.now(), hd = PDTX.sz >= 1024;
   try { let items;
     if (PD_TXSRC === 'dir'){ const d = hd ? 'tx-hd/' : 'tx-mobile/'; items = PD_TXALL.map(n => ({n, u: d + n + '.jpg'})); }
-    else { const file = hd ? 'textures83-hd.bin' : 'textures83-mobile.bin', r = await fetch(file + '?v=' + encodeURIComponent((document.querySelector('meta[name="pd-version"]') || {}).content || ''), {priority: 'low'}); if (!r.ok) throw new Error(file + ' : ' + r.status);
+    else { const file = hd ? 'textures84-hd.bin' : 'textures84-mobile.bin', r = await fetch(file + '?v=' + encodeURIComponent((document.querySelector('meta[name="pd-version"]') || {}).content || ''), {priority: 'low'}); if (!r.ok) throw new Error(file + ' : ' + r.status);
       const buf = await r.arrayBuffer(), u8 = new Uint8Array(buf);
       if (u8[0] !== 80 || u8[1] !== 68 || u8[2] !== 84 || u8[3] !== 88) throw new Error(file + ' : format');
       const hl = new DataView(buf).getUint32(4, true), H = JSON.parse(new TextDecoder().decode(u8.subarray(8, 8 + hl))), base = 8 + hl;
@@ -1446,8 +1447,9 @@ precision highp sampler2DArray;
 uniform sampler2DArray uTx,uGal; uniform sampler2D uRingT; uniform float uTxOn,uTxS;
 /* V8.2 · textures réelles (Figma) projetées en 3 plans sur la sphère, niveau de détail calculé (pas de dérivées) */
 vec3 gW=vec3(0.,0.,1.),gS=vec3(0.,0.,1.),gLo=vec3(0.,0.,1.); float gMu=1.,gE=.01,TXR=0.,TXK=0.,BZR=0.,BZK=0.;
-vec3 txT(float ly,vec3 p,float lod){ return textureLod(uTx,vec3(p.yz,ly),lod).rgb*gW.x+textureLod(uTx,vec3(p.zx,ly),lod).rgb*gW.y+textureLod(uTx,vec3(p.xy,ly),lod).rgb*gW.z; }
-float txL(float sc){ return log2(max(uTxS*sc/(max(uR,1.)*gMu),1e-3))-.35; }
+vec3 txT(float ly,vec3 p,float lod){ vec3 c=vec3(0.); if(gW.x>0.) c+=textureLod(uTx,vec3(p.yz,ly),lod).rgb*gW.x; if(gW.y>0.) c+=textureLod(uTx,vec3(p.zx,ly),lod).rgb*gW.y;
+  if(gW.z>0.) c+=textureLod(uTx,vec3(p.xy,ly),lod).rgb*gW.z; return c; }   /* V8.4 : une face sans poids ne lit plus la texture (moins de lectures) */
+float gLB=0.; bool gST=false; float txL(float sc){ return log2(max(uTxS*sc/(max(uR,1.)*gMu),1e-3))-.35+gLB; }
 vec3 txS(float ly,float sc,out float rl){ vec3 o=fract(vec3(.37,.71,.53)*(uSeed+ly*.31))*4.; float lod=txL(sc); vec3 c=txT(ly,gS*sc+o,lod); rl=0.;
   if(uR>16.){ vec3 c1=txT(ly,(gS+gLo*gE)*sc+o,lod); rl=dot(c1-c,vec3(.3,.59,.11)); } return c; }
 
@@ -1457,6 +1459,9 @@ mat3 rotZ(float t){float c=cos(t),s=sin(t);return mat3(c,s,0,-s,c,0,0,0,1);}
 vec4 over(vec4 t,vec4 u){return t+u*(1.-t.a);}
 /* relief: height field per environment, with distance LOD (detail octaves fade in as the body grows on screen) */
 float ridge(float x){return 1.-abs(x*2.-1.);}
+float fbm2(vec3 p){ return n3(p)*.66+n3(p*2.03+vec3(1.7,9.2,3.1))*.34; }   /* V8.4 */
+float relief84(vec3 b){ vec3 q=b*1.6+uSeed*7.; q*=vec3(1.+.32*sin(uSeed*1.7),1.+.28*sin(uSeed*2.9),1.+.32*cos(uSeed*2.3));
+  return uType==10?fbm2(q*1.1)*.8-smoothstep(.56,.84,n3(q*1.35+5.))*.3:uType==9?fbm2(q*1.3)*.75:fbm2(q*1.4)*.65+smoothstep(.6,.88,n3(q*2.+9.))*.35; }
 float reliefB(vec3 b,float det,out float hb){
   vec3 q=b*1.6+uSeed*7.; q*=vec3(1.+.32*sin(uSeed*1.7),1.+.28*sin(uSeed*2.9),1.+.32*cos(uSeed*2.3)); float h;
   if(uType==11||uType==1){ vec3 w=q*1.15; w+=vec3(n3(w*1.3+2.),n3(w*1.3+7.),n3(w*1.3+11.))*.55; h=fbm3(w);
@@ -1505,7 +1510,7 @@ vec3 biomeC(int b,vec3 sp,out float bs,inout vec3 em){
   else { c=mix(vec3(.15,.36,.1),vec3(.4,.54,.17),f)*(.85+g*.25); float lk=smoothstep(.66,.7,fbm3(sp*3.+9.)); c=mix(c,vec3(.03,.12,.26),lk); bs=lk*1.1; }
   BZR=0.; BZK=0.;
   if(uTxOn>.5){ float rl=0.; int ly=b==0?2:b==1?4:b==2?5:b==3?6:b==4?3:b==5?10:b==6?11:12; float sc=b>=5?4.6:b==2?2.:b==3?1.7:b==4?1.5:1.9;
-    vec3 t=txS(float(ly),sc,rl); vec3 tm=ly==2?vec3(.31,.18,.13):ly==4?vec3(.58,.36,.24):ly==5?vec3(.34,.33,.32):ly==6?vec3(.44,.41,.49):ly==3?vec3(.62,.6,.6):ly==10?vec3(.17,.25,.15):ly==11?vec3(.66,.52,.32):vec3(.33,.46,.25);
+    vec3 t=txS(float(ly),sc,rl); vec3 tm=ly==2?vec3(.31,.18,.13):ly==4?vec3(.58,.36,.24):ly==5?vec3(.42,.4,.384):ly==6?vec3(.44,.41,.49):ly==3?vec3(.62,.6,.6):ly==10?vec3(.17,.25,.15):ly==11?vec3(.66,.52,.32):vec3(.33,.46,.25);
     c=mix(c,c*t/tm,b>=5?.62:.5); c=mix(c,t,b>=5?.22:.42);
     if(b==0){ float hot=smoothstep(.3,.75,t.r-t.b); em+=vec3(1.,.42,.1)*hot*hot*(.85+uAudio*2.5)*(.72+.28*sin(uT*1.5+t.g*9.)); }
     if(b==3){ em+=rainbow(dot(t,vec3(.3,.59,.11))+uT*.03)*pow(clamp((t.b-.55)*2.2,0.,1.),3.)*.5*(1.+uAudio); }
@@ -1613,21 +1618,84 @@ vec3 gasV83(vec3 S,vec3 wd,float dif,inout vec3 emi){
   emi+=vec3(.72,.82,1.)*gzK*(fk*(.55+.1*st)+uBeat*uPlay*1.1)*(.2+.8*nt)*smoothstep(2.,4.5,st+uWx*3.+uPlay*2.5)*.6;
   if(wild>.01){ float cz=smoothstep(.86,.95,n3(vec3(q*vec2(90.,45.),floor(uT*3.1)*3.7)))*pow(1.-fract(uT*3.1),2.); emi+=vec3(.7,.8,1.)*cz*wild*(.25+uBeat*uPlay*.7)*(.2+.8*nt); }
   return c; }
+/* V8.4 · rocheuses, métalliques et volcaniques naturelles : deux terrains réels (Figma) par planète, répartis en grandes régions
+   aux contours naturels, chacun avec sa propre clarté (mers sombres, hauts plateaux clairs…), couleurs minérales, relief tiré de la texture,
+   lueur de lave tirée de la texture. Le relief procédural fin (cratères en taches, bruit qui scintillait) n'est plus calculé pour ces planètes. */
+const vec3 TXM[20]=vec3[20](vec3(.477,.428,.313),vec3(.465,.439,.415),vec3(.318,.183,.132),vec3(.617,.597,.592),vec3(.585,.363,.242),vec3(.42,.4,.384),vec3(.434,.406,.492),vec3(.292),vec3(.579),vec3(.621,.527,.454),
+  vec3(.173,.245,.148),vec3(.658,.52,.317),vec3(.329,.455,.251),vec3(.419,.377,.339),vec3(.269,.246,.232),vec3(.578,.429,.325),vec3(.304,.287,.276),vec3(.685,.547,.326),vec3(.44,.247,.171),vec3(.231,.2,.192));
+float gHot84=0.; vec3 gGc84=vec3(1.,.4,.08);   // lave : chaleur et couleur de la lueur, reprises par les éruptions plus bas
+vec3 txNrm(float ly,vec3 c,float k){ return c*(k/max(dot(TXM[int(ly+.5)],vec3(.3,.59,.11)),.05)); }
+// chaleur lue dans la couleur de la texture, proportionnelle à la surface en fusion (les fissures fines gardent leur lueur de loin)
+float hot84(float ly,vec3 t){ if(abs(ly-17.)<.5){ float h=clamp((t.r-t.g-.18)/.25,0.,1.)*clamp((t.r-.55)/.3,0.,1.); return h*h*.7; }
+  return clamp((t.r-t.g*.6-t.b*.4-.1)*(abs(ly-19.)<.5?3.:1.65),0.,1.); }
+vec3 solid84(float dif,inout vec3 emi,inout float spec,out float rl){
+  float vr=floor(fract(uSeed*13.17)*4.), v2=fract(uSeed*7.31), v3=fract(uSeed*3.77);
+  if(uType==10&&uIrr>.2&&vr==1.) vr=v2>.5?0.:2.;   // lunes et astéroïdes : roches grises (pas de « Mars » à côté de la Terre de l'album)
+  float A,B,sa,sb,kA,kB,cov;   // terrain principal A, second terrain B (texture, échelle, clarté), part du second terrain
+  if(uType==10){
+    if(vr==0.){ A=1.; kA=.5; B=14.; kB=.25; cov=.38; }                                  // type Lune : hauts plateaux clairs, mers de basalte sombres
+    else if(vr==1.){ A=15.; kA=.42; B=v2>.5?13.:14.; kB=v2>.5?.36:.24; cov=.3; }      // type Mars : terres rousses ravinées, régions sombres
+    else if(vr==2.){ A=13.; kA=.4; B=v2>.5?1.:14.; kB=v2>.5?.54:.27; cov=.32; }        // type Mercure : cratères, plaines plus claires ou plus sombres
+    else { A=14.; kA=.28; B=v2>.5?15.:13.; kB=v2>.5?.36:.38; cov=.3; }                // basalte sombre, coulées anciennes plus claires
+    sa=1.2+.45*v2; sb=1.5+.4*v3; }
+  else if(uType==9){ A=v2<.6?5.:16.; B=A==5.?16.:5.; kA=A==5.?.5:.38; kB=A==5.?.36:.5; cov=.34; sa=1.15+.4*v3; sb=1.45; }   // métal type Psyché / coulées de métal
+  else { A=vr==0.?2.:vr==1.?17.:vr==2.?19.:18.; B=vr==0.?19.:vr==1.?14.:vr==2.?(v2>.5?2.:14.):19.;                          // croûte / soufre / obsidienne / rivières de lave
+    kA=vr==1.?.55:vr==2.?.17:.24; kB=B==19.?.15:B==14.?.22:.24; cov=vr==1.?.3:.36; sa=1.05+.4*v2; sb=1.35; }
+  // régions du second terrain : grandes formes aux contours naturels (bruit déformé), proportion propre à chaque planète
+  vec3 pq=gS*1.05+uSeed*3.1; pq+=(n3(pq*1.7+1.)-.5)*vec3(.7,-.6,.5);
+  float t0=.5+(.5-cov)*.34+(v3-.5)*.05; float m=smoothstep(t0-.03,t0+.03,fbm3(pq));
+  gLB=.4; float rA=0.,rB=0.; vec3 a=vec3(.45),b=a; if(m<.996) a=txS(A,sa,rA); if(m>.004) b=txS(B,sb,rB); gLB=0.;
+  float hot=uType==4?mix(hot84(A,a),hot84(B,b),m):0.;
+  vec3 t=mix(txNrm(A,a,kA),txNrm(B,b,kB),m); rl=mix(rA,rB,m); float lum=dot(t,vec3(.3,.59,.11));
+  vec3 pal=mix(uC2,uC1,smoothstep(.15,.6,lum)); float pl=dot(pal,vec3(.3,.59,.11)); pal=mix(vec3(pl),pal,.8)/max(pl,.06);   // couleur choisie, en teinte
+  float big=smoothstep(.3,.7,n3(gS*1.1+uSeed*1.7));   // grandes nuances claires et sombres
+  vec3 c;
+  if(uType==10){
+    c=mix(t,lum*pal,.28+.16*v2);
+    c*=vr==1.?vec3(1.07,.95,.84):vr==3.?vec3(1.03,.97,.93):vec3(1.);
+    c*=(.88+.24*v3)*(.86+.28*big)*mix(vec3(1.03,1.,.96),vec3(.97,1.,1.04),big);
+    if(vr==1.&&v2>.3){ float fr=smoothstep(.8,.9,abs(gS.y)+(lum-.4)*.3+(big-.5)*.1); c=mix(c,vec3(.88,.9,.93)*(.9+.2*lum),fr*.85); }   // calottes polaires
+  }
+  else if(uType==9){
+    vec3 mt=vr==0.?vec3(.86,.88,.92):vr==1.?vec3(1.,.72,.55):vr==2.?vec3(1.,.84,.52):vec3(.8,.86,.97);   // fer / cuivre / or / titane
+    float rust=smoothstep(.05,.16,t.r-t.b)*.5;                                                          // un peu d'oxyde, seulement là où la roche est nettement rousse
+    c=mix(vec3(lum)*mt*1.08,t*vec3(1.06,.9,.76),rust); c=mix(c,c*pal,.22);
+    c*=(.95+.2*v3)*(.86+.28*big);
+    if(vr==1.) c=mix(c,vec3(.36,.6,.5)*lum*1.4,rust*big*.7);                                             // cuivre : vert-de-gris
+    spec=max(spec,(.7+.8*smoothstep(.25,.6,lum))*(1.-rust*1.4));                                        // le métal poli brille, l'oxyde non
+  }
+  else {
+    c=mix(t,lum*mix(vec3(1.),uC2*1.4+.15,.5),.2)*(.9+.2*v3); c=mix(c,c*.25,hot);
+    if(vr==1.) c=mix(c,max(mix(vec3(dot(c,vec3(.3,.59,.11))),c,1.35),0.),1.-m);                       // soufre plus franc
+    float act=.5+.5*smoothstep(.3,.7,n3(gS*1.8+vec3(uT*.004,0.,0.)+uSeed));                          // régions plus ou moins actives, qui changent lentement
+    float fl=.84+.16*sin(uT*1.3+lum*11.+gS.x*7.+gS.z*5.);
+    vec3 g0=mix(vec3(1.,.2,.03),vec3(1.,.32,.05),v2), g1=mix(vec3(1.,.5,.1),vec3(1.,.66,.2),v2);
+    vec3 gc=mix(mix(g0,g1,smoothstep(.35,.95,hot)),uC1*1.15,.2);                                         // bords rouges, cœur orange
+    emi+=gc*hot*act*fl*(1.2+uAudio*2.2+uBeat*.8)*(.55+.45*(1.-dif*.8)); rl*=1.-hot; gHot84=hot; gGc84=gc;
+    float ob=(A==19.?1.-m:0.)+(B==19.?m:0.);                                                             // obsidienne : verre noir brillant
+    spec=max(spec,(.12+.45*ob)*(1.-hot));
+  }
+  return c;
+}
 vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
   vec3 sp=s*1.6+uSeed*7.; vec4 cwvG=cloudWave(s); wvG=min(wvG,1.5);
-  TXR=0.; TXK=0.; if(uTxOn>.5){ gW=pow(abs(s),vec3(4.)); gW/=dot(gW,vec3(1.)); gMu=max(n.z,.22); gS=normalize(s-cwvG.xyz*.8); gLo=RM*L; gE=clamp(1.6/max(uR,1.),.0015,.03); }
+  TXR=0.; TXK=0.; if(uTxOn>.5){ gW=pow(abs(s),vec3(4.)); gW/=dot(gW,vec3(1.)); gW=max(gW-.03,0.); gW/=dot(gW,vec3(1.)); gMu=max(n.z,.22); gS=normalize(s-cwvG.xyz*.8); gLo=RM*L; gE=clamp(1.6/max(uR,1.),.0015,.03); }
+  bool sT=uTxOn>.5&&uR>3.&&(uType==10||uType==9||uType==4); gST=sT;   /* V8.4 : rocheuse, métallique ou volcanique faite par solid84 */
   float det=clamp((uR-14.)/95.,0.,1.)*uQual; vec3 n0=n, nb=n; float gh=.5;
   float bA=uType==10?2.8:uType==9?1.5:uType==4?2.:uType==0?1.9:uType==3?1.6:(uType==11||uType==1)?2.:0.;
   float shd=occShadow(n0,L)*ringShadow(n0,L);
-  if(bA>0.&&uR>14.){ float e=clamp(2.5/uR,.004,.02); vec3 b0=RM*n; float gc; gh=reliefB(b0,det,gc); float dg=uQual>.85?det:0.; float g0=dg>0.?gh:gc;
-    float hx=relief(RM*normalize(n+vec3(e,0.,0.)),dg)-g0, hy=relief(RM*normalize(n+vec3(0.,e,0.)),dg)-g0;
+  if(sT) bA=uType==10?1.:uType==9?.8:.9;
+  if(bA>0.&&uR>14.){ float e=clamp(2.5/uR,.004,.02); vec3 b0=RM*n; float gc,hx,hy;
+    if(sT){ gh=relief84(b0); gc=gh; hx=relief84(RM*normalize(n+vec3(e,0.,0.)))-gh; hy=relief84(RM*normalize(n+vec3(0.,e,0.)))-gh; }   /* V8.4 */
+    else { gh=reliefB(b0,det,gc); float dg=uQual>.85?det:0.; float g0=dg>0.?gh:gc; hx=relief(RM*normalize(n+vec3(e,0.,0.)),dg)-g0; hy=relief(RM*normalize(n+vec3(0.,e,0.)),dg)-g0; }
     nb=normalize(n-vec3(hx,hy,0.)/e*bA*.1*smoothstep(9.,34.,uR));
-    if(det>.2&&uQual>.55){ vec3 lb=RM*L; float oc=1.; float tl=1.+2.5*(1.-clamp(dot(n0,L),0.,1.)); int mk=uQual>.8?3:2; for(int k=1;k<=3;k++){ if(k>mk) break; float st=.011*float(k*k)*tl; float hl=relief(normalize(b0+lb*st),0.); oc=min(oc,clamp((gc-hl)*12./float(k)+.8,0.,1.)); }
+    if(det>.2&&uQual>.55&&!sT){ vec3 lb=RM*L; float oc=1.; float tl=1.+2.5*(1.-clamp(dot(n0,L),0.,1.)); int mk=uQual>.8?3:2; for(int k=1;k<=3;k++){ if(k>mk) break; float st=.011*float(k*k)*tl; float hl=relief(normalize(b0+lb*st),0.); oc=min(oc,clamp((gc-hl)*12./float(k)+.8,0.,1.)); }
       shd*=mix(1.,.1+.9*oc,min(1.,det*1.5)*smoothstep(-.1,.4,dot(n0,L))); } }
   if(!(uType==11||uType==1)) n=nb;
   float ndl=dot(n,L); float dif=lam(ndl)*shd; float amb=.038;
   vec3 col; vec3 emi=vec3(0.); float a=1.; float land=1.; float spec=0.;
-  if(uType==0){ float f=fbm(sp*1.3); float cr=fbm(sp*5.); col=mix(uC2*.45,uC1,smoothstep(.3,.7,f)); col*=.68+.55*cr; col*=.9+.2*sin(dot(sp,vec3(9.,3.,7.))+fbm3(sp*4.)*6.)*(.3+det); col*=.93+.14*sin(s.y*90.+fbm3(sp*3.)*9.)*det;
+  if(sT){ col=vec3(.4); }   /* V8.4 : couleur faite plus bas par solid84 */
+  else if(uType==0){ float f=fbm(sp*1.3); float cr=fbm(sp*5.); col=mix(uC2*.45,uC1,smoothstep(.3,.7,f)); col*=.68+.55*cr; col*=.9+.2*sin(dot(sp,vec3(9.,3.,7.))+fbm3(sp*4.)*6.)*(.3+det); col*=.93+.14*sin(s.y*90.+fbm3(sp*3.)*9.)*det;
     float veg=smoothstep(.55,.15,abs(s.y))*clamp(uStage/3.,.12,1.)*smoothstep(.45,.6,f); col=mix(col,vec3(.13,.3,.1)*(.7+fbm3(sp*9.)*.6),veg*.55);
     col=mix(col,vec3(.92,.95,1.),smoothstep(.72,.9,abs(s.y))*.85); }
   else if(uType==9){ float qp=n3(sp*2.2+fbm3(sp*1.4)*.6)*5.; float seam=1.-smoothstep(0.,.05,min(fract(qp),1.-fract(qp)));
@@ -1701,7 +1769,7 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
   else { vec3 q=sp*1.2; q+=vec3(fbm(q+uT*.04),fbm(q+4.),fbm(q+9.))*1.6; float f=fbm(q); col=mix(uC1*.5,uC2,f*f*1.5);
     emi+=uC2*pow(f,4.)*(1.6+uAudio*3.); land=.5; }
   if(uTxOn>.5&&uR>3.){ float rl=0.; vec3 t;
-    if(uType==10){ t=txS(1.,1.5,rl); col=mix(col,col*t*2.2,.85); TXR=rl; TXK=3.2; }
+    if(sT){ emi=vec3(0.); spec=0.; col=solid84(dif,emi,spec,rl); TXR=rl; TXK=uType==9?1.4:uType==4?1.6:1.8; }   /* V8.4 */
     else if(uType==3){ t=txS(3.,1.1,rl); col=mix(col,col*t*1.65,.6); col=mix(col,t*mix(vec3(1.),uC1+.25,.3),.3); TXR=rl; TXK=1.8; }
     else if(uType==4){ t=txS(2.,1.3,rl); float hot=smoothstep(.3,.75,t.r-t.b); col=mix(col,t*.5+col*.3,.75); emi+=mix(uC1,vec3(1.,.5,.12),.55)*hot*hot*(.9+uAudio*2.5+uBeat*.9)*(.78+.22*sin(uT*1.4+t.g*9.)); TXR=rl*(1.-hot); TXK=2.6; }
     else if(uType==5){ t=txS(6.,2.6,rl); col=mix(col,col*t*2.3,.65); col+=t*t*t*.12; spec=max(spec,smoothstep(.55,.85,dot(t,vec3(.33)))*.9); TXR=rl; TXK=2.; }
@@ -1836,18 +1904,18 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
     col=mix(col,col*.55+vec3(.07,.06,.05),smoothstep(.04,.16,slope)*.55*lk);
     col*=mix(vec3(1.),vec3(1.1,.97,.88),smoothstep(.35,.75,fbm3(sp*.6+3.))*.35*lk);
     col*=mix(1.,.64+.8*gh,.6*lk);
-    col*=1.+det*(n3(sp*38.)-.5)*.26+det*det*(n3(sp*90.)-.5)*.14; spec*=.75+.5*n3(sp*30.); }
+    if(!sT){ col*=1.+det*(n3(sp*38.)-.5)*.26+det*det*(n3(sp*90.)-.5)*.14; spec*=.75+.5*n3(sp*30.); } }
   if(uType==0||uType==3||uType==10){ float hz=smoothstep(.55,.82,fbm3(rotY(uT*.0002)*sp*1.4+11.)+(n3(sp*12.)-.5)*.1)*(.18+uWx*.55)*(uType==10?.5:1.);
     col=mix(col,uType==3?vec3(.93,.96,1.):vec3(.72,.56,.4),hz*.6); cloudA=max(cloudA,hz*.5); }
   { float vr=floor(fract(uSeed*13.17)*4.);
-    if(uType==10){ vec3 tn=vr==0.?vec3(.55,.55,.57):vr==1.?vec3(.85,.72,.52):vr==2.?vec3(.8,.42,.25):vec3(.3,.29,.3); col=mix(col,col*tn*1.6,.6);
+    if(uType==10&&!sT){ vec3 tn=vr==0.?vec3(.55,.55,.57):vr==1.?vec3(.85,.72,.52):vr==2.?vec3(.8,.42,.25):vec3(.3,.29,.3); col=mix(col,col*tn*1.6,.6);
       if(vr==2.) col=mix(col,col*.6,(1.-smoothstep(0.,.03,abs(fbm3(sp*3.+5.)-.5)))*.7); }                       // basalt / sandstone / iron oxide with canyons / carbon
     if(uType==3){ col*=vr==0.?vec3(1.):vr==1.?vec3(1.,.84,.74):vr==2.?vec3(.82,.92,1.05):vec3(.78,.73,.65);
       if(vr==1.) col=mix(col,vec3(.55,.32,.22),smoothstep(.6,.75,fbm3(sp*1.5+3.))*.5); }                            // water ice / nitrogen ice with tholins / methane frost / dirty ice
     if(uType==2&&!(uTxOn>.5&&uR>3.)){ if(vr==2.) col=mix(col,vec3(.45,.75,.85)*(.85+.3*col.r),.65); else if(vr==3.){ col*=.55; emi+=vec3(1.,.35,.1)*smoothstep(.55,.78,fbm3(sp*3.+uT*.0003))*.22*(1.-dif); }
       else if(vr==1.) col=mix(col,vec3(.92,.82,.6),.35); }                                                          // jovian / saturnian / ice giant / hot jupiter
-    if(uType==4){ if(vr==1.) col=mix(col,vec3(.8,.68,.25),.35); else if(vr==2.){ col*=.6; spec=max(spec,.6); } } // basalt / sulfur world / obsidian glass
-    if(uType==9){ vec3 tn=vr==0.?vec3(.75,.77,.8):vr==1.?vec3(.95,.6,.45):vr==2.?vec3(1.,.85,.45):vec3(.7,.75,.85); col=mix(col,col*tn*1.4,.7); spec*=1.2;
+    if(uType==4&&!sT){ if(vr==1.) col=mix(col,vec3(.8,.68,.25),.35); else if(vr==2.){ col*=.6; spec=max(spec,.6); } } // basalt / sulfur world / obsidian glass
+    if(uType==9&&!sT){ vec3 tn=vr==0.?vec3(.75,.77,.8):vr==1.?vec3(.95,.6,.45):vr==2.?vec3(1.,.85,.45):vec3(.7,.75,.85); col=mix(col,col*tn*1.4,.7); spec*=1.2;
       if(vr==1.) col=mix(col,vec3(.35,.6,.5),smoothstep(.6,.75,fbm3(sp*4.))*.4); }                                  // iron / copper with verdigris / gold / titanium
     if(uType==5) col*=vr==0.?vec3(1.):vr==1.?vec3(.85,.65,1.1):vr==2.?vec3(.6,1.05,.75):vec3(1.1,.55,.6);          // quartz / amethyst / emerald / ruby
     if(uType==0){ vec3 tn=vr==0.?vec3(1.05,.92,.7):vr==1.?vec3(.85,.95,.6):vr==2.?vec3(1.1,.65,.45):vec3(.8,.8,.78); col=mix(col,col*tn,.6); } // desert / savanna / red dust / grey regolith
@@ -1864,23 +1932,23 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
     float lkk=smoothstep(.7,.73,n3(sp*4.+21.))*lk*smoothstep(.55,.45,gh)*(1.-cloudA); col=mix(col,vec3(.03,.12,.2),lkk*.8); spec=max(spec,lkk); }
   if((uType==1||uType==11)&&det>.05){ float wat=(1.-land)*(1.-cloudA); vec3 wq=sp*46.+vec3(uT*.05,0.,uT*.04);
     n=normalize(n+(vec3(n3(wq),n3(wq+7.),n3(wq+13.))-.5)*.1*wat*det); spec*=1.+wat*.15*smoothstep(.55,.8,n3(sp*12.+uT*.01)); }
-  if(uType==10) col=mix(col,vec3(.92,.9,.88),smoothstep(.82,.9,abs(s.y)+fbm3(sp*3.)*.08)*.7);
+  if(uType==10&&!sT) col=mix(col,vec3(.92,.9,.88),smoothstep(.82,.9,abs(s.y)+fbm3(sp*3.)*.08)*.7);
   if(uType==0||uType==1||uType==11){ float lk=uType==0?1.:land;                                                   // forests: temperate lowlands, canopy grain, self-shaded
     float fo=smoothstep(.52,.62,n3(sp*3.2+31.))*smoothstep(.62,.5,gh)*smoothstep(.75,.45,abs(s.y))*lk*(1.-cloudA)*(uType==0?.5:1.);
     vec3 fc=mix(vec3(.04,.14,.05),vec3(.13,.25,.08),n3(sp*7.)); fc=mix(fc,vec3(.03,.1,.08),smoothstep(.35,.6,abs(s.y)+gh*.4)*.7);
     float crown=det>.3?smoothstep(.3,.8,n3(sp*190.))*det:0.; float clump=smoothstep(.35,.7,n3(sp*24.));
     col=mix(col,fc*(.7+.45*n3(sp*30.)+.25*clump+.35*(crown-.5)),fo*.72); col*=1.-fo*(.16+.12*(1.-crown)*det)*(1.-dif*.6); }
-  if(uType==4){ float qc=n3(sp*6.+fbm3(sp*2.))*4.; float ce=1.-smoothstep(0.,.07,min(fract(qc),1.-fract(qc)));                // lava crust plates with glowing seams
+  if(uType==4&&!sT){ float qc=n3(sp*6.+fbm3(sp*2.))*4.; float ce=1.-smoothstep(0.,.07,min(fract(qc),1.-fract(qc)));                // lava crust plates with glowing seams
     col*=.85+.25*fract(floor(qc)*.618); emi+=uC1*ce*(.35+.25*sin(uT*.5+floor(qc)*3.))*(.4+.6*(1.-dif)); }
-  if(uType==10||uType==0){ float ck=1.-smoothstep(0.,.018,abs(n3(sp*8.+3.)-.5)); col*=1.-ck*.35*(.4+det); }                // fracture networks
+  if((uType==10&&!sT)||uType==0){ float ck=1.-smoothstep(0.,.018,abs(n3(sp*8.+3.)-.5)); col*=1.-ck*.35*(.4+det); }                // fracture networks
   if(uType!=2&&uType!=8&&uType!=6&&uType!=7){ float cav=smoothstep(.22,.82,gh); col*=mix(1.,mix(.8,1.1,cav),(.35+.65*det)*(1.-cloudA)*((uType==1||uType==11)?land:1.)); }
   if(uType==3){ float pool=smoothstep(.72,.75,n3(sp*6.+9.))*(1.-cloudA); col=mix(col,vec3(.28,.58,.88),pool*.7); spec=max(spec,pool*1.2); } // meltwater pools
   vec3 lbD=RM*L;
   if(uType==2&&!(uTxOn>.5&&uR>3.)){ float gd=fbm3(sp*vec3(3.,10.,3.))-fbm3((sp+lbD*.05)*vec3(3.,10.,3.)); col*=clamp(1.+gd*(uTxOn>.5?1.:2.2),.6,1.4); float deep=smoothstep(.55,.3,fbm3(sp*vec3(2.,7.,2.)+3.)); col=mix(col,col*vec3(.55,.5,.6),deep*.4); col*=.93+.14*n3(sp*vec3(4.,22.,4.)+fbm3(sp*2.)); float vt=n3(sp*vec3(5.,12.,5.)+vec3(uT*.006,0.,0.)); float vk=uTxOn>.5?.4:1.; col=mix(col,col*1.28,smoothstep(.58,.8,vt)*.4*vk); col=mix(col,col*.72,smoothstep(.42,.2,vt)*.35*vk);
     float gt=uT*.5; float lg=smoothstep(.84,.94,n3(sp*8.+floor(gt)*5.1))*pow(1.-fract(gt),4.)*(1.-dif); emi+=vec3(.7,.8,1.)*lg*.6; }
-  if(uType==9){ float md=n3(sp*36.)-n3((sp+lbD*.012)*36.); col*=clamp(1.+md*1.6*(.3+det),.6,1.5); float cur=1.-smoothstep(0.,.02,abs(n3(sp*5.+uT*.01)-.5)); emi+=uLC*cur*.14*(.3+.7*(1.-dif)); col=mix(col,col*vec3(.95,.62,.42),smoothstep(.58,.8,fbm3(sp*5.+2.))*.45);
+  if(uType==9&&!sT){ float md=n3(sp*36.)-n3((sp+lbD*.012)*36.); col*=clamp(1.+md*1.6*(.3+det),.6,1.5); float cur=1.-smoothstep(0.,.02,abs(n3(sp*5.+uT*.01)-.5)); emi+=uLC*cur*.14*(.3+.7*(1.-dif)); col=mix(col,col*vec3(.95,.62,.42),smoothstep(.58,.8,fbm3(sp*5.+2.))*.45);
     float swp=pow(max(0.,sin(dot(sp,vec3(1.3,.7,.9))-uT*.25)),30.); spec*=1.+swp*1.5; col*=1.+swp*.12*dif; }
-  if(uType==10){ float md=n3(sp*30.)-n3((sp+lbD*.014)*30.); col*=clamp(1.+md*1.8*(.3+det),.55,1.5); float strat=sin(gh*70.+n3(sp*6.)*4.); col*=1.+strat*.07; float vn=1.-smoothstep(0.,.012,abs(n3(sp*11.+4.)-.5)); float ore=vn*smoothstep(.45,.7,n3(sp*2.)); col=mix(col,vec3(.8,.62,.32),ore*.55); spec=max(spec,ore*.9);
+  if(uType==10&&!sT){ float md=n3(sp*30.)-n3((sp+lbD*.014)*30.); col*=clamp(1.+md*1.8*(.3+det),.55,1.5); float strat=sin(gh*70.+n3(sp*6.)*4.); col*=1.+strat*.07; float vn=1.-smoothstep(0.,.012,abs(n3(sp*11.+4.)-.5)); float ore=vn*smoothstep(.45,.7,n3(sp*2.)); col=mix(col,vec3(.8,.62,.32),ore*.55); spec=max(spec,ore*.9);
     col=mix(col,col*1.18+.03,smoothstep(.6,.82,n3(sp*3.+vec3(uT*.003,0.,0.)))*.3); float tal=smoothstep(.1,.22,1.-dot(nb,n0)); col=mix(col,col*1.25,tal*.3); }                                                      // fine cloud-top striations
   if(uType==11||uType==1){ float ci=smoothstep(.58,.82,n3(vec3(sp.x*2.,sp.y*14.,sp.z*2.)+uT*.0003))*.28*(1.-land*.3); col=mix(col,vec3(.95,.97,1.),ci); cloudA=max(cloudA,ci);
     col=mix(col,col*vec3(.78,.8,.88),cloudA*(1.-dif)*.35); }                                                       // cirrus streaks, darker cloud undersides
@@ -1933,15 +2001,16 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
     vec3 sc=uType==0?vec3(.55,.42,.3):vec3(.32,.35,.42); col=mix(col,sc,storm*uWx*(gzT?.12:.5));
     float lt=uT*1.6; float fl=smoothstep(.72,.86,n3(sp*5.+floor(lt)*3.7))*pow(1.-fract(lt),3.)*storm*uWx*(uType==0?0.:1.); emi+=vec3(.75,.85,1.)*fl*(uBeat*2.6*uPlay+.06+uFlash*2.4);
     emi+=vec3(.55,.65,.9)*storm*uFlash*.45*(uType==0?0.:1.); }
-  if(uType==4){ float hot=smoothstep(.72,.95,n3(sp*3.2+vec3(0.,uT*.25,0.))); emi+=vec3(1.,.75,.3)*hot*(.25+uStage*.25)*(.35+uAudio*3.5)*(uPath.y==1.?1.8:1.); }
+  if(uType==4&&sT){ float hot=smoothstep(.6,.9,n3(sp*3.2+vec3(0.,uT*.25,0.))); emi+=mix(gGc84,vec3(1.,.72,.3),.3)*hot*(gHot84*1.7+.03)*(.25+uStage*.25)*(.35+uAudio*3.5)*(uPath.y==1.?1.8:1.); }   /* V8.4 */
+  else if(uType==4){ float hot=smoothstep(.72,.95,n3(sp*3.2+vec3(0.,uT*.25,0.))); emi+=vec3(1.,.75,.3)*hot*(.25+uStage*.25)*(.35+uAudio*3.5)*(uPath.y==1.?1.8:1.); }
   float aur=(uPath.z==2.?1.:0.)+((uType==3||uType==6)?clamp(uStage-1.,0.,1.)*.6:0.);
   if(aur>0.){ float ab=(abs(s.y)-.8)*9.; float band=exp(-ab*ab); float wav=.5+.5*sin(atan(s.z,s.x)*7.+uT*.6+fbm3(sp*2.)*4.);
     emi+=mix(vec3(.2,1.,.6),uLC,.3)*band*wav*aur*(.35+uAudio*2.5); }
   if(bA>0.){ col=mix(vec3(dot(col,vec3(.3,.59,.11))),col,1.04); col*=.92+.16*(gh-.5)*2.; }
   if(bA>0.&&(uType==0||uType==1||uType==11)) col=mix(col,col*vec3(1.08,.95,.82),smoothstep(.55,.8,gh)*.5*land);
-  if(uType==10||uType==9||uType==0) col*=1.+det*det*(n3(sp*300.)-.5)*.14;
+  if((uType==10||uType==9||uType==0)&&!sT) col*=1.+det*det*(n3(sp*300.)-.5)*.14;
   col=mix(col,uAt*.55+col*.3,pow(1.-max(n0.z,0.),3.)*uAtmo*.55);
-  if(TXK>0.&&uR>16.){ float lt=smoothstep(-.12,.35,dot(n0,L))*smoothstep(0.,.3,n0.z); dif*=mix(1.,clamp(1.-TXR*TXK*5.,.28,1.8),lt); }
+  if(TXK>0.&&uR>16.){ float lt=smoothstep(-.12,.35,dot(n0,L))*smoothstep(0.,.3,n0.z); dif*=mix(1.,clamp(1.-TXR*TXK*5.,sT?.45:.28,sT?1.55:1.8),lt); }
   vec3 sun=uSun*uSunI; if(uType==2) col*=.62+.38*pow(max(n0.z,0.),.35); if(uType==10||uType==0||uType==9) dif*=1.+.22*pow(max(L.z,0.),8.)*shd;
   vec3 sky=mix(sun,uAt*1.2,.55*clamp(uAtmo*1.4,0.,1.));
   vec3 lit=col*(amb*mix(vec3(1.),sky,.7)+dif*sun+(1.-shd)*max(ndl,0.)*sky*.06*uAtmo)+emi;
@@ -3040,21 +3109,31 @@ function drawBG(camx, camy, warp, lights, ring, exp = 1.3){
 const NOL = new Float32Array(12);
 function useSP(){ gl.useProgram(SP.p); gl.bindVertexArray(quad); gl.uniform2f(SP.u.uRes, W, H); gl.uniform1f(SP.u.uT, time); gl.uniform1f(SP.u.uTxOn, PDTX.on); gl.uniform1f(SP.u.uTxS, PDTX.sz); }
 const TER0 = new Float32Array(48), OCC12 = new Float32Array(12);
+/* V8.4 · repère de vue propre à chaque astre (de la caméra vers son centre) : sa surface ne tourne plus avec la caméra */
+const PDB_VW = new Float32Array(9), PDB_F = new Float32Array(9), PDB_L = new Float32Array(3), PDB_O = new Float32Array(12);
+function pdFrame(x, y){ const asp = W / H; let dx = (x / W * 2 - 1) * asp / P5, dy = (1 - y / H * 2) / P5, l = Math.hypot(dx, dy, 1);
+  const z0 = -dx / l, z1 = -dy / l, z2 = 1 / l; let x0 = 1 - z0 * z0, x1 = -z1 * z0, x2 = -z2 * z0; l = Math.hypot(x0, x1, x2) || 1; x0 /= l; x1 /= l; x2 /= l;
+  const F = PDB_F; F[0] = x0; F[1] = x1; F[2] = x2; F[3] = z1 * x2 - z2 * x1; F[4] = z2 * x0 - z0 * x2; F[5] = z0 * x1 - z1 * x0; F[6] = z0; F[7] = z1; F[8] = z2;
+  const M = VWM; for (let c = 0; c < 3; c++) for (let i = 0; i < 3; i++) PDB_VW[c * 3 + i] = M[i] * F[c * 3] + M[3 + i] * F[c * 3 + 1] + M[6 + i] * F[c * 3 + 2];
+  return F; }
+const pdInF = (F, v, out, k) => { const a = v[k], b = v[k + 1], c = v[k + 2]; out[k] = F[0] * a + F[1] * b + F[2] * c; out[k + 1] = F[3] * a + F[4] * b + F[5] * c; out[k + 2] = F[6] * a + F[7] * b + F[8] * c; return out; };
+function pdFrameW(x, y){ pdFrame(x, y); const V = PDB_VW; return [[V[0], V[1], V[2]], [V[3], V[4], V[5]], [V[6], V[7], V[8]]]; }
 function drawBody(o){
   const u = SP.u;
   if (o.kind === 2){ if (!(o.alpha > .004) || !(o.r > .3)) return; if (GB.on){ glowAdd(o); return; } gl.uniform1i(u.uKind, 2); gl.uniform2f(u.uC, o.x, o.y); gl.uniform1f(u.uR, o.r); gl.uniform1f(u.uQ, o.q); gl.uniform1f(u.uAsp, 1); gl.uniform1f(u.uIrr, 0);
     gl.uniform3fv(u.uC1, o.c1); gl.uniform1f(u.uAtmo, o.atmo ?? 1); gl.uniform1f(u.uAlpha, o.alpha ?? 1); gl.uniform1f(u.uHi, o.hi || 0); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); return; }
+  const fr = (o.kind === 0 || o.kind === 1) && !o.vw && o.x === o.x && o.y === o.y ? pdFrame(o.x, o.y) : null;   // V8.4
   gl.uniform1i(u.uKind, o.kind); gl.uniform1i(u.uType, o.type || 0);
   gl.uniform2f(u.uC, o.x, o.y); gl.uniform1f(u.uR, o.r); gl.uniform1f(u.uQ, o.q); gl.uniform1f(u.uAsp, o.asp || 1);
   gl.uniform3fv(u.uC1, o.c1); gl.uniform3fv(u.uC2, o.c2 || o.c1); gl.uniform3fv(u.uAt, o.at || o.c1);
   gl.uniform1f(u.uAtmo, o.atmo ?? 1); gl.uniform1f(u.uSeed, o.seed || 0); gl.uniform1f(u.uAng, o.ang || 0); gl.uniform1f(u.uTilt, o.tilt || 0);
   gl.uniform1f(u.uRoll, o.roll || 0); gl.uniform1f(u.uRingS, o.ringS || .3); gl.uniform2f(u.uRingK, o.rk ? o.rk[0] : 0, o.rk ? o.rk[1] : 0);
-  gl.uniform3fv(u.uRingC, o.rc || [1,1,1]); gl.uniform3fv(u.uL, o.L || [0,0,1]); gl.uniform1f(u.uAudio, o.audio || 0); gl.uniform1f(u.uAlpha, o.alpha ?? 1); gl.uniform1f(u.uClouds, o.clouds || 0);
+  gl.uniform3fv(u.uRingC, o.rc || [1,1,1]); gl.uniform3fv(u.uL, fr ? pdInF(fr, o.L || [0,0,1], PDB_L, 0) : (o.L || [0,0,1])); gl.uniform1f(u.uAudio, o.audio || 0); gl.uniform1f(u.uAlpha, o.alpha ?? 1); gl.uniform1f(u.uClouds, o.clouds || 0);
   gl.uniform1f(u.uMap, o.map || 0); gl.uniform1f(u.uHi, o.hi || 0); gl.uniform1f(u.uStage, o.stage || 0); gl.uniform3fv(u.uLC, o.lc || LIGHTS[0]); gl.uniform3fv(u.uPath, o.path || [-1, -1, -1]);
   gl.uniform1i(u.uTerN, o.terN || 0); gl.uniform1i(u.uSel, o.sel ?? -1);
   gl.uniform1f(u.uPlay, o.play || 0); gl.uniform1f(u.uBeat, o.beat || 0); gl.uniform1f(u.uLv, o.lv || 0); gl.uniform1f(u.uBs, o.bs || 0); if (u.uSp) gl.uniform4fv(u.uSp, o.spb || [0, 0, 0, 0]); gl.uniform1f(u.uBt, o.bt ?? 9); gl.uniform1f(u.uSunI, o.sunI ?? 1); gl.uniform3fv(u.uSun, o.sun || [1, 1, 1]); gl.uniform1f(u.uIrr, o.irr || 0);
   if (o.terN){ gl.uniform4fv(u.uTer, o.ter); gl.uniform4fv(u.uTerB, o.terB); }
-  gl.uniformMatrix3fv(u.uVW, false, o.vw || VWM); gl.uniform1i(u.uOccN, o.occN || 0); if (o.occN){ OCC12.fill(0); for (let i = 0; i < 12 && i < o.occ.length; i++) OCC12[i] = o.occ[i]; gl.uniform4fv(u.uOcc, OCC12); }
+  gl.uniformMatrix3fv(u.uVW, false, fr ? PDB_VW : (o.vw || VWM)); gl.uniform1i(u.uOccN, o.occN || 0); if (o.occN){ OCC12.fill(0); for (let i = 0; i < 12 && i < o.occ.length; i++) OCC12[i] = o.occ[i]; if (fr) for (let k = 0; k < 12; k += 4) pdInF(fr, OCC12, OCC12, k); gl.uniform4fv(u.uOcc, OCC12); }
   gl.uniform1f(u.uArch, o.arch || 0); gl.uniform1f(u.uQual, QUAL); gl.uniform1f(u.uEvo, o.evo || 0); if (o.evo) gl.uniform3fv(u.uEvoD, o.evoD); gl.uniform1f(u.uWx, o.wx || 0); gl.uniform1f(u.uFlash, o.flash || 0);
   gl.uniform1i(u.uTkN, o.cq ? o.cq.n : 0); gl.uniform1i(u.uTkSel, o.cq ? o.cq.sel : -1); gl.uniform1f(u.uTkHi, o.cq ? o.cq.hi : 0); if (o.cq && o.cq.n){ gl.uniform4fv(u.uTk, o.cq.tk); gl.uniform4fv(u.uTkB, o.cq.tkB); }
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -3115,7 +3194,7 @@ function planetBody0(p, pos, pr, r, lvl, extra){ const cq0 = conquest(p), lm0 = 
     c1: hsl(...p.c1), c2: hsl(...p.c2), at: hsl(p.atH, .85, .62), atmo: p.atmo, seed: p.seed, ang: p._ang || 0, tilt: p.tilt,
     roll: p.ringRoll, ringS, rk: p.ring ? [1.32, p.ring === 2 ? 2.4 : 1.8] : null, rc: hsl(p.ringH, .45, .72), L, audio: 0, clouds: p.clouds,
     stage: stageF(p), lc: LIGHTS[Math.max(0, pathOf(p)[0])], path: pathOf(p), alpha: starIgnite, reach,
-    play: lm0, beat: lv0 ? beatLvl : 0, lv: lv0 ? audioLvl : 0, bs: lv0 ? bassLvl : 0, spb: lv0 ? SPB : null, bt: lv0 ? time - beatT : 9, wx: stormLvl(p), flash: p._flash || 0, cq: cq0, sun: VIEW ? starCol(VIEW).map(v => .5 + v * .45) : [1, 1, 1], sunI: clamp(1.35 / Math.sqrt(Math.hypot(pos[0], pos[2]) / 3.4 + .55), .6, 1.05), irr: p.type === 10 ? .26 : 0}, extra || {});
+    play: lm0, beat: lv0 ? beatLvl : 0, lv: lv0 ? audioLvl : 0, bs: lv0 ? bassLvl : 0, spb: lv0 ? SPB : null, bt: lv0 ? time - beatT : 9, wx: stormLvl(p), flash: p._flash || 0, cq: cq0, sun: VIEW ? starCol(VIEW).map(v => .5 + v * .45) : [1, 1, 1], sunI: clamp(1.35 / Math.sqrt(Math.hypot(pos[0], pos[2]) / 3.4 + .55), .6, 1.05), irr: p.type === 10 ? .02 + .04 * (Math.abs(p.seed * 5.13) % 1) : 0}, extra || {});
 }
 
 /* ================= labels ================= */
@@ -3486,8 +3565,9 @@ function terrUniforms(p, mapA){
   return {ter, terB, terN: T.length, sel: selT, map: mapA};
 }
 function seedDir(t){ const la = t.lat, lo = t.lon; return [Math.cos(la) * Math.cos(lo), Math.sin(la), Math.cos(la) * Math.sin(lo)]; }
-function viewOf(p, s){ const w = rz(-p.tilt, ry(-(p._ang || 0), s)); const z = [-CF[0], -CF[1], -CF[2]]; return [dot(w, CR), dot(w, CU), dot(w, z)]; }
-function surfOf(p, n){ const w = [CR[0] * n[0] + CU[0] * n[1] - CF[0] * n[2], CR[1] * n[0] + CU[1] * n[1] - CF[1] * n[2], CR[2] * n[0] + CU[2] * n[1] - CF[2] * n[2]]; return ry(p._ang || 0, rz(p.tilt, w)); }
+function viewOf(p, s){ const w = rz(-p.tilt, ry(-(p._ang || 0), s)); if (curP && curP.p === p){ const F = pdFrameW(curP.x, curP.y); return [dot(w, F[0]), dot(w, F[1]), dot(w, F[2])]; } const z = [-CF[0], -CF[1], -CF[2]]; return [dot(w, CR), dot(w, CU), dot(w, z)]; }
+function surfOf(p, n){ if (curP && curP.p === p){ const F = pdFrameW(curP.x, curP.y); return ry(p._ang || 0, rz(p.tilt, [0, 1, 2].map(k => F[0][k] * n[0] + F[1][k] * n[1] + F[2][k] * n[2]))); }
+  const w = [CR[0] * n[0] + CU[0] * n[1] - CF[0] * n[2], CR[1] * n[0] + CU[1] * n[1] - CF[1] * n[2], CR[2] * n[0] + CU[2] * n[1] - CF[2] * n[2]]; return ry(p._ang || 0, rz(p.tilt, w)); }
 let mapA = 0, angT = null;
 function renderPlanet(dt){ PASS.clear();
   const sys = VIEW; const i = sys.planets.findIndex(x => x.id === focus); if (i < 0){ backToSystem(); return; }
