@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#010208">
 <title>planèteDot · ton univers musical</title>
-<meta name="pd-version" content="8.0.1">
+<meta name="pd-version" content="8.0.2">
 <meta name="description" content="PlanèteDot · l’album de GuillaumDot et ton univers musical en 3D : chaque planète est un morceau.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PlanèteDot">
@@ -565,6 +565,7 @@ body.pdT>:not(#pdIntro):not(#gl):not(#pdOutroFx):not(#pdFade):not(#flash):not(#a
 #scDock .sch{display:flex;align-items:center;gap:8px;padding:0 2px 8px}#scDock .sch>svg{width:20px;height:20px;fill:none;stroke:#ff8a3d;stroke-width:1.8;stroke-linecap:round;flex:none}
 #scDock .m{flex:1;min-width:0}#scDock .m b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#scDock .m span{font-size:11px;color:var(--mute)}
 #scDock iframe{display:block;width:100%;border:0;border-radius:12px;background:#111}
+#scDock .scw{transition:height .35s}#scDock.mini .scw{height:2px;overflow:hidden;opacity:.02;pointer-events:none}#scDock.mini .sch{padding-bottom:0}#scDock.mini #scSt{display:none}#scDock .sch .ib svg{width:18px;height:18px}#scDock #scEx svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .3s;transform:rotate(180deg)}#scDock.mini #scEx svg{transform:none}#scDock .m a{color:inherit;text-decoration:none}#scDock.mini{padding:8px 8px 6px}
 .mpf{flex-wrap:wrap}.mpf .btn{min-width:0}.mpf #mpSc{flex-basis:100%}.mpf #mpSc svg{fill:none;stroke:#ff8a3d;stroke-width:1.8;stroke-linecap:round}
 body.cine #scDock,body.pdT #scDock{opacity:0;pointer-events:none}
 </style>
@@ -808,7 +809,7 @@ const ERA_XP = true ? [0, 30, 90, 200, 380, 650] : [0, 75, 225, 500, 950, 1650];
 /* an era is reached by what stands on the planet: 8 towns, then 4 countries, 8 countries, 4, 8 and 16 continents (a country is worth 4 towns, a continent 4 countries) */
 const ERA_EQ = [0, 8, 16, 32, 64, 128, 256], ERA_UNIT = [[2, 8], [3, 4], [3, 8], [4, 4], [4, 8], [4, 16]], ST_OF = [0, 1, 2, 3, 4, 4, 5];
 function eraInfo(p){ const c = p._era; if (c && Math.abs(time - c.t) < 1 && c.ro === readonly) return c;
-  const ws = readonly && p.tracksRO ? p.tracksRO.map(x => x[4] || 0) : (p.tracks || []).map(id => { const m = META[id] || {}; return (m.plays || 0) + (m.secs || 0) / 300; });
+  const ws = readonly && p.tracksRO ? p.tracksRO.map(x => x[4] || 0) : (p.tracks || []).map(id => { const m = META[id] || {}; return (m.plays || 0) + (m.secs || 0) / 300; }).concat(Object.values(p.scp && typeof p.scp === 'object' ? p.scp : {}).map(r => ((r && r.n) || 0) + ((r && r.s) || 0) / 300));
   const n = [0, 0, 0, 0, 0]; let eq = 0; ws.forEach(w => { const g = regG(w), t = Math.min(4, Math.floor(g)); if (t < 1) return; const k = Math.min(3, Math.floor(Math.pow(4, g - Math.floor(g)) + 1e-6)); n[t] += k; if (t >= 2) eq += k * Math.pow(4, t - 2); });
   let e = 0; for (let i = 1; i < 7; i++) if (eq >= ERA_EQ[i]) e = i;
   if (readonly && p.xp){ let k = 0; for (let i = 1; i < 6; i++) if (p.xp >= ERA_XP[i]) k = i; e = Math.max(e, ST_OF.indexOf(k)); }
@@ -2092,6 +2093,7 @@ function planetPos(p, i){ const R = orbitR(i), el = orbEl(p), a = p._orb ?? p.ph
 function stormLvl(p){ if (isLive(p)) return 1; if (p.type === 8) return 0; const sd = p.seed || 0, x = time / 150 + sd * 13.7;
   const v = Math.sin(x) * .5 + Math.sin(x * 2.31 + sd) * .3 + Math.sin(x * .43 + sd * 3) * .2; return clamp((v - .3) * 3, 0, 1); }
 function act(p){
+  if (SCP && SCP.playing && SCP.pid === p.id && au.paused) return 1;
   if (readonly){ const n = liveNow(); if (n && n.pid === p.id) return 1; return num(p.act, 0, 1, 0); }
   if (p.id === playingPlanet() && !au.paused) return 1; return p.last ? Math.exp(-(Date.now() - p.last) / 1.3e8) : 0; }
 function advanceOrbits(sys, dt){ sys.planets.forEach((p, i) => { const R = orbitR(i), a = act(p); p._a = lerp(p._a ?? a, a, 1 - Math.exp(-dt * 1.5));
@@ -4774,21 +4776,66 @@ function pdScBindSheet(p, fromLib, ro){ const again = () => setTimeout(() => { i
 function scLoadApi(){ if (scApi) return scApi; scApi = new Promise((ok, ko) => { if (window.SC && SC.Widget){ ok(); return; } const s = document.createElement('script'); s.src = 'https://w.soundcloud.com/player/api.js'; s.async = true; s.onload = () => ok(); s.onerror = () => { scApi = null; ko(); }; document.head.appendChild(s); }); return scApi; }
 function scPlay(p, i){ const l = scLinks(p.links)[i]; if (!l) return; unlockAudio(); try { if (!au.paused) au.pause(); if (typeof radio !== 'undefined' && radio) stopRadio(); } catch(e){}
   scClose(true); const set = scGuess(l.u).set, d = document.createElement('div'); d.id = 'scDock'; d.className = 'glass';
-  d.innerHTML = `<div class="sch">${ICON_SC}<div class="m"><b>${esc(l.t)}</b><span>${esc(l.a)} · SoundCloud</span></div><button class="ib" id="scSt" aria-label="Partager en story">${ICON_SHARE}</button><button class="x" id="scX" aria-label="Fermer">${ICON.x}</button></div>
-    <iframe id="scF" title="Lecteur SoundCloud" allow="autoplay; encrypted-media" scrolling="no" frameborder="no" height="${set ? 300 : 166}" src="https://w.soundcloud.com/player/?url=${encodeURIComponent(l.u)}&color=%235aa9ff&auto_play=true&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=false"></iframe>`;
-  document.body.appendChild(d); SCP = {pid: p.id, u: l.u, title: l.t, list: p.name, playing: false, w: null};
-  $('#scX').onclick = () => scClose(); $('#scSt').onclick = () => shareStory();
+  d.innerHTML = `<div class="sch">${ICON_SC}<div class="m"><b id="scT">${esc(l.t)}</b><span><a href="${esc(l.u)}" target="_blank" rel="noopener">${esc(l.a)} · SoundCloud</a></span></div><button class="ib scc" id="scPv" aria-label="Précédent">${ICON.prev}</button><button class="ib scc" id="scPP" aria-label="Lecture ou pause">${ICON.play}</button><button class="ib scc" id="scNx" aria-label="Suivant">${ICON.next}</button><button class="ib" id="scEx" aria-label="Afficher ou masquer le lecteur">${PD_SC_CHEV}</button><button class="ib" id="scSt" aria-label="Partager en story">${ICON_SHARE}</button><button class="x" id="scX" aria-label="Fermer">${ICON.x}</button></div>
+    <div class="scw"><iframe id="scF" title="Lecteur SoundCloud" allow="autoplay; encrypted-media" scrolling="no" frameborder="no" height="${set ? 300 : 166}" src="https://w.soundcloud.com/player/?url=${encodeURIComponent(l.u)}&color=%235aa9ff&auto_play=true&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=false"></iframe></div>`;
+  document.body.appendChild(d); SCP = {pid: p.id, u: l.u, title: l.t, list: p.name, playing: false, w: null, pos: 0, at: performance.now(), sid: null, dur: 0, hs: 0, heard: false, acc: 0, keep: false};
+  $('#scX').onclick = () => scClose(); $('#scSt').onclick = () => shareStory(); try { pdScUi(d); } catch(e){}
   scLoadApi().then(() => { if (!SCP || !document.getElementById('scF')) return; const w = SC.Widget(document.getElementById('scF')); SCP.w = w; const sp = SCP;
-    w.bind(SC.Widget.Events.PLAY, () => { sp.playing = true; try { if (!au.paused) au.pause(); } catch(e){} w.getCurrentSound(s => { if (s && s.title) sp.title = s.title; }); updUI(); });
-    w.bind(SC.Widget.Events.PAUSE, () => { sp.playing = false; }); w.bind(SC.Widget.Events.FINISH, () => { sp.playing = false; }); }).catch(() => {}); sfx('open'); }
+    w.bind(SC.Widget.Events.PLAY, () => { sp.playing = true; sp.at = performance.now(); try { if (!au.paused) au.pause(); } catch(e){} w.getCurrentSound(s => { if (s && s.title) sp.title = s.title; pdScSound(sp, s); }); updUI(); pdScBtn(sp); pdScMiniSoon(sp); });
+    w.bind(SC.Widget.Events.PLAY_PROGRESS, e => { if (!e) return; sp.pos = (e.currentPosition || 0) / 1000; sp.at = performance.now(); });
+    w.bind(SC.Widget.Events.PAUSE, () => { sp.playing = false; pdScBtn(sp); }); w.bind(SC.Widget.Events.FINISH, () => { sp.playing = false; sp.heard = false; sp.hs = 0; pdScBtn(sp); }); }).catch(() => {}); sfx('open'); }
 function scClose(quiet){ const d = document.getElementById('scDock'); if (SCP && SCP.w) try { SCP.w.pause(); } catch(e){} SCP = null; if (d){ if (quiet) d.remove(); else { d.classList.add('off'); setTimeout(() => d.remove(), 400); } } }
 
 function scSection(p, ro){ const L = scLinks(p.links); if (!L.length) return '';
-  return `<div class="mpsc"><h4>${ICON_SC}SoundCloud</h4><ul class="list">${L.map((l, i) => `<li class="tr${SCP && SCP.pid === p.id && SCP.u === l.u ? ' on' : ''}" data-sc="${i}"><span class="n">${ICON_SC}</span><div class="m"><b>${esc(l.t)}</b><span>${esc(l.a)}</span></div>${ro ? '' : `<button class="ib" data-scx aria-label="Retirer">${ICON.x}</button>`}</li>`).join('')}</ul></div>`; }
+  const nP = pdScPlays(p); return `<div class="mpsc"><h4>${ICON_SC}SoundCloud${nP ? ' · ' + plural(nP, 'écoute') : ''}</h4><ul class="list">${L.map((l, i) => `<li class="tr${SCP && SCP.pid === p.id && SCP.u === l.u ? ' on' : ''}" data-sc="${i}"><span class="n">${ICON_SC}</span><div class="m"><b>${esc(l.t)}</b><span>${esc(l.a)}</span></div>${ro ? '' : `<button class="ib" data-scx aria-label="Retirer">${ICON.x}</button>`}</li>`).join('')}</ul></div>`; }
 function scBind(p, el, ro){ const b = el.querySelector('#mpSc'); if (b) b.onclick = () => { closeMenu(true); scAdd(p); };
   const ul = el.querySelector('.mpsc ul'); if (!ul) return; ul.onclick = e => { const li = e.target.closest('[data-sc]'); if (!li) return; const i = +li.dataset.sc;
     if (!ro && e.target.closest('[data-scx]')){ p.links = scLinks(p.links); p.links.splice(i, 1); save(); try { publishSoon(); } catch(_){} renderMenu(); return; } scPlay(p, i); setTimeout(() => MENU.open && renderMenu(), 200); }; }
-function scLevels(){ if (SCP && SCP.playing && au.paused){ const b = .5 + .5 * Math.sin(time * 4.4); audioLvl = Math.max(audioLvl, .3 + .18 * b); bassLvl = Math.max(bassLvl, .22 * b * b); } }
+function scLevels(){ if (!(SCP && SCP.playing && au.paused)) return; const sp = SCP, dt = Math.min(.1, Math.max(.001, FDT || .016));
+  try { pdScListen(sp, dt); } catch(e){}
+  const pos = sp.pos + (performance.now() - sp.at) / 1000, W = SCW.id === sp.sid ? SCW.s : null; let a;
+  if (W && W.length > 2 && sp.dur > 0){ const x = clamp(pos / sp.dur, 0, 1) * (W.length - 1), i = Math.floor(x), u = x - i; a = W[i] + (W[Math.min(W.length - 1, i + 1)] - W[i]) * u; }
+  else a = .62 + .12 * Math.sin(pos * .55) + .08 * Math.sin(pos * 1.7);
+  const ph = (pos * SCW.bps) % 1, pulse = Math.pow(1 - ph, 2.6), rise = a - SCW.prev; SCW.prev = a; SCW.avg = lerp(SCW.avg, a, Math.min(1, dt * .5));
+  const lv = clamp(Math.pow(a, 1.25) * .7 + pulse * .28 * a, 0, 1); audioLvl = lv > audioLvl ? lerp(audioLvl, lv, .6) : Math.max(lv, audioLvl * Math.exp(-dt * 4));
+  const bv = clamp(pulse * a * 1.05 + clamp((a - SCW.avg * .85) * 2.4, 0, .5), 0, 1); bassLvl = Math.max(bassLvl, bv);
+  if (ph < SCW.ph && a > SCW.avg * .8){ if (beatLvl < .5) beatT = time; beatLvl = Math.max(beatLvl, clamp(.55 + (a - SCW.avg) * 2.5 + rise * 4, .4, 1)); } SCW.ph = ph;
+  for (let k = 0; k < 4; k++){ const v = clamp(bv * (1 - k * .16) + Math.sin(time * (2.3 + k * 1.7) + k) * .06 * a, 0, 1); SPB[k] = Math.max(SPB[k], v); } }
+const SCW = {id: null, s: null, busy: null, prev: 0, avg: .5, ph: 0, bps: 1.2};
+const PD_SC_CHEV = '<svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg>';
+/* forme d'onde publique du morceau SoundCloud (repli : pulsation douce si elle ne se charge pas) */
+function scWave(snd){ if (!snd || !snd.waveform_url || SCW.id === snd.id || SCW.busy === snd.id) return; SCW.busy = snd.id; const u = String(snd.waveform_url);
+  (async () => { let w = null;
+    try { const r = await fetch(u.replace(/\.png(\?.*)?$/, '.json')); if (r.ok){ const j = await r.json(); if (j && Array.isArray(j.samples) && j.samples.length > 10){ const h = j.height || Math.max(...j.samples) || 1; w = Float32Array.from(j.samples, v => clamp(v / h, 0, 1)); } } } catch(e){}
+    if (!w) try { w = await new Promise((ok, ko) => { const im = new Image(); im.crossOrigin = 'anonymous'; im.onload = () => { try { const c = document.createElement('canvas'), N = Math.min(1800, im.width); c.width = N; c.height = im.height; const g = c.getContext('2d'); g.drawImage(im, 0, 0, N, im.height);
+        const D = g.getImageData(0, 0, N, im.height).data, H = im.height, o = new Float32Array(N); for (let x = 0; x < N; x++){ let y = 0; while (y < H / 2 && D[(y * N + x) * 4 + 3] > 8) y++; o[x] = clamp(1 - y / (H / 2), 0, 1); } ok(o); } catch(e){ ko(e); } }; im.onerror = ko; im.src = u; }); } catch(e){ w = null; }
+    if (w){ let mx = 0; for (const v of w) mx = Math.max(mx, v); if (mx > .05) for (let i = 0; i < w.length; i++) w[i] /= mx; else w = null; }
+    if (SCP && SCP.sid === snd.id){ SCW.id = snd.id; SCW.s = w; SCW.bps = pdScTempo(w, (snd.duration || 0) / 1000); } SCW.busy = null; })(); }
+/* tempo approché à partir de l'enveloppe (sinon 72 pulsations/min) */
+function pdScTempo(w, dur){ if (!w || !dur) return 1.2; const sr = w.length / dur; if (sr < 5) return 1.2; let best = 0, bl = 0;
+  for (let bpm = 60; bpm <= 180; bpm += 2){ const lag = sr * 60 / bpm; if (lag < 1.5) continue; let c = 0, n = 0; for (let i = 0; i + lag + 1 < w.length; i++){ const j = i + lag, k = Math.floor(j), u = j - k; c += w[i] * (w[k] * (1 - u) + w[k + 1] * u); n++; } c /= n || 1; if (c > best){ best = c; bl = bpm; } }
+  return bl ? clamp(bl / 60, .9, 3) : 1.2; }
+/* un nouveau morceau commence dans la playlist SoundCloud */
+function pdScSound(sp, snd){ if (!snd || SCP !== sp) return; if (snd.id !== sp.sid){ sp.sid = snd.id; sp.dur = (snd.duration || 0) / 1000; sp.heard = false; sp.hs = 0; sp.stitle = String(snd.title || sp.title || '').slice(0, 80); scWave(snd); }
+  const t = document.getElementById('scT'); if (t) t.textContent = sp.stitle || sp.title; }
+/* écoutes SoundCloud : comptées sur la planète, la font évoluer comme une écoute MP3 */
+function pdScListen(sp, dt){ if (readonly || guestMode || !sp.sid) return; const p = SYS.planets.find(x => x.id === sp.pid); if (!p) return;
+  p.scp = p.scp && typeof p.scp === 'object' ? p.scp : {}; const k = String(sp.sid), r = p.scp[k] || (p.scp[k] = {t: sp.stitle || sp.title || 'Son SoundCloud', n: 0, s: 0});
+  const pos = sp.pos + (performance.now() - sp.at) / 1000; sp.hs += dt; sp.acc += dt;
+  if (!sp.heard && (sp.hs > 30 || (sp.dur && pos / sp.dur > .5))){ sp.heard = true; r.n = (r.n || 0) + 1; r.l = Date.now(); delete p._era; save(); try { publishSoon(); } catch(e){} }
+  if (sp.acc < TICK) return; sp.acc = 0; r.s = (r.s || 0) + TICK; SYS.secs = (SYS.secs || 0) + TICK * STAR_SPEED;
+  p.xp = (p.xp || 0) + SPEED; p.last = Date.now(); delete p._era; const eN = eraInfo(p).e, eB = p.eL ?? eN; p.eL = eN;
+  if (eN > eB){ try { SND.eraStage = stage(p); EVO.push({pid: p.id, t0: time}); if (pendingPath(p) >= 0) toast(`${p.name} : une décision t’attend.`, 5000); reorganize(p); } catch(e){} }
+  addXP(SPEED); }
+function pdScPlays(p){ let n = 0; Object.values(p && p.scp || {}).forEach(r => n += (r && r.n) || 0); return n; }
+function pdScBtn(sp){ const b = document.getElementById('scPP'); if (b && SCP === sp) b.innerHTML = sp.playing ? ICON.pauseS : ICON.play; }
+function pdScMini(on){ const d = document.getElementById('scDock'); if (d) d.classList.toggle('mini', !!on); }
+function pdScMiniSoon(sp){ if (sp.keep || sp.mini0) return; sp.mini0 = true; setTimeout(() => { if (SCP === sp && sp.playing && !sp.keep) pdScMini(true); }, 1600); }
+function pdScUi(d){ const sp = SCP; const w = () => sp && sp.w;
+  d.querySelector('#scPP').onclick = () => { try { w() && w().toggle(); } catch(e){} };
+  d.querySelector('#scPv').onclick = () => { try { w() && w().prev(); } catch(e){} };
+  d.querySelector('#scNx').onclick = () => { try { w() && w().next(); } catch(e){} };
+  d.querySelector('#scEx').onclick = () => { const m = !d.classList.contains('mini'); if (!m) sp.keep = true; pdScMini(m); sfx('tick'); }; }
 au.addEventListener('play', () => { if (SCP && SCP.w) try { SCP.w.pause(); } catch(e){} });
 // galaxy map: a galaxy's card shows only while you point at it (the centre of the screen, or the mouse)
 const GLA = new Map(); let HOVP = null;
