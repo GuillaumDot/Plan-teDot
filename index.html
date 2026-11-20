@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#010208">
 <title>planèteDot · ton univers musical</title>
-<meta name="pd-version" content="8.0">
+<meta name="pd-version" content="8.0.1">
 <meta name="description" content="PlanèteDot · l’album de GuillaumDot et ton univers musical en 3D : chaque planète est un morceau.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PlanèteDot">
@@ -217,6 +217,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border:0;border-radiu
 .big{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;height:88px;border-radius:20px;background:rgba(10,132,255,.16);border:1px dashed rgba(74,163,255,.6);color:#cfe6ff;font-weight:600;font-size:16px;position:relative;width:100%}
 .big svg{width:24px;height:24px}
 .big input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.pdfill{display:grid;grid-template-columns:1fr 1fr;gap:10px}.big.sc{background:rgba(255,120,40,.14);border-color:rgba(255,138,61,.65);color:#ffe0c8;font-family:inherit;cursor:pointer}.big.sc svg{fill:none;stroke:#ff8a3d;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .lb{position:fixed;left:0;right:0;height:0;background:#000;z-index:20;transition:height 1.1s cubic-bezier(.4,0,.2,1);pointer-events:none}
 #lbT{top:0}#lbB{bottom:0}
 body.cine .lb{height:0}
@@ -3288,16 +3289,16 @@ function openPlaylist(p, fromLib){
     return `<li class="tr${on ? ' on' : ''}" data-i="${i}" data-id="${t.id}" style="--i:${i}">${on ? eqHTML : `<span class="n">${i + 1}</span>`}<div class="m" data-play><b>${esc(t.title)}</b><span>${dot(t)}${esc(t.artist || 'Artiste inconnu')}${(x => x && x.lvl != null ? ' · ' + regName(p, x) + (x.ev ? ' · ' + REG_EVN[x.evType] : '') : '')(cqOf(t))}</span></div><span class="d">${fmt(t.dur)}</span></li>`; }).join('');
   openSheet('scan', `<div class="sh" style="margin:0"><div></div><button class="x" data-close aria-label="Fermer">${ICON.x}</button></div>
     <div class="ph2">${privateView ? '<span class="pd-lock" aria-hidden="true">🔒</span>' : ''}<h2 id="pName" ${ro ? '' : 'title="Renommer"'}>${esc(p.name)}</h2>
-      <p>${plural(tr.length, 'titre')}${dur ? ' · ' + fmtLong(dur) : ''}${live ? ' · <span style="color:#4aa3ff">en écoute</span>' : ''}</p>${(() => { const EI = eraInfo(p); if (EI.e >= 6) return '<p class="eran">' + esc(eraName(p)) + ' · ère finale</p><p class="eran" style="opacity:.7">' + EI.counts + '</p>'; return `<div class="erab"><i style="width:${Math.round(EI.pc * 100)}%"></i></div><p class="eran">${esc(eraName(p))} · ${EI.need}</p><p class="eran" style="opacity:.7">${EI.counts}</p>`; })()}</div>
+      <p>${plural(tr.length, 'titre')}${scLinks(p.links).length ? ' · ' + plural(scLinks(p.links).length, 'lien SoundCloud', 'liens SoundCloud') : ''}${dur ? ' · ' + fmtLong(dur) : ''}${live ? ' · <span style="color:#4aa3ff">en écoute</span>' : ''}</p>${(() => { const EI = eraInfo(p); if (EI.e >= 6) return '<p class="eran">' + esc(eraName(p)) + ' · ère finale</p><p class="eran" style="opacity:.7">' + EI.counts + '</p>'; return `<div class="erab"><i style="width:${Math.round(EI.pc * 100)}%"></i></div><p class="eran">${esc(eraName(p))} · ${EI.need}</p><p class="eran" style="opacity:.7">${EI.counts}</p>`; })()}</div>
     <div class="pact2">${ro ? `${p.gd ? `<button class="btn pri" id="sAlb">${ICON.play}Écouter</button>` : ''}<button class="btn${p.gd ? '' : ' pri'}" id="sLand">${ICON.land}Explorer</button>${privateView ? '<span class="chip" aria-label="Planète verrouillée">🔒 Privée · écoute et copie verrouillées</span>' : `${p.gd ? '' : `<button class="btn" id="sRemote">${ICON.play}Écouter</button>`}<button class="btn" id="sCopy">${ICON.plus}Copier</button>`}`
       : tr.length ? `<button class="btn pri" id="sPlay">${live ? ICON.pauseS + 'Pause' : ICON.play + 'Lecture'}</button><button class="btn" id="sShuf">${ICON.shuf}Aléatoire</button>`
-      : `<label class="btn pri">${ICON.file}Importer${imp}</label>`}<button class="icb" id="sMore" aria-label="Plus">⋯</button></div>
-    <div class="more off" id="pMore">${ro ? `<button id="sSig">${ICON.signal}Envoyer un signal</button>` : `<label>${ICON.file}Importer de la musique${imp}</label>${TRACKS.size ? `<button id="sAdd">${ICON.plus}Ajouter depuis ma musique</button>` : ''}
+      : scLinks(p.links).length ? `<button class="btn pri" id="sScPlay">${ICON.play}Écouter</button><button class="btn" id="sScAdd">${ICON_SC}SoundCloud</button>` : `<label class="btn pri">${ICON.file}Mes fichiers${imp}</label><button class="btn" id="sScAdd">${ICON_SC}SoundCloud</button>`}<button class="icb" id="sMore" aria-label="Plus">⋯</button></div>
+    <div class="more off" id="pMore">${ro ? `<button id="sSig">${ICON.signal}Envoyer un signal</button>` : `<label>${ICON.file}Importer de la musique${imp}</label><button id="sScAdd">${ICON_SC}Ajouter depuis SoundCloud</button>${TRACKS.size ? `<button id="sAdd">${ICON.plus}Ajouter depuis ma musique</button>` : ''}
       <button id="sPublishAudio">☁ Partager les fichiers audio publics</button><button id="sPrivacy">${p.isPublic === false ? "◯ Rendre cette playlist publique" : "◉ Rendre cette playlist privée"}</button><button id="sRemoveTrack">${ICON.x}Retirer un titre de cette planète</button><button id="sRen">${ICON.forge}Renommer</button><button id="sLand">${ICON.land}Explorer la planète</button><button id="sForge">${ICON.forge}Façonner</button>${tr.length ? `<button id="sDna">${ICON.shuf}Accorder au son</button>` : ''}`}
       <dl class="spec">${rows.map(r => `<div><dt>${r[0]}</dt><dd class="${r[2] || ''}">${esc(r[1])}${r[3] || ''}</dd></div>`).join('')}</dl></div>
-    ${tr.length ? `<ul class="list" id="pList">${rowsHTML2}</ul>` : ro ? '<div class="empty">Aucun titre visible.</div>' : '<div class="empty">Planète vide.</div>'}`, () => {
+    ${tr.length ? `<ul class="list" id="pList">${rowsHTML2}</ul>` : ''}${scSection(p, ro)}${tr.length || scLinks(p.links).length ? '' : ro ? '<div class="empty">Aucun titre visible.</div>' : '<div class="empty">Planète vide.</div>'}`, () => {
     const on = (id, f) => sbody.querySelectorAll('#' + id).forEach(e => e.onclick = f);
-    on('sMore', () => { $('#pMore').classList.toggle('off'); sfx('tick'); });
+    on('sMore', () => { $('#pMore').classList.toggle('off'); sfx('tick'); }); try { pdScBindSheet(p, fromLib, ro); } catch(e){ console.warn('SoundCloud', e); }
     on('sPrivacy', async () => { const wasPublic=p.isPublic!==false; if(wasPublic && !(await pdRevokePlanet(p))){toast('Impossible de révoquer les fichiers publics : confidentialité inchangée');return;} p.isPublic=!wasPublic; save(); if(remoteReady) publishPublicGalaxy(); if(p.isPublic) pdAutoShareSoon(3000); toast(p.isPublic ? 'Playlist publique · ses morceaux seront partagés automatiquement' : 'Playlist privée · audio partagé révoqué'); openPlaylist(p, fromLib); });
     on('sPublishAudio', async () => { if(p.isPublic===false){toast('Rends cette planète publique avant de partager son audio');return;} if(!confirm('Publier les fichiers audio de cette planète pour une écoute par tous, y compris les visiteurs ? Vérifie que tu possèdes les droits de partage.'))return; await pdPublishPlanetAudio(p); });
     on('sRemote',()=>pdPlayRemotePlanet(p,0)); on('sLand', () => { if (fromLib && mode === 'system') focusOn(p.id); land(p); }); on('sCopy', () => copyPlanet(p)); on('sAlb', () => playAlbum(0)); on('sAdd', () => openPicker(p, null)); on('sSig', () => composeSignal(ownerId, VIEW));
@@ -3432,11 +3433,12 @@ function openNewPlanet(){
   if (mode !== 'system' || readonly || guestMode) return; overview();
   openSheet('new', head('Nouvelle planète', 'Elle prend la forme de sa musique.') +
     `<label class="field"><span>Nom de la playlist</span><input type="text" id="nN" maxlength="28" placeholder="Ex. Nuits de Saturne"></label>
-     <label class="field" style="display:flex;align-items:center;gap:10px"><input id="nPublic" type="checkbox"> Rendre cette playlist publique dans la galaxie</label><label class="big" id="nBig">${ICON.file}Importer des morceaux<input type="file" id="nImp" multiple accept="audio/*,.mp3,.m4a,.aac,.wav,.flac,.ogg,.opus,.aif,.aiff"></label>
+     <label class="field" style="display:flex;align-items:center;gap:10px"><input id="nPublic" type="checkbox"> Rendre cette playlist publique dans la galaxie</label><p class="note" style="margin:4px 4px 8px">Remplis-la avec :</p><div class="pdfill"><button class="big sc" id="nSc" type="button">${ICON_SC}SoundCloud</button><label class="big" id="nBig">${ICON.file}Mes fichiers audio<input type="file" id="nImp" multiple accept="audio/*,.mp3,.m4a,.aac,.wav,.flac,.ogg,.opus,.aif,.aiff"></label></div>
      <div class="row" style="justify-content:space-between;margin:12px 0 0">${TRACKS.size ? '<button class="lnk" id="nLib">Depuis ma musique</button>' : '<span></span>'}<button class="lnk" id="nHand">Choisir ma planète</button></div>`, () => {
     const mk = () => { const nm = $('#nN').value.trim() || 'Planète ' + (SYS.planets.length + 1); const p = makePlanet(nm, 1, {auto: false, xp: 0, isPublic: false}); surprise(p); p.name = nm; p.auto = false; p.tlock = 1; p.isPublic = $('#nPublic').checked; SYS.planets.push(p); addXP(15); save(); return p; };
     $('#nImp').onchange = async e => { const files = e.target.files; if (!files.length) return; const p = mk(); closeSheet(true); focusOn(p.id); await importFiles(files, p); applyDNA(p, false); scanPlanet(p); toast(`${p.name} est née · analyse du son en cours`); };
     const nl = $('#nLib'); if (nl) nl.onclick = () => { const p = mk(); openPicker(p, null); };
+    $('#nSc').onclick = () => { const p = mk(); focusOn(p.id); toast(p.name + ' est née · choisis ta musique SoundCloud', 3000); scAdd(p); };
     $('#nHand').onclick = () => openForge(null);
   });
 }
@@ -4758,8 +4760,17 @@ function scAdd(p){ openSheet('scadd', head('SoundCloud', 'Tes sons et playlists,
     else { acc.innerHTML = ICON_SC + 'Crée ton compte pour relier SoundCloud'; }
     $('#scOk').onclick = async () => { const u = scUrl(inp.value); if (!u){ toast('Colle un lien SoundCloud (soundcloud.com/…)'); return; } p.links = scLinks(p.links); if (p.links.length >= 12){ toast('12 liens au maximum par planète'); return; }
       if (p.links.some(l => l.u === u)){ toast('Ce lien est déjà sur la planète'); return; } $('#scOk').disabled = true; const m = await scMeta(u); p.links.push({k: 'sc', u, t: m.t, a: m.a});
-      save(); try { publishSoon(); } catch(e){} sfx('confirm'); toast('« ' + m.t + ' » ajouté à ' + p.name); closeSheet(true); const i = VIEW.planets.indexOf(p); if (i >= 0) setTimeout(() => { openMenu(); if (MENU.open){ MENU.sel = i; renderMenu(); } }, 300); }; }); }
+      save(); try { publishSoon(); } catch(e){} sfx('confirm'); toast('« ' + m.t + ' » ajouté à ' + p.name); closeSheet(true); pdScShow(p); }; }); }
 let SCP = null, scApi = null;
+/* correctif SoundCloud : les sons SoundCloud sur la fiche de la planète */
+function pdScShow(p){ setTimeout(() => { try { if (mode === 'system' && SYS.planets.includes(p)) openPlaylist(p, true); } catch(e){} }, 350); }
+function pdScBindSheet(p, fromLib, ro){ const again = () => setTimeout(() => { if (sheetKind === 'scan') openPlaylist(p, fromLib); }, 200);
+  sbody.querySelectorAll('#sScAdd').forEach(b => b.onclick = () => scAdd(p));
+  sbody.querySelectorAll('#sScPlay').forEach(b => b.onclick = () => { scPlay(p, 0); again(); });
+  const ul = sbody.querySelector('.mpsc ul'); if (!ul) return;
+  ul.onclick = e => { const li = e.target.closest('[data-sc]'); if (!li) return; const i = +li.dataset.sc;
+    if (!ro && e.target.closest('[data-scx]')){ p.links = scLinks(p.links); p.links.splice(i, 1); save(); try { publishSoon(); } catch(_){} openPlaylist(p, fromLib); return; }
+    scPlay(p, i); again(); }; }
 function scLoadApi(){ if (scApi) return scApi; scApi = new Promise((ok, ko) => { if (window.SC && SC.Widget){ ok(); return; } const s = document.createElement('script'); s.src = 'https://w.soundcloud.com/player/api.js'; s.async = true; s.onload = () => ok(); s.onerror = () => { scApi = null; ko(); }; document.head.appendChild(s); }); return scApi; }
 function scPlay(p, i){ const l = scLinks(p.links)[i]; if (!l) return; unlockAudio(); try { if (!au.paused) au.pause(); if (typeof radio !== 'undefined' && radio) stopRadio(); } catch(e){}
   scClose(true); const set = scGuess(l.u).set, d = document.createElement('div'); d.id = 'scDock'; d.className = 'glass';
@@ -4842,7 +4853,7 @@ function scPick(x, p){ if (p){ scImportInto(x, p); return; } const P = SYS.plane
 function scImportInto(x, p){ const u = scUrl(x.url); if (!u || !p) return; p.links = scLinks(p.links);
   if (p.links.some(l => l.u === u)){ toast('« ' + x.title + ' » est déjà sur ' + p.name); return; } if (p.links.length >= 12){ toast('12 liens SoundCloud au maximum par planète'); return; }
   p.links.push({k: 'sc', u, t: String(x.title).slice(0, 80), a: (SCU && SCU.name) || 'SoundCloud'}); save(); try { publishSoon(); } catch(e){} sfx('confirm');
-  toast('« ' + x.title + ' » importée dans ' + p.name, 3500); closeSheet(true); }
+  toast('« ' + x.title + ' » importée dans ' + p.name, 3500); closeSheet(true); pdScShow(p); }
 
 (async () => {
   try {
