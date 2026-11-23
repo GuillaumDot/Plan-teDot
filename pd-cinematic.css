@@ -29,3 +29,9 @@
 @supports selector(:focus-visible){
   .btn:focus:not(:focus-visible){outline:none}
 }
+
+/* V9: keep sheets inside the visible viewport as Safari chrome changes. */
+@supports (height: 100dvh){
+  #sheet{max-height:min(66dvh,720px)}
+  #sheet.short{max-height:min(46dvh,420px)}
+}
