@@ -23,3 +23,9 @@
   #title p{color:#f5f9ff}
 }
 .btn:focus-visible{outline:2px solid #86ceff;outline-offset:3px}
+
+/* V9: keep keyboard focus visible on older Safari; avoid persistent tap outlines where supported. */
+.btn:focus{outline:2px solid #86ceff;outline-offset:3px}
+@supports selector(:focus-visible){
+  .btn:focus:not(:focus-visible){outline:none}
+}
