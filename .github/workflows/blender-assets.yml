@@ -1,0 +1,33 @@
+name: Blender asset smoke test
+on:
+  push:
+    branches: ['dev/blender-pipeline']
+    paths:
+      - 'tools/blender/**'
+      - '.github/workflows/blender-assets.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  render:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Blender
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y blender
+          blender --version
+      - name: Render test planet
+        run: blender --background --factory-startup --python-exit-code 1 --python tools/blender/generate.py
+      - name: Verify output
+        run: |
+          test -s blender-output/basalt-preview.png
+          test -s blender-output/basalt.blend
+      - uses: actions/upload-artifact@v4
+        with:
+          name: blender-planet-preview
+          path: blender-output/
+          retention-days: 7
+          if-no-files-found: error
