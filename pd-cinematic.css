@@ -12,3 +12,14 @@
 .tr.on .m b{color:#86ceff}
 .lab b{color:#f5f9ff;text-shadow:0 1px 4px #000,0 2px 8px #000}
 @media(prefers-reduced-motion:reduce){#dock,#sheet,#labels,#top{transition-duration:.01ms!important}#hint span{animation:none!important}}
+
+/* V9: avoid expensive backdrop effects on devices without support and respect contrast preferences. */
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .glass{background:rgba(12,16,32,.96)}
+}
+@media(prefers-contrast:more){
+  :root{--mute:rgba(245,249,255,.96);--faint:rgba(235,242,255,.88)}
+  .glass{background:rgba(12,16,32,.98);border-color:rgba(174,210,255,.65);backdrop-filter:none;-webkit-backdrop-filter:none}
+  #title p{color:#f5f9ff}
+}
+.btn:focus-visible{outline:2px solid #86ceff;outline-offset:3px}
