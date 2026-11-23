@@ -35,3 +35,8 @@
   #sheet{max-height:min(66dvh,720px)}
   #sheet.short{max-height:min(46dvh,420px)}
 }
+
+/* V9: avoid glass compositing when the user requests reduced transparency. */
+@media(prefers-reduced-transparency:reduce){
+  .glass{background:rgba(12,16,32,.98);backdrop-filter:none;-webkit-backdrop-filter:none}
+}
