@@ -5222,7 +5222,8 @@ function openCopyTo(ref, from){ const key = (ref.title + '|' + (ref.artist || ''
 function next(d = 1){ if (!Q.length) return; if (!XF.on) try { PDA.nav('track'); } catch(e){} qi = (qi + d + Q.length) % Q.length; load(); }
 /* V6.3 · between two songs: the end fades (where the system allows it), a breath of light crosses the space, the next song rises; the title slides in */
 const XF = {on: false, at: -1, pq: -1};
-function auFade(to, dur){ try { const v0 = au.volume, t0 = performance.now(); const st = () => { const k = Math.min(1, (performance.now() - t0) / (dur * 1000)); try { au.volume = clamp(v0 + (to - v0) * k * k * (3 - 2 * k), 0, 1); } catch(e){} if (k < 1) requestAnimationFrame(st); }; requestAnimationFrame(st); } catch(e){} }
+let auFadeGeneration = 0;
+function auFade(to, dur){ const generation = ++auFadeGeneration; try { const v0 = au.volume, t0 = performance.now(); const st = () => { if (generation !== auFadeGeneration) return; const k = dur > 0 ? Math.min(1, Math.max(0, (performance.now() - t0) / (dur * 1000))) : 1; try { au.volume = clamp(v0 + (to - v0) * k * k * (3 - 2 * k), 0, 1); } catch(e){} if (k < 1) requestAnimationFrame(st); }; st(); } catch(e){} }
 au.addEventListener('timeupdate', () => { if (!au.duration || au.paused || XF.at === qi || Q.length < 2 || (typeof radio !== 'undefined' && radio)) return; const rem = au.duration - au.currentTime;
   if (XF.pq !== qi && au.currentTime > Math.min(20, au.duration * .5)){ XF.pq = qi; try { const nt = TRACKS.get(Q[(qi + 1) % Q.length]); if (nt && !nt.blob && !nt.pre){ nt.pre = true; if (nt.url) fetchBlob(nt.url).then(b => { if (!nt.blob) nt.blob = b; }).catch(() => { nt.pre = false; }); else ensureBlob(nt).catch(() => {}); } } catch(e){} }   // the next song is ready before this one ends
   if (rem < 1.6 && rem > 0){ XF.on = true; XF.at = qi; try { PDA.nav('track'); } catch(e){} auFade(.15, rem * .9); POST.flash = Math.max(POST.flash, .06); } });
