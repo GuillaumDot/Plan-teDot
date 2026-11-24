@@ -1084,7 +1084,21 @@ const OCT = [3, 4, 5][TIER];
 if (TIER === 0) document.documentElement.classList.add('lowfx'); if (TIER === 1) document.documentElement.classList.add('tier1');
 let scale = [.7, .9, 1][TIER], maxScale = [1.15, 1.4, 1.65][TIER]; const SMIN = [.38, .42, .45][TIER];
 let DPR = 1, W = 1, H = 1, RS = 1;
-function resize(){ DPR = window.devicePixelRatio || 1; RS = Math.min(DPR, maxScale) * scale; W = Math.max(2, Math.round(innerWidth * RS)); H = Math.max(2, Math.round(innerHeight * RS)); cv.width = W; cv.height = H; gl.viewport(0, 0, W, H); skyFbo.resize(); if (typeof POST_READY !== 'undefined') POST.resize(); }
+let pdResizePending = false;
+const pdGpuLimits = [gl.getParameter(gl.MAX_TEXTURE_SIZE), gl.getParameter(gl.MAX_RENDERBUFFER_SIZE), ...gl.getParameter(gl.MAX_VIEWPORT_DIMS)];
+const pdGpuMax = Math.min(...pdGpuLimits.filter(v => Number.isFinite(v) && v > 0), 4096);
+function resize(){
+  if (gl.isContextLost && gl.isContextLost()){ pdResizePending = true; return; }
+  DPR = window.devicePixelRatio || 1;
+  RS = Math.min(DPR, maxScale) * scale;
+  RS = Math.min(RS, pdGpuMax / Math.max(2, innerWidth, innerHeight), Math.sqrt(4000000 / Math.max(4, innerWidth * innerHeight)));
+  const w = Math.max(2, Math.round(innerWidth * RS)), h = Math.max(2, Math.round(innerHeight * RS));
+  if (!pdResizePending && W === w && H === h && cv.width === w && cv.height === h) return;
+  pdResizePending = false; W = w; H = h;
+  if (cv.width !== W) cv.width = W;
+  if (cv.height !== H) cv.height = H;
+  gl.viewport(0, 0, W, H); skyFbo.resize(); if (typeof POST_READY !== 'undefined') POST.resize();
+}
 // dynamic resolution
 let perfAcc = 0, perfN = 0, perfT = 0;
 let slowN = 0, fastN = 0, PERF_UP = 0, postBackN = 0;
@@ -2959,7 +2973,13 @@ const POST = {on: false, s: null, b: [], bloom: .85, ca: 0, flash: 0, ms: null, 
     gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA); }
 };
 gl.disable(gl.DEPTH_TEST);
-addEventListener('resize', resize); resize();
+let pdResizeRaf = null;
+addEventListener('resize', () => {
+  pdResizePending = true;
+  if (document.hidden || pdResizeRaf !== null) return;
+  pdResizeRaf = requestAnimationFrame(() => { pdResizeRaf = null; if (!document.hidden) { pdResizePending = false; resize(); } });
+});
+resize();
 
 /* ================= camera ================= */
 const FOV0 = 45 * Math.PI / 180; let FOV = FOV0;
@@ -4030,7 +4050,7 @@ let pdFrameRequest = null, pdContextLost = false;
 function pdQueueFrame(){ if (!running || document.hidden || pdContextLost || pdFrameRequest !== null) return; pdFrameRequest = requestAnimationFrame(t => { pdFrameRequest = null; if (running && !document.hidden && !pdContextLost) frameSafe(t); }); }
 function pdStopFrame(){ running = false; if (pdFrameRequest !== null){ cancelAnimationFrame(pdFrameRequest); pdFrameRequest = null; } }
 function frameSafe(t){ try { frame(t); FERR = 0; } catch(e){ FERR++; GB.n = 0; GB.busy = false; console.error('[PlanèteDot] image ignorée', e); if (FERR < 30) pdQueueFrame(); else { pdFailure('Rendu 3D interrompu', e); pdLite('render', e); } } }
-document.addEventListener('visibilitychange', () => { if (SND.ab && actx) SND.ab.gain.setTargetAtTime(document.hidden ? 0 : 1, actx.currentTime, .1); if (document.hidden) pdStopFrame(); else if (!running && !pdContextLost){ running = true; last = performance.now(); lastDraw = 0; pdQueueFrame(); } });
+document.addEventListener('visibilitychange', () => { if (SND.ab && actx) SND.ab.gain.setTargetAtTime(document.hidden ? 0 : 1, actx.currentTime, .1); if (document.hidden) pdStopFrame(); else if (!running && !pdContextLost){ running = true; last = performance.now(); lastDraw = 0; perfAcc = perfN = perfT = 0; if (pdResizePending) resize(); pdQueueFrame(); } });
 function arrive(){ setTimeout(() => document.body.classList.remove('pdT'), 380);
   warpT = -1; const isNew = !SYS.name || !SYS.user; if (isNew){ starIgnite = 0; sndInit(); } if (hudEl) hudEl.style.opacity = 0;
   enterSystem(SYS, false); $('#hint').classList.add('hide');
@@ -5110,7 +5130,7 @@ function unlockAudio(){
 // iOS only lets audio start from a finished touch (touchend / click), never from touchstart or pointerdown
 ['touchend', 'pointerup', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, () => { if (!actx || actx.state !== 'running') unlockAudio(); }, {capture: true, passive: true}));
 document.addEventListener('visibilitychange', () => { PDA.setHidden(document.hidden); if (!actx) return; clearTimeout(PDA.S.susT);
-  if (document.hidden) PDA.S.susT = setTimeout(() => { if (document.hidden && actx.state === 'running' && !(radio && !ra.paused)) actx.suspend().catch(() => {}); }, 1500); });
+  if (document.hidden) PDA.S.susT = setTimeout(() => { if (document.hidden && actx.state === 'running' && au.paused && !(radio && !ra.paused)) actx.suspend().catch(() => {}); }, 1500); });
 addEventListener('pageshow', () => { if (!document.hidden) PDA.setHidden(false); });
 /* music → waves: on iPhone the native player cannot feed an analyser, so each track's spectrum is computed once,
    in the background, and replayed in sync with the music (same values as AnalyserNode.getByteFrequencyData) */
