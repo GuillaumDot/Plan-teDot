@@ -3993,7 +3993,7 @@ document.addEventListener('pointerdown', () => { lastInteract = performance.now(
 function fade(dt){ const f = $('#flash'); const fo = parseFloat(f.style.opacity || 0); if (fo > 0) f.style.opacity = Math.max(0, fo - dt * 1.6); }
 function frame(now, once){
   if (!running && !once) return;
-  if (!once){ const iv = 1000 / pdCap(); if (now - lastDraw < iv - 3){ requestAnimationFrame(frameSafe); return; } lastDraw = now - lastDraw < iv * 1.5 ? lastDraw + iv : now; } else lastDraw = now; SHOT_PT = null; ambTick(Math.min(.05, (now - last) / 1000));
+  if (!once){ const iv = 1000 / pdCap(); if (now - lastDraw < iv - 3){ pdQueueFrame(); return; } lastDraw = now - lastDraw < iv * 1.5 ? lastDraw + iv : now; } else lastDraw = now; SHOT_PT = null; ambTick(Math.min(.05, (now - last) / 1000));
   const rawDt = Math.min(.25, (now - last) / 1000); const dt = Math.min(.05, rawDt); last = now; time = now / 1000 - T0;
   FDT = rawDt; perf(dt); readAudio(dt); scLevels(); listenTick(dt); ambUpdate(dt); radioSpatial(dt); POST.begin();
   if (mode !== 'splash' && !cine) FOV = lerp(FOV, FOV0, 1 - Math.exp(-dt * 2.2));
@@ -4022,11 +4022,15 @@ function frame(now, once){
   if (tutoI >= 0){ if (mode === 'splash' || (mode !== 'system' && TUTO_ACT === TUTO)) endTuto(); else tutoTick(); }
   if (cine && cine.album) albumFocus(dt); if (cine && cine.dir) pdDirPost(); if (OUTRO) outroTick(); if (INTRO.on) introTick(dt);
   glowFlush(); pdShkTick(); POST.end(); shotTick(); if (STORY) storyTick();
-  if (!once) requestAnimationFrame(frameSafe);
+  if (!once) pdQueueFrame();
 }
 let FERR = 0;
-function frameSafe(t){ try { frame(t); FERR = 0; } catch(e){ FERR++; GB.n = 0; GB.busy = false; console.error('[PlanèteDot] image ignorée', e); if (FERR < 30) requestAnimationFrame(frameSafe); else { pdFailure('Rendu 3D interrompu', e); pdLite('render', e); } } }
-document.addEventListener('visibilitychange', () => { if (SND.ab && actx) SND.ab.gain.setTargetAtTime(document.hidden ? 0 : 1, actx.currentTime, .1); if (document.hidden) running = false; else if (!running){ running = true; last = performance.now(); requestAnimationFrame(frameSafe); } });
+// One pending render callback, including startup and visibility transitions.
+let pdFrameRequest = null, pdContextLost = false;
+function pdQueueFrame(){ if (!running || document.hidden || pdContextLost || pdFrameRequest !== null) return; pdFrameRequest = requestAnimationFrame(t => { pdFrameRequest = null; if (running && !document.hidden && !pdContextLost) frameSafe(t); }); }
+function pdStopFrame(){ running = false; if (pdFrameRequest !== null){ cancelAnimationFrame(pdFrameRequest); pdFrameRequest = null; } }
+function frameSafe(t){ try { frame(t); FERR = 0; } catch(e){ FERR++; GB.n = 0; GB.busy = false; console.error('[PlanèteDot] image ignorée', e); if (FERR < 30) pdQueueFrame(); else { pdFailure('Rendu 3D interrompu', e); pdLite('render', e); } } }
+document.addEventListener('visibilitychange', () => { if (SND.ab && actx) SND.ab.gain.setTargetAtTime(document.hidden ? 0 : 1, actx.currentTime, .1); if (document.hidden) pdStopFrame(); else if (!running && !pdContextLost){ running = true; last = performance.now(); lastDraw = 0; pdQueueFrame(); } });
 function arrive(){ setTimeout(() => document.body.classList.remove('pdT'), 380);
   warpT = -1; const isNew = !SYS.name || !SYS.user; if (isNew){ starIgnite = 0; sndInit(); } if (hudEl) hudEl.style.opacity = 0;
   enterSystem(SYS, false); $('#hint').classList.add('hide');
@@ -5957,10 +5961,8 @@ function scImportInto(x, p){ const u = scUrl(x.url); if (!u || !p) return; p.lin
     // Start WebGL before any database or network request, unlike the original.
     gdInit();
     splashStart = time;
-    requestAnimationFrame(t => {
-      last=t;
-      frameSafe(t);
-    });
+    last = performance.now();
+    if (document.hidden) pdStopFrame(); else pdQueueFrame();
     try { introBoot(); } catch(e){ console.warn('Ouverture', e); gateShow(false); }
     setTimeout(()=>{if(mode==='splash'&&warpT<0&&!INTRO.on) $('#hint').classList.remove('hide');},2400);
     pdStatus('Ouverture de la session');
@@ -6552,7 +6554,7 @@ setTimeout(pdCheckUpdate, 4000); document.addEventListener('visibilitychange', (
   const relaunch = () => { if (au.paused && !STORY){ go(); return; }
     if (!told){ told = true; try { toast('L’univers se relance à la prochaine pause', 5000); } catch(e){} }
     if (armed) return; armed = true; au.addEventListener('pause', function f(){ au.removeEventListener('pause', f); armed = false; setTimeout(relaunch, 1200); }); };
-  cv.addEventListener('webglcontextlost', e => { e.preventDefault(); lost = true; running = false; console.warn('[PlanèteDot] contexte graphique perdu'); }, false);
+  cv.addEventListener('webglcontextlost', e => { e.preventDefault(); lost = true; pdContextLost = true; pdStopFrame(); console.warn('[PlanèteDot] contexte graphique perdu'); }, false);
   cv.addEventListener('webglcontextrestored', () => { if (lost && !document.hidden) relaunch(); }, false);
   document.addEventListener('visibilitychange', () => { if (!document.hidden && (lost || (gl.isContextLost && gl.isContextLost()))) relaunch(); });
 })();
