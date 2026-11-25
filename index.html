@@ -899,7 +899,7 @@ const ERA_XP = true ? [0, 30, 90, 200, 380, 650] : [0, 75, 225, 500, 950, 1650];
 /* an era is reached by what stands on the planet: 8 towns, then 4 countries, 8 countries, 4, 8 and 16 continents (a country is worth 4 towns, a continent 4 countries) */
 const ERA_EQ = [0, 8, 16, 32, 64, 128, 256], ERA_UNIT = [[2, 8], [3, 4], [3, 8], [4, 4], [4, 8], [4, 16]], ST_OF = [0, 1, 2, 3, 4, 4, 5];
 function eraInfo(p){ const c = p._era; if (c && Math.abs(time - c.t) < 1 && c.ro === readonly) return c;
-  const ws = readonly && p.tracksRO ? p.tracksRO.map(x => x[4] || 0) : (p.tracks || []).map(id => { const m = META[id] || {}; return (m.plays || 0) + (m.secs || 0) / 300; }).concat(Object.values(p.scp && typeof p.scp === 'object' ? p.scp : {}).map(r => ((r && r.n) || 0) + ((r && r.s) || 0) / 300));
+  const ws = readonly && p.tracksRO ? p.tracksRO.map(x => x[4] || 0).concat(Array.isArray(p.scw) ? p.scw : []) : (p.tracks || []).map(id => { const m = META[id] || {}; return (m.plays || 0) + (m.secs || 0) / 300; }).concat(Object.values(p.scp && typeof p.scp === 'object' ? p.scp : {}).map(r => ((r && r.n) || 0) + ((r && r.s) || 0) / 300));
   const n = [0, 0, 0, 0, 0]; let eq = 0; ws.forEach(w => { const g = regG(w), t = Math.min(4, Math.floor(g)); if (t < 1) return; const k = Math.min(3, Math.floor(Math.pow(4, g - Math.floor(g)) + 1e-6)); n[t] += k; if (t >= 2) eq += k * Math.pow(4, t - 2); });
   let e = 0; for (let i = 1; i < 7; i++) if (eq >= ERA_EQ[i]) e = i;
   if (readonly && p.xp){ let k = 0; for (let i = 1; i < 6; i++) if (p.xp >= ERA_XP[i]) k = i; e = Math.max(e, ST_OF.indexOf(k)); }
@@ -3094,7 +3094,7 @@ function trackBiome(id, p){ const m = META[id] || {}; if (m.a && m.a.sono){ cons
 const FIB = (() => { const out = []; for (let i = 0; i < 16; i++){ const y = 1 - 2 * (i + .5) / 16, r = Math.sqrt(1 - y * y), a = i * 2.39996; out.push([Math.cos(a) * r, y * .94, Math.sin(a) * r]); } return out; })();
 const CQ = new WeakMap();
 function conquest(p){ const c0 = CQ.get(p); if (c0 && time - c0.t < 1) return hlApply(p, c0);
-  let items = readonly ? (p.tracksRO || []).map(x => ({id: x[0] + '|' + (x[1] || ''), title: x[0], w: x[4] || 0, biome: x[5] ?? (TYPE_BIOME[p.type] ?? 7)}))
+  let items = readonly ? (p.tracksRO || []).map(x => ({id: x[0] + '|' + (x[1] || ''), title: x[0], w: x[4] || 0, biome: x[5] ?? (TYPE_BIOME[p.type] ?? 7)})).concat(pdScItemsRO(p))
     : p.tracks.map(id => { const m = META[id] || {}; return {id, title: (TRACKS.get(id) || {}).title, w: (m.plays || 0) + (m.secs || 0) / 300, biome: trackBiome(id, p)}; }).concat(pdScItems(p));
   items.sort((a, b) => b.w - a.w); const all = items; items = items.slice(0, 16);
   const capL = 4; all.forEach(x => { const gk = p.id + '|' + x.id, gT = Math.min(regG(x.w), capL + .999); let g = REGG.get(gk); g = g === undefined ? gT : g + clamp(gT - g, -.05, .012); REGG.set(gk, g); x.g = g; x.capped = regG(x.w) > capL + .999; const l = Math.min(4, Math.floor(g)); x.lvl = l; x.evType = REG_EV[x.biome ?? 7]; x.ev = l >= 1 && Math.sin(time / 37 + hashStr(x.id) * 40) > .45 ? 1 : 0;
@@ -3565,7 +3565,7 @@ function renderSystem(dt, flyIn){ { const kT = 1 + Math.max(0, starR(VIEW) - .55
     
     picks.push({x: pr.x, y: pr.y, r: Math.max(r * b.reach, 26 * RS), w: pr.w, act: () => MENU.open ? menuSelect(i) : scanPlanet(p)});
     if (i === 0) PL_PT = {x: pr.x, y: pr.y - r * .2};
-    if (mk > .5) placeNC(lab('mn' + p.id, `<b>${esc(p.name)}</b>${plural((readonly ? (p.tracksRO || []) : p.tracks).length, 'titre')}`, 'mn' + (i === MENU.sel ? ' sel' : '')), pr.x, pr.y + r * 1.15 + 6 * RS, clamp((mk - .5) * 2, 0, 1));
+    if (mk > .5) placeNC(lab('mn' + p.id, `<b>${esc(p.name)}</b>${plural(pdNMus(p), 'titre')}`, 'mn' + (i === MENU.sel ? ' sel' : '')), pr.x, pr.y + r * 1.15 + 6 * RS, clamp((mk - .5) * 2, 0, 1));
     if (showLabels) (isLive(p) ? place : placeNC)(lab(p.id, `<b>${esc(p.name)}</b>${isLive(p) ? (readonly ? 'en direct' : '● en écoute') : ''}`, isLive(p) ? 'live' : ''), pr.x, pr.y + r * Math.max(1.15, b.reach * b.ringS + .2) + 6 * RS, clamp((r / RS - 3) / 6, 0, 1) * starIgnite * (.55 + .45 * (p._a ?? 0)));
     if (p.id === focus && sheetKind === 'scan'){ const e = $('#ret'), s = r * b.reach * 1.15 / RS; e.style.width = e.style.height = (s * 2) + 'px'; e.style.transform = `translate(${pr.x / RS - s}px,${pr.y / RS - s}px)`; }
     const occ = [];
@@ -4194,7 +4194,7 @@ function updUI(){
   if (mode === 'galaxy'){ $('#tName').textContent = 'Andromède'; $('#tSub').textContent = plural(OTHERS.size + (guestMode ? 0 : 1), 'galaxie') + ' · fais glisser pour naviguer';
     bLeft.innerHTML = ICON.back; bLeft.setAttribute('aria-label', 'Retour'); bNew.classList.remove('hide'); bNew.setAttribute('aria-label', 'Rechercher'); }
   else if (mode === 'planet' && focus){ const p = VIEW.planets.find(x => x.id === focus); if (!p) return; const lib = planetLiberation(p);
-    $('#tName').textContent = p.name; $('#tSub').textContent = readonly ? `${plural(p.terr.length, 'territoire')} · ${plural(p.tracks.length, 'morceau', 'morceaux')}` : `${eraName(p)} · ${Math.round(lib * 100)} % libérée · ${plural(p.terr.length, 'territoire')}`;
+    $('#tName').textContent = p.name; $('#tSub').textContent = readonly ? `${plural(p.terr.length, 'territoire')} · ${plural(pdNMus(p), 'morceau', 'morceaux')}` : `${eraName(p)} · ${Math.round(lib * 100)} % libérée · ${plural(p.terr.length, 'territoire')}`;
     $('#tBar').hidden = readonly; $('#tBarI').style.width = (lib * 100) + '%';
     bLeft.innerHTML = ICON.back; bLeft.setAttribute('aria-label', 'Retour au système'); bNew.classList.add('hide'); }
   else if (VIEW){ const nt = VIEW.planets.reduce((s, p) => s + p.tracks.length, 0);
@@ -5375,7 +5375,7 @@ function nowInfo(){ if (au.paused || !Q.length) return null; const t = TRACKS.ge
 function snapshot(){ return {name: SYS.name.slice(0, 40), user: SYS.user.slice(0, 30), previousStar: String(SYS.previousStar||'').slice(0,30), starRenamedAt: SYS.starRenamedAt||0, hue: SYS.hue, hueSet: !!SYS.hueSet, secs: SYS.secs || 0, theme: SYS.theme, level: level(SYS.xp), updated: Date.now(), rx: pd9RxOut(), now: (()=>{const n=nowInfo();return n && SYS.planets.find(p=>p.id===n.pid)?.isPublic===false ? null : n;})(),
   planets: SYS.planets.slice(0, 24).map(p => { const tr = []; p.terr.slice(0, 12).forEach((t, ti) => t.tracks.slice(0, 40).forEach(id => { const x = TRACKS.get(id); if (x) { const m = META[id] || {}; tr.push([x.title.slice(0, 80), (x.artist || '').slice(0, 60), ti, x.src && x.src.k !== 'local' ? x.src.k : '', Math.round(((m.plays || 0) + (m.secs || 0) / 300) * 10) / 10, trackBiome(id, p)]); } }));
     return {id: p.id, isPublic: p.isPublic !== false, name: p.name.slice(0, 40), type: p.type, size: p.size, c1: p.c1, c2: p.c2, atH: p.atH, atmo: p.atmo, ring: p.ring, ringH: p.ringH, ringTilt: p.ringTilt, ringRoll: p.ringRoll,
-      moons: p.moons, clouds: p.clouds, arch: p.arch || 0, spin: p.spin, tilt: p.tilt, seed: p.seed, phase: p.phase, emo: p.emo, origin: (p.origin || '').slice(0, 40), level: plevel(p), xp: p.xp || 0, path: pathOf(p), act: Math.round(act(p) * 100) / 100, links: p.isPublic === false ? [] : scLinks(p.links),
+      moons: p.moons, clouds: p.clouds, arch: p.arch || 0, spin: p.spin, tilt: p.tilt, seed: p.seed, phase: p.phase, emo: p.emo, origin: (p.origin || '').slice(0, 40), level: plevel(p), xp: p.xp || 0, path: pathOf(p), act: Math.round(act(p) * 100) / 100, links: p.isPublic === false ? [] : scLinks(p.links), scw: p.isPublic === false ? [] : pdScItems(p).map(x => Math.round(x.w * 10) / 10),
       terr: p.terr.slice(0, 12).map(t => ({id: t.id, name: t.name.slice(0, 30), kind: t.kind, hue: t.hue, lat: t.lat, lon: t.lon, n: t.tracks.length, lib: Math.round(liberation(t, p) * 100) / 100})), tracks: tr.slice(0, 240).map(t => p.isPublic === false ? [t[0],t[1],t[2],'',t[4],t[5]] : t)}; })}; }
 const num = (v, a, b, d) => (typeof v === 'number' && isFinite(v)) ? clamp(v, a, b) : d;
 const col3 = (c, d) => Array.isArray(c) && c.length === 3 ? c.map(v => num(v, 0, 1, .5)) : d;
@@ -5387,7 +5387,7 @@ function sanitize(v){ if (!v || !Array.isArray(v.planets)) return null; return {
     return {id: sid(p.id, uid()), isPublic: p.isPublic !== false, name: String(p.name || 'Planète').slice(0, 40), type: Math.round(num(p.type, 0, 11, 0)), size: num(p.size, .5, 1.5, 1), c1: col3(p.c1, [.6,.6,.5]), c2: col3(p.c2, [.5,.6,.5]),
       atH: num(p.atH, 0, 1, .6), atmo: num(p.atmo, 0, 1, .4), ring: Math.round(num(p.ring, 0, 2, 0)), ringH: num(p.ringH, 0, 1, .6), ringTilt: num(p.ringTilt, -1, 1, .25), ringRoll: num(p.ringRoll, -1, 1, 0),
       moons: Math.round(num(p.moons, 0, 3, 0)), arch: Math.round(num(p.arch, 0, 5, 0)), clouds: num(p.clouds, 0, 1, .4), spin: num(p.spin, 0, 1, .2), tilt: num(p.tilt, -1, 1, .2), seed: num(p.seed, 0, 100, 1), phase: num(p.phase, 0, 7, 0),
-      emo: Math.round(num(p.emo, -1, 7, -1)), origin: String(p.origin || '').slice(0, 40), level: Math.round(num(p.level, 1, 99, 1)), xp: num(p.xp, 0, 1e7, 0), path: Array.isArray(p.path) ? p.path.slice(0, 3).map(x => Math.round(num(x, -1, 2, -1))) : [-1, -1, -1], act: num(p.act, 0, 1, 0), links: scLinks(p.links), terr, tracksRO, tracks: tracksRO.map(() => 0), org: 'manual', auto: false}; })}; }
+      emo: Math.round(num(p.emo, -1, 7, -1)), origin: String(p.origin || '').slice(0, 40), level: Math.round(num(p.level, 1, 99, 1)), xp: num(p.xp, 0, 1e7, 0), path: Array.isArray(p.path) ? p.path.slice(0, 3).map(x => Math.round(num(x, -1, 2, -1))) : [-1, -1, -1], act: num(p.act, 0, 1, 0), links: scLinks(p.links), scw: Array.isArray(p.scw) ? p.scw.slice(0, 12).map(x => num(x, 0, 1e6, 0)) : [], terr, tracksRO, tracks: tracksRO.map(() => 0), org: 'manual', auto: false}; })}; }
 function publishSoon(){ clearTimeout(pubT); pubT = setTimeout(async () => { if (authUser && remoteReady){ publishPublicGalaxy(); return; } if (!DB || !ME || !canShare || !SYS.name) return;
   try { await DB.doc('systems/' + ME).set(snapshot()); } catch(e){ if (e && (e.code === 'invalid_argument' || e.code === 'revoked' || e.code === 'not_granted')) canShare = false; } }, 2500); }
 async function pushSignal(item){
@@ -6007,7 +6007,11 @@ function pdScListen(sp, dt){ if (readonly || guestMode || !sp.sid) return; const
   addXP(SPEED); }
 function pdScItems(p){ const L = scLinks(p.links); if (!L.length) return []; const R = Object.values(p.scp && typeof p.scp === 'object' ? p.scp : {});
   return L.map((l, i) => { let w = 0; R.forEach(r => { if (r && ((r.u && r.u === l.u) || (!r.u && i === 0))) w += (r.n || 0) + (r.s || 0) / 300; });
-    return {id: 'sc:' + l.u, sc: true, u: l.u, title: l.t, w, biome: TYPE_BIOME[p.type] ?? 7}; }); }
+    return {id: 'sc:' + l.u, sc: true, u: l.u, title: l.t, ar: l.a, w, biome: TYPE_BIOME[p.type] ?? 7}; }); }
+/* V9 · un lien SoundCloud (titre ou playlist) compte comme une musique : une zone sur la planète, chez soi comme chez les visiteurs */
+function pdScItemsRO(p){ const W = Array.isArray(p.scw) ? p.scw : []; return scLinks(p.links).map((l, i) => ({id: 'sc:' + l.u, sc: true, u: l.u, title: l.t, ar: l.a, w: +W[i] || 0, biome: TYPE_BIOME[p.type] ?? 7})); }
+function pdRoList(p){ return (p.tracksRO || []).map(x => [x[0], x[1] || '', 0]).concat(scLinks(p.links).map(l => [l.t, l.a, 1])); }
+function pdNMus(p){ return (readonly ? (p.tracksRO || []).length : (p.tracks || []).length) + scLinks(p.links).length; }
 function pdScPlays(p){ let n = 0; Object.values(p && p.scp || {}).forEach(r => n += (r && r.n) || 0); return n; }
 function pdScBtn(sp){ const b = document.getElementById('scPP'); if (b && SCP === sp) b.innerHTML = sp.playing ? ICON.pauseS : ICON.play; if (SCP === sp && au.paused){ const ic = document.getElementById('ppIc'); if (ic) ic.innerHTML = sp.playing ? ICON.pause : ICON.playp; } try { updNP(); } catch(e){} if (sp.playing){ cineArm = cineArm || performance.now(); } }
 function pdScMini(on){ const d = document.getElementById('scDock'); if (d) d.classList.toggle('mini', !!on); }
@@ -6898,19 +6902,19 @@ function pd9Grid(row){ const em = PD9_RX.filter(r => !r[1]), tx = PD9_RX.filter(
 function pd9Bind(root, tgf){ if (!root) return; root.addEventListener('click', async e => { const b = e.target.closest('[data-rx]'); if (!b || !root.contains(b)) return; const tg = tgf(); if (!tg){ toast('Choisis d’abord la playlist ou un titre'); return; }
   b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); try { sfx('tick'); } catch(_){} if (await pd9React(tg, b.dataset.rx)) b.classList.add('sent'); }); }
 function pd9Sheet(o, V, pre){ // réagir à la musique d'une galaxie : toute une playlist ou un seul titre ; ou lui faire écouter un de tes titres
-  if (!V) return; const ps = (V.planets || []).filter(p => p.isPublic !== false && (p.tracksRO || []).length); const canMsg = pdUuid(o) && !guestMode && !!authUser;
+  if (!V) return; const ps = (V.planets || []).filter(p => p.isPublic !== false && pdRoList(p).length); const canMsg = pdUuid(o) && !guestMode && !!authUser;
   let pi = Math.max(0, pre && pre.p ? ps.findIndex(p => p.id === pre.p) : 0), z = pre && pre.z ? pre.z : '', tab = ps.length ? 'their' : 'mine', pick = null;
   const mine = [...TRACKS.values()].filter(t => !t.builtin && !String(t.id).startsWith('pd-public:')).slice(0, 300);
   openSheet('signal', head(ps.length ? 'Réagir à sa musique' : 'Faire écouter un titre', `${esc(V.name || 'Cette galaxie')}${V.user ? ' · ' + esc(V.user) : ''}`) +
     (canMsg ? `<div class="tabs" id="r9T"><button data-t="msg">Message libre</button><button class="on" data-t="mus">Musique ♫</button></div>` : '') +
     (ps.length && canMsg && mine.length ? `<div class="chips" id="r9W"><button class="chip on" data-w="their">Sa musique</button><button class="chip" data-w="mine">Te faire écouter un titre</button></div>` : '') +
     `<div id="r9B"></div><p class="note">Sur la musique, que du positif : des réactions toutes prêtes, sans texte libre. Elles popent sur la planète, au moment du morceau si tu l’écoutes.</p>`, () => {
-    const B = $('#r9B'); const tg = () => { const p = ps[pi]; if (!p) return null; const x = z && (p.tracksRO || []).find(y => pd9Key(y[0], y[1]) === z);
+    const B = $('#r9B'); const tg = () => { const p = ps[pi]; if (!p) return null; const x = z && pdRoList(p).find(y => pd9Key(y[0], y[1]) === z);
       return x ? {o, p: p.id, pn: p.name, t: 'track', ti: x[0], ar: x[1] || '', z, live: false} : {o, p: p.id, pn: p.name, t: 'playlist'}; };
     const paint = () => { if (tab === 'their'){ const p = ps[pi];
         B.innerHTML = (ps.length > 1 ? `<div class="chips" id="r9P">${ps.map((q, i) => `<button class="chip${i === pi ? ' on' : ''}" data-i="${i}">${esc(q.name)}</button>`).join('')}</div>` : '') +
-          `<ul class="list rx9l" id="r9L"><li class="tr${z ? '' : ' on'}" data-z=""><span class="n">✦</span><div class="m"><b>Toute la playlist</b><span>${esc(p.name)} · ${plural((p.tracksRO || []).length, 'titre')}</span></div></li>` +
-          (p.tracksRO || []).slice(0, 60).map(x => { const k = pd9Key(x[0], x[1]); return `<li class="tr${z === k ? ' on' : ''}" data-z="${esc(k)}"><span class="n">♫</span><div class="m"><b>${esc(x[0])}</b><span>${esc(x[1] || 'Artiste inconnu')}</span></div></li>`; }).join('') + `</ul><h4 class="rx9h">Ta réaction</h4>${pd9Grid()}`;
+          `<ul class="list rx9l" id="r9L"><li class="tr${z ? '' : ' on'}" data-z=""><span class="n">✦</span><div class="m"><b>Toute la playlist</b><span>${esc(p.name)} · ${plural(pdRoList(p).length, 'titre')}</span></div></li>` +
+          pdRoList(p).slice(0, 72).map(x => { const k = pd9Key(x[0], x[1]); return `<li class="tr${z === k ? ' on' : ''}" data-z="${esc(k)}"><span class="n">${x[2] ? ICON_SC : '♫'}</span><div class="m"><b>${esc(x[0])}</b><span>${esc(x[1] || 'Artiste inconnu')}</span></div></li>`; }).join('') + `</ul><h4 class="rx9h">Ta réaction</h4>${pd9Grid()}`;
         const P = $('#r9P'); if (P) P.onclick = e => { const b = e.target.closest('[data-i]'); if (!b) return; pi = +b.dataset.i; z = ''; paint(); };
         $('#r9L').onclick = e => { const li = e.target.closest('[data-z]'); if (!li) return; z = li.dataset.z; $('#r9L').querySelectorAll('.tr').forEach(n => n.classList.toggle('on', n === li)); try { sfx('tick'); } catch(_){} };
         pd9Bind(B.querySelector('.rx9'), tg); }
@@ -6985,7 +6989,7 @@ function pd9At(S, d, out){ const w = rz(-S.tilt, ry(-S.ang, d)), V = S.vw;
   out[0] = S.x + nx * S.r; out[1] = S.y - ny * S.r; out[2] = nz; return out; }
 function pd9From(S, nx, ny){ const nz = Math.sqrt(Math.max(0, 1 - nx * nx - ny * ny)), V = S.vw;
   return ry(S.ang, rz(S.tilt, [V[0] * nx + V[3] * ny + V[6] * nz, V[1] * nx + V[4] * ny + V[7] * nz, V[2] * nx + V[5] * ny + V[8] * nz])); }
-const pd9ZKey = x => readonly ? x.id : x.sc ? pd9Key(x.title, x.ar) : (t => t ? pd9Key(t.title, t.artist) : x.id)(TRACKS.get(x.id));
+const pd9ZKey = x => x.sc ? pd9Key(x.title, x.ar) : readonly ? x.id : (t => t ? pd9Key(t.title, t.artist) : x.id)(TRACKS.get(x.id));
 function pd9Zone(S, z){ const cq = S.cq; if (!cq || !z) return null; let m = cq._pd9; if (!m){ m = new Map(); for (const x of cq.items) m.set(pd9ZKey(x), x); cq._pd9 = m; } return m.get(z) || null; }
 function pd9Jit(d, k, a, b){ const t1 = norm(Math.abs(d[1]) < .9 ? cross(d, [0, 1, 0]) : cross(d, [1, 0, 0])), t2 = cross(d, t1);
   return norm([d[0] + (t1[0] * a + t2[0] * b) * k, d[1] + (t1[1] * a + t2[1] * b) * k, d[2] + (t1[2] * a + t2[2] * b) * k]); }
