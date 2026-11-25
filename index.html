@@ -4073,7 +4073,7 @@ function startCine(force, pidO){ const cp = pdCinePid(pidO); if (!cp) return fal
   mode = 'system'; focus = null; selT = -1; angT = null; setRail(false); curP = null;   // V7.2 · le réalisateur filme depuis le système : zone, planète, étoile, galaxie
   closeSheet(true); if (MENU.open) closeMenu(true);
   cine = {pid, album: false, dir: {}, back, shot: 'zone', t: 0, t0: time, cut: true, sc: !!cp.sc}; document.body.classList.add('cine'); if (!pidO) cineCaption(); return true; }
-function exitCine(){ if (!cine) return; const wa = cine.album, c0 = cine; cine = null; pdDirExit(c0); document.body.classList.remove('cine'); $('#cineCap').style.opacity = 0; cineArm = (!au.paused && Q.length) ? performance.now() : 0; cineRe = true; lastInteract = performance.now();
+function exitCine(){ if (!cine) return; const wa = cine.album, c0 = cine; cine = null; PDPIV.on = false; pdDirExit(c0); document.body.classList.remove('cine'); $('#cineCap').style.opacity = 0; cineArm = (!au.paused && Q.length) ? performance.now() : 0; cineRe = true; lastInteract = performance.now();
   if (!wa){ if (mode === 'planet'){ mode = 'system'; curP = null; selT = -1; } focus = null; if (mode === 'system') overview(); } updUI(); }
 function cineCaption(){ const t = TRACKS.get(Q[qi]); const p = SYS.planets.find(x => x.id === qPlanet); const c = $('#cineCap'); if (!t) return;
   c.innerHTML = `<b>${esc(t.title)}</b><span>${esc(t.artist || '')}${p ? ' · ' + esc(p.name) : ''}</span>`; c.style.opacity = 1; clearTimeout(c._t); c._t = setTimeout(() => c.style.opacity = 0, 6000); }
@@ -4145,7 +4145,18 @@ function pdDragPivot(dx, dy){ const p = curP && curP.p; if (!p) return; const an
   const F = pdFrameW(curP.x, curP.y), ax = [F[0][0] * dy + F[1][0] * dx, F[0][1] * dy + F[1][1] * dx, F[0][2] * dy + F[1][2] * dx]; pdPivot(p, ax, an);
   const now = performance.now(), dts = clamp((now - (PIV.t || now - 16)) / 1000, .008, .1), w = Math.min(an / dts, 6); PIV.t = now;
   PIV.w = PIV.p === p ? PIV.w * .45 + w * .55 : w; PIV.p = p; const l = Math.hypot(ax[0], ax[1], ax[2]) || 1; PIV.ax = [ax[0] / l, ax[1] / l, ax[2] / l]; }
-function pdPivotHeld(p){ return false; }   // étape 6 : un plan cinématique peut tenir la pose d'une planète
+function pdPivotHeld(p){ return !!(cine && PDPIV.on && PDPIV.pid === p.id); }   // un plan cinématique tient la pose de sa planète
+/* V9 · plans qui font pivoter la planète comme au doigt : « tournant » (un tour complet sur un axe incliné, pôles compris)
+   et « vinyle » (le pôle vient face à nous, la planète tourne comme un disque au tempo, puis se redresse) */
+const PDPIV = {on: false, pid: null, key: -1, q0: null, ax: null, rt: null, fw: null, t0: 0};
+function pdDirPivot(X, name, u, side, key, f){ const p = X.p; if (name !== 'turn' && name !== 'vinyl'){ PDPIV.on = false; return; }
+  if (PDPIV.key !== key || PDPIV.pid !== p.id){ PDPIV.key = key; PDPIV.pid = p.id; PDPIV.q0 = p._q ? p._q.slice() : [0, 0, 0, 1]; PDPIV.t0 = time; const a = .45 * side;
+    const cp = Math.cos(f.pitch), z = [cp * Math.sin(f.yaw), Math.sin(f.pitch), cp * Math.cos(f.yaw)], x = norm(cross([0, 1, 0], z)), y = cross(z, x);
+    PDPIV.ax = norm([x[0] * Math.cos(a) + y[0] * Math.sin(a), x[1] * Math.cos(a) + y[1] * Math.sin(a), x[2] * Math.cos(a) + y[2] * Math.sin(a)]); PDPIV.rt = x; PDPIV.fw = z; }
+  PDPIV.on = true; let g;
+  if (name === 'turn') g = qAx(PDPIV.ax, TAU * sstep(0, 1, u));
+  else { const k = sstep(0, .22, u) * (1 - sstep(.8, 1, u)), bc = beatClock(), w = bc ? TAU * bc.bpm / 60 / 16 : .7; g = qMul(qAx(PDPIV.fw, (time - PDPIV.t0) * w * side), qAx(PDPIV.rt, Math.PI / 2 * k)); }
+  const q = qMul(PDPIV.q0, [-g[0], -g[1], -g[2], g[3]]), l = Math.hypot(q[0], q[1], q[2], q[3]) || 1; p._q = [q[0] / l, q[1] / l, q[2] / l, q[3] / l]; }
 function pdRelax(p, dt){ const q = p._q, k = 1 - Math.exp(-dt * 1.6), sg = q[3] < 0 ? -1 : 1, r = [q[0] * (1 - k), q[1] * (1 - k), q[2] * (1 - k), q[3] * (1 - k) + sg * k], l = Math.hypot(r[0], r[1], r[2], r[3]) || 1;
   p._q = Math.abs(r[3] / l) > .99999 ? null : [r[0] / l, r[1] / l, r[2] / l, r[3] / l]; if (PIV.p === p) PIV.w = 0; }
 const ptrs = new Map(); let pinch = null, gestureMulti = false, dragging = false, lastInteract = performance.now();
@@ -6602,31 +6613,58 @@ const PDD = {
   horizon: (X, e, s) => ({t: [X.pos[0], X.pos[1] + X.R * .78, X.pos[2]], yaw: X.ly + s * (.55 - .4 * e), pitch: .04 + .03 * e, dist: X.R * (1.35 - .12 * e), fov: 50}),
   ringside: (X, e, s) => ({t: X.pos, yaw: X.ly + s * (.7 - .55 * e), pitch: .03 + .02 * e, dist: pdFit(X.R, 44, 1.65 - .15 * e), fov: 44}),
   vertigo: (X, e, s) => { const f = lerp(56, 28, e); return {t: X.pos, yaw: X.ly + s * .3 * e, pitch: X.zp * .5 + .1, dist: pdFit(X.R, f, 1.05), fov: f}; },
+  // V9 · la foule : tout près de la zone jouée, les réactions popent comme un public qui répond à la musique
+  crowd: (X, e, s) => ({t: X.pos, yaw: X.ly + s * (.12 - .1 * e), pitch: X.zp + .05, dist: pdFit(X.R, 30, .66 - .1 * e), fov: 30}),
+  // V9 · le tournant : caméra posée de trois quarts, la planète roule sur elle-même d'un tour complet, pôles compris (pdDirPivot)
+  turn: (X, e, s) => ({t: X.pos, yaw: X.ly + s * (.3 + .12 * e), pitch: .12 + X.zp * .3, dist: pdFit(X.R, 40, 1.1), fov: 40}),
+  // V9 · le vinyle : la planète présente son pôle et tourne comme un disque, au tempo (pdDirPivot)
+  vinyl: (X, e, s) => ({t: X.pos, yaw: X.ly - s * (.22 - .08 * e), pitch: .08 + X.zp * .25, dist: pdFit(X.R, 38, 1.02 - .08 * e), fov: 38}),
+  // V9 · la spirale : de tout le système jusqu'à la planète, en tournant autour d'elle
+  spiral: (X, e, s) => { const q = Math.pow(e, .9); return {t: mix3([0, 0, 0], X.pos, sstep(0, .75, q)), yaw: X.ly + s * TAU * .75 * (1 - q), pitch: lerp(.72, X.zp + .08, sstep(0, .9, q)), dist: Math.exp(lerp(Math.log(X.sd * .95), Math.log(pdFit(X.R, 38, .86)), q)), fov: lerp(58, 38, q)}; },
   dive: (X, e, s) => { const q = Math.pow(e, .85); return {t: mix3([0, 0, 0], X.pos, sstep(0, .7, q)), yaw: X.ly + s * 1.4 * (1 - q), pitch: lerp(.56, X.zp + .06, sstep(0, .85, q)), dist: Math.exp(lerp(Math.log(X.sd * .92), Math.log(pdFit(X.R, 36, .8)), q)), fov: lerp(55, 36, q)}; },
 };
 function mix3(a, b, k){ return [lerp(a[0], b[0], k), lerp(a[1], b[1], k), lerp(a[2], b[2], k)]; }
+/* V9 · cadrages sans étoile gênante : un plan rapproché tourne autour de la planète, du plus petit angle possible, pour que l'étoile
+   ne la cache jamais et que la caméra ne passe jamais dedans. La foule, le tournant et le vinyle sortent aussi son disque du champ
+   (au plus de n × 3,75°, sinon seule la règle de base s'applique). Le côté choisi est gardé jusqu'à la fin du plan. */
+const PDSUN = {zone: 0, graze: 0, planet: 0, moons: 0, orbit: 0, ringside: 0, vertigo: 0, crowd: 16, turn: 32, vinyl: 32};
+function pdSunGap(X, f, yaw, strict){ const cp = Math.cos(f.pitch), z = [cp * Math.sin(yaw), Math.sin(f.pitch), cp * Math.cos(yaw)];
+  const E = [f.t[0] + f.dist * z[0], f.t[1] + f.dist * z[1], f.t[2] + f.dist * z[2]], es = Math.hypot(E[0], E[1], E[2]) || 1e-6;
+  if (es < X.rs * 1.2) return -1;
+  const ds = [-E[0] / es, -E[1] / es, -E[2] / es], rho = Math.asin(Math.min(1, X.rs / es));
+  if (strict){ const fz = -dot(ds, z); if (fz <= 0) return 1; const x = norm(cross([0, 1, 0], z)), y = cross(z, x), hv = f.fov * Math.PI / 360, hh = Math.atan(Math.tan(hv) * W / H);
+    return Math.max(Math.atan2(Math.abs(dot(ds, x)), fz) - hh, Math.atan2(Math.abs(dot(ds, y)), fz) - hv) - rho - .05; }
+  const P = sub(X.pos, E), ep = Math.hypot(P[0], P[1], P[2]) || 1; if (es >= ep) return 1;
+  return Math.acos(clamp(dot(ds, P) / ep, -1, 1)) - rho - Math.asin(Math.min(1, X.R / ep)) * 1.15; }
+function pdSunSafe(X, f, ns, st){ const tries = ns > 0 ? [[1, ns], [0, 48]] : [[0, 48]];
+  for (const [m, n] of tries) for (let i = 0; i <= n; i++) for (const k of st.sg ? [st.sg, -st.sg] : [1, -1]){
+    const y = f.yaw + k * i * Math.PI / 48; if (pdSunGap(X, f, y, m) >= 0){ if (i) st.sg = k; return y; } if (!i) break; }
+  return f.yaw; }
 // le montage : [plan, durée en mesures, transition vers le plan suivant]
 // V8.3 · montage plus posé : plans de 4 à 6 mesures, surtout des glissés et des fondus
-const PDSEQ = [['zone', 4, 'glide'], ['orbit', 6, 'fade'], ['silhouette', 4, 'glide'], ['pullout', 6, 'glide'], ['system', 4, 'glide'], ['dive', 6, 'cut'],
-  ['horizon', 4, 'fade'], ['sunrise', 4, 'glide'], ['ringside', 4, 'fade'], ['vertigo', 4, 'cut'], ['moons', 4, 'glide'], ['zone', 4, 'whip'],
-  ['graze', 4, 'fade'], ['trio', 4, 'fade'], ['planet', 4, 'glide'], ['plane', 4, 'fade']];
+// V9 · quatre plans de plus : la foule, le tournant, le vinyle, la spirale
+const PDSEQ = [['zone', 4, 'glide'], ['crowd', 4, 'fade'], ['orbit', 6, 'fade'], ['turn', 6, 'glide'], ['silhouette', 4, 'glide'], ['pullout', 6, 'glide'], ['system', 4, 'glide'], ['dive', 6, 'cut'],
+  ['horizon', 4, 'fade'], ['vinyl', 6, 'fade'], ['sunrise', 4, 'glide'], ['ringside', 4, 'fade'], ['vertigo', 4, 'cut'], ['moons', 4, 'glide'], ['zone', 4, 'whip'],
+  ['crowd', 4, 'fade'], ['graze', 4, 'fade'], ['trio', 4, 'fade'], ['planet', 4, 'glide'], ['plane', 4, 'fade'], ['spiral', 6, 'cut']];
 const PDSEQ_T = PDSEQ.reduce((a, x) => a + x[1], 0);
 function pdDirCtx(sys){ const c = cine, i = sys.planets.findIndex(p => p.id === c.pid); if (i < 0) return null; const p = sys.planets[i], pos = planetPos(p, i), R = bodyR(p) * 1.05;
-  let zy = c.zy ?? Math.atan2(pos[0], pos[2]) + .9, zp = .2; const lr = conquest(p).items.find(x => x.live);
-  if (lr && lr.dir){ const w = pdUt(p, rz(-(p.tilt || 0), ry(-(p._ang || 0), lr.dir))); zy = Math.atan2(w[0], w[2]); zp = clamp(Math.asin(clamp(w[1], -1, 1)) * .8, -.35, .9); }
-  c.zy = zy; const pd = Math.hypot(pos[0], pos[2]) || 1, sun = Math.atan2(-pos[0], -pos[2]), dA = ((sun - zy + Math.PI) % TAU + TAU) % TAU - Math.PI;
-  return {p, pos, R, zy, zp, pd, ly: zy + dA * .42, sy: Math.atan2(pos[0], pos[2]), sd: pdSysD(sys)}; }
+  let zy = c.zy ?? Math.atan2(pos[0], pos[2]) + .9, zp = c.zp ?? .2; const lr = conquest(p).items.find(x => x.live);
+  if (lr && lr.dir && !(PDPIV.on && PDPIV.pid === p.id)){ const w = pdUt(p, rz(-(p.tilt || 0), ry(-(p._ang || 0), lr.dir))); zy = Math.atan2(w[0], w[2]); zp = clamp(Math.asin(clamp(w[1], -1, 1)) * .8, -.35, .9); }
+  c.zy = zy; c.zp = zp; const pd = Math.hypot(pos[0], pos[2]) || 1, sun = Math.atan2(-pos[0], -pos[2]), dA = ((sun - zy + Math.PI) % TAU + TAU) % TAU - Math.PI;
+  return {p, pos, R, zy, zp, pd, ly: zy + dA * .42, sy: Math.atan2(pos[0], pos[2]), sd: pdSysD(sys), rs: starR(sys) * (sys.gd ? 2 : 1.25)}; }
 function pdSysD(sys){ const n = Math.max(sys.planets.length, 1), maxR = orbitR(n - 1) + 1.8; return clamp(maxR / (Math.tan(55 * Math.PI / 360) * clamp(W / H, .6, 1.25)) * .95, 12, 500); }
 function pdDirCam(dt, sys){ const c = cine; if (readonly){ const v = pdVisitPid(); if (v && v !== c.pid){ c.pid = v; c.zy = null; } } const X = pdDirCtx(sys); if (!X){ exitCine(); return; }
   const bc = beatClock(), barS = bc ? 240 / bc.bpm : 1.75; const B = bc ? bc.beat / 4 : (time - c.t0) / barS;   // position en mesures
   const st = c.dir; let k = Math.floor(B / PDSEQ_T), r = B - k * PDSEQ_T, j = 0; while (j < PDSEQ.length - 1 && r >= PDSEQ[j][1]){ r -= PDSEQ[j][1]; j++; }
   const sh = PDART.on ? ['planet', 2, 'cut'] : PDSEQ[j], u = PDART.on ? .5 : clamp(r / sh[1], 0, 1), e = u * u * (3 - 2 * u), side = (k % 2) ? -1 : 1, key = k * 100 + j;
-  const f = PDD[sh[0]](X, sh[0] === 'pullout' || sh[0] === 'dive' ? e : u * .35 + e * .65, side);
+  const f = PDD[sh[0]](X, sh[0] === 'pullout' || sh[0] === 'dive' || sh[0] === 'spiral' ? e : u * .35 + e * .65, side);
+  const sn = PDART.on ? undefined : PDSUN[sh[0]]; if (sn !== undefined){ if (st.sk !== key){ st.sk = key; st.sg = 0; } f.yaw = pdSunSafe(X, f, sn, st); }
   if (st.key !== key){ const prev = st.key === undefined ? null : PDSEQ[st.j]; const tr = prev ? prev[2] : 'first'; st.key = key; st.j = j;
     if (tr === 'cut' || tr === 'fade'){ cam.g.t = [...f.t]; cam.g.yaw = wrapA(f.yaw, cam.yaw); cam.g.pitch = f.pitch; cam.g.dist = f.dist; cam.yaw = cam.g.yaw; cam.pitch = cam.g.pitch; cam.dist = cam.g.dist; cam.t = [...f.t]; CV.yaw = CV.pitch = CV.dist = 0; CV.t = [0, 0, 0]; FOV = f.fov * Math.PI / 180 * (tr === 'cut' ? 1.035 : 1);
       if (tr === 'cut'){ POST.flash = Math.max(POST.flash, .12); POST.ca = Math.max(POST.ca, .25); } }
     else if (tr === 'whip'){ st.whip = .42; POST.ca = Math.max(POST.ca, .9); camSpeed = Math.max(camSpeed, 2.4); POST.flash = Math.max(POST.flash, .06); }
-    if (tr === 'fade') st.fin = time + .45; }
+    if (tr === 'fade') st.fin = time + .45; if (sh[0] === 'crowd') pd9Burst(X.p); }
+  pdDirPivot(X, PDART.on ? '' : sh[0], u, side, key, f);
   // fondu au noir avant une transition « fade » (dessiné dans le rendu : il apparaît aussi dans la story)
   const rem = (sh[1] - r) * barS; st.fk = sh[2] === 'fade' ? sstep(.42, 0, rem) : 0; if (st.fin > time) st.fk = Math.max(st.fk, (st.fin - time) / .45);
   if (st.whip > 0) st.whip -= dt; c.whip = st.whip > 0 ? 1 : 0; if (st.whip > 0){ const k = Math.sin(Math.PI * clamp(st.whip / .42, 0, 1)); POST.mb[0] = side * .011 * k; }
@@ -6672,7 +6710,7 @@ function pdShkTick(){ const S = PDSHK; S.u0.fill(0); S.u1.fill(0); if (!POST.on)
 
 /* ================= V7.3 · toujours la dernière version, et l'écran verrouillé de l'album ================= */
 const PD_VER = (document.querySelector('meta[name="pd-version"]') || {}).content || '';
-const PDZOOM = ['zone', 'graze', 'planet', 'moons', 'orbit', 'silhouette', 'horizon', 'ringside', 'vertigo'];
+const PDZOOM = ['zone', 'graze', 'planet', 'moons', 'orbit', 'silhouette', 'horizon', 'ringside', 'vertigo', 'crowd', 'turn', 'vinyl'];
 async function pdCheckUpdate(){ try {
   const r = await fetch(location.pathname + '?pdcheck=' + Date.now(), {cache: 'no-store'}); if (!r.ok) return;
   const m = (await r.text()).slice(0, 8000).match(/name="pd-version" content="([^"]+)"/); if (!m || m[1] === PD_VER) return;
@@ -7042,6 +7080,9 @@ function pd9Pops(B, n){ const G = PD9.g; if (!G) return n; const keep = [];
     const el = u * P.dur; if (el < .9 && n < PD9_MAXI){ const q = el / .9, rs = (10 + 26 * q) * RS * kS; n = pd9Put(B, n, PD9_Q[0], PD9_Q[1], rs * 2, rs * 2 * Math.max(.35, f), 0, 0, 0, 0, (1 - q) * .9 * vis, 2, 0, 0); }
     if (n < PD9_MAXI) n = pd9Put(B, n, PD9_Q[0] + Math.sin(time * 1.3 + P.seed * 7) * 3 * RS * kS, PD9_Q[1] - rise - h0 * .62 * ease, w0 * ease * beat, h0 * ease * beat, R.u0, R.v0, R.u1, R.v1, fade * vis, 0, sway, 0); }
   PD9.pops = keep; return n; }
+/* V9 · plan « foule » : les réactions reçues par la planète popent ensemble, celles de la zone jouée d'abord (seulement de vraies réactions) */
+function pd9Burst(p){ try { if (!p) return; const L = pd9List().filter(e => e.p === p.id); if (!L.length) return; const lv = conquest(p).items.find(x => x.live), lk = lv ? pd9ZKey(lv) : null;
+  L.filter(e => e.z === lk).concat(L.filter(e => e.z !== lk)).slice(0, 6).forEach((e, i) => pd9Pop({p: e.p, z: e.z, r: e.r, delay: .3 + i * .45, dur: 3.6})); } catch(e){} }
 function pd9Draw(){ try {
   if (!VIEW || PD9.bad || mode === 'splash' || mode === 'galaxy' || OUTRO || INTRO.on || PDART.on || document.hidden || (cine && cine.album) || (gl.isContextLost && gl.isContextLost())) return;
   const ga = cine && cine.dir ? clamp(1 - (cine.dir.fk || 0), 0, 1) : 1; if (ga < .02) return;
