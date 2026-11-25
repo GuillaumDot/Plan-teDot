@@ -4,7 +4,7 @@ import { PlanetPBR } from "./webgl-pbr.mjs";
 import { createPlanetPBRBinding } from "./planet-pbr-shader.mjs";
 
 export class PlanetMaterialController {
-  constructor(gl, {manifestURL, units, reservedUnits=[], budgetBytes=16*1024*1024,
+  constructor(gl, {manifestURL, units=[4,5], reservedUnits=[], budgetBytes=16*1024*1024,
     onInvalidate=()=>{}, onError=()=>{}}) {
     this.gl=gl;
     this.options={manifestURL,units,reservedUnits,budgetBytes};
