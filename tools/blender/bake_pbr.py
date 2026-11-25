@@ -70,11 +70,16 @@ def main():
     for name in ("basalt", "ocean", "ice", "desert", "gas"):
         blend = source / (name + ".blend")
         if not blend.is_file():
-            continue
+            raise RuntimeError(f"Missing generated planet: {blend}")
         bpy.ops.wm.open_mainfile(filepath=str(blend))
         scene = bpy.context.scene
         scene.render.engine = 'CYCLES'
         scene.cycles.samples = 16
+        # Baking must also work on CPU-only builds without OIDN.
+        scene.cycles.device = 'CPU'
+        scene.cycles.use_denoising = False
+        for layer in scene.view_layers:
+            layer.cycles.use_denoising = False
         candidates = [o for o in scene.objects if o.type == 'MESH' and o.data.uv_layers and len(o.data.materials)==1]
         if len(candidates) != 1:
             raise RuntimeError(f"{name}: expected exactly one UV mesh with one material")
