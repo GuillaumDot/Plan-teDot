@@ -4039,16 +4039,21 @@ function renderTuto(){ const s0 = TUTO_ACT[tutoI]; if (!s0){ endTuto(); return; 
   el.classList.remove('off'); el.classList.remove('swap'); void el.offsetWidth; el.classList.add('swap'); if (actx && SND.bus){ const t = actx.currentTime; tone(523.3 * Math.pow(2, tutoI * 2 / 12), t, .4, .016); tone(784 * Math.pow(2, tutoI * 2 / 12), t + .06, .5, .01); }
   const cm = s0.cam; if (cm === 'star'){ focus = null; pz = 1; cam.g = {t: [0, 0, 0], yaw: cam.g.yaw, pitch: .28, dist: starR(SYS) * 9}; } else if (cm === 'planet' && SYS.planets[0]){ focusOn(SYS.planets[0].id, .22); pz = .75; } else if (cm === 'wide'){ pz = 1; overview(); } else if (cm === 'logo'){ focus = null; }
   $('#tuNext').onclick = () => { tutoI++; if (tutoI >= TUTO_ACT.length) endTuto(); else renderTuto(); }; $('#tuSkip').onclick = endTuto; const ta = $('#tuAct'); if (ta) ta.onclick = () => { s0.act[1](); sfx('confirm'); }; }
+/* V9 · fluidité : pendant le guide, le voile plein écran n'est repeint que si le point visé bouge d'un pixel, la bulle est mesurée
+   par un observateur de taille au lieu d'une mesure forcée à chaque image, et rien n'est réécrit quand rien ne change */
+const TUTV = {w: -1, h: -1}; try { new ResizeObserver(() => { const e = $('#tuto'); TUTV.w = e.offsetWidth; TUTV.h = e.offsetHeight; }).observe($('#tuto')); } catch(e){}
+function tuSet(e, k, v){ if (e['_t' + k] === v) return; e['_t' + k] = v; if (k[0] === '-') e.style.setProperty(k, v); else e.style[k] = v; }
 function tutoTick(){ if (tutoI < 0) return; const el = $('#tuto'), rg = $('#tring'), dm = $('#tdim'); const s1 = TUTO_ACT[tutoI];
   if (s1.wait && !s1._ok && s1.wait()){ s1._ok = true; el.classList.add('off'); rg.classList.add('off'); dm.classList.add('off'); toast('Parfait ✓', 1800); if (actx && SND.bus){ const t = actx.currentTime; tone(784, t, .3, .014); tone(1175, t + .09, .5, .012); }
     const i = tutoI; setTimeout(() => { if (tutoI !== i) return; if (sheetOpen && TUTO_ACT === TUTO) closeSheet(true); if (MENU.open) closeMenu(); tutoI++; if (tutoI >= TUTO_ACT.length) endTuto(); else renderTuto(); }, TUTO_ACT === TUTO ? 3200 : 1400); }
   if (s1._ok) return;
   if (TUTO_ACT[tutoI].cam === 'logo' && VIEW === SYS && LOGO_W){ cam.g.t = [...LOGO_W]; cam.g.dist = 11; cam.g.pitch = .3; }
-  const pt = TUTO_ACT[tutoI].at(); dm.classList.remove('off'); if (pt){ dm.style.setProperty('--x', pt.x / RS + 'px'); dm.style.setProperty('--y', pt.y / RS + 'px'); dm.classList.remove('full'); } else dm.classList.add('full'); const bw = el.offsetWidth, bh = el.offsetHeight, vw = innerWidth, vh = innerHeight;
-  if (!pt){ rg.classList.add('off'); el.style.transform = `translate(${(vw - bw) / 2}px,${vh * .42 - bh / 2}px)`; el.dataset.arrow = ''; return; }
-  const x = pt.x / RS, y = pt.y / RS; rg.classList.remove('off'); rg.style.transform = `translate(${x - 28}px,${y - 28}px)`;
-  const below = y < vh * .5, by = below ? y + 42 : y - 42 - bh, bx = clamp(x - bw / 2, 12, vw - bw - 12);
-  el.style.transform = `translate(${bx}px,${by}px)`; el.dataset.arrow = below ? 'up' : 'down'; el.style.setProperty('--ax', (x - bx) + 'px'); }
+  const pt = TUTO_ACT[tutoI].at(); dm.classList.remove('off'); if (pt){ tuSet(dm, '--x', Math.round(pt.x / RS) + 'px'); tuSet(dm, '--y', Math.round(pt.y / RS) + 'px'); dm.classList.remove('full'); } else dm.classList.add('full');
+  const bw = TUTV.w >= 0 ? TUTV.w : el.offsetWidth, bh = TUTV.h >= 0 ? TUTV.h : el.offsetHeight, vw = innerWidth, vh = innerHeight;
+  if (!pt){ rg.classList.add('off'); tuSet(el, 'transform', `translate(${Math.round((vw - bw) / 2)}px,${Math.round(vh * .42 - bh / 2)}px)`); if (el.dataset.arrow !== '') el.dataset.arrow = ''; return; }
+  const xf = pt.x / RS, yf = pt.y / RS, x = Math.round(xf), y = Math.round(yf); rg.classList.remove('off'); tuSet(rg, 'transform', `translate(${x - 28}px,${y - 28}px)`);
+  const below = yf < vh * .5, by = below ? y + 42 : y - 42 - bh, bx = Math.round(clamp(xf - bw / 2, 12, vw - bw - 12)), ar = below ? 'up' : 'down';   // le côté de la bulle se décide sur la position exacte, comme avant
+  tuSet(el, 'transform', `translate(${bx}px,${by}px)`); if (el.dataset.arrow !== ar) el.dataset.arrow = ar; tuSet(el, '--ax', (x - bx) + 'px'); }
 function openSearch(){
   openSheet('search', `<div class="sh" style="margin:0 0 8px"><h2 style="font-size:19px;margin:0">Rechercher</h2><button class="x" data-close aria-label="Fermer">${ICON.x}</button></div>
     <label class="field srch"><input type="search" id="qIn" placeholder="Pseudo ou nom de système" autocomplete="off"></label><ul class="list" id="qList"></ul>`, () => {
