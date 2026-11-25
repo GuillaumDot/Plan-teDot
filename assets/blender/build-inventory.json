@@ -1,0 +1,128 @@
+{
+  "blender": "Blender 4.0.2",
+  "files": {
+    "previews/basalt-preview.png": {
+      "bytes": 282338,
+      "sha256": "f7098db82c50a3494f6a22addf56011136913bf40c74f54d05a608b82677ced7",
+      "width": 512,
+      "height": 512
+    },
+    "previews/ocean-preview.png": {
+      "bytes": 272561,
+      "sha256": "d70a3f4da128d9305542ea57ddb407d606daeabd10b5eb7cd98ca521a0f4c09e",
+      "width": 512,
+      "height": 512
+    },
+    "previews/ice-preview.png": {
+      "bytes": 280261,
+      "sha256": "db24e6e7652743b388fcc8dd0e504b2f37b8408b9fd30181a548bd33b03c25f4",
+      "width": 512,
+      "height": 512
+    },
+    "previews/desert-preview.png": {
+      "bytes": 275637,
+      "sha256": "210644dfa6a8018fe4a5b178c1d97f74cf1ff5c4512e356d5d2362bf51c389d1",
+      "width": 512,
+      "height": 512
+    },
+    "previews/gas-preview.png": {
+      "bytes": 253318,
+      "sha256": "06fc0b3c7d596c54ca4fa3796c5e0cfc73462b1a4b7e4783e7fb1f27e85c6091",
+      "width": 512,
+      "height": 512
+    },
+    "pbr-512/basalt-albedo.png": {
+      "bytes": 167482,
+      "sha256": "be3fc256024c0e85b0de43c0a2ab4761d57ec2afd416099d218f8ef6a54aafb1",
+      "width": 512,
+      "height": 256
+    },
+    "pbr-512/basalt-normal.png": {
+      "bytes": 265449,
+      "sha256": "4a29ab30ba40fdeb5db887717546e75d0876e33894dddf7d51d97437c2156765",
+      "width": 512,
+      "height": 256
+    },
+    "pbr-512/basalt-roughness.png": {
+      "bytes": 2356,
+      "sha256": "4db094d5189dda9060785fc48f1140793497d56289f63b788426d4fefeda4ef8",
+      "width": 512,
+      "height": 256
+    },
+    "pbr-512/ocean-albedo.png": {
+      "bytes": 187580,
+      "sha256": "b1fb5cf3a2fbff658cacf5981a9980d38b4e66e5d88730b9b30d70d04884c332",
+      "width": 512,
+      "height": 256
+    },
+    "pbr-512/ocean-normal.png": {
+      "bytes": 172694,
+      "sha256": "364a263d628f2183ee8cb0b7bd7ba8135ac186a5d7d2fc367a0cc111a7cec5ad",
+      "width": 512,
+      "height": 256
+    },
+    "pbr-512/ocean-roughness.png": {
+      "bytes": 2356,
+      "sha256": "e3c786640166c4d8196a93264286617694d3e0e557752c35595ea47cfc4305bf",
+      "width": 512,
+      "height": 256
+    },
+    "pbr-512/ice-albedo.png": {
+      "bytes": 195026,
+      "sha256": "33367d049ed1a12faf4300b99bd0c9a972881ab29d54398338a047ad21a7914c",
+      "width": 512,
+      "height": 256
+    },
+    "pbr-512/ice-normal.png": {
+      "bytes": 247883,
+      "sha256": "dd4ba02c03e05f0875ab9f806bb671c11d00c696828bb230dcbcd9e7a8b4d905",
+      "width": 512,
+      "height": 256
+    },
+    "pbr-512/ice-roughness.png": {
+      "bytes": 2354,
+      "sha256": "5c16883a58f8c2b2c643c99b32f363798c04931fd9fb43ecac9786479b20349c",
+      "width": 512,
+      "height": 256
+    },
+    "pbr-512/desert-albedo.png": {
+      "bytes": 174107,
+      "sha256": "9c320c5910fe4fe10e07f971fc6a7646a89f96ea1ac811ab91313c5d61a29892",
+      "width": 512,
+      "height": 256
+    },
+    "pbr-512/desert-normal.png": {
+      "bytes": 237833,
+      "sha256": "a50371d7940f2389d507ad0490e68175bf40185d1334ae5092685c37d95e0b02",
+      "width": 512,
+      "height": 256
+    },
+    "pbr-512/desert-roughness.png": {
+      "bytes": 2356,
+      "sha256": "73d8b0a9de38b001be93ccff8da833568d71c6084c06d6767691ab78a614d822",
+      "width": 512,
+      "height": 256
+    },
+    "pbr-512/gas-albedo.png": {
+      "bytes": 153752,
+      "sha256": "365c1673bb74954f695bf2165ce73091004b4baf3f331cddeb947d7328f1edad",
+      "width": 512,
+      "height": 256
+    },
+    "pbr-512/gas-normal.png": {
+      "bytes": 118977,
+      "sha256": "813d9010e7f775bc064537032cb8215ecd2f315f433a61ca9760c36224b29f66",
+      "width": 512,
+      "height": 256
+    },
+    "pbr-512/gas-roughness.png": {
+      "bytes": 2356,
+      "sha256": "fc8381016a7598be153895f461e0a102439e630413f6a480390bc2198033041e",
+      "width": 512,
+      "height": 256
+    }
+  },
+  "packs": {
+    "512": "pbr-512/manifest.json"
+  }
+}
