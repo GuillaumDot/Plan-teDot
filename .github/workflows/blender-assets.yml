@@ -33,3 +33,56 @@ jobs:
           path: ${{ runner.temp }}/planet-assets/
           retention-days: 7
           if-no-files-found: error
+
+  publish-preview:
+    needs: bake
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev/blender-pipeline' && github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: planet-assets-512
+          path: ${{ runner.temp }}/planet-publish
+      - name: Publish generated browser assets on development branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin refs/heads/dev/blender-pipeline
+          if [[ "$(git rev-parse FETCH_HEAD)" != "$GITHUB_SHA" ]]; then
+            echo "Branch advanced; newer build must publish."
+            exit 0
+          fi
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, shutil
+          source = pathlib.Path(os.environ["RUNNER_TEMP"]) / "planet-publish"
+          inventory = json.loads((source / "build-inventory.json").read_text())
+          expected = {f"previews/{p}-preview.png" for p in ("basalt","ocean","ice","desert","gas")}
+          expected |= {f"pbr-512/{p}-{k}.png" for p in ("basalt","ocean","ice","desert","gas") for k in ("albedo","normal","roughness")}
+          if set(inventory["files"]) != expected:
+              raise ValueError("Unexpected asset inventory")
+          for name in sorted(expected):
+              data = (source / name).read_bytes()
+              meta = inventory["files"][name]
+              if len(data) != meta["bytes"] or hashlib.sha256(data).hexdigest() != meta["sha256"]:
+                  raise ValueError("Asset integrity failure: " + name)
+          manifest = json.loads((source / "pbr-512/manifest.json").read_text())
+          if manifest["width"] != 512 or manifest["height"] != 256:
+              raise ValueError("Unexpected manifest dimensions")
+          target = pathlib.Path("assets/blender")
+          for name in sorted(expected | {"build-inventory.json", "pbr-512/manifest.json"}):
+              dst = target / name
+              dst.parent.mkdir(parents=True, exist_ok=True)
+              shutil.copyfile(source / name, dst)
+          PY
+          git add -- assets/blender/
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Publish generated Blender mobile preview assets"
+          git push origin HEAD:refs/heads/dev/blender-pipeline
