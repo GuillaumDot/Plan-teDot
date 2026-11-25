@@ -8,7 +8,12 @@ out.mkdir(exist_ok=True)
 bpy.ops.wm.read_factory_settings(use_empty=True)
 scene = bpy.context.scene
 scene.render.engine = 'CYCLES'
-scene.cycles.samples = 24
+scene.cycles.samples = 64
+# Runner builds may omit OpenImageDenoiser.
+scene.cycles.device = 'CPU'
+scene.cycles.use_denoising = False
+for layer in scene.view_layers:
+    layer.cycles.use_denoising = False
 scene.render.resolution_x = 512
 scene.render.resolution_y = 512
 scene.render.resolution_percentage = 100
