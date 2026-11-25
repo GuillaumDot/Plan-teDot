@@ -193,11 +193,11 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border:0;border-radiu
 #radio b{font-weight:600}
 #radio span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #radio .bars{display:flex;gap:2px;align-items:flex-end;height:16px;flex:none}
-#radio .bars i{width:3px;border-radius:1px;background:var(--blue);animation:bar 1s ease-in-out infinite}
+#radio .bars i{width:3px;border-radius:1px;background:var(--blue);animation:bar 1s ease-in-out infinite both;height:16px!important;transform-origin:50% 100%}
 #radio .bars i:nth-child(2){animation-delay:.2s}#radio .bars i:nth-child(3){animation-delay:.4s}#radio .bars i:nth-child(4){animation-delay:.6s}
 #radio.on{border-color:rgba(58,168,255,.6)}
 #radio:not(.on) .bars i{animation-play-state:paused;opacity:.5}
-@keyframes bar{0%,100%{height:4px}50%{height:16px}}
+@keyframes bar{0%,100%{transform:scaleY(.25)}50%{transform:scaleY(1)}}
 .ghost .m b{color:var(--faint)}
 .btn:active{transform:scale(.97)}
 .btn.blue{background:#0a84ff;color:#fff}
@@ -256,7 +256,7 @@ body.cine #cineCatch{display:block}
 .icb.on{color:#4aa3ff}
 .pact .sp{flex:1}
 .tr .eq{width:20px;display:flex;gap:2px;align-items:flex-end;height:14px;flex:none;justify-content:flex-end}
-.tr .eq i{width:3px;background:#4aa3ff;border-radius:1px;animation:bar 1s ease-in-out infinite}
+.tr .eq i{width:3px;background:#4aa3ff;border-radius:1px;animation:bar 1s ease-in-out infinite both;height:16px!important;transform-origin:50% 100%}
 .tr .eq i:nth-child(2){animation-delay:.25s}.tr .eq i:nth-child(3){animation-delay:.5s}
 details.specd{margin:14px 0 6px}
 details.specd summary{list-style:none;cursor:pointer;font-size:15px;font-weight:600;color:var(--mute);height:40px;display:flex;align-items:center;gap:6px}
@@ -741,6 +741,7 @@ const GB = {n: 0, busy: false, on: false};
   ['uniform1fv', 'uniform2fv', 'uniform3fv', 'uniform4fv', 'uniform1iv'].forEach(n => { const f = G[n].bind(G); G[n] = (l, a) => { if (!l || same(l._pv, a)) return; keep(l, a); f(l, a); }; });
   ['uniformMatrix3fv', 'uniformMatrix4fv'].forEach(n => { const f = G[n].bind(G); G[n] = (l, t, a) => { if (!l || same(l._pv, a)) return; keep(l, a); f(l, t, a); }; });
   ['useProgram', 'bindVertexArray', 'bindBuffer', 'drawArraysInstanced'].forEach(n => { GLR[n] = G[n].bind(G); });
+  { const f = G.activeTexture.bind(G); GLR.at = G.TEXTURE0; G.activeTexture = u => { if (u === GLR.at) return; GLR.at = u; f(u); }; }   // V9 · fluidité : l'unité active est connue sans la demander à la carte (une question bloque Safari)
   G.useProgram = p => { GLR.prog = p; GLR.useProgram(p); };
   G.bindVertexArray = v => { GLR.vao = v; GLR.bindVertexArray(v); };
   G.bindBuffer = (t, b) => { if (t === G.ARRAY_BUFFER) GLR.ab = b; GLR.bindBuffer(t, b); };
@@ -1134,14 +1135,31 @@ function resize(){
 // dynamic resolution
 let perfAcc = 0, perfN = 0, perfT = 0;
 let slowN = 0, fastN = 0, PERF_UP = 0, postBackN = 0;
-function perf(dt){ pdTxTick(); perfAcc += dt; perfN++; perfT += dt; if (perfT < 1.2) return; const avg = perfAcc / perfN; perfAcc = perfN = perfT = 0; pdGov(avg); const tgt = 1 / pdCap(); if (pdHold() && avg < tgt * (STORY ? 1.3 : 1.8)) return;
-  const nowP = performance.now();
-  if (avg > tgt * 1.22 && scale > SMIN){ scale = Math.max(SMIN, scale * (avg > tgt * 1.8 ? .82 : .92)); resize(); PERF_UP = nowP + 4000; }
+/* V9 · fluidité : le régulateur ne savait que descendre. Un écran à 60 Hz ne donne jamais d'image plus rapide que 16,7 ms : l'ancienne remontée
+   (moyenne < 14 ms) ne pouvait pas se produire, et un passage lourd laissait la netteté, les effets ou les 30 images/s pour toute la visite.
+   - une fenêtre de 1,2 s sans image manquée dit que l'appareil suit : après 4 fenêtres, la netteté remonte d'un cran, jamais au-delà de celle du départ ;
+     si ce cran fait manquer des images, on redescend et on n'y retourne pas avant 1 min (puis 2, 4, 8) ;
+   - des images manquées en continu (plus de 15 % pendant 2,4 s) font aussi descendre d'un cran : l'à-coup régulier se voit plus qu'un cran de netteté ;
+   - les effets reviennent après 7 s sans accroc (puis 14, 29, 58 s s'ils repartent) ;
+   - à 30 images/s, le retour aux 60 est retenté juste après un changement de scène ; s'il ne tient pas, retour immédiat aux 30 (essais espacés de 30 s, 1, 2, 4, 8 min). */
+const PRV = {s0: scale, miss: 0, jank: 0, ok: 0, ceil: 1, ceilT: 0, back: 60000, upAt: -1e9, upFrom: 0, fT: 0, fBack: 30000, fTry: null, v: null, m: '', c: false, scT: 0, postN: 6};
+function perf(dt){ pdTxTick(); perfAcc += dt; perfN++; perfT += dt; if (dt > 1.45 / pdCap()) PRV.miss++; if (perfT < 1.2) return; const avg = perfAcc / perfN, mr = PRV.miss / perfN; perfAcc = perfN = perfT = 0; PRV.miss = 0; pdGov(avg); const tgt = 1 / pdCap(), smooth = mr < .02 && avg < tgt * 1.06;
+  const nowP = performance.now(); if (VIEW !== PRV.v || mode !== PRV.m || !!cine !== PRV.c){ PRV.v = VIEW; PRV.m = mode; PRV.c = !!cine; PRV.scT = nowP; }
+  PRV.jank = mr > .15 ? PRV.jank + 1 : 0;
+  if (pdHold() && avg < tgt * (STORY ? 1.3 : 1.8)) return;
+  if (PRV.fTry){ if (avg > tgt * 1.22 || PRV.jank >= 2){ FCAP = 30; scale = PRV.fTry.s; resize(); PRV.fT = nowP + PRV.fBack; PRV.fBack = Math.min(PRV.fBack * 2, 480000); PRV.fTry = null; slowN = fastN = PRV.ok = PRV.jank = 0; PERF_UP = nowP + 4000; return; }
+    if (nowP - PRV.fTry.at > 4000){ PRV.fTry = null; PRV.fBack = 30000; } }
+  const top = Math.min(PRV.s0, nowP < PRV.ceilT ? PRV.ceil : 1);
+  if ((avg > tgt * 1.22 || PRV.jank >= 2) && scale > SMIN){ if (nowP - PRV.upAt < 6000 && PRV.upFrom < scale){ PRV.ceil = PRV.upFrom; PRV.ceilT = nowP + PRV.back; PRV.back = Math.min(PRV.back * 2, 480000); }
+    scale = Math.max(SMIN, scale * (avg > tgt * 1.8 ? .82 : .92)); resize(); PERF_UP = nowP + 4000; PRV.ok = PRV.jank = 0; }
   else if (avg < tgt * .84 && scale < 1 && nowP > PERF_UP){ scale = Math.min(1, scale * 1.06); resize(); PERF_UP = nowP + 2400; }
-  if (FCAP === 60){ slowN = avg > .024 && scale <= SMIN + .01 ? slowN + 1 : 0; if (slowN >= 3){ slowN = 0; if (POST.ms){ POST.msaa = false; POST.resize(); } else { FCAP = 30; scale = Math.min(1, scale * 1.3); resize(); } } }
-  else { fastN = avg < .02 ? fastN + 1 : 0; if (fastN >= 8){ FCAP = 60; fastN = 0; } }
-  if (avg > .03 && scale <= .46 && POST.on){ POST.on = false; POST.allow = false; postBackN = 0; }
-  else if (POST.allow === false && TIER > 0){ postBackN = avg < tgt * .75 ? postBackN + 1 : 0; if (postBackN >= 6){ postBackN = 0; POST.allow = true; POST.resize(); } }
+  else if (smooth && scale < top - .005 && nowP > PERF_UP){ if (++PRV.ok >= 4){ PRV.ok = 0; PRV.upFrom = scale; PRV.upAt = nowP; scale = Math.min(top, scale * 1.06); resize(); PERF_UP = nowP + 2400; } }
+  else if (!smooth) PRV.ok = 0;
+  if (FCAP === 60){ slowN = avg > .024 && scale <= SMIN + .01 ? slowN + 1 : 0; if (slowN >= 3){ slowN = 0; if (POST.ms){ POST.msaa = false; POST.resize(); } else { FCAP = 30; scale = Math.min(1, scale * 1.3); resize(); PRV.fT = Math.max(PRV.fT, nowP + 20000); } } }
+  else { fastN = avg < .02 ? fastN + 1 : 0; if (fastN >= 8){ FCAP = 60; fastN = 0; }
+    else if (!PRV.fTry && smooth && nowP > PRV.fT && nowP - PRV.scT > 1000 && nowP - PRV.scT < 6000){ PRV.fTry = {at: nowP, s: scale}; FCAP = 60; scale = Math.max(SMIN, scale / 1.3); resize(); slowN = PRV.ok = 0; PERF_UP = nowP + 2400; return; } }
+  if (avg > Math.max(.03, tgt * 1.2) && scale <= .46 && POST.on){ POST.on = false; POST.allow = false; postBackN = 0; }   // à 30 images/s, 33 ms par image n'est pas un retard
+  else if (POST.allow === false && TIER > 0){ postBackN = (avg < tgt * .75 || smooth) ? postBackN + 1 : 0; if (postBackN >= PRV.postN){ postBackN = 0; PRV.postN = Math.min(PRV.postN * 2, 48); POST.allow = true; POST.resize(); } }
   QUAL = clamp((scale - .4) / .5, .35, 1) * (TIER === 0 ? .6 : 1); }
 
 const NOISE = `
@@ -2808,8 +2826,8 @@ if (SP.u.uTx){ gl.useProgram(SP.p); gl.uniform1i(SP.u.uTx, 8); gl.uniform1i(SP.u
 pdTxInit();
 
 // V9 Blender: optional detail maps; Figma color and audio untouched.
-const PD9PBR={maps:new Map(),neutral:null,active:false,epoch:0};
-cv.addEventListener('webglcontextlost',()=>{PD9PBR.epoch++;PD9PBR.active=false;PD9PBR.maps.clear();PD9PBR.neutral=null;});
+const PD9PBR={maps:new Map(),neutral:null,active:false,epoch:0,cur:null};
+cv.addEventListener('webglcontextlost',()=>{PD9PBR.epoch++;PD9PBR.active=false;PD9PBR.maps.clear();PD9PBR.neutral=null;PD9PBR.cur=null;});
 function pd9PbrInit(){
   if(!SP.u.uPDNormal || !SP.u.uPDMaterial) return;
   const G=gl;
@@ -2868,13 +2886,14 @@ function pd9PbrInit(){
     }
   })().catch(()=>{ /* neutral material remains available */ });
 }
+// V9 · fluidité : plus aucune question bloquante à la carte graphique (getParameter, une centaine par image sur Safari), table fixe,
+// et l'unité 4 n'est rebranchée que lorsque la carte de relief change d'un astre à l'autre
+const PD9PBR_E={0:['desert',.86],1:['ocean',.32],2:['gas',.68],3:['ice',.48],4:['basalt',.82],10:['basalt',.82],11:['ocean',.32]};
 function pd9PbrDraw(o){
-  if(!PD9PBR.active||gl.isContextLost())return;
-  const type=o.type||0;
-  const entry=({0:['desert',.86],1:['ocean',.32],2:['gas',.68],3:['ice',.48],4:['basalt',.82],10:['basalt',.82],11:['ocean',.32]})[type];
-  const t=o.kind===0&&entry?PD9PBR.maps.get(entry[0]):null;
-  const old=gl.getParameter(gl.ACTIVE_TEXTURE);
-  gl.activeTexture(gl.TEXTURE0+4);gl.bindTexture(gl.TEXTURE_2D,t||PD9PBR.neutral);gl.activeTexture(old);
+  if(!PD9PBR.active)return;
+  const entry=PD9PBR_E[o.type||0];
+  const t=o.kind===0&&entry?PD9PBR.maps.get(entry[0]):null, tx=t||PD9PBR.neutral;
+  if(PD9PBR.cur!==tx){PD9PBR.cur=tx;const old=GLR.at;gl.activeTexture(gl.TEXTURE0+4);gl.bindTexture(gl.TEXTURE_2D,tx);gl.activeTexture(old);}
   gl.uniform2f(SP.u.uPDMaterial,t?.35:0,entry?entry[1]:.5);
 }
 pd9PbrInit();
@@ -3149,6 +3168,7 @@ const POST = {on: false, s: null, b: [], bloom: .85, ca: 0, flash: 0, ms: null, 
   begin(){ gl.disable(gl.DEPTH_TEST); gl.disable(gl.CULL_FACE); gl.frontFace(gl.CCW); for (let i = 0; i < 4; i++){ gl.activeTexture(gl.TEXTURE0 + i); gl.bindTexture(gl.TEXTURE_2D, null); } gl.bindFramebuffer(gl.FRAMEBUFFER, this.target()); gl.viewport(0, 0, W, H); },
   pass(prog, out, setup){ gl.bindFramebuffer(gl.FRAMEBUFFER, out ? out.f : null); gl.viewport(0, 0, out ? out.w : W, out ? out.h : H); gl.useProgram(prog.p); setup(prog.u); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); },
   end(){ if (!this.on) return; gl.disable(gl.BLEND); gl.bindVertexArray(quad); const [a4, b4, a8, b8] = this.b, sc = this.s;
+    if (gl.invalidateFramebuffer){ gl.bindFramebuffer(gl.FRAMEBUFFER, this.target()); gl.invalidateFramebuffer(gl.FRAMEBUFFER, [gl.DEPTH_ATTACHMENT]); }   // V9 · fluidité : la profondeur ne sert plus, elle n'est pas recopiée
     if (this.ms){ gl.bindFramebuffer(gl.READ_FRAMEBUFFER, this.ms.f); gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, sc.f); gl.blitFramebuffer(0, 0, W, H, 0, 0, W, H, gl.COLOR_BUFFER_BIT, gl.NEAREST);
       if (gl.invalidateFramebuffer) gl.invalidateFramebuffer(gl.READ_FRAMEBUFFER, [gl.COLOR_ATTACHMENT0, gl.DEPTH_ATTACHMENT]); }
     const tx = (u, name, o, unit) => { gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, o.t); gl.uniform1i(u[name], unit); };
@@ -3305,13 +3325,13 @@ function focusOn(id, pitch = .16){ if (focus !== id){ pz = 1; FOV = FOV0 * 1.07;
 
 /* ================= GL draw helpers ================= */
 function drawSky(R, U, F, neb, theme){
-  gl.bindFramebuffer(gl.FRAMEBUFFER, skyFbo.fb); gl.viewport(0, 0, skyFbo.w, skyFbo.h); gl.disable(gl.BLEND);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, skyFbo.fb); gl.viewport(0, 0, skyFbo.w, skyFbo.h); gl.disable(gl.BLEND); gl.clear(gl.COLOR_BUFFER_BIT);
   gl.useProgram(SKY.p); gl.bindVertexArray(quad);
   gl.uniform3fv(SKY.u.uR, R); gl.uniform3fv(SKY.u.uU, U); gl.uniform3fv(SKY.u.uF, F); gl.uniform1f(SKY.u.uTan, Math.tan(FOV / 2)); gl.uniform1f(SKY.u.uAsp, W / H);
   gl.uniform1f(SKY.u.uT, time); gl.uniform1f(SKY.u.uNeb, neb); gl.uniform1f(SKY.u.uTxOn, PDTX.on);
   const th = THEMES[theme || 0] || THEMES[0]; gl.uniform3fv(SKY.u.uN1, th.n[0]); gl.uniform3fv(SKY.u.uN2, th.n[1]); gl.uniform3fv(SKY.u.uN3, th.n[2]);
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-  gl.bindFramebuffer(gl.FRAMEBUFFER, POST.target()); gl.viewport(0, 0, W, H);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, POST.target()); gl.viewport(0, 0, W, H); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);   // V9 · fluidité : le fond recouvre tout, l'image précédente n'a pas à être relue
 }
 function drawBG(camx, camy, warp, lights, ring, exp = 1.3){
   gl.useProgram(BG.p); gl.bindVertexArray(quad); gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, skyFbo.tex); gl.uniform1i(BG.u.uSky, 1);
@@ -3336,9 +3356,9 @@ const PDB_VQ = new Float32Array(9), PDBR = {k: 1, tx: 0};   // V9 : force des so
 function pdVWq(q, V){ for (let c = 0; c < 9; c += 3){ const r = qRot(q, [V[c], V[c + 1], V[c + 2]]); PDB_VQ[c] = r[0]; PDB_VQ[c + 1] = r[1]; PDB_VQ[c + 2] = r[2]; } return PDB_VQ; }
 function drawBody(o){
   const u = SP.u;
-  pd9PbrDraw(o);
   if (o.kind === 2){ if (!(o.alpha > .004) || !(o.r > .3)) return; if (GB.on){ glowAdd(o); return; } gl.uniform1i(u.uKind, 2); gl.uniform2f(u.uC, o.x, o.y); gl.uniform1f(u.uR, o.r); gl.uniform1f(u.uQ, o.q); gl.uniform1f(u.uAsp, 1); gl.uniform1f(u.uIrr, 0);
     gl.uniform3fv(u.uC1, o.c1); gl.uniform1f(u.uAtmo, o.atmo ?? 1); gl.uniform1f(u.uAlpha, o.alpha ?? 1); gl.uniform1f(u.uHi, o.hi || 0); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); return; }
+  pd9PbrDraw(o);   // V9 · fluidité : pas pour les lueurs (elles ne lisent pas la matière)
   const fr = (o.kind === 0 || o.kind === 1) && !o.vw && o.x === o.x && o.y === o.y ? pdFrame(o.x, o.y) : null;   // V8.4
   gl.uniform1i(u.uKind, o.kind); gl.uniform1i(u.uType, o.type || 0);
   gl.uniform2f(u.uC, o.x, o.y); gl.uniform1f(u.uR, o.r); gl.uniform1f(u.uQ, o.q); gl.uniform1f(u.uAsp, o.asp || 1);
@@ -3353,6 +3373,7 @@ function drawBody(o){
   const vwU = o.uq ? pdVWq(o.uq, fr ? PDB_VW : (o.vw || VWM)) : (fr ? PDB_VW : (o.vw || VWM)); gl.uniformMatrix3fv(u.uVW, false, vwU); if (u.uBreath) gl.uniform4f(u.uBreath, PDBR.k, 0, PDBR.tx * PDTX.on, 0); if (o.pd9) pd9Seen(o, vwU); gl.uniform1i(u.uOccN, o.occN || 0); if (o.occN){ OCC12.fill(0); for (let i = 0; i < 12 && i < o.occ.length; i++) OCC12[i] = o.occ[i]; if (fr) for (let k = 0; k < 12; k += 4) pdInF(fr, OCC12, OCC12, k); gl.uniform4fv(u.uOcc, OCC12); }
   gl.uniform1f(u.uArch, o.arch || 0); gl.uniform1f(u.uQual, QUAL); gl.uniform1f(u.uEvo, o.evo || 0); if (o.evo) gl.uniform3fv(u.uEvoD, o.evoD); gl.uniform1f(u.uWx, o.wx || 0); gl.uniform1f(u.uFlash, o.flash || 0);
   gl.uniform1i(u.uTkN, o.cq ? o.cq.n : 0); gl.uniform1i(u.uTkSel, o.cq ? o.cq.sel : -1); gl.uniform1f(u.uTkHi, o.cq ? o.cq.hi : 0); if (o.cq && o.cq.n){ gl.uniform4fv(u.uTk, o.cq.tk); gl.uniform4fv(u.uTkB, o.cq.tkB); }
+  if (o.kind === 3){ const hb = o.r * .26, y0 = Math.floor(H - o.y - hb); gl.enable(gl.SCISSOR_TEST); gl.scissor(0, y0, W, Math.max(0, Math.ceil(H - o.y + hb) - y0)); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); gl.disable(gl.SCISSOR_TEST); return; }   // V9 · fluidité : la traînée n'éclaire qu'une bande, le reste de l'écran n'est plus calculé pour rien
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 }
 function planetBody(p, pos, pr, r, lvl, extra){
@@ -3430,7 +3451,7 @@ function labsBegin(){ labs.forEach(e => e._seen = false); }
 function labsEnd(){ labs.forEach((e, k) => { if (!e._seen){ e.remove(); labs.delete(k); } }); }
 let placed = [];
 function placeNC(e, x, y, op){ const w = Math.max(70, (e._h.length > 60 ? 110 : 90)) * RS, h = 32 * RS; const hit = placed.some(r => Math.abs(r[0] - x) < (w + r[2]) / 2 && Math.abs(r[1] - y) < h); if (!hit && op > .05) placed.push([x, y, w]); place(e, x, y, hit ? 0 : op); }
-function place(e, x, y, op){ e.style.transform = `translate(${(x / RS).toFixed(1)}px,${(y / RS).toFixed(1)}px) translate(-50%,0)`; e.style.opacity = op; }
+function place(e, x, y, op){ const t = `translate(${(x / RS).toFixed(1)}px,${(y / RS).toFixed(1)}px) translate(-50%,0)`; if (e._tf !== t){ e._tf = t; e.style.transform = t; } if (e._op !== op){ e._op = op; e.style.opacity = op; } }   // V9 · fluidité : rien n'est réécrit quand l'étiquette ne bouge pas
 
 /* ================= splash ================= */
 const tilt = {x: 0, y: 0, tx: 0, ty: 0, vx: 0, vy: 0};
@@ -3772,10 +3793,11 @@ function drawSysLogo(lp, sp, sc, mE){
   drawLogo(lp.x, lp.y, S, [la2 - .38 * Math.sin(2 * la2), .2 + Math.sin(time * .3) * .1 + fly * .25, fly * .35 * (LFLY.on ? LFLY.on.side : 0)],
     new Float32Array([sp ? sp.x : W / 2, sp ? sp.y : H / 2, .4 + .8 * ECL, 0, W * .2, H * .1, .35 * fly, 0, 0, 0, 0, 0]), .97 * starIgnite * (1 - mE * .5), {vel, boost: fly * .6});
   picks.push({x: lp.x, y: lp.y, r: Math.max(S * .55, 24 * RS), w: lp.w, act: () => MENU.open ? closeMenu() : openMenu()}); }
+let SHEETH = -1;   // V9 · fluidité : hauteur de la feuille, tenue à jour par un observateur
 function frameFocus(p, i){
   const pos = planetPos(p, i, time), r = bodyR(p);
   const reach = mode === 'planet' ? 1.12 * r : (p.ring === 2 ? 2.45 : p.ring === 1 ? 1.85 : 1.15) * r + (p.moons ? r * .6 : 0); const th = Math.tan(FOV / 2);
-  let sh = 0; if (mode === 'planet') sh = cine ? 0 : (sheetOpen ? Math.min(sheet.offsetHeight, innerHeight * .7) : 250) * RS; else if (sheetOpen) sh = Math.min(sheet.offsetHeight * RS, H * .7);
+  let sh = 0; if (mode === 'planet') sh = cine ? 0 : (sheetOpen ? Math.min(SHEETH >= 0 ? SHEETH : sheet.offsetHeight, innerHeight * .7) : 250) * RS; else if (sheetOpen) sh = Math.min((SHEETH >= 0 ? SHEETH : sheet.offsetHeight) * RS, H * .7);
   const topPad = 70 * RS; const v = 1 - (sh + topPad) / H;
   const fill = mode === 'planet' ? (cine ? .64 : .86) : .7;
   const d = Math.max(reach / (th * fill * v), reach * (H / 2) / (th * (mode === 'planet' ? .46 : .42) * W)) + r;
@@ -4353,6 +4375,7 @@ function toast(m, ms = 4200){ const t = $('#toast'); t.textContent = m; t.classL
 
 /* ================= sheet ================= */
 const sheet = $('#sheet'), sbody = $('#sbody'); let sheetOpen = false, sheetKind = '', onClose = null;
+try { new ResizeObserver(() => { SHEETH = sheet.offsetHeight; }).observe(sheet); } catch(e){}
 function openSheet(kind, ...rest){ if (MENU.open) closeMenu(true); return openSheet_(kind, ...rest); }
 function openSheet_(kind, html, after, short){ if (onClose && sheetKind !== kind){ const f = onClose; onClose = null; f(); }
   if (!sheetOpen) sfx('open'); sheetKind = kind; sbody.innerHTML = html; sbody.scrollTop = 0; sbody.classList.remove('swap'); void sbody.offsetWidth; sbody.classList.add('swap'); sheet.classList.toggle('short', !!short); sheet.classList.remove('off'); sheetOpen = true; dock.classList.add('down'); rail.classList.add('off');
@@ -5438,11 +5461,34 @@ function msMeta(){ try { const t = TRACKS.get(Q[qi]); if (!t) return; const alb 
 /* the playing planet, as it is on screen right now, becomes the artwork of the system media card */
 const shotCv = document.createElement('canvas'); shotCv.width = shotCv.height = 240;
 const ARTF = []; let artT = -99, artI = 0, artPid = null;
-function shotTick(){ if (PDART.on) return; if (!SHOT_PT || time - (SHOT_PT.t || 0) > .6 || (isAlbumTrack(Q[qi]) && !(cine && (cine.album || cine.dir))) || (cine && cine.dir && !PDZOOM.includes(cine.shot)) || au.paused || !Q.length || !('mediaSession' in navigator)) return; const nowS = performance.now() / 1000; if (STORY || nowS - shotT < (document.hidden ? 4 : 9)) return; shotT = nowS;
+/* V9 · fluidité : la vignette est copiée en petit par la carte graphique, puis lue une ou deux images plus tard sans l'attendre
+   (avant : une copie qui arrêtait le rendu toutes les 9 s pendant l'écoute). Si l'appareil refuse, l'ancienne copie reprend. */
+const SHOTR = {fb: null, rb: null, pb: null, sync: null, n: 0, nowS: 0, bad: !gl.fenceSync, chk: true, px: null};
+function shotSave(nowS){ shotCv.toBlob(bl => { if (!bl) return; const u = URL.createObjectURL(bl); ARTF.push(u); if (ARTF.length > 14){ const old = ARTF.shift(); setTimeout(() => { if (old !== ART) URL.revokeObjectURL(old); }, 9000); }
+    if (!ART || nowS - artT > 20 || document.hidden){ ART = u; artT = nowS; msMeta(); } }, 'image/jpeg', .8); }
+function shotAsync(x, y, sz, nowS){ if (SHOTR.bad) return false; if (SHOTR.sync) return true; const G = gl;
+  try { if (!SHOTR.fb){ SHOTR.rb = G.createRenderbuffer(); G.bindRenderbuffer(G.RENDERBUFFER, SHOTR.rb); G.renderbufferStorage(G.RENDERBUFFER, G.RGBA8, 240, 240); G.bindRenderbuffer(G.RENDERBUFFER, null);
+      SHOTR.fb = G.createFramebuffer(); G.bindFramebuffer(G.FRAMEBUFFER, SHOTR.fb); G.framebufferRenderbuffer(G.FRAMEBUFFER, G.COLOR_ATTACHMENT0, G.RENDERBUFFER, SHOTR.rb);
+      SHOTR.pb = G.createBuffer(); G.bindBuffer(G.PIXEL_PACK_BUFFER, SHOTR.pb); G.bufferData(G.PIXEL_PACK_BUFFER, 240 * 240 * 4, G.STREAM_READ); G.bindBuffer(G.PIXEL_PACK_BUFFER, null); }
+    if (SHOTR.chk) G.getError();
+    const s = Math.round(sz), x0 = clamp(Math.round(x), 0, W - s), y0 = clamp(Math.round(H - y - sz), 0, H - s);
+    G.bindFramebuffer(G.READ_FRAMEBUFFER, null); G.bindFramebuffer(G.DRAW_FRAMEBUFFER, SHOTR.fb);
+    G.blitFramebuffer(x0, y0, x0 + s, y0 + s, 0, 240, 240, 0, G.COLOR_BUFFER_BIT, G.LINEAR);   // retournée pendant la copie : les lignes sortent dans l'ordre de l'image
+    G.bindFramebuffer(G.READ_FRAMEBUFFER, SHOTR.fb); G.bindBuffer(G.PIXEL_PACK_BUFFER, SHOTR.pb); G.readPixels(0, 0, 240, 240, G.RGBA, G.UNSIGNED_BYTE, 0); G.bindBuffer(G.PIXEL_PACK_BUFFER, null);
+    G.bindFramebuffer(G.FRAMEBUFFER, null);
+    if (SHOTR.chk){ SHOTR.chk = false; if (G.getError()){ SHOTR.bad = true; return false; } }
+    SHOTR.sync = G.fenceSync(G.SYNC_GPU_COMMANDS_COMPLETE, 0); if (!SHOTR.sync){ SHOTR.bad = true; return false; } G.flush(); SHOTR.n = 0; SHOTR.nowS = nowS; return true;
+  } catch(e){ SHOTR.bad = true; SHOTR.sync = null; try { G.bindBuffer(G.PIXEL_PACK_BUFFER, null); G.bindFramebuffer(G.FRAMEBUFFER, null); } catch(_){} return false; } }
+function shotPoll(){ if (!SHOTR.sync) return; const G = gl;
+  try { const st = G.clientWaitSync(SHOTR.sync, 0, 0); if (st === G.TIMEOUT_EXPIRED && ++SHOTR.n < 30) return;
+    G.deleteSync(SHOTR.sync); SHOTR.sync = null; if (st === G.WAIT_FAILED) return;
+    const px = SHOTR.px || (SHOTR.px = new Uint8ClampedArray(240 * 240 * 4)); G.bindBuffer(G.PIXEL_PACK_BUFFER, SHOTR.pb); G.getBufferSubData(G.PIXEL_PACK_BUFFER, 0, px); G.bindBuffer(G.PIXEL_PACK_BUFFER, null);
+    shotCv.getContext('2d').putImageData(new ImageData(px, 240, 240), 0, 0); shotSave(SHOTR.nowS);
+  } catch(e){ SHOTR.bad = true; SHOTR.sync = null; try { G.bindBuffer(G.PIXEL_PACK_BUFFER, null); } catch(_){} } }
+function shotTick(){ shotPoll(); if (PDART.on) return; if (!SHOT_PT || time - (SHOT_PT.t || 0) > .6 || (isAlbumTrack(Q[qi]) && !(cine && (cine.album || cine.dir))) || (cine && cine.dir && !PDZOOM.includes(cine.shot)) || au.paused || !Q.length || !('mediaSession' in navigator)) return; const nowS = performance.now() / 1000; if (STORY || nowS - shotT < (document.hidden ? 4 : 9)) return; shotT = nowS;
   if (artPid !== qPlanet){ artPid = qPlanet; ARTF.splice(0).forEach(u => setTimeout(() => { if (u !== ART) URL.revokeObjectURL(u); }, 9000)); }
-  try { const sz = clamp(SHOT_PT.r * 2.7, 40, Math.min(W, H)), x = clamp(SHOT_PT.x - sz / 2, 0, W - sz), y = clamp(SHOT_PT.y - sz / 2, 0, H - sz), c = shotCv.getContext('2d'); c.drawImage(cv, x, y, sz, sz, 0, 0, 240, 240);
-    shotCv.toBlob(bl => { if (!bl) return; const u = URL.createObjectURL(bl); ARTF.push(u); if (ARTF.length > 14){ const old = ARTF.shift(); setTimeout(() => { if (old !== ART) URL.revokeObjectURL(old); }, 9000); }
-      if (!ART || nowS - artT > 20 || document.hidden){ ART = u; artT = nowS; msMeta(); } }, 'image/jpeg', .8); } catch(e){} }
+  try { const sz = clamp(SHOT_PT.r * 2.7, 40, Math.min(W, H)), x = clamp(SHOT_PT.x - sz / 2, 0, W - sz), y = clamp(SHOT_PT.y - sz / 2, 0, H - sz);
+    if (shotAsync(x, y, sz, nowS)) return; shotCv.getContext('2d').drawImage(cv, x, y, sz, sz, 0, 0, 240, 240); shotSave(nowS); } catch(e){} }
 // locked screen: the captured frames play in a loop, so the planet turns on the media card
 setInterval(() => { if (PDART.on || !document.hidden || au.paused || !Q.length || ARTF.length < 3 || artPid !== qPlanet || !('mediaSession' in navigator)) return; const n = ARTF.length, p = 2 * n - 2; artI = (artI + 1) % p; ART = ARTF[artI < n ? artI : p - artI]; msMeta(); }, 1100);
 /* the whole galaxy, planet after planet */
@@ -6916,20 +6962,27 @@ function pdDurBind(){ document.querySelectorAll('.pdDur button').forEach(b => b.
 // --- Andromède : chaque galaxie tourne autour du logo (courbe de rotation plate : même vitesse, les plus proches font le tour plus vite),
 //     sur une orbite légèrement inclinée, et le bord du disque se gauchit comme celui d'Andromède : de la profondeur, du relief
 const PDORB = {v: 1.25};
-function pdOrbAt(id, da){ const h = hashStr(id), h2 = hashStr(id + '#'), arm = Math.floor(h * 4), r = 24 + h2 * 88;
-  const an = arm * TAU / 4 + r * .045 + (hashStr(id + '!') - .5) * .5 + time * PDORB.v / r + (da || 0);
-  const inc = (hashStr(id + 'i') - .5) * .3 * (.45 + r / 112), nd = hashStr(id + 'n') * TAU, warp = sstep(62, 112, r) * 7 * Math.sin(an - 1.2);
-  const y = (hashStr(id + '?') - .5) * 3 + r * Math.sin(inc) * Math.sin(an - nd) + warp, c = Math.cos(inc * Math.sin(an - nd));
+const PDORBK = new Map();   // V9 · fluidité : constantes d'orbite par galaxie, mêmes valeurs qu'avant, calculées une seule fois
+function pdOrbK(id){ let K = PDORBK.get(id); if (K) return K; const h = hashStr(id), h2 = hashStr(id + '#'), arm = Math.floor(h * 4), r = 24 + h2 * 88;
+  K = {r, a0: arm * TAU / 4 + r * .045 + (hashStr(id + '!') - .5) * .5, inc: (hashStr(id + 'i') - .5) * .3 * (.45 + r / 112), nd: hashStr(id + 'n') * TAU, wk: sstep(62, 112, r) * 7, y0: (hashStr(id + '?') - .5) * 3};
+  if (PDORBK.size > 400) PDORBK.clear(); PDORBK.set(id, K); return K; }
+function pdOrbAt(id, da){ const K = pdOrbK(id), r = K.r, inc = K.inc, nd = K.nd;
+  const an = K.a0 + time * PDORB.v / r + (da || 0);
+  const warp = K.wk * Math.sin(an - 1.2);
+  const y = K.y0 + r * Math.sin(inc) * Math.sin(an - nd) + warp, c = Math.cos(inc * Math.sin(an - nd));
   return [Math.cos(an) * r * c, y, Math.sin(an) * r * c]; }
 // brume de profondeur : les galaxies lointaines pâlissent un peu
 const pdDepthA = w => clamp(1.22 - w / (Math.max(cam.dist, 60) * 2.3), .5, 1);
 // sillage : l'orbite de la galaxie choisie (et de la tienne), et une traînée derrière elle qui montre qu'elle avance
 function pdOrbitDraw(){ if (mode !== 'galaxy') return; const ids = []; if (gLock && gLock.id !== GD_ID && !gLock.gd) ids.push([gLock.id, 1]); if (!guestMode){ const me = ME || 'me'; if (!ids.some(x => x[0] === me)) ids.push([me, .55]); }
   if (!ids.length) return; gl.useProgram(SEG.p); gl.bindVertexArray(segV); gl.bindBuffer(gl.ARRAY_BUFFER, segB); gl.uniformMatrix4fv(SEG.u.uVP, false, VP);
-  ids.forEach(([id, k]) => { const n = 120, a = []; for (let i = 0; i < n; i++){ a.push(...pdOrbAt(id, -i * TAU / n), ...pdOrbAt(id, -(i + 1) * TAU / n)); }
-    gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(a)); gl.uniform4f(SEG.u.uC, .55, .78, 1, .045 * k); gl.drawArrays(gl.LINES, 0, n * 2);
-    for (let j = 0; j < 7; j++){ const a2 = []; for (let i = 0; i < 4; i++){ const s0 = -(j * 4 + i) * .02, s1 = s0 - .02; a2.push(...pdOrbAt(id, s0), ...pdOrbAt(id, s1)); }
-      gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(a2)); gl.uniform4f(SEG.u.uC, .7, .86, 1, .3 * k * (1 - j / 7)); gl.drawArrays(gl.LINES, 0, 8); } }); }
+  const A = PDORB_A, L = PDORB_L, T2 = PDORB_T;
+  ids.forEach(([id, k]) => { const n = 120; for (let i = 0; i <= n; i++) A.set(pdOrbAt(id, -i * TAU / n), i * 3);   // chaque point sert aux deux segments qui le touchent
+    for (let i = 0; i < n; i++) L.set(A.subarray(i * 3, i * 3 + 6), i * 6);
+    gl.bufferSubData(gl.ARRAY_BUFFER, 0, L); gl.uniform4f(SEG.u.uC, .55, .78, 1, .045 * k); gl.drawArrays(gl.LINES, 0, n * 2);
+    for (let j = 0; j < 7; j++){ for (let i = 0; i < 4; i++){ const s0 = -(j * 4 + i) * .02, s1 = s0 - .02; T2.set(pdOrbAt(id, s0), i * 6); T2.set(pdOrbAt(id, s1), i * 6 + 3); }
+      gl.bufferSubData(gl.ARRAY_BUFFER, 0, T2); gl.uniform4f(SEG.u.uC, .7, .86, 1, .3 * k * (1 - j / 7)); gl.drawArrays(gl.LINES, 0, 8); } }); }
+const PDORB_A = new Float32Array(121 * 3), PDORB_L = new Float32Array(240 * 3), PDORB_T = new Float32Array(8 * 3);
 // la caméra accompagne la galaxie visée (ou celle vers laquelle on voyage) : elle ne file pas hors de l'écran
 let PDGF = null;
 function pdGalFollow(){ const id = jump ? (jump.o ? jump.o.id : null) : (gLock ? gLock.id : null);
