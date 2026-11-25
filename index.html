@@ -2772,7 +2772,8 @@ if (SP.u.uTx){ gl.useProgram(SP.p); gl.uniform1i(SP.u.uTx, 8); gl.uniform1i(SP.u
 pdTxInit();
 
 // V9 Blender: optional detail maps; Figma color and audio untouched.
-const PD9PBR={maps:new Map(),neutral:null,active:false};
+const PD9PBR={maps:new Map(),neutral:null,active:false,epoch:0};
+cv.addEventListener('webglcontextlost',()=>{PD9PBR.epoch++;PD9PBR.active=false;PD9PBR.maps.clear();PD9PBR.neutral=null;});
 function pd9PbrInit(){
   if(!SP.u.uPDNormal || !SP.u.uPDMaterial) return;
   const G=gl;
@@ -2803,12 +2804,33 @@ function pd9PbrInit(){
   PD9PBR.active=true;
   // Explicit candidate opt-in until actual UV orientation is validated.
   if(new URLSearchParams(location.search).get('pbr')!=='1')return;
-  const base='https://raw.githubusercontent.com/GuillaumDot/Plan-teDot/6dd4388/assets/blender/pbr-512/';
-  for(const name of ['basalt','desert','ice','ocean','gas']){
-    const img=new Image();img.crossOrigin='anonymous';
-    img.onload=()=>{if(!G.isContextLost()&&img.width===512&&img.height===256){const t=upload(img);if(t)PD9PBR.maps.set(name,t);}};
-    img.src=base+name+'-normal.png';
+  const local=new URL('assets/blender/pbr-512/',document.baseURI);
+  const remote='https://raw.githubusercontent.com/GuillaumDot/Plan-teDot/6dd4388d7472de85c93ad77882869e10a6e3dbb9/assets/blender/pbr-512/';
+  const epoch=++PD9PBR.epoch;
+  const alive=()=>PD9PBR.epoch===epoch&&!G.isContextLost();
+  function load(url){
+    return new Promise(resolve=>{
+      const img=new Image();img.crossOrigin='anonymous';
+      let done=false;
+      const finish=value=>{if(done)return;done=true;clearTimeout(timer);img.onload=img.onerror=null;resolve(value);};
+      const timer=setTimeout(()=>finish(null),8000);
+      img.onload=()=>finish(img.width===512&&img.height===256?img:null);
+      img.onerror=()=>finish(null);
+      img.src=url;
+    });
   }
+  // Sequential decode/upload limits transient memory on mobile.
+  (async()=>{
+    for(const name of ['basalt','desert','ice','ocean','gas']){
+      if(!alive())break;
+      const file=name+'-normal.png';
+      let img=await load(new URL(file,local).href);
+      if(!alive())break;
+      if(!img)img=await load(remote+file);
+      if(!alive())break;
+      if(img){const t=upload(img);if(t)PD9PBR.maps.set(name,t);}
+    }
+  })().catch(()=>{ /* neutral material remains available */ });
 }
 function pd9PbrDraw(o){
   if(!PD9PBR.active||gl.isContextLost())return;
