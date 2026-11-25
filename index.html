@@ -1482,6 +1482,20 @@ in vec2 a; uniform vec2 uRes,uC; uniform float uR,uQ,uAsp; out vec2 vP;
 void main(){vec2 px=uC+a*uR*uQ*vec2(uAsp,1.); vec2 ndc=px/uRes*2.-1.; gl_Position=vec4(ndc.x,-ndc.y,0.,1.); vP=vec2(a.x*uAsp,-a.y)*uQ;}`,
 `#version 300 es
 precision highp float;
+uniform sampler2D uPDNormal;
+uniform vec2 uPDMaterial; // strength, baked roughness
+vec3 pdV9Detail(vec3 n0, vec3 n, vec3 s, mat3 RM, float det, float mask){
+  float radial=length(s.xz);
+  float w=uPDMaterial.x*det*mask*smoothstep(.025,.15,radial);
+  if(w<=0.) return n;
+  vec2 uv=vec2(fract(atan(s.z,s.x)/6.2831853+.5),asin(clamp(s.y,-1.,1.))/3.14159265+.5);
+  vec3 t=radial>.0001?vec3(-s.z,0.,s.x)/radial:vec3(1.,0.,0.);
+  vec3 b=normalize(cross(t,s));
+  vec3 d=textureLod(uPDNormal,uv,mix(2.,0.,det)).xyz*2.-1.;
+  vec3 delta=(t*d.x+b*d.y)*RM;
+  return normalize(n+delta*w);
+}
+
 in vec2 vP; out vec4 o;
 uniform int uKind,uType,uTerN,uSel; uniform vec3 uC1,uC2,uAt,uRingC,uL; uniform vec2 uRingK;
 uniform float uAtmo,uSeed,uT,uAng,uTilt,uRoll,uRingS,uAudio,uAlpha,uClouds,uR,uMap,uHi,uStage,uPlay,uBeat,uSunI,uIrr,uLv,uBt,uBs; uniform vec3 uLC,uPath,uSun;
@@ -2090,6 +2104,8 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
   if((uType==10||uType==9||uType==0)&&!sT) col*=1.+det*det*(n3(sp*300.)-.5)*.14;
   col=mix(col,uAt*.55+col*.3,pow(1.-max(n0.z,0.),3.)*uAtmo*.55);
   // [PBR] normal : n = normale d’éclairage (repère vue), n0 = normale de la sphère, s = direction sur la planète (UV inchangées), RM = vue → planète ; TXR/TXK = relief Figma actuel
+  float pdMask=(uType==1||uType==11)?1.-land:1.;
+  if(uPDMaterial.x>0.&&uType!=8){n=pdV9Detail(n0,n,s,RM,det,pdMask);ndl=dot(n,L);dif=lam(ndl)*shd;}
   if(TXK>0.&&uR>16.){ float lt=smoothstep(-.12,.35,dot(n0,L))*smoothstep(0.,.3,n0.z); dif*=mix(1.,clamp(1.-TXR*TXK*5.,sT?.45:.28,sT?1.55:1.8),lt); }
   vec3 sun=uSun*uSunI; if(uType==2) col*=.62+.38*pow(max(n0.z,0.),.35); if(uType==10||uType==0||uType==9) dif*=1.+.22*pow(max(L.z,0.),8.)*shd;
   vec3 sky=mix(sun,uAt*1.2,.55*clamp(uAtmo*1.4,0.,1.));
@@ -2101,6 +2117,7 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
   vec3 h=normalize(L+vec3(0.,0.,1.)); float fres=pow(1.-max(n.z,0.),5.);
   { // GGX highlight + Schlick Fresnel: the star mirrored in oceans, ice and metal, moving with the camera
     float rg=uType==9?.3:uType==3?.34:uType==5?.22:.13;   // [PBR] rough : rg = rugosité de base du reflet GGX, spec = force du reflet
+    rg=mix(rg,uPDMaterial.y,clamp(uPDMaterial.x*det*pdMask,0.,1.));
     float a2=rg*rg*rg*rg; float nh=max(dot(n,h),0.); float dd=nh*nh*(a2-1.)+1.;
     float D=a2/(3.14159*dd*dd); float Fr=.03+.97*pow(1.-max(dot(h,vec3(0.,0.,1.)),0.),5.);
     lit+=sun*min(D*Fr*.12,2.6)*spec*max(ndl,0.)*shd; }
@@ -2754,6 +2771,56 @@ void main(){
 if (SP.u.uTx){ gl.useProgram(SP.p); gl.uniform1i(SP.u.uTx, 8); gl.uniform1i(SP.u.uRingT, 9); gl.uniform1i(SP.u.uGal, 10); if (SP.u.uGz) gl.uniform1i(SP.u.uGz, 13); }
 pdTxInit();
 
+// V9 Blender: optional detail maps; Figma color and audio untouched.
+const PD9PBR={maps:new Map(),neutral:null,active:false};
+function pd9PbrInit(){
+  if(!SP.u.uPDNormal || !SP.u.uPDMaterial) return;
+  const G=gl;
+  function upload(img){
+    const old=G.getParameter(G.ACTIVE_TEXTURE);
+    G.activeTexture(G.TEXTURE0+4);
+    const prev=G.getParameter(G.TEXTURE_BINDING_2D), flip=G.getParameter(G.UNPACK_FLIP_Y_WEBGL), cs=G.getParameter(G.UNPACK_COLORSPACE_CONVERSION_WEBGL);
+    const t=G.createTexture();
+    try{
+      if(!t) return null;
+      G.bindTexture(G.TEXTURE_2D,t);
+      G.pixelStorei(G.UNPACK_FLIP_Y_WEBGL,!!img);
+      G.pixelStorei(G.UNPACK_COLORSPACE_CONVERSION_WEBGL,G.NONE);
+      if(img) G.texImage2D(G.TEXTURE_2D,0,G.RGBA,G.RGBA,G.UNSIGNED_BYTE,img);
+      else G.texImage2D(G.TEXTURE_2D,0,G.RGBA,1,1,0,G.RGBA,G.UNSIGNED_BYTE,new Uint8Array([128,128,255,255]));
+      G.texParameteri(G.TEXTURE_2D,G.TEXTURE_WRAP_S,G.REPEAT);
+      G.texParameteri(G.TEXTURE_2D,G.TEXTURE_WRAP_T,G.CLAMP_TO_EDGE);
+      G.texParameteri(G.TEXTURE_2D,G.TEXTURE_MIN_FILTER,img?G.LINEAR_MIPMAP_LINEAR:G.LINEAR);
+      G.texParameteri(G.TEXTURE_2D,G.TEXTURE_MAG_FILTER,G.LINEAR);
+      if(img) G.generateMipmap(G.TEXTURE_2D);
+      return t;
+    }catch(e){if(t)G.deleteTexture(t);return null;}
+    finally{G.pixelStorei(G.UNPACK_FLIP_Y_WEBGL,flip);G.pixelStorei(G.UNPACK_COLORSPACE_CONVERSION_WEBGL,cs);G.bindTexture(G.TEXTURE_2D,prev);G.activeTexture(old);}
+  }
+  PD9PBR.neutral=upload(null);
+  if(!PD9PBR.neutral)return;
+  G.useProgram(SP.p);G.uniform1i(SP.u.uPDNormal,4);
+  PD9PBR.active=true;
+  // Explicit candidate opt-in until actual UV orientation is validated.
+  if(new URLSearchParams(location.search).get('pbr')!=='1')return;
+  const base='https://raw.githubusercontent.com/GuillaumDot/Plan-teDot/6dd4388/assets/blender/pbr-512/';
+  for(const name of ['basalt','desert','ice','ocean','gas']){
+    const img=new Image();img.crossOrigin='anonymous';
+    img.onload=()=>{if(!G.isContextLost()&&img.width===512&&img.height===256){const t=upload(img);if(t)PD9PBR.maps.set(name,t);}};
+    img.src=base+name+'-normal.png';
+  }
+}
+function pd9PbrDraw(o){
+  if(!PD9PBR.active||gl.isContextLost())return;
+  const type=o.type||0;
+  const entry=({0:['desert',.86],1:['ocean',.32],2:['gas',.68],3:['ice',.48],4:['basalt',.82],10:['basalt',.82],11:['ocean',.32]})[type];
+  const t=o.kind===0&&entry?PD9PBR.maps.get(entry[0]):null;
+  const old=gl.getParameter(gl.ACTIVE_TEXTURE);
+  gl.activeTexture(gl.TEXTURE0+4);gl.bindTexture(gl.TEXTURE_2D,t||PD9PBR.neutral);gl.activeTexture(old);
+  gl.uniform2f(SP.u.uPDMaterial,t?.35:0,entry?entry[1]:.5);
+}
+pd9PbrInit();
+
 const PT = compile(`#version 300 es
 in vec3 a; in float s; uniform mat4 uVP; uniform float uT,uDpr,uScale,uRot; out float vB;
 void main(){ float an=uT*uRot*(1.+s*.25); float c=cos(an),si=sin(an); vec3 p=vec3(a.x*c-a.z*si,a.y,a.x*si+a.z*c);
@@ -3211,6 +3278,7 @@ const PDB_VQ = new Float32Array(9), PDBR = {k: 1, tx: 0};   // V9 : force des so
 function pdVWq(q, V){ for (let c = 0; c < 9; c += 3){ const r = qRot(q, [V[c], V[c + 1], V[c + 2]]); PDB_VQ[c] = r[0]; PDB_VQ[c + 1] = r[1]; PDB_VQ[c + 2] = r[2]; } return PDB_VQ; }
 function drawBody(o){
   const u = SP.u;
+  pd9PbrDraw(o);
   if (o.kind === 2){ if (!(o.alpha > .004) || !(o.r > .3)) return; if (GB.on){ glowAdd(o); return; } gl.uniform1i(u.uKind, 2); gl.uniform2f(u.uC, o.x, o.y); gl.uniform1f(u.uR, o.r); gl.uniform1f(u.uQ, o.q); gl.uniform1f(u.uAsp, 1); gl.uniform1f(u.uIrr, 0);
     gl.uniform3fv(u.uC1, o.c1); gl.uniform1f(u.uAtmo, o.atmo ?? 1); gl.uniform1f(u.uAlpha, o.alpha ?? 1); gl.uniform1f(u.uHi, o.hi || 0); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); return; }
   const fr = (o.kind === 0 || o.kind === 1) && !o.vw && o.x === o.x && o.y === o.y ? pdFrame(o.x, o.y) : null;   // V8.4
