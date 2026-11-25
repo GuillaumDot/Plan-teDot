@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "width": 512,
+  "height": 256,
+  "uv": "source Blender sphere UV",
+  "normalConvention": "+X +Y +Z tangent",
+  "colorSpace": {
+    "albedo": "srgb",
+    "normal": "linear",
+    "roughness": "linear"
+  },
+  "presets": {
+    "basalt": {
+      "albedo": "basalt-albedo.png",
+      "normal": "basalt-normal.png",
+      "roughness": "basalt-roughness.png"
+    },
+    "ocean": {
+      "albedo": "ocean-albedo.png",
+      "normal": "ocean-normal.png",
+      "roughness": "ocean-roughness.png"
+    },
+    "ice": {
+      "albedo": "ice-albedo.png",
+      "normal": "ice-normal.png",
+      "roughness": "ice-roughness.png"
+    },
+    "desert": {
+      "albedo": "desert-albedo.png",
+      "normal": "desert-normal.png",
+      "roughness": "desert-roughness.png"
+    },
+    "gas": {
+      "albedo": "gas-albedo.png",
+      "normal": "gas-normal.png",
+      "roughness": "gas-roughness.png"
+    }
+  }
+}
