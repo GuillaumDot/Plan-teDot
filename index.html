@@ -1587,13 +1587,46 @@ float wvAt(vec3 s,vec3 D,float T,out float sl,out float sw,out float q,out float
   sl=(cos(p1)*A1+cos(p2)*A2)*nrm;
   float ds=(aw-a0-uBt*.95)*mix(3.,5.,smoothstep(18.,70.,uR)); sw=exp(-ds*ds)*exp(-uBt*.9)*(.3+uBs*.8);
   return (sin(p1)*A1+sin(p2)*A2)*nrm; }
-/* clouds outside the played zone ride the waves and are swept by the big fronts */
-float wvG=0.;
-vec4 cloudWave(vec3 s){ vec4 r=vec4(0.); if(uPlay<=0.||uTkN<=0) return r; float I=.15+uLv*.9+uBs*1.4;
+/* V9 · souffles : les ondes ne déplacent plus la texture (fini les déformations). Leurs fronts, larges et doux, partent de la zone jouée
+   et deviennent des souffles propres à chaque monde : nuages qui naissent, écume, éruptions, rafales, poussière, voiles lumineux */
+uniform vec4 uBreath;   // x : force des souffles (0 = coupés), y : réservé, z : 1 quand la texture Figma des souffles (unité 14) est prête, w : réservé
+float wvG=0., brF=0.; vec3 brT=vec3(0.,1.,0.);
+float brFront(float ang,float a0,float q,vec3 s){ float ph=(ang-a0)*2.3-uT*(.5+uLv*.3+uBs*.45)+(n3(s*2.1+vec3(uT*.035))-.5)*1.1;
+  return pow(.5+.5*cos(ph*6.2832),4.)*smoothstep(0.,.04,q); }
+vec4 cloudWave(vec3 s){ vec4 r=vec4(0.); if(uPlay<=0.||uTkN<=0) return r;
   for(int i=0;i<16;i++){ if(i>=uTkN) break; float A=mod(uTkB[i].z,2.); if(A<=.004) continue; float sl,sw,q,az; float h=wvAt(s,uTk[i].xyz,uTk[i].w,sl,sw,q,az);
-    float env=exp(-q*2.6)*(1.-smoothstep(.7,1.,q))*smoothstep(0.,.03,q)*A; vec3 tv=normalize(s-uTk[i].xyz*dot(s,uTk[i].xyz)+1e-5);
-    r.xyz+=tv*(h*.03*I+sw*.05)*env; wvG+=(smoothstep(.25,.9,h)*(.45+uLv*.65+uBs*.8)+sw*1.4)*env; r.w+=sw*env*(1.-smoothstep(.45,1.,q)); }
-  return r; }
+    float env=exp(-q*2.6)*(1.-smoothstep(.7,1.,q))*smoothstep(0.,.03,q)*A;
+    wvG+=(smoothstep(.25,.9,h)*(.45+uLv*.65+uBs*.8)+sw*1.4)*env; r.w+=sw*env*(1.-smoothstep(.45,1.,q));
+    float ang=acos(clamp(dot(s,uTk[i].xyz),-1.,1.)), a0=acos(clamp(uTk[i].w,-1.,1.)), f=(brFront(ang,a0,q,s)*(.3+uLv*.75+uBs*.9)+sw*1.15)*env;
+    if(f>brF){ brF=f; brT=normalize(s-uTk[i].xyz*dot(s,uTk[i].xyz)+1e-5); } }
+  brF=min(brF*uBreath.x,1.2); return r; }
+/* V9 · un souffle passe : chaque monde réagit à sa façon, en couleur et en lumière, sans jamais déplacer sa texture */
+void breathFx(vec3 s,vec3 sp,vec3 tv,float ang,float az,float bf,vec3 wc,float dif,float land,inout vec3 col,inout vec3 emi,inout float spec){
+  float lt=.42+.58*dif, nt=1.-smoothstep(-.05,.3,dif);
+  float al=ang*4.2-uT*(1.05+uBs*.7), ac=az*46.;
+  float gust=smoothstep(.5,.86,n3(vec3(al,ac,uT*.3)))*bf;
+  float puff=smoothstep(.45,.8,fbm3(sp*2.6+tv*uT*.12))*bf;
+  if(uType==1||uType==11){ float wat=1.-land;                                     // océans : houle claire et écume ; terres : rafales dans la végétation
+    float foam=smoothstep(.58,.84,n3(sp*24.+tv*uT*.5))*(.5+.5*n3(sp*5.))*bf*wat;
+    col=mix(col,vec3(.86,.93,1.)*lt,foam*.55); col*=1.+wat*bf*.06*(n3(sp*7.+uT*.2)-.35); spec+=foam*.25;
+    col=mix(col,col*1.08+vec3(.02,.03,0.),gust*land*.4); }
+  else if(uType==4){                                                             // volcans : les bouches s'embrasent, panaches de cendre
+    float vent=smoothstep(.74,.9,n3(sp*6.5+3.)), er=vent*bf*(.8+uBeat*.9);
+    emi+=vec3(1.,.36,.07)*er*(1.1+.5*sin(uT*7.+az*30.))+vec3(1.,.62,.2)*smoothstep(.85,.95,n3(sp*6.5+3.))*bf*.6;
+    float ash=smoothstep(.48,.8,n3(vec3(al*.7,ac*.35,uT*.45)))*bf;
+    col=mix(col,vec3(.13,.11,.1)*lt,ash*.42); emi+=vec3(.9,.32,.08)*ash*er*.25+vec3(.55,.2,.05)*ash*nt*.12; }
+  else if(uType==3){                                                             // glace : poudrerie et étincelles de givre
+    col=mix(col,vec3(.93,.97,1.)*lt,gust*.55); float sk=pow(n3(sp*150.+vec3(0.,uT*2.,0.)),14.)*bf;
+    emi+=vec3(.75,.9,1.)*sk*(.7+uBeat); spec+=gust*.15; }
+  else if(uType==2||uType==6||uType==7){                                         // géantes et mondes spectraux : voiles lumineux
+    float veil=smoothstep(.42,.9,n3(vec3(al*.6,ac*.22,uT*.25)))*bf;
+    col=mix(col,col*1.12+wc*.05,veil*.35); emi+=mix(wc,vec3(.85,.92,1.),.5)*veil*(.06+.3*nt); }
+  else if(uType==5){                                                             // cristal : éclats prismatiques
+    float gl=pow(n3(sp*85.+tv*uT*.8),9.)*bf; emi+=(.5+.5*cos(6.2832*(az+uT*.1+vec3(0.,.33,.67))))*gl*1.2; spec+=bf*.2; }
+  else if(uType==9){                                                             // métal : arcs électriques
+    float arc=1.-smoothstep(0.,.03,abs(n3(vec3(al*1.6,ac*.4,uT*1.3))-.5)); emi+=vec3(.55,.78,1.)*arc*bf*(.5+uBeat*.8); spec+=bf*.15; }
+  else { vec3 dust=mix(col,vec3(.74,.58,.4),.65)*lt; col=mix(col,dust,gust*.5+puff*.18); }   // roches et mondes telluriques : rafales de poussière
+  emi+=wc*bf*.025*(.4+nt); }
 /* V8.3 · géantes gazeuses vivantes, faites à partir de 4 cartes Figma 2:1 (jovienne, glacée, dorée, orageuse).
    La carte suit la famille de la planète (jovienne, saturnienne, géante de glace, jupiter chaude) ; les couleurs restent celles de la planète.
    Animation : courants qui glissent à des vitesses différentes selon la latitude, turbulence lente, tempêtes qui naissent, tournent puis
@@ -1726,7 +1759,7 @@ vec3 solid84(float dif,inout vec3 emi,inout float spec,out float rl){
 }
 vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
   vec3 sp=s*1.6+uSeed*7.; vec4 cwvG=cloudWave(s); wvG=min(wvG,1.5);
-  TXR=0.; TXK=0.; if(uTxOn>.5){ gW=pow(abs(s),vec3(4.)); gW/=dot(gW,vec3(1.)); gW=max(gW-.03,0.); gW/=dot(gW,vec3(1.)); gMu=max(n.z,.22); gS=normalize(s-cwvG.xyz*.8); gLo=RM*L; gE=clamp(1.6/max(uR,1.),.0015,.03); }
+  TXR=0.; TXK=0.; if(uTxOn>.5){ gW=pow(abs(s),vec3(4.)); gW/=dot(gW,vec3(1.)); gW=max(gW-.03,0.); gW/=dot(gW,vec3(1.)); gMu=max(n.z,.22); gS=s; gLo=RM*L; gE=clamp(1.6/max(uR,1.),.0015,.03); }
   bool sT=uTxOn>.5&&uR>3.&&(uType==10||uType==9||uType==4); gST=sT;   /* V8.4 : rocheuse, métallique ou volcanique faite par solid84 */
   float det=clamp((uR-14.)/95.,0.,1.)*uQual; vec3 n0=n, nb=n; float gh=.5;
   float bA=uType==10?2.8:uType==9?1.5:uType==4?2.:uType==0?1.9:uType==3?1.6:(uType==11||uType==1)?2.:0.;
@@ -1769,7 +1802,7 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
     float cl=smoothstep(.48,.79,fbm(cq*1.9+3.)+(n3(cq*14.+uT*.004)-.5)*.13*(.3+det)+(n3(cq*31.-uT*.006)-.5)*.07*det+(det>.5?(n3(cq*70.)-.5)*.045*det*det:0.))*(.5+uClouds*.6); int gS=gOct; gOct=min(gOct,4); float cs=smoothstep(.48,.79,fbm((cq+L*.05)*1.9+3.))*(.5+uClouds*.6); gOct=gS;
     if(uTxOn>.5){ float tlc=txL(1.15); float tc=txT(7.,cq*.72,tlc).r; cl=clamp(mix(cl,cl*(.3+1.25*tc)+tc*.1*smoothstep(.15,.45,cl),.75),0.,1.);
       float tcs=txT(7.,(cq+L*.05)*.72,tlc+.5).r; cs=clamp(mix(cs,cs*(.3+1.25*tcs),.75),0.,1.); }
-    float cy=.4+.6*uWx; cl=max(cl,cyclone(s,cy)); cs=max(cs,cyclone(normalize(s+L*.03),cy)); { float swp=clamp(cwv.w,0.,1.); cl*=1.-swp*.65; cs*=1.-swp*.5; }
+    float cy=.4+.6*uWx; cl=max(cl,cyclone(s,cy)); cs=max(cs,cyclone(normalize(s+L*.03),cy)); { float bc=brF*smoothstep(.4,.75,fbm3(cq*1.3+brT*uT*.05+vec3(7.))); cl=max(cl,bc*.8); cs=max(cs,bc*.45); }
     vec3 ccol=mix(vec3(.97),vec3(.58,.62,.68),smoothstep(.6,1.,cl)*uWx*.7); ccol+=vec3(1.,.95,.86)*smoothstep(.02,.18,cl)*(1.-smoothstep(.2,.5,cl))*smoothstep(0.,.5,dot(n0,L))*.18;
     ccol*=clamp(.82+(cl-cs)*.9,.55,1.15)*(.9+.2*n3(cq*22.)); col*=1.-cs*.5*(1.-cl); col=mix(col,ccol,cl); spec*=1.-cl; cloudA=cl; }
   else if(uType==10){ float f=fbm(sp*2.); float cr=n3(sp*5.); float ring=smoothstep(.56,.6,cr)-smoothstep(.6,.67,cr); float bowl=smoothstep(.6,.75,cr);
@@ -1782,7 +1815,7 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
     float veg=smoothstep(.6,.2,abs(s.y))*clamp(uStage/3.,.1,1.)*land; col=mix(col,vec3(.12,.32,.1)*(.7+fbm3(sp*9.)*.6),veg*.5);
     vec4 cwv=cwvG; vec3 cpp=sp-cwv.xyz*1.6;
     float cl=smoothstep(.48,.8,fbm(rotY(uT*.00025)*cpp*1.7+3.+uT*.0015)+(n3(cpp*26.+uT*.004)-.5)*.09*det)*uClouds; int gS=gOct; gOct=min(gOct,4); float cs=smoothstep(.48,.8,fbm(rotY(uT*.00025)*(cpp+L*.05)*1.7+3.+uT*.0015))*uClouds; gOct=gS;
-    float cy=.35+.65*uWx; cl=max(cl,cyclone(s,cy)); cs=max(cs,cyclone(normalize(s+L*.03),cy)); { float swp=clamp(cwv.w,0.,1.); cl*=1.-swp*.65; cs*=1.-swp*.5; }
+    float cy=.35+.65*uWx; cl=max(cl,cyclone(s,cy)); cs=max(cs,cyclone(normalize(s+L*.03),cy)); { float bc=brF*smoothstep(.4,.75,fbm3(cpp*1.3+brT*uT*.05+vec3(7.))); cl=max(cl,bc*.8); cs=max(cs,bc*.45); }
     col*=1.-cs*.4*(1.-cl); col=mix(col,mix(vec3(.96),vec3(.6,.63,.7),smoothstep(.6,1.,cl)*uWx*.7),cl); cloudA=cl; land=max(land,cl);
     spec=(1.-land); }
   else if(uType==2&&uTxOn>.5&&uR>3.){ land=0.; }   /* V8.3 : géante gazeuse faite par gasV83 */
@@ -2002,12 +2035,11 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
   float dq=smoothstep(15.,26.,uR); col=mix(colB0,col,dq); emi=mix(emiB0,emi,dq); }
   if(uPlay>0.&&uType!=8){ for(int j=0;j<2;j++){ float A=lvA[j]; if(A<=.004) continue; float E=lvE[j]; vec3 C=lvC[j]; float dbo=max(-E,0.)*lvW[j]*2.4; float out0=smoothstep(0.,.015,dbo);
     float sl,swv,q,az01; float hw=wvAt(s,lvD[j],lvT[j],sl,swv,q,az01);
-    float env=exp(-q*2.6)*(1.-smoothstep(.7,1.,q))*smoothstep(0.,.05,q)*out0; float I=(.16+uLv*.6+uBs*1.+uBeat*.35)*A; float sw2=swv*A*out0*exp(-q*2.2);
-    float lt2=.55+.45*dif; float crest=smoothstep(.2,.9,hw);
-    col*=clamp(1.+(sl*.27*I*env+sw2*.26)*lt2,.72,1.36);
+    float env=exp(-q*2.6)*(1.-smoothstep(.7,1.,q))*smoothstep(0.,.05,q)*out0; float sw2=swv*A*out0*exp(-q*2.2);
     vec3 wc=mix(C,.5+.5*cos(6.2832*(az01+uT*.02+vec3(0.,.33,.67))),.15);
-    col=mix(col,col*(.88+wc*.24),crest*I*env*.24);
-    emi+=mix(wc,vec3(1.),.35)*(crest*I*env*.14+sw2*.22)*(.5+.6*(1.-dif)); spec+=crest*I*env*.17+sw2*.17;
+    { float ang=acos(clamp(dot(s,lvD[j]),-1.,1.)), a0=acos(clamp(lvT[j],-1.,1.));   /* V9 : un souffle au lieu des anneaux qui gondolaient la surface */
+      float bf=min(((brFront(ang,a0,q,s)*(.3+uLv*.75+uBs*.9)+swv*1.15)*env*A+sw2*.3)*uBreath.x,1.2);
+      if(bf>.003) breathFx(s,sp,normalize(s-lvD[j]*dot(s,lvD[j])+1e-5),ang,az01,bf,wc,dif,land,col,emi,spec); }
     float px=abs(E)/max(fwidth(E),1e-5); float wl=.8+uR*.0032;
     float core=(1.-smoothstep(wl*.4,wl*.4+1.,px))*A*smoothstep(4.,14.,uR); float inner=exp(-max(E,0.)*5.)*step(0.,E)*(1.-core)*A;
     float run=.85+.15*sin(n3(sp*5.)*12.-uT*1.2);
@@ -2057,6 +2089,7 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
   if(bA>0.&&(uType==0||uType==1||uType==11)) col=mix(col,col*vec3(1.08,.95,.82),smoothstep(.55,.8,gh)*.5*land);
   if((uType==10||uType==9||uType==0)&&!sT) col*=1.+det*det*(n3(sp*300.)-.5)*.14;
   col=mix(col,uAt*.55+col*.3,pow(1.-max(n0.z,0.),3.)*uAtmo*.55);
+  // [PBR] normal : n = normale d’éclairage (repère vue), n0 = normale de la sphère, s = direction sur la planète (UV inchangées), RM = vue → planète ; TXR/TXK = relief Figma actuel
   if(TXK>0.&&uR>16.){ float lt=smoothstep(-.12,.35,dot(n0,L))*smoothstep(0.,.3,n0.z); dif*=mix(1.,clamp(1.-TXR*TXK*5.,sT?.45:.28,sT?1.55:1.8),lt); }
   vec3 sun=uSun*uSunI; if(uType==2) col*=.62+.38*pow(max(n0.z,0.),.35); if(uType==10||uType==0||uType==9) dif*=1.+.22*pow(max(L.z,0.),8.)*shd;
   vec3 sky=mix(sun,uAt*1.2,.55*clamp(uAtmo*1.4,0.,1.));
@@ -2067,7 +2100,8 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
   if(uOccN>0&&uOcc[0].w>1.5){ vec3 pc=uOcc[0].xyz; float dpc=length(pc); vec3 pd=pc/dpc; float ph=.5+.5*dot(-pd,L); float sa=uOcc[0].w/dpc; lit+=col*sun*max(dot(n,pd),0.)*ph*sa*sa*.9; }
   vec3 h=normalize(L+vec3(0.,0.,1.)); float fres=pow(1.-max(n.z,0.),5.);
   { // GGX highlight + Schlick Fresnel: the star mirrored in oceans, ice and metal, moving with the camera
-    float rg=uType==9?.3:uType==3?.34:uType==5?.22:.13; float a2=rg*rg*rg*rg; float nh=max(dot(n,h),0.); float dd=nh*nh*(a2-1.)+1.;
+    float rg=uType==9?.3:uType==3?.34:uType==5?.22:.13;   // [PBR] rough : rg = rugosité de base du reflet GGX, spec = force du reflet
+    float a2=rg*rg*rg*rg; float nh=max(dot(n,h),0.); float dd=nh*nh*(a2-1.)+1.;
     float D=a2/(3.14159*dd*dd); float Fr=.03+.97*pow(1.-max(dot(h,vec3(0.,0.,1.)),0.),5.);
     lit+=sun*min(D*Fr*.12,2.6)*spec*max(ndl,0.)*shd; }
   if(uType==9) lit+=sun*col*pow(1.-max(n0.z,0.),2.5)*.5*dif+sun*.1*pow(max(dot(reflect(-L,n),vec3(0.,0.,1.)),0.),6.)*shd;
@@ -2278,7 +2312,7 @@ float wvG=0.;
 vec4 cloudWave(vec3 s){ vec4 r=vec4(0.); if(uPlay<=0.||uTkN<=0) return r; float I=.15+uLv*.9+uBs*1.4;
   for(int i=0;i<16;i++){ if(i>=uTkN) break; float A=mod(uTkB[i].z,2.); if(A<=.004) continue; float sl,sw,q,az; float h=wvAt(s,uTk[i].xyz,uTk[i].w,sl,sw,q,az);
     float env=exp(-q*2.6)*(1.-smoothstep(.7,1.,q))*smoothstep(0.,.03,q)*A; vec3 tv=normalize(s-uTk[i].xyz*dot(s,uTk[i].xyz)+1e-5);
-    r.xyz+=tv*(h*.03*I+sw*.05)*env; wvG+=(smoothstep(.25,.9,h)*(.45+uLv*.65+uBs*.8)+sw*1.4)*env; r.w+=sw*env*(1.-smoothstep(.45,1.,q)); }
+    wvG+=(smoothstep(.25,.9,h)*(.45+uLv*.65+uBs*.8)+sw*1.4)*env; r.w+=sw*env*(1.-smoothstep(.45,1.,q)); }
   return r; }
 vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
   vec3 sp=s*1.6+uSeed*7.; vec4 cwvG=cloudWave(s); wvG=min(wvG,1.5);
@@ -3068,7 +3102,7 @@ function conquest(p){ const c0 = CQ.get(p); if (c0 && time - c0.t < 1) return hl
     if (!readonly){ const key = p.id + '|' + x.id, pv = REGL.get(key); if (pv !== undefined && l > pv) p.xp = (p.xp || 0) + 6 * l; REGL.set(key, l); } });
   if (HL && HL.pid === p.id && !items.some(x => x.id === HL.key)){ const x = all.find(y => y.id === HL.key); if (x){ if (items.length >= 16) items.pop(); items.push(x); } }
   const Wt = items.reduce((a, x) => a + x.w, 0), n = items.length, cover = n ? 1 - Math.exp(-Wt / (5 + n * 1.2)) : 0;
-  const used = new Set(), liveId = (!readonly || p.gd) && !au.paused && qPlanet === p.id ? (readonly ? (t0 => t0 ? t0.title + '|' + (t0.artist || '') : null)(TRACKS.get(Q[qi])) : Q[qi]) : null, ln = readonly ? liveNow() : null;
+  const used = new Set(), liveId = !au.paused && (((!readonly || p.gd) && qPlanet === p.id) || (readonly && !p.gd && pdRemoteLivePid() === p.id)) ? (readonly ? (t0 => t0 ? t0.title + '|' + (t0.artist || '') : null)(TRACKS.get(Q[qi])) : Q[qi]) : null, ln = readonly ? liveNow() : null;
   const tk = new Float32Array(64), tkB = new Float32Array(64);
   items.forEach((x, i) => { let k = Math.floor(hashStr(x.id + p.id) * 16); while (used.has(k)) k = (k + 5) % 16; used.add(k);
     x.dir = norm(ry((p.seed || 0) * 1.7, FIB[k])); x.share = (1 - Math.cos(clamp(.05 + 1.9 * regR(x.g), .075, 1))) / 2; x.hue = frc(i * .618034 + .08);
@@ -3173,7 +3207,7 @@ function pdFrame(x, y){ const asp = W / H; let dx = (x / W * 2 - 1) * asp / P5, 
 const pdInF = (F, v, out, k) => { const a = v[k], b = v[k + 1], c = v[k + 2]; out[k] = F[0] * a + F[1] * b + F[2] * c; out[k + 1] = F[3] * a + F[4] * b + F[5] * c; out[k + 2] = F[6] * a + F[7] * b + F[8] * c; return out; };
 function pdFrameW(x, y){ pdFrame(x, y); const V = PDB_VW; return [[V[0], V[1], V[2]], [V[3], V[4], V[5]], [V[6], V[7], V[8]]]; }
 /* V9 · U replié dans le repère de vue de l'astre : chaque colonne c (axe de vue exprimé dans le monde) devient U·c */
-const PDB_VQ = new Float32Array(9);
+const PDB_VQ = new Float32Array(9), PDBR = {k: 1, tx: 0};   // V9 : force des souffles, texture Figma des souffles prête (unité 14)
 function pdVWq(q, V){ for (let c = 0; c < 9; c += 3){ const r = qRot(q, [V[c], V[c + 1], V[c + 2]]); PDB_VQ[c] = r[0]; PDB_VQ[c + 1] = r[1]; PDB_VQ[c + 2] = r[2]; } return PDB_VQ; }
 function drawBody(o){
   const u = SP.u;
@@ -3190,7 +3224,7 @@ function drawBody(o){
   gl.uniform1i(u.uTerN, o.terN || 0); gl.uniform1i(u.uSel, o.sel ?? -1);
   gl.uniform1f(u.uPlay, o.play || 0); gl.uniform1f(u.uBeat, o.beat || 0); gl.uniform1f(u.uLv, o.lv || 0); gl.uniform1f(u.uBs, o.bs || 0); if (u.uSp) gl.uniform4fv(u.uSp, o.spb || [0, 0, 0, 0]); gl.uniform1f(u.uBt, o.bt ?? 9); gl.uniform1f(u.uSunI, o.sunI ?? 1); gl.uniform3fv(u.uSun, o.sun || [1, 1, 1]); gl.uniform1f(u.uIrr, o.irr || 0);
   if (o.terN){ gl.uniform4fv(u.uTer, o.ter); gl.uniform4fv(u.uTerB, o.terB); }
-  const vwU = o.uq ? pdVWq(o.uq, fr ? PDB_VW : (o.vw || VWM)) : (fr ? PDB_VW : (o.vw || VWM)); gl.uniformMatrix3fv(u.uVW, false, vwU); if (o.pd9) pd9Seen(o, vwU); gl.uniform1i(u.uOccN, o.occN || 0); if (o.occN){ OCC12.fill(0); for (let i = 0; i < 12 && i < o.occ.length; i++) OCC12[i] = o.occ[i]; if (fr) for (let k = 0; k < 12; k += 4) pdInF(fr, OCC12, OCC12, k); gl.uniform4fv(u.uOcc, OCC12); }
+  const vwU = o.uq ? pdVWq(o.uq, fr ? PDB_VW : (o.vw || VWM)) : (fr ? PDB_VW : (o.vw || VWM)); gl.uniformMatrix3fv(u.uVW, false, vwU); if (u.uBreath) gl.uniform4f(u.uBreath, PDBR.k, 0, PDBR.tx, 0); if (o.pd9) pd9Seen(o, vwU); gl.uniform1i(u.uOccN, o.occN || 0); if (o.occN){ OCC12.fill(0); for (let i = 0; i < 12 && i < o.occ.length; i++) OCC12[i] = o.occ[i]; if (fr) for (let k = 0; k < 12; k += 4) pdInF(fr, OCC12, OCC12, k); gl.uniform4fv(u.uOcc, OCC12); }
   gl.uniform1f(u.uArch, o.arch || 0); gl.uniform1f(u.uQual, QUAL); gl.uniform1f(u.uEvo, o.evo || 0); if (o.evo) gl.uniform3fv(u.uEvoD, o.evoD); gl.uniform1f(u.uWx, o.wx || 0); gl.uniform1f(u.uFlash, o.flash || 0);
   gl.uniform1i(u.uTkN, o.cq ? o.cq.n : 0); gl.uniform1i(u.uTkSel, o.cq ? o.cq.sel : -1); gl.uniform1f(u.uTkHi, o.cq ? o.cq.hi : 0); if (o.cq && o.cq.n){ gl.uniform4fv(u.uTk, o.cq.tk); gl.uniform4fv(u.uTkB, o.cq.tkB); }
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -3205,7 +3239,11 @@ function satellites(p, pos, R, bodies){ const st = stage(p); if (pathOf(p)[2] !=
     const q = project([pos[0] + Math.cos(a) * ra, pos[1] + Math.sin(a) * ra * inc, pos[2] + Math.sin(a) * ra]); if (!q) continue;
     bodies.push({w: q.w, kind: 2, x: q.x, y: q.y, r: Math.max(2.2 * RS, pxR(R * .09, q.w)), q: 1, c1: [.8, .9, 1], atmo: 0, alpha: .9}); } }
 function radioWaves(p, pr, r, bodies, c){ bodies.push({w: pr.w - .01, kind: 5, x: pr.x, y: pr.y, r, q: 4.4, c1: c || [.4, .7, 1], alpha: 1}); }
-function isLive(p){ if (SCP && SCP.playing && SCP.pid === p.id) return true; if (p.gd) return qPlanet === p.id && !au.paused && Q.length > 0; if (readonly){ const n = liveNow(); return !!(n && n.pid === p.id); } return p.id === playingPlanet() && !au.paused; }
+function isLive(p){ if (SCP && SCP.playing && SCP.pid === p.id) return true; if (p.gd) return qPlanet === p.id && !au.paused && Q.length > 0; if (readonly){ const n = liveNow(); return !!(n && n.pid === p.id) || pdRemoteLivePid() === p.id; } return p.id === playingPlanet() && !au.paused; }
+/* V9 · un visiteur qui écoute un titre partagé de cette galaxie : la planète qui le porte vit (zone, ondes, souffles) comme chez son créateur */
+const PDRL = {t: -1, id: '', v: null};
+function pdRemoteLivePid(){ if (!readonly || au.paused || !Q.length) return null; const id = String(Q[qi] || ''); if (PDRL.t === time && PDRL.id === id) return PDRL.v;
+  const m = /^pd-public:([0-9a-f-]{36}):/i.exec(id); PDRL.t = time; PDRL.id = id; PDRL.v = m && m[1] === ownerId ? pdVisitPidV76() : null; return PDRL.v; }
 /* ecosystem & physics */
 const COMETS = [{a: 11, e: .78, inc: .35, w: .4, ph: 0, c: [.75, .9, 1]}, {a: 16, e: .86, inc: -.22, w: 2.6, ph: 3, c: [.95, .85, .7]}];
 function cometPos(c, t){ const n = .55 / Math.pow(c.a, 1.5) * .7; let M = (c.ph + t * n) % TAU, E = M; for (let k = 0; k < 6; k++) E = E - (E - c.e * Math.sin(E) - M) / (1 - c.e * Math.cos(E));
@@ -5222,7 +5260,15 @@ function readAudio(dt){ let v = 0;
     { const bb = (fbuf[1] + fbuf[2] + fbuf[3]) / 765; bassAvg = lerp(bassAvg, bb, .02); const bv = clamp((bb - bassAvg * .75) * 3.2, 0, 1); bassLvl = bv > bassLvl ? lerp(bassLvl, bv, .7) : bassLvl * Math.exp(-dt * 5); }
     if (flux > fluxAvg * 1.6 && flux > 4){ if (beatLvl < .5) beatT = time; beatLvl = 1; } fluxAvg = lerp(fluxAvg, flux, .08);
     if (tot > 1){ feat.e += tot / N; feat.b += clamp(cen / tot / (N * .35), 0, 1); feat.l += low / tot * 4; onsetAcc += flux > 6 ? 1 : 0; feat.k++; } }
-  if (!SPEC.live){ bassLvl *= Math.exp(-dt * 5); for (let k = 0; k < 4; k++) SPB[k] *= Math.exp(-dt * 3); } audioLvl = v > audioLvl ? lerp(audioLvl, v, .6) : audioLvl * Math.exp(-dt * 4); beatLvl *= Math.exp(-dt * 7); }
+  if (!SPEC.live){ bassLvl *= Math.exp(-dt * 5); for (let k = 0; k < 4; k++) SPB[k] *= Math.exp(-dt * 3); } audioLvl = v > audioLvl ? lerp(audioLvl, v, .6) : audioLvl * Math.exp(-dt * 4); beatLvl *= Math.exp(-dt * 7);
+  if (!SPEC.live && !au.paused && Q.length && !(SCP && SCP.playing)) pdSynthLevels(dt); }
+/* V9 · sans spectre (titre écouté à distance, fichier trop long) : une respiration douce au tempo plausible, sans rien télécharger de plus */
+const PDSY = {ph: 0};
+function pdSynthLevels(dt){ const pos = au.currentTime || 0, h = hashStr(String(Q[qi] || '')), bps = 1.6 + .5 * h,
+    a = clamp(.56 + .13 * Math.sin(pos * .41 + h * 9) + .08 * Math.sin(pos * 1.33 + h * 3) + .05 * Math.sin(pos * 2.9), .2, 1), ph = (pos * bps) % 1, pulse = Math.pow(1 - ph, 2.6), lv = clamp(Math.pow(a, 1.25) * .62 + pulse * .26 * a, 0, 1);
+  audioLvl = lv > audioLvl ? lerp(audioLvl, lv, .5) : Math.max(lv, audioLvl * Math.exp(-dt * 4)); bassLvl = Math.max(bassLvl, clamp(pulse * a * .95, 0, 1));
+  for (let k = 0; k < 4; k++) SPB[k] = Math.max(SPB[k], clamp(pulse * a * (k ? .55 - k * .1 : .9), 0, 1));
+  if (ph < PDSY.ph && a > .45){ if (beatLvl < .5) beatT = time; beatLvl = Math.max(beatLvl, .55 + (a - .5) * .8); } PDSY.ph = ph; }
 let tickAcc = 0, trackSecs = 0;
 function listenTick(dt){
   if (au.paused || !Q.length || guestMode) return; tickAcc += dt; trackSecs += dt;
