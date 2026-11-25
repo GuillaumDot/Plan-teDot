@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#010208">
 <title>planèteDot · ton univers musical</title>
-<meta name="pd-version" content="9.1">
+<meta name="pd-version" content="9.2">
 <meta name="description" content="PlanèteDot · l’album de GuillaumDot et ton univers musical en 3D : chaque planète est un morceau.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PlanèteDot">
@@ -594,6 +594,14 @@ body.cine #scDock,body.pdT #scDock{opacity:0;pointer-events:none}
 #rx9m>b{display:block;font-size:12px;font-weight:600;color:var(--faint);margin:0 2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #rx9m .rx9e{gap:6px;margin:0 0 8px}#rx9m .rx9b.e{font-size:22px;border-radius:14px}#rx9m .rx9t{gap:6px;margin:0 0 10px}#rx9m .rx9b.t{min-height:32px;font-size:13px;padding:0 11px 0 8px}#rx9m .rx9b.t span{font-size:15px}
 @media (prefers-reduced-motion:reduce){.rx9b.e span{animation:none}#rx9m{transition:none}}
+/* V9.2 · fenêtre des titres plus compacte (25/11) : moins haute, ✕ flottant, ère sur une ligne (les zones passent dans « ⋯ »), pastilles plus discrètes */
+#sheet.scan{max-height:min(40vh,430px);max-height:min(40svh,430px)}
+.shx{position:absolute;top:8px;right:12px;margin:0;z-index:2}.ph2c{gap:3px;margin:0 0 8px;padding:0 36px}.ph2c h2{margin-top:2px}.ph2c p{line-height:1.35}
+.era1{display:flex;align-items:center;justify-content:center;gap:7px;min-width:0;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.era1 .erab{width:40px;margin:0;flex:none}
+.ph2c .pdAuH{margin:0;font-size:11px}#sheet.scan .pact2{margin:0 0 6px}
+#pList .pdAu{font-size:9.5px;padding:2px 6px;border-radius:7px;border:0}
+#rx9m{width:min(316px,calc(100vw - 24px));padding:10px 10px 0;border-radius:20px}#rx9m>b{font-size:11.5px;margin:0 2px 6px}
+#rx9m .rx9e{gap:5px;margin:0 0 7px}#rx9m .rx9b.e{font-size:19px;border-radius:12px}#rx9m .rx9t{gap:5px;margin:0 0 9px}#rx9m .rx9b.t{min-height:28px;font-size:12px;padding:0 9px 0 7px;border-radius:14px}#rx9m .rx9b.t span{font-size:13px}
 </style>
 <link rel="stylesheet" href="pd-cinematic.css?v=85-preview">
 </head>
@@ -1639,11 +1647,13 @@ float lam(float x){ float w=.1*uAtmo; return pow(clamp((x+w)/(1.+w),0.,1.),.72);
 uniform vec4 uSp;
 float spB(float x){ x=fract(x)*4.; int i=int(floor(x)); float f=smoothstep(0.,1.,fract(x)); return mix(uSp[i],uSp[(i+1)%4],f); }
 /* waves leaving a played zone: irregular fronts whose height around the zone follows the spectrum like a circular analyser */
+float wvD=0., wvB=0.;   // V9.2 · ondes : distance irrégulière au bord de la zone (rad) et spectre à cet azimut, posées par wvAt
 float wvAt(vec3 s,vec3 D,float T,out float sl,out float sw,out float q,out float az01){
   float a0=acos(clamp(T,-1.,1.)), ang=acos(clamp(dot(s,D),-1.,1.)); q=clamp((ang-a0)/max(3.1416-a0,.4),0.,1.);
   vec3 t1=normalize(cross(D,vec3(0.,1.,.001))), t2=cross(D,t1); float az=atan(dot(s,t2),dot(s,t1)); az01=az/6.2832+.5;
   float irr=n3(vec3(cos(az)*1.8,sin(az)*1.8,uT*.22+ang*1.3)); float bnd=spB(az01+uT*.015);
   float aw=ang+(irr-.5)*.32*(.4+bnd)+(n3(s*3.5+vec3(uT*.05))-.5)*.14;
+  wvD=aw-a0; wvB=bnd;
   float kw=mix(3.6,6.,smoothstep(18.,70.,uR)); float dsp=1.-.22*q;
   float p1=(aw-a0)*kw*dsp-uT*(1.15+uLv*.5+uBs*.8), p2=(aw-a0)*kw*1.9*dsp-uT*(1.7+uSp.z)+irr*3.;
   float A1=.5+bnd*.8+uBs*.6, A2=.12+uSp.z*.25+uSp.w*.15, tot=A1+A2, nrm=min(tot,1.6)/(1.6*tot);
@@ -1697,9 +1707,8 @@ void breathFx(vec3 s,vec3 sp,vec3 tv,float ang,float az,float bf,vec3 wc,float d
   else if(uType==5){                                                             // cristal : éclats prismatiques
     float gl=pow(n3(sp*85.+tv*uT*.8),9.)*bf; if(bt){ float cx=brTx(s*7.+uSeed*2.3,s,1.,brL(7.)).g; gl=max(gl,pow(cx,6.)*brRev(cx,bf,.5)*bk*(.55+.45*sin(uT*4.+cx*30.))*1.3); }
     emi+=(.5+.5*cos(6.2832*(az+uT*.1+vec3(0.,.33,.67))))*gl*1.2; spec+=bf*.2; }
-  else if(uType==9){                                                             // métal : arcs électriques
-    float arc=1.-smoothstep(0.,.03,abs(n3(vec3(al*1.6,ac*.4,uT*1.3))-.5)); if(bt){ float vx=brTx(rotY(uT*.15)*s*3.+uSeed,s,1.,brL(3.)).b; arc=max(arc,smoothstep(.82,.97,vx)*brRev(vx,bf,.5)); }
-    emi+=vec3(.55,.78,1.)*arc*bf*(.5+uBeat*.8); spec+=bf*.15; }
+  else if(uType==9){                                                             // métal : l'onde fait glisser un reflet sur le métal (V9.2 : fini les arcs en zigzag)
+    float sh=bk*(.75+.25*uBeat); spec+=sh*.55; col=mix(col,col*1.22+vec3(.035,.04,.05)*lt,sh*.4); emi+=vec3(.62,.76,.95)*sh*nt*.06; }
   else { vec3 dust=mix(col,vec3(.74,.58,.4),.65)*lt;                             // roches et mondes telluriques : rafales de poussière
     if(bt){ vec3 dx=brTx(rotY(uT*.05)*s*3.+uSeed,s,0.,brL(3.)); col=mix(col,dust,brRev(dx.b,bf,n3(vec3(al,ac,uT*.3)))*bk*.5+brRev(dx.r,bf*.8,.5)*bk*.2); }
     else col=mix(col,dust,gust*.5+smoothstep(.45,.8,fbm3(sp*2.6+tv*uT*.12))*bf*.18); }
@@ -2114,9 +2123,14 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
     float sl,swv,q,az01; float hw=wvAt(s,lvD[j],lvT[j],sl,swv,q,az01);
     float env=exp(-q*2.6)*(1.-smoothstep(.7,1.,q))*smoothstep(0.,.05,q)*out0; float sw2=swv*A*out0*exp(-q*2.2);
     vec3 wc=mix(C,.5+.5*cos(6.2832*(az01+uT*.02+vec3(0.,.33,.67))),.15);
-    { float ang=acos(clamp(dot(s,lvD[j]),-1.,1.)), a0=acos(clamp(lvT[j],-1.,1.));   /* V9 : un souffle au lieu des anneaux qui gondolaient la surface */
-      float bf=min(((brFront(ang,a0,q,s)*(.3+uLv*.75+uBs*.9)+swv*1.15)*env*A+sw2*.3)*uBreath.x,1.2);
-      if(bf>.003) breathFx(s,sp,normalize(s-lvD[j]*dot(s,lvD[j])+1e-5),ang,az01,bf,wc,dif,land,col,emi,spec); }
+    { float ang=acos(clamp(dot(s,lvD[j]),-1.,1.)), a0=acos(clamp(lvT[j],-1.,1.));
+      /* V9.2 · ondes : des anneaux de lumière partent de la zone jouée, au rythme de la musique, plus forts là où le spectre monte.
+         Lumière seulement (ni creux ni relief : la texture ne bouge pas) ; chaque monde y réagit à sa façon, sur la crête des anneaux seulement */
+      float rph=mix(ang-a0,wvD,.45)*2.1-uT*(.5+uLv*.22+uBs*.35), rc=.5+.5*cos(rph*6.2832), r2=rc*rc, r4=r2*r2, cr=r4*r4*r2;   // crête fine (rc^10)
+      float aa=smoothstep(.18,.55,fwidth(rph)), rg=mix(cr+r4*.3,.15,aa);   // halo doux ; anneaux trop serrés à l'écran : une lueur égale au lieu d'un scintillement
+      float e0=(.3+uLv*.6+uBs*.85+uBeat*.3)*(.55+.75*wvB)*env*A*(1.-.3*q), rl=(rg*e0+sw2*.85)*uBreath.x; vec3 rcl=mix(wc,vec3(1.),.3);
+      emi+=rcl*rl*(.1+.22*(1.-dif)); col=mix(col,col*1.08,min(rl,1.)*.3*dif); spec+=rl*.08;
+      float bf=min((mix(cr,.15,aa)*e0+sw2*.6)*uBreath.x,1.2); if(bf>.01) breathFx(s,sp,normalize(s-lvD[j]*dot(s,lvD[j])+1e-5),ang,az01,bf,wc,dif,land,col,emi,spec); }
     float px=abs(E)/max(fwidth(E),1e-5); float wl=.8+uR*.0032;
     float core=(1.-smoothstep(wl*.4,wl*.4+1.,px))*A*smoothstep(4.,14.,uR); float inner=exp(-max(E,0.)*5.)*step(0.,E)*(1.-core)*A;
     float run=.85+.15*sin(n3(sp*5.)*12.-uT*1.2);
@@ -2376,11 +2390,13 @@ float lam(float x){ float w=.1*uAtmo; return pow(clamp((x+w)/(1.+w),0.,1.),.72);
 uniform vec4 uSp;
 float spB(float x){ x=fract(x)*4.; int i=int(floor(x)); float f=smoothstep(0.,1.,fract(x)); return mix(uSp[i],uSp[(i+1)%4],f); }
 /* waves leaving a played zone: irregular fronts whose height around the zone follows the spectrum like a circular analyser */
+float wvD=0., wvB=0.;   // V9.2 · ondes : distance irrégulière au bord de la zone (rad) et spectre à cet azimut, posées par wvAt
 float wvAt(vec3 s,vec3 D,float T,out float sl,out float sw,out float q,out float az01){
   float a0=acos(clamp(T,-1.,1.)), ang=acos(clamp(dot(s,D),-1.,1.)); q=clamp((ang-a0)/max(3.1416-a0,.4),0.,1.);
   vec3 t1=normalize(cross(D,vec3(0.,1.,.001))), t2=cross(D,t1); float az=atan(dot(s,t2),dot(s,t1)); az01=az/6.2832+.5;
   float irr=n3(vec3(cos(az)*1.8,sin(az)*1.8,uT*.22+ang*1.3)); float bnd=spB(az01+uT*.015);
   float aw=ang+(irr-.5)*.32*(.4+bnd)+(n3(s*3.5+vec3(uT*.05))-.5)*.14;
+  wvD=aw-a0; wvB=bnd;
   float kw=mix(3.6,6.,smoothstep(18.,70.,uR)); float dsp=1.-.22*q;
   float p1=(aw-a0)*kw*dsp-uT*(1.15+uLv*.5+uBs*.8), p2=(aw-a0)*kw*1.9*dsp-uT*(1.7+uSp.z)+irr*3.;
   float A1=.5+bnd*.8+uBs*.6, A2=.12+uSp.z*.25+uSp.w*.15, tot=A1+A2, nrm=min(tot,1.6)/(1.6*tot);
@@ -2651,12 +2667,12 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
   float dq=smoothstep(15.,26.,uR); col=mix(colB0,col,dq); emi=mix(emiB0,emi,dq); }
   if(uPlay>0.&&uType!=8){ for(int j=0;j<2;j++){ float A=lvA[j]; if(A<=.004) continue; float E=lvE[j]; vec3 C=lvC[j]; float dbo=max(-E,0.)*lvW[j]*2.4; float out0=smoothstep(0.,.015,dbo);
     float sl,swv,q,az01; float hw=wvAt(s,lvD[j],lvT[j],sl,swv,q,az01);
-    float env=exp(-q*2.6)*(1.-smoothstep(.7,1.,q))*smoothstep(0.,.05,q)*out0; float I=(.16+uLv*.6+uBs*1.+uBeat*.35)*A; float sw2=swv*A*out0*exp(-q*2.2);
-    float lt2=.55+.45*dif; float crest=smoothstep(.2,.9,hw);
-    col*=clamp(1.+(sl*.27*I*env+sw2*.26)*lt2,.72,1.36);
+    float env=exp(-q*2.6)*(1.-smoothstep(.7,1.,q))*smoothstep(0.,.05,q)*out0; float sw2=swv*A*out0*exp(-q*2.2);
     vec3 wc=mix(C,.5+.5*cos(6.2832*(az01+uT*.02+vec3(0.,.33,.67))),.15);
-    col=mix(col,col*(.88+wc*.24),crest*I*env*.24);
-    emi+=mix(wc,vec3(1.),.35)*(crest*I*env*.14+sw2*.22)*(.5+.6*(1.-dif)); spec+=crest*I*env*.17+sw2*.17;
+    { float ang=acos(clamp(dot(s,lvD[j]),-1.,1.)), a0=acos(clamp(lvT[j],-1.,1.));   /* V9.2 · les mêmes anneaux de lumière */
+      float rph=mix(ang-a0,wvD,.45)*2.1-uT*(.5+uLv*.22+uBs*.35), rc=.5+.5*cos(rph*6.2832), r2=rc*rc, r4=r2*r2, cr=r4*r4*r2;
+      float rg=mix(cr+r4*.3,.15,smoothstep(.18,.55,fwidth(rph))), rl=rg*(.3+uLv*.6+uBs*.85+uBeat*.3)*(.55+.75*wvB)*env*A*(1.-.3*q)+sw2*.85; vec3 rcl=mix(wc,vec3(1.),.3);
+      emi+=rcl*rl*(.1+.22*(1.-dif)); col=mix(col,col*1.08,min(rl,1.)*.3*dif); spec+=rl*.08; }
     float px=abs(E)/max(fwidth(E),1e-5); float wl=.8+uR*.0032;
     float core=(1.-smoothstep(wl*.4,wl*.4+1.,px))*A*smoothstep(4.,14.,uR); float inner=exp(-max(E,0.)*5.)*step(0.,E)*(1.-core)*A;
     float run=.85+.15*sin(n3(sp*5.)*12.-uT*1.2);
@@ -4162,8 +4178,9 @@ function pdAccount(){
 function pdGuide(){ if (guestMode){ if (tutoI >= 0) endTuto(); startTutoV(); return; } if (VIEW !== SYS || readonly){ goHome(); setTimeout(() => startTuto(true), 1700); } else startTuto(true); }
 (() => { const vv = window.visualViewport; if (!vv) return; let tm = 0;
   const upd = () => { const kb = Math.max(0, Math.round(innerHeight - vv.height - vv.offsetTop)); document.documentElement.style.setProperty('--kb', (kb > 60 ? kb : 0) + 'px'); document.documentElement.style.setProperty('--vvh', vv.height + 'px'); document.body.classList.toggle('kb', kb > 60);
+    const ae = document.activeElement; document.body.classList.toggle('kbt', kb > 60 && !!ae && /^(INPUT|TEXTAREA)$/.test(ae.tagName));
     const a = document.activeElement; if (kb > 60 && a && /^(INPUT|TEXTAREA)$/.test(a.tagName)){ clearTimeout(tm); tm = setTimeout(() => { try { a.scrollIntoView({block: 'center', behavior: 'smooth'}); } catch(e){} }, 80); } };
-  vv.addEventListener('resize', upd); vv.addEventListener('scroll', upd); document.addEventListener('focusin', e => { if (/^(INPUT|TEXTAREA)$/.test(e.target.tagName)) setTimeout(upd, 320); }); document.addEventListener('focusout', () => setTimeout(upd, 120)); })();
+  vv.addEventListener('resize', upd); vv.addEventListener('scroll', upd); document.addEventListener('focusin', e => { if (/^(INPUT|TEXTAREA)$/.test(e.target.tagName)) setTimeout(upd, 320); }); document.addEventListener('focusout', () => setTimeout(upd, 120)); upd(); })();
 function pdArrive(k, t, sub){ let el = document.getElementById('pdArrive'); if (!el){ el = document.createElement('div'); el.id = 'pdArrive'; el.setAttribute('aria-live', 'polite'); document.body.appendChild(el); }
   el.innerHTML = `<small>${esc(k)}</small><b>${esc(t)}</b>${sub ? `<span>${esc(sub)}</span>` : ''}`; el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('on'), 4200); }
 function pdArrival(sys, owner){ try { if (!sys) return; const gd = owner === GD_ID || !!sys.gd, k = COUNTS.get(owner) || {}, n = (sys.planets || []).length, bits = [plural(n, 'planète')];
@@ -4394,7 +4411,7 @@ const sheet = $('#sheet'), sbody = $('#sbody'); let sheetOpen = false, sheetKind
 try { new ResizeObserver(() => { SHEETH = sheet.offsetHeight; }).observe(sheet); } catch(e){}
 function openSheet(kind, ...rest){ if (MENU.open) closeMenu(true); return openSheet_(kind, ...rest); }
 function openSheet_(kind, html, after, short){ pd9MenuClose(); if (onClose && sheetKind !== kind){ const f = onClose; onClose = null; f(); }
-  if (!sheetOpen) sfx('open'); sheetKind = kind; sbody.innerHTML = html; sbody.scrollTop = 0; sbody.classList.remove('swap'); void sbody.offsetWidth; sbody.classList.add('swap'); sheet.classList.toggle('short', !!short); sheet.classList.remove('off'); sheetOpen = true; dock.classList.add('down'); rail.classList.add('off');
+  if (!sheetOpen) sfx('open'); sheetKind = kind; sbody.innerHTML = html; sbody.scrollTop = 0; sbody.classList.remove('swap'); void sbody.offsetWidth; sbody.classList.add('swap'); sheet.classList.toggle('short', !!short); sheet.classList.toggle('scan', kind === 'scan'); sheet.classList.remove('off'); sheetOpen = true; dock.classList.add('down'); rail.classList.add('off');
   if (mode !== 'planet') labWrap.style.opacity = 0; $('#ret').classList.toggle('hide', kind !== 'scan'); if (after) after(); }
 function closeSheet(keepFocus){ pd9MenuClose(); if (!sheetOpen) return; sfx('close'); sheet.classList.add('off'); sheetOpen = false; sheetKind = ''; dock.classList.remove('down'); labWrap.style.opacity = 1; $('#ret').classList.add('hide');
   if (onClose){ const f = onClose; onClose = null; f(); }
@@ -4566,7 +4583,7 @@ function openPlaylist(p, fromLib){
   const dur = tr.reduce((a, t) => a + (t.dur || 0), 0); const sono = sonoOf(p);
   const EI = eraInfo(p), st = EI.e, pc = EI.pc;
   const rows = [['Diamètre', Math.round(bodyR(p) * 9800).toLocaleString('fr-FR') + ' km'], ['Météo', weather(p)], ['État', stateOf(p), live ? 'live' : ''],
-    ['Ère', `${st + 1}/7 · ${eraName(p)}${EI.need ? ' · ' + EI.need : ''}`, '', `<span class="bar"><i style="width:${(pc * 100).toFixed(0)}%"></i></span>`]].concat(p.origin ? [['Origine', p.origin]] : []);
+    ['Ère', `${st + 1}/7 · ${eraName(p)}${EI.need ? ' · ' + EI.need : ''}`, '', `<span class="bar"><i style="width:${(pc * 100).toFixed(0)}%"></i></span>`], ['Zones', EI.counts]].concat(p.origin ? [['Origine', p.origin]] : []);
   const imp = `<input type="file" class="pimp" multiple accept="audio/*,.mp3,.m4a,.aac,.wav,.flac,.ogg,.opus,.aif,.aiff">`;
   const cq = conquest(p), cqOf = t => cq.map.get(ro ? t.title + '|' + (t.artist || '') : t.id) || (cq.all || []).find(x => x.id === (ro ? t.title + '|' + (t.artist || '') : t.id));
   const bioTag = t => { const x = cqOf(t); if (!x) return ''; const b = x.biome ?? 7; const pc = x.share ? Math.max(1, Math.round(x.share * 100)) : 0;
@@ -4576,9 +4593,9 @@ function openPlaylist(p, fromLib){
   const dot = t => { const x = cqOf(t); return x ? `<i class="bd" style="background:${trackCss(x)}"></i>` : ''; };
   const rowsHTML2 = tr.map((t, i) => { const on = !ro && Q[qi] === t.id && !au.paused;
     return `<li class="tr${on ? ' on' : ''}" data-i="${i}" data-id="${t.id}" style="--i:${i}">${on ? eqHTML : `<span class="n">${i + 1}</span>`}<div class="m" data-play><b>${esc(t.title)}</b><span>${dot(t)}${esc(t.artist || 'Artiste inconnu')}${(x => x && x.lvl != null ? ' · ' + regName(p, x) + (x.ev ? ' · ' + REG_EVN[x.evType] : '') : '')(cqOf(t))}</span></div><span class="d">${fmt(t.dur)}</span>${rxOK && t.ro ? `<button class="rx9k" data-rxi="${i}" aria-label="Réagir à ${esc(t.title)}" aria-haspopup="dialog" aria-expanded="false">⋯</button>` : ''}</li>`; }).join('');
-  openSheet('scan', `<div class="sh" style="margin:0"><div></div><button class="x" data-close aria-label="Fermer">${ICON.x}</button></div>
-    <div class="ph2">${privateView ? '<span class="pd-lock" aria-hidden="true">🔒</span>' : ''}${rxOK ? '<div class="ph2t">' : ''}<h2 id="pName" ${ro ? '' : 'title="Renommer"'}>${esc(p.name)}</h2>${rxOK ? '<button class="rx9k" id="sRxK" aria-label="Réagir à cette playlist" aria-haspopup="dialog" aria-expanded="false">⋯</button></div>' : ''}
-      <p>${plural(tr.length, 'titre')}${scLinks(p.links).length ? ' · ' + plural(scLinks(p.links).length, 'lien SoundCloud', 'liens SoundCloud') : ''}${dur ? ' · ' + fmtLong(dur) : ''}${live ? ' · <span style="color:#4aa3ff">en écoute</span>' : ''}${(n9 => n9 ? ' · ✦ ' + plural(n9, 'réaction') : '')(pd9Count(p))}</p>${(() => { const EI = eraInfo(p); if (EI.e >= 6) return '<p class="eran">' + esc(eraName(p)) + ' · ère finale</p><p class="eran" style="opacity:.7">' + EI.counts + '</p>'; return `<div class="erab"><i style="width:${Math.round(EI.pc * 100)}%"></i></div><p class="eran">${esc(eraName(p))} · ${EI.need}</p><p class="eran" style="opacity:.7">${EI.counts}</p>`; })()}</div>
+  openSheet('scan', `<div class="sh shx"><div></div><button class="x" data-close aria-label="Fermer">${ICON.x}</button></div>
+    <div class="ph2 ph2c">${privateView ? '<span class="pd-lock" aria-hidden="true">🔒</span>' : ''}${rxOK ? '<div class="ph2t">' : ''}<h2 id="pName" ${ro ? '' : 'title="Renommer"'}>${esc(p.name)}</h2>${rxOK ? '<button class="rx9k" id="sRxK" aria-label="Réagir à cette playlist" aria-haspopup="dialog" aria-expanded="false">⋯</button></div>' : ''}
+      <p>${plural(tr.length, 'titre')}${scLinks(p.links).length ? ' · ' + plural(scLinks(p.links).length, 'lien SoundCloud', 'liens SoundCloud') : ''}${dur ? ' · ' + fmtLong(dur) : ''}${live ? ' · <span style="color:#4aa3ff">en écoute</span>' : ''}${(n9 => n9 ? ' · ✦ ' + plural(n9, 'réaction') : '')(pd9Count(p))}</p>${(() => { const EI = eraInfo(p); if (EI.e >= 6) return '<p class="eran">' + esc(eraName(p)) + ' · ère finale</p>'; return `<p class="eran era1"><span class="erab"><i style="width:${Math.round(EI.pc * 100)}%"></i></span>${esc(eraName(p))} · ${esc(EI.need)}</p>`; })()}</div>
     <div class="pact2">${ro ? `${p.gd ? `<button class="btn pri" id="sAlb">${ICON.play}Écouter</button>` : ''}<button class="btn${p.gd ? '' : ' pri'}" id="sLand">${ICON.land}Explorer</button>${privateView ? '<span class="chip" aria-label="Planète verrouillée">🔒 Privée · écoute et copie verrouillées</span>' : `${p.gd ? '' : `<button class="btn" id="sRemote">${ICON.play}Écouter</button>`}<button class="btn" id="sCopy">${ICON.plus}Copier</button>`}`
       : tr.length ? `<button class="btn pri" id="sPlay">${live ? ICON.pauseS + 'Pause' : ICON.play + 'Lecture'}</button><button class="btn" id="sShuf">${ICON.shuf}Aléatoire</button>`
       : scLinks(p.links).length ? `<button class="btn pri" id="sScPlay">${ICON.play}Écouter</button><button class="btn" id="sScAdd">${ICON_SC}SoundCloud</button>` : `<label class="btn pri">${ICON.file}Mes fichiers${imp}</label><button class="btn" id="sScAdd">${ICON_SC}SoundCloud</button>`}<button class="icb" id="sMore" aria-label="Plus">⋯</button></div>
@@ -6455,7 +6472,7 @@ body:has(#sheet:not(.off)) #pd-audio-test{opacity:0;pointer-events:none}
 .acc button i{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:rgba(120,170,255,.12);font-style:normal;font-size:16px}.acc button.dng{color:#ff8fa3}.acc button.dng i{background:rgba(255,90,120,.12)}
 .accH{display:flex;align-items:center;gap:13px;margin:2px 4px 10px}.accH .av{width:50px;height:50px;border-radius:50%;display:grid;place-items:center;font:600 20px var(--font);background:radial-gradient(circle at 35% 30%,#9fd0ff,#2a5bd7 70%);color:#fff;box-shadow:0 0 22px rgba(80,150,255,.45)}.accH b{display:block;font-size:17px}.accH span{font-size:12.5px;color:var(--mute)}
 #np.swap .t{animation:npSwap .7s cubic-bezier(.2,.8,.2,1)}@keyframes npSwap{0%{opacity:0;transform:translateY(8px);filter:blur(6px)}100%{opacity:1;transform:none;filter:none}}
-#sheet{bottom:var(--kb,0px)}body.kb #sheet{max-height:calc(var(--vvh,100vh) - 16px)!important;transition:transform .35s cubic-bezier(.2,.8,.2,1),bottom .25s ease}#pdArrive small{display:block;font:600 10px/1.4 system-ui;letter-spacing:.26em;text-transform:uppercase;color:#9fd0ff}
+#sheet{bottom:var(--kb,0px)}body.kbt #sheet{max-height:calc(var(--vvh,100vh) - 16px)!important}body.kb #sheet{transition:transform .35s cubic-bezier(.2,.8,.2,1),bottom .25s ease}#pdArrive small{display:block;font:600 10px/1.4 system-ui;letter-spacing:.26em;text-transform:uppercase;color:#9fd0ff}
 #pdArrive b{display:block;font:600 25px/1.2 system-ui;margin:7px 0 5px;letter-spacing:.01em}#pdArrive span{display:block;font:12.5px/1.45 system-ui;color:#c8dcf5}
 #pdaPanel ol{margin:6px 0 0;padding-left:16px;color:#b8cde8;font-size:11px}#pdaPanel .x{border:0;background:none;font-size:18px;padding:0 4px}`;
   document.head.appendChild(css);
