@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#010208">
 <title>planèteDot · ton univers musical</title>
-<meta name="pd-version" content="9.0">
+<meta name="pd-version" content="9.1">
 <meta name="description" content="PlanèteDot · l’album de GuillaumDot et ton univers musical en 3D : chaque planète est un morceau.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PlanèteDot">
@@ -584,7 +584,16 @@ body.cine #scDock,body.pdT #scDock{opacity:0;pointer-events:none}
 .tr .m span.ib9{white-space:normal;line-height:1.5}.tr .m span.rx9pill{display:inline-flex;width:auto;white-space:nowrap;padding:1px 8px;margin:0 1px;font-size:inherit;vertical-align:baseline}
 .rx9c{margin:6px 0 0;min-height:30px;font-size:13px}.rx9u{background:none;border:0;color:var(--blue);font:inherit;font-size:13px;padding:0}
 .ib.lk{font-size:20px}.ib.lk.on{color:#ff6b8a}.ib.lk.pop{animation:rx9p .55s cubic-bezier(.2,1.6,.4,1)}
-@media (prefers-reduced-motion:reduce){.rx9b.e span{animation:none}}
+/* V9 · réactions rangées derrière « ⋯ » à droite des titres (25/11) */
+.rx9k{flex:none;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.09);color:var(--ink);border:0;font:inherit;font-size:17px;line-height:1;letter-spacing:0;cursor:pointer;transition:background .2s,transform .15s;-webkit-tap-highlight-color:transparent}
+.rx9k:active{transform:scale(.9)}.rx9k[aria-expanded=true]{background:rgba(58,168,255,.32)}
+.ph2t{display:flex;align-items:center;justify-content:center;gap:8px;max-width:100%;margin:6px 0 0}.ph2t::before{content:'';width:32px;flex:none}.ph2t h2{margin:0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tr .rx9k{background:transparent;color:var(--mute);margin:0 -6px 0 2px}.nph .rx9k{align-self:center}
+#rx9m{position:fixed;left:0;top:0;z-index:8;width:min(340px,calc(100vw - 24px));overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:12px 12px 2px;border-radius:22px;background:rgba(12,16,32,.985);border:.5px solid rgba(255,255,255,.12);box-shadow:0 18px 50px rgba(0,0,0,.55);opacity:0;transform:scale(.96);transform-origin:var(--ox,90%) var(--oy,0);transition:opacity .16s,transform .22s cubic-bezier(.2,.9,.3,1.1);pointer-events:none}
+#rx9m.on{opacity:1;transform:none;pointer-events:auto}
+#rx9m>b{display:block;font-size:12px;font-weight:600;color:var(--faint);margin:0 2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#rx9m .rx9e{gap:6px;margin:0 0 8px}#rx9m .rx9b.e{font-size:22px;border-radius:14px}#rx9m .rx9t{gap:6px;margin:0 0 10px}#rx9m .rx9b.t{min-height:32px;font-size:13px;padding:0 11px 0 8px}#rx9m .rx9b.t span{font-size:15px}
+@media (prefers-reduced-motion:reduce){.rx9b.e span{animation:none}#rx9m{transition:none}}
 </style>
 <link rel="stylesheet" href="pd-cinematic.css?v=85-preview">
 </head>
@@ -3900,16 +3909,18 @@ function gdSync(){ if (!GD) return; const p = GD.planets[0]; let tot = 0;
 function playAlbum(i){ unlockAudio(); if (radio) stopRadio(); playList(GD_IDS, i || 0, GD_PID); }
 function fetchBlob(url){ return new Promise((res, rej) => { try { const x = new XMLHttpRequest(); x.open('GET', url); x.responseType = 'blob'; x.onload = () => (x.status === 200 || x.status === 0) && x.response && x.response.size ? res(x.response) : rej(); x.onerror = rej; x.send(); } catch(e){ rej(e); } }); }
 function openAlbum(){ const p = GD.planets[0];
-  openSheet('album', head('PlanèteDot', 'Album de GuillaumDot · sortie le ??/??/2026') +
+  openSheet('album', head('PlanèteDot', 'Album de GuillaumDot · sortie le ??/??/2026', '<button class="rx9k" id="aRxK" aria-label="Réagir à l’album" aria-haspopup="dialog" aria-expanded="false">⋯</button>') +
     `<div class="alb"><img src="${GD_COVER}" alt="Pochette de l’album PlanèteDot"><p>Le logo de planèteDot est la pochette de cet album. L’appli le fait vivre : chaque titre est une zone de la planète PlanèteDot, qui grandit avec les écoutes de toute la communauté.</p></div>
      <div class="row"><button class="btn pri wide" id="aPlay">${ICON.play}Écouter l’album</button>${VIEW === GD ? `<button class="btn wide" id="aCopy">${ICON.plus}Copier la planète</button>` : `<button class="btn wide" id="aGo">${ICON.jump}Y aller</button>`}</div>
-     <div class="rx9p" id="aRx"><span>Réagir à l’album</span>${pd9Grid(true)}</div><div id="pdAlStats"></div><h4 class="pdal-t">Titres</h4>
-     <ul class="list" id="aList">${GD_TR.map((t, i) => `<li class="tr${Q[qi] === GD_IDS[i] && !au.paused ? ' on' : ''}" data-i="${i}" style="cursor:pointer"><span class="n">${i + 1}</span><div class="m"><b>${esc(t[0])}</b><span data-pc="${i}">GuillaumDot</span></div><span class="spk-w" data-sp="${i}"></span><span class="d">${fmt(t[1])}</span></li>`).join('')}</ul>`, () => {
-    pdAlbumPaint(); pdAlbumLoad(true); pd9Bind($('#aRx'), () => { const tg = pd9PlayTarget(); return tg && tg.o === GD_ID ? tg : {o: GD_ID, p: GD_PID, pn: 'PlanèteDot', t: 'playlist'}; });
+     <div id="pdAlStats"></div><h4 class="pdal-t">Titres</h4>
+     <ul class="list" id="aList">${GD_TR.map((t, i) => `<li class="tr${Q[qi] === GD_IDS[i] && !au.paused ? ' on' : ''}" data-i="${i}" style="cursor:pointer"><span class="n">${i + 1}</span><div class="m"><b>${esc(t[0])}</b><span data-pc="${i}">GuillaumDot</span></div><span class="spk-w" data-sp="${i}"></span><span class="d">${fmt(t[1])}</span><button class="rx9k" data-rxi="${i}" aria-label="Réagir à ${esc(t[0])}" aria-haspopup="dialog" aria-expanded="false">⋯</button></li>`).join('')}</ul>`, () => {
+    pdAlbumPaint(); pdAlbumLoad(true);
+    { const k = $('#aRxK'); if (k) k.onclick = () => pd9Menu(k, 'Réagir à l’album', () => ({o: GD_ID, p: GD_PID, pn: 'PlanèteDot', t: 'playlist'})); }   // chaque titre a aussi son « ⋯ » dans la liste
     $('#aPlay').onclick = () => { playAlbum(0); setTimeout(() => sheetKind === 'album' && openAlbum(), 200); };
     const cp = $('#aCopy'); if (cp) cp.onclick = () => { closeSheet(true); copyPlanet(p); };
     const go = $('#aGo'); if (go) go.onclick = () => { closeSheet(true); if (mode === 'galaxy') jumpTo(GDO); else enterSystem(GD, true, GD_ID); };
-    $('#aList').onclick = e => { const li = e.target.closest('[data-i]'); if (!li) return; playAlbum(+li.dataset.i); setTimeout(() => sheetKind === 'album' && openAlbum(), 200); }; }); }
+    $('#aList').onclick = e => { const k = e.target.closest('.rx9k'); if (k){ const T = GD_TR[+k.dataset.rxi]; if (T) pd9Menu(k, 'Réagir · ' + T[0], () => pd9TrackTg(GD_ID, GD_PID, 'PlanèteDot', T[0], 'GuillaumDot')); return; }
+      const li = e.target.closest('[data-i]'); if (!li) return; playAlbum(+li.dataset.i); setTimeout(() => sheetKind === 'album' && openAlbum(), 200); }; }); }
 function sysPos(id){ if (id === GD_ID) return [0, 0, 0]; return pdOrbAt(id, 0); }
 function statsOf(o){ const s = o.s || {}; if (o.mine) return {pl: SYS.planets.length, v: (COUNTS.get(ME) || {}).v || 0, c: (COUNTS.get(ME) || {}).c || 0, f: Math.max(followersOf(ME || 'me'), (COUNTS.get(ME) || {}).f || 0), h: (SYS.secs || 0) / 3600};
   const st = s.stats || {}; const k = COUNTS.get(o.id) || {}; return {pl: (s.planets || []).length, v: (k.v || 0) + (st.v || 0), c: (k.c || 0) + (st.c || 0), f: Math.max(followersOf(o.id), k.f || 0) + (st.f || 0), h: (s.secs || 0) / 3600}; }
@@ -4382,10 +4393,10 @@ function toast(m, ms = 4200){ const t = $('#toast'); t.textContent = m; t.classL
 const sheet = $('#sheet'), sbody = $('#sbody'); let sheetOpen = false, sheetKind = '', onClose = null;
 try { new ResizeObserver(() => { SHEETH = sheet.offsetHeight; }).observe(sheet); } catch(e){}
 function openSheet(kind, ...rest){ if (MENU.open) closeMenu(true); return openSheet_(kind, ...rest); }
-function openSheet_(kind, html, after, short){ if (onClose && sheetKind !== kind){ const f = onClose; onClose = null; f(); }
+function openSheet_(kind, html, after, short){ pd9MenuClose(); if (onClose && sheetKind !== kind){ const f = onClose; onClose = null; f(); }
   if (!sheetOpen) sfx('open'); sheetKind = kind; sbody.innerHTML = html; sbody.scrollTop = 0; sbody.classList.remove('swap'); void sbody.offsetWidth; sbody.classList.add('swap'); sheet.classList.toggle('short', !!short); sheet.classList.remove('off'); sheetOpen = true; dock.classList.add('down'); rail.classList.add('off');
   if (mode !== 'planet') labWrap.style.opacity = 0; $('#ret').classList.toggle('hide', kind !== 'scan'); if (after) after(); }
-function closeSheet(keepFocus){ if (!sheetOpen) return; sfx('close'); sheet.classList.add('off'); sheetOpen = false; sheetKind = ''; dock.classList.remove('down'); labWrap.style.opacity = 1; $('#ret').classList.add('hide');
+function closeSheet(keepFocus){ pd9MenuClose(); if (!sheetOpen) return; sfx('close'); sheet.classList.add('off'); sheetOpen = false; sheetKind = ''; dock.classList.remove('down'); labWrap.style.opacity = 1; $('#ret').classList.add('hide');
   if (onClose){ const f = onClose; onClose = null; f(); }
   if (mode === 'planet'){ setRail(true); return; }
   if (!keepFocus && mode === 'system') overview(); }
@@ -4550,7 +4561,7 @@ const eqHTML = '<span class="eq"><i style="height:6px"></i><i style="height:12px
 let libTab = 'playlists';
 function openPlaylist(p, fromLib){
   if (mode === 'system' && !fromLib) focusOn(p.id, .2);
-  const ro = readonly, live = isLive(p), privateView = ro && p.isPublic === false;
+  const ro = readonly, live = isLive(p), privateView = ro && p.isPublic === false, rxOK = ro && !privateView && (p.tracksRO || []).length > 0;
   const tr = ro ? (p.tracksRO || []).map((x, i) => ({id: 'ro' + i, title: x[0], artist: x[1], dur: 0, ro: true})) : p.tracks.map(id => TRACKS.get(id)).filter(Boolean);
   const dur = tr.reduce((a, t) => a + (t.dur || 0), 0); const sono = sonoOf(p);
   const EI = eraInfo(p), st = EI.e, pc = EI.pc;
@@ -4564,20 +4575,19 @@ function openPlaylist(p, fromLib){
     return `<li class="tr${on ? ' on' : ''}" data-i="${i}" data-id="${t.id}">${on ? eqHTML : `<span class="n">${i + 1}</span>`}<div class="m" data-play><b>${esc(t.title)}</b><span>${esc(t.artist || 'Artiste inconnu')}${ro ? '' : srcTag(t)}${bioTag(t)}</span></div><span class="d">${fmt(t.dur)}</span></li>`; }).join('');
   const dot = t => { const x = cqOf(t); return x ? `<i class="bd" style="background:${trackCss(x)}"></i>` : ''; };
   const rowsHTML2 = tr.map((t, i) => { const on = !ro && Q[qi] === t.id && !au.paused;
-    return `<li class="tr${on ? ' on' : ''}" data-i="${i}" data-id="${t.id}" style="--i:${i}">${on ? eqHTML : `<span class="n">${i + 1}</span>`}<div class="m" data-play><b>${esc(t.title)}</b><span>${dot(t)}${esc(t.artist || 'Artiste inconnu')}${(x => x && x.lvl != null ? ' · ' + regName(p, x) + (x.ev ? ' · ' + REG_EVN[x.evType] : '') : '')(cqOf(t))}</span></div><span class="d">${fmt(t.dur)}</span></li>`; }).join('');
+    return `<li class="tr${on ? ' on' : ''}" data-i="${i}" data-id="${t.id}" style="--i:${i}">${on ? eqHTML : `<span class="n">${i + 1}</span>`}<div class="m" data-play><b>${esc(t.title)}</b><span>${dot(t)}${esc(t.artist || 'Artiste inconnu')}${(x => x && x.lvl != null ? ' · ' + regName(p, x) + (x.ev ? ' · ' + REG_EVN[x.evType] : '') : '')(cqOf(t))}</span></div><span class="d">${fmt(t.dur)}</span>${rxOK && t.ro ? `<button class="rx9k" data-rxi="${i}" aria-label="Réagir à ${esc(t.title)}" aria-haspopup="dialog" aria-expanded="false">⋯</button>` : ''}</li>`; }).join('');
   openSheet('scan', `<div class="sh" style="margin:0"><div></div><button class="x" data-close aria-label="Fermer">${ICON.x}</button></div>
-    <div class="ph2">${privateView ? '<span class="pd-lock" aria-hidden="true">🔒</span>' : ''}<h2 id="pName" ${ro ? '' : 'title="Renommer"'}>${esc(p.name)}</h2>
+    <div class="ph2">${privateView ? '<span class="pd-lock" aria-hidden="true">🔒</span>' : ''}${rxOK ? '<div class="ph2t">' : ''}<h2 id="pName" ${ro ? '' : 'title="Renommer"'}>${esc(p.name)}</h2>${rxOK ? '<button class="rx9k" id="sRxK" aria-label="Réagir à cette playlist" aria-haspopup="dialog" aria-expanded="false">⋯</button></div>' : ''}
       <p>${plural(tr.length, 'titre')}${scLinks(p.links).length ? ' · ' + plural(scLinks(p.links).length, 'lien SoundCloud', 'liens SoundCloud') : ''}${dur ? ' · ' + fmtLong(dur) : ''}${live ? ' · <span style="color:#4aa3ff">en écoute</span>' : ''}${(n9 => n9 ? ' · ✦ ' + plural(n9, 'réaction') : '')(pd9Count(p))}</p>${(() => { const EI = eraInfo(p); if (EI.e >= 6) return '<p class="eran">' + esc(eraName(p)) + ' · ère finale</p><p class="eran" style="opacity:.7">' + EI.counts + '</p>'; return `<div class="erab"><i style="width:${Math.round(EI.pc * 100)}%"></i></div><p class="eran">${esc(eraName(p))} · ${EI.need}</p><p class="eran" style="opacity:.7">${EI.counts}</p>`; })()}</div>
     <div class="pact2">${ro ? `${p.gd ? `<button class="btn pri" id="sAlb">${ICON.play}Écouter</button>` : ''}<button class="btn${p.gd ? '' : ' pri'}" id="sLand">${ICON.land}Explorer</button>${privateView ? '<span class="chip" aria-label="Planète verrouillée">🔒 Privée · écoute et copie verrouillées</span>' : `${p.gd ? '' : `<button class="btn" id="sRemote">${ICON.play}Écouter</button>`}<button class="btn" id="sCopy">${ICON.plus}Copier</button>`}`
       : tr.length ? `<button class="btn pri" id="sPlay">${live ? ICON.pauseS + 'Pause' : ICON.play + 'Lecture'}</button><button class="btn" id="sShuf">${ICON.shuf}Aléatoire</button>`
       : scLinks(p.links).length ? `<button class="btn pri" id="sScPlay">${ICON.play}Écouter</button><button class="btn" id="sScAdd">${ICON_SC}SoundCloud</button>` : `<label class="btn pri">${ICON.file}Mes fichiers${imp}</label><button class="btn" id="sScAdd">${ICON_SC}SoundCloud</button>`}<button class="icb" id="sMore" aria-label="Plus">⋯</button></div>
-    ${ro && !privateView && (p.tracksRO || []).length ? `<div class="rx9p" id="sRxRow"><span>Réagir à cette playlist</span>${pd9Grid(true)}<button class="chip rx9c" id="sRx">✦ Réagir à un titre…</button></div>` : ''}
     <div class="more off" id="pMore">${ro ? `<button id="sSig">${ICON.signal}Envoyer un signal</button>` : `<label>${ICON.file}Importer de la musique${imp}</label><button id="sScAdd">${ICON_SC}Ajouter depuis SoundCloud</button>${TRACKS.size ? `<button id="sAdd">${ICON.plus}Ajouter depuis ma musique</button>` : ''}
       <button id="sPublishAudio">☁ Partager les fichiers audio publics</button><button id="sPrivacy">${p.isPublic === false ? "◯ Rendre cette playlist publique" : "◉ Rendre cette playlist privée"}</button><button id="sRemoveTrack">${ICON.x}Retirer un titre de cette planète</button><button id="sRen">${ICON.forge}Renommer</button><button id="sLand">${ICON.land}Explorer la planète</button><button id="sForge">${ICON.forge}Façonner</button>${tr.length ? `<button id="sDna">${ICON.shuf}Accorder au son</button>` : ''}`}
       <dl class="spec">${rows.map(r => `<div><dt>${r[0]}</dt><dd class="${r[2] || ''}">${esc(r[1])}${r[3] || ''}</dd></div>`).join('')}</dl></div>
     ${tr.length ? `<ul class="list" id="pList">${rowsHTML2}</ul>` : ''}${scSection(p, ro)}${tr.length || scLinks(p.links).length ? '' : ro ? '<div class="empty">Aucun titre visible.</div>' : '<div class="empty">Planète vide.</div>'}`, () => {
     const on = (id, f) => sbody.querySelectorAll('#' + id).forEach(e => e.onclick = f);
-    on('sMore', () => { $('#pMore').classList.toggle('off'); sfx('tick'); }); pd9Bind($('#sRxRow'), () => ({o: ownerId, p: p.id, pn: p.name, t: 'playlist'})); on('sRx', () => pd9Sheet(ownerId, VIEW, {p: p.id})); try { pdScBindSheet(p, fromLib, ro); } catch(e){ console.warn('SoundCloud', e); }
+    on('sMore', () => { $('#pMore').classList.toggle('off'); sfx('tick'); }); on('sRxK', e => pd9Menu(e.currentTarget, 'Réagir à cette playlist', () => ({o: ownerId, p: p.id, pn: p.name, t: 'playlist'}))); try { pdScBindSheet(p, fromLib, ro); } catch(e){ console.warn('SoundCloud', e); }
     on('sPrivacy', async () => { const wasPublic=p.isPublic!==false; if(wasPublic && !(await pdRevokePlanet(p))){toast('Impossible de révoquer les fichiers publics : confidentialité inchangée');return;} p.isPublic=!wasPublic; save(); if(remoteReady) publishPublicGalaxy(); if(p.isPublic) pdAutoShareSoon(3000); toast(p.isPublic ? 'Playlist publique · ses morceaux seront partagés automatiquement' : 'Playlist privée · audio partagé révoqué'); openPlaylist(p, fromLib); });
     on('sPublishAudio', async () => { if(p.isPublic===false){toast('Rends cette planète publique avant de partager son audio');return;} if(!confirm('Publier les fichiers audio de cette planète pour une écoute par tous, y compris les visiteurs ? Vérifie que tu possèdes les droits de partage.'))return; await pdPublishPlanetAudio(p); });
     on('sRemote',()=>pdPlayRemotePlanet(p,0)); on('sLand', () => { if (fromLib && mode === 'system') focusOn(p.id); land(p); }); on('sCopy', () => copyPlanet(p)); on('sAlb', () => playAlbum(0)); on('sAdd', () => openPicker(p, null)); on('sSig', () => composeSignal(ownerId, VIEW));
@@ -4591,6 +4601,7 @@ function openPlaylist(p, fromLib){
     on('pName', ren); on('sRen', ren);
     sbody.querySelectorAll('.pimp').forEach(im => im.onchange = e => importFiles(e.target.files, p).then(() => { if (sheetKind === 'scan') openPlaylist(p, fromLib); }));
     if ($('#pList') && p.gd) $('#pList').onclick = e => { const li = e.target.closest('.tr'); if (li) playAlbum(+li.dataset.i); };
+    if (rxOK && $('#pList')) $('#pList').addEventListener('click', e => { const k = e.target.closest('.rx9k'); if (!k) return; e.stopImmediatePropagation(); const x = (p.tracksRO || [])[+k.dataset.rxi]; if (x) pd9Menu(k, 'Réagir · ' + x[0], () => pd9TrackTg(ownerId, p.id, p.name, x[0], x[1])); }, true);
     const L = $('#pList'); if (L && !ro) L.onclick = e => { const li = e.target.closest('.tr'); if (!li) return; highlightTrack(p, li.dataset.id); playList(p.tracks, +li.dataset.i, p.id); setTimeout(() => sheetKind === 'scan' && openPlaylist(p, fromLib), 150); };
     else if (L && !p.gd) L.onclick = e => { const li = e.target.closest('.tr'); if (!li) return; if(p.isPublic===false){toast('🔒 Cette planète est privée');return;} pdPlayRemotePlanet(p,+li.dataset.i); };
     if (ro && !p.gd && !privateView) pdShMark(p);
@@ -4598,12 +4609,12 @@ function openPlaylist(p, fromLib){
 }
 function openPlayer(){
   const t = TRACKS.get(Q[qi]); if (!t){ openLibrary(); return; } const p = SYS.planets.find(x => x.id === qPlanet);
-  openSheet('player', `<div class="nph"><div style="flex:1;overflow:hidden"><h2>${esc(t.title)}</h2><p class="note" style="margin:2px 0 0">${esc(t.artist || 'Artiste inconnu')}${p ? ' · ' + esc(p.name) : ''}${srcTag(t)}</p></div><button class="x" data-close aria-label="Fermer">${ICON.x}</button></div>
+  openSheet('player', `<div class="nph"><div style="flex:1;overflow:hidden"><h2>${esc(t.title)}</h2><p class="note" style="margin:2px 0 0">${esc(t.artist || 'Artiste inconnu')}${p ? ' · ' + esc(p.name) : ''}${srcTag(t)}</p></div>${pd9PlayTarget() ? '<button class="rx9k" id="npRxK" aria-label="Réagir à ce titre" aria-haspopup="dialog" aria-expanded="false">⋯</button>' : ''}<button class="x" data-close aria-label="Fermer">${ICON.x}</button></div>
     <input type="range" class="scrub" id="npR" min="0" max="1000" value="0" aria-label="Position"><div class="times"><span id="npC">0:00</span><span id="npD">${fmt(au.duration) || fmt(t.dur)}</span></div>
     <div class="ctrls"><button class="icb${shuf ? ' on' : ''}" id="npS" aria-label="Aléatoire">${ICON.shuf}</button><button class="icb" id="npP" aria-label="Précédent">${ICON.prev}</button>
       <button class="playbig" id="npX" aria-label="Lecture">${au.paused ? ICON.play : ICON.pauseS}</button><button class="icb" id="npN" aria-label="Suivant">${ICON.next}</button><button class="icb" id="npG" aria-label="Voir la planète">${ICON.land}</button></div>
-    ${pdDurRow()}${pd9PlayTarget() ? `<div class="rx9p" id="npRx"><span>Réagir · ${esc(t.title)}</span>${pd9Grid(true)}</div>` : ''}<div class="row shr"><button class="btn wide" id="npStory">${ICON_SHARE}Story</button><button class="btn wide" id="npWa">WhatsApp</button><button class="btn wide" id="npTxt">Partager</button></div>`, () => {
-    pdDurBind(); pd9Bind($('#npRx'), pd9PlayTarget); $('#npStory').onclick = () => { PDWA = false; shareStory(); }; { const wb = $('#npWa'); if (wb) wb.onclick = () => { PDWA = true; shareStory(); }; } $('#npTxt').onclick = () => shareText();
+    ${pdDurRow()}<div class="row shr"><button class="btn wide" id="npStory">${ICON_SHARE}Story</button><button class="btn wide" id="npWa">WhatsApp</button><button class="btn wide" id="npTxt">Partager</button></div>`, () => {
+    pdDurBind(); { const k = $('#npRxK'); if (k) k.onclick = () => pd9Menu(k, 'Réagir · ' + t.title, pd9PlayTarget); } $('#npStory').onclick = () => { PDWA = false; shareStory(); }; { const wb = $('#npWa'); if (wb) wb.onclick = () => { PDWA = true; shareStory(); }; } $('#npTxt').onclick = () => shareText();
     $('#npP').onclick = () => { if (au.currentTime > 3) au.currentTime = 0; else next(-1); setTimeout(openPlayer, 120); };
     $('#npN').onclick = () => { next(1); setTimeout(openPlayer, 120); };
     $('#npX').onclick = () => { if (au.paused) au.play().catch(() => {}); else au.pause(); setTimeout(openPlayer, 80); };
@@ -7121,8 +7132,32 @@ function pd9PlayTarget(){ const id = Q[qi], t = id && TRACKS.get(id); if (!t) re
 function pd9Grid(row){ const em = PD9_RX.filter(r => !r[1]), tx = PD9_RX.filter(r => r[1]);
   const E = em.map((r, i) => `<button class="rx9b e" data-rx="${r[0]}" style="--k:${i}" aria-label="Réagir ${r[2]}"><span>${r[2]}</span></button>`).join(''), T = tx.map(r => `<button class="rx9b t" data-rx="${r[0]}"><span>${r[2]}</span>${esc(r[1])}</button>`).join('');
   return row ? `<div class="rx9row" role="group" aria-label="Réactions">${E}${T}</div>` : `<div class="rx9" role="group" aria-label="Réactions"><div class="rx9e">${E}</div><div class="rx9t">${T}</div></div>`; }
-function pd9Bind(root, tgf){ if (!root) return; root.addEventListener('click', async e => { const b = e.target.closest('[data-rx]'); if (!b || !root.contains(b)) return; const tg = tgf(); if (!tg){ toast('Choisis d’abord la playlist ou un titre'); return; }
-  b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); try { sfx('tick'); } catch(_){} if (await pd9React(tg, b.dataset.rx)) b.classList.add('sent'); }); }
+function pd9Bind(root, tgf, onOk){ if (!root) return; root.addEventListener('click', async e => { const b = e.target.closest('[data-rx]'); if (!b || !root.contains(b)) return; const tg = tgf(); if (!tg){ toast('Choisis d’abord la playlist ou un titre'); return; }
+  b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); try { sfx('tick'); } catch(_){} if (await pd9React(tg, b.dataset.rx)){ b.classList.add('sent'); if (onOk) onOk(b); } }); }
+/* V9 · fenêtre de réactions ouverte par « ⋯ » (fiche d'une playlist, ses morceaux, lecteur, album) : sous le bouton s'il y a la place,
+   sinon au-dessus ; un toucher ailleurs la ferme sans rien déclencher derrière ; une réaction envoyée la referme */
+var PD9M = null;
+function pd9MenuClose(){ const M = PD9M; if (!M || !M.el || !M.btn) return; M.el.classList.remove('on'); M.btn.setAttribute('aria-expanded', 'false'); M.btn = null; }
+// toucher hors du menu : il se ferme sans agir dessous (3D, boutons de la fiche) ; toucher un autre « ⋯ » ouvre directement le sien
+function pd9MenuOut(e){ const M = PD9M; if (!M.btn){ M.eat = 0; return; } if (M.el.contains(e.target) || M.btn.contains(e.target)) return;
+  const k = e.target.closest && e.target.closest('.rx9k'); pd9MenuClose(); if (k) return; e.stopPropagation(); M.eat = performance.now(); }
+function pd9Menu(btn, label, tgf){ if (!btn) return; if (!PD9M){ PD9M = {el: null, btn: null, tg: null, eat: 0};
+    document.addEventListener('pointerdown', pd9MenuOut, true);
+    document.addEventListener('click', e => { if (PD9M.eat && performance.now() - PD9M.eat < 800){ PD9M.eat = 0; e.stopPropagation(); e.preventDefault(); } }, true);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && PD9M.btn){ e.stopPropagation(); pd9MenuClose(); } }, true);
+    addEventListener('resize', pd9MenuClose); sbody.addEventListener('scroll', pd9MenuClose, {passive: true}); }
+  const M = PD9M; if (M.btn === btn){ pd9MenuClose(); return; } pd9MenuClose();
+  if (!M.el){ M.el = document.createElement('div'); M.el.id = 'rx9m'; M.el.setAttribute('role', 'dialog'); document.body.appendChild(M.el); pd9Bind(M.el, () => M.tg && M.tg(), () => setTimeout(pd9MenuClose, 650)); }
+  M.tg = tgf; M.el.setAttribute('aria-label', label); M.el.innerHTML = `<b>${esc(label)}</b>${pd9Grid()}`; M.el.style.maxHeight = '';
+  // sous le bouton si la place suffit, sinon au-dessus ; sur un écran trop court, le côté le plus grand et le menu défile
+  const r = btn.getBoundingClientRect(), w = M.el.offsetWidth, vw = innerWidth, vh = innerHeight, roomB = vh - 12 - r.bottom - 8, roomA = r.top - 8 - 12;
+  let h = M.el.offsetHeight; const below = h <= roomB || (h > roomA && roomB >= roomA), room = below ? roomB : roomA;
+  if (h > room){ M.el.style.maxHeight = Math.max(140, Math.floor(room)) + 'px'; h = M.el.offsetHeight; }
+  const left = clamp(r.right - w, 12, Math.max(12, vw - w - 12)), top = below ? r.bottom + 8 : Math.max(12, r.top - 8 - h);
+  M.el.style.left = Math.round(left) + 'px'; M.el.style.top = Math.round(top) + 'px'; M.el.style.setProperty('--ox', Math.round(r.left + r.width / 2 - left) + 'px'); M.el.style.setProperty('--oy', below ? '0px' : '100%');
+  M.btn = btn; btn.setAttribute('aria-expanded', 'true'); void M.el.offsetWidth; M.el.classList.add('on'); try { sfx('tick'); } catch(_){} }
+// cible d'une réaction à un morceau listé : si c'est lui qu'on écoute, la réaction garde le moment du morceau
+function pd9TrackTg(o, pid, pn, ti, ar){ const z = pd9Key(ti, ar), pt = pd9PlayTarget(); return pt && pt.o === o && pt.z === z ? pt : {o, p: pid, pn, t: 'track', ti, ar: ar || '', z, live: false}; }
 function pd9Sheet(o, V, pre){ // réagir à la musique d'une galaxie : toute une playlist ou un seul titre ; ou lui faire écouter un de tes titres
   if (!V) return; const ps = (V.planets || []).filter(p => p.isPublic !== false && pdRoList(p).length); const canMsg = pdUuid(o) && !guestMode && !!authUser;
   let pi = Math.max(0, pre && pre.p ? ps.findIndex(p => p.id === pre.p) : 0), z = pre && pre.z ? pre.z : '', tab = ps.length ? 'their' : 'mine', pick = null;
