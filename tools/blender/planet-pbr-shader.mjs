@@ -9,9 +9,9 @@ uniform sampler2D uPDRoughness;
 uniform float uPDStrength;
 uniform float uPDLongitude;
 uniform float uPDNormalY;
-vec3 pdPBRSurface(vec3 sphereNormal, float lod, out float roughness) {
+vec3 pdPBRDetail(vec3 sphereNormal, float lod, float baseRoughness, out float roughness) {
   vec3 n = normalize(sphereNormal);
-  roughness = 0.5;
+  roughness = baseRoughness;
   if (uPDStrength <= 0.0) return n;
   float radial = length(n.xz);
   float longitude = atan(n.z, n.x);
@@ -22,8 +22,30 @@ vec3 pdPBRSurface(vec3 sphereNormal, float lod, out float roughness) {
   vec3 detail = textureLod(uPDNormal,uv,max(0.0,lod)).xyz*2.0-1.0;
   detail.y *= uPDNormalY;
   float weight = clamp(uPDStrength,0.0,1.0)*smoothstep(0.015,0.12,radial);
-  roughness = mix(0.5,clamp(textureLod(uPDRoughness,uv,max(0.0,lod)).r,0.08,1.0),weight);
+  roughness = mix(baseRoughness,clamp(textureLod(uPDRoughness,uv,max(0.0,lod)).r,0.08,1.0),weight);
   return normalize(mix(n,normalize(t*detail.x+b*detail.y+n*max(detail.z,0.01)),weight));
+}
+// Backward-compatible entry point for standalone previews.
+vec3 pdPBRSurface(vec3 sphereNormal, float lod, out float roughness) {
+  return pdPBRDetail(sphereNormal,lod,0.5,roughness);
+}
+// Compose detail onto the artistic normal in the same sphere-space frame.
+// No displacement, UV mutation or dependency on Claude's breath uniform.
+vec3 pdPBRCompose(vec3 sphereNormal, vec3 artisticNormal, float lod,
+                  float baseRoughness, out float roughness) {
+  vec3 n = normalize(sphereNormal);
+  vec3 a = normalize(artisticNormal);
+  vec3 d = pdPBRDetail(n,lod,baseRoughness,roughness);
+  if (uPDStrength <= 0.0) return a;
+  // Shortest-arc rotation maps the radial normal to the artistic normal.
+  vec3 v = cross(n,a);
+  float c = dot(n,a);
+  if (c < -0.999) return a;
+  return normalize(d + cross(v,d) + cross(v,cross(v,d))/(1.0+c));
+}
+float pdPBRBreathRoughness(float roughness, float frontWeight, float signedResponse) {
+  return clamp(roughness + clamp(frontWeight,0.0,1.0) *
+               clamp(signedResponse,-0.25,0.25),0.08,1.0);
 }
 `;
 
@@ -33,7 +55,7 @@ vec3 pdPBRSurface(vec3 sphereNormal, float lod, out float roughness) {
 export function createPlanetPBRBinding(gl, program, units, {reservedUnits=[]}={}) {
   const [normalUnit, roughUnit] = units;
   const max = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
-  const reserved = new Set([8,9,10,11,12,13,...reservedUnits]);
+  const reserved = new Set([0,1,2,3,8,9,10,11,12,13,14,15,...reservedUnits]);
   if (normalUnit === roughUnit || [normalUnit,roughUnit].some(u =>
     !Number.isInteger(u) || u<0 || u>=max || reserved.has(u))) return null;
   const names = ["uPDNormal","uPDRoughness","uPDStrength","uPDLongitude","uPDNormalY"];
