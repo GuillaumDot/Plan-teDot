@@ -775,6 +775,15 @@ const cross = (a, b) => [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1
 const norm = a => { const l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0]/l, a[1]/l, a[2]/l]; };
 const ry = (t, v) => { const c = Math.cos(t), s = Math.sin(t); return [c*v[0] + s*v[2], v[1], -s*v[0] + c*v[2]]; };
 const rz = (t, v) => { const c = Math.cos(t), s = Math.sin(t); return [c*v[0] - s*v[1], s*v[0] + c*v[1], v[2]]; };
+/* V9 · pivot libre à 360° : chaque planète peut porter une rotation d'utilisateur U (quaternion p._q, [x, y, z, w]),
+   appliquée dans le repère du monde avant son inclinaison et sa rotation propre : s = rotY(ang)·rotZ(tilt)·U·w */
+const qMul = (a, b) => [a[3] * b[0] + a[0] * b[3] + a[1] * b[2] - a[2] * b[1], a[3] * b[1] - a[0] * b[2] + a[1] * b[3] + a[2] * b[0], a[3] * b[2] + a[0] * b[1] - a[1] * b[0] + a[2] * b[3], a[3] * b[3] - a[0] * b[0] - a[1] * b[1] - a[2] * b[2]];
+const qAx = (ax, an) => { const l = Math.hypot(ax[0], ax[1], ax[2]) || 1, k = Math.sin(an / 2) / l; return [ax[0] * k, ax[1] * k, ax[2] * k, Math.cos(an / 2)]; };
+const qRot = (q, v) => { const x = q[0], y = q[1], z = q[2], w = q[3], tx = 2 * (y * v[2] - z * v[1]), ty = 2 * (z * v[0] - x * v[2]), tz = 2 * (x * v[1] - y * v[0]);
+  return [v[0] + w * tx + y * tz - z * ty, v[1] + w * ty + z * tx - x * tz, v[2] + w * tz + x * ty - y * tx]; };
+const pdU = (p, v) => p && p._q ? qRot(p._q, v) : v;                                         // monde → repère naturel de la planète
+const pdUt = (p, v) => p && p._q ? qRot([-p._q[0], -p._q[1], -p._q[2], p._q[3]], v) : v;     // repère naturel → monde
+const PIV = {p: null, ax: [0, 1, 0], w: 0, t: 0};   // élan du pivot (planète, axe du monde, rad/s)
 const wrapA = (a, ref) => ref + ((((a - ref) % TAU) + TAU + Math.PI) % TAU) - Math.PI;
 const shuffle = a => { a = [...a]; for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const ICON = {
@@ -963,7 +972,7 @@ function save(delay){
     if (saveBusy){ saveAgain = true; return; }   // V6: a change made during a save is saved right after, never dropped
     saveBusy = true;
     try {
-      const payload = JSON.parse(JSON.stringify(SYS, (key, value) => key === '_la' || key === '_lt' ? undefined : value));
+      const payload = JSON.parse(JSON.stringify(SYS, (key, value) => key === '_la' || key === '_lt' || key === '_q' ? undefined : value));
       payload.meta = metaPack();
       const {error} = await sb.from('user_systems').upsert({user_id: authUser.id, system: payload, updated_at: new Date().toISOString()}, {onConflict:'user_id'});
       if (error) console.warn('PlanèteDot sync:', error.message);
@@ -3102,9 +3111,9 @@ function highlightTrack(p, key){ if (!p) return; HL = {pid: p.id, key, t0: time}
 setInterval(() => { for (let z = ZUP.length - 1; z >= 0; z--) if (time - ZUP[z].t > 8) ZUP.splice(z, 1); }, 3000);
 function hlTick(dt){ if (!HL || !VIEW) return; if (time - HL.t0 > 15.5){ HL = null; return; } const i = VIEW.planets.findIndex(x => x.id === HL.pid); if (i < 0 || focus !== HL.pid) return;
   const p = VIEW.planets[i], cq = conquest(p); hlApply(p, cq); const x = cq.items[cq.sel]; if (!x) return;
-  const u = rz(p.tilt || 0, [-CF[0], -CF[1], -CF[2]]); const tgt = wrapA(Math.atan2(x.dir[0], x.dir[2]) - Math.atan2(u[0], u[2]), p._ang || 0);
+  const u = rz(p.tilt || 0, pdU(p, [-CF[0], -CF[1], -CF[2]])); const tgt = wrapA(Math.atan2(x.dir[0], x.dir[2]) - Math.atan2(u[0], u[2]), p._ang || 0);
   p._ang = lerp(p._ang || 0, tgt, 1 - Math.exp(-dt * 2.4)); if (mode !== 'planet') cam.g.pitch = lerp(cam.g.pitch, clamp(.12 + Math.asin(clamp(x.dir[1], -1, 1)) * .7, -.3, .95), 1 - Math.exp(-dt * 2));
-  const pos = planetPos(p, i), R = bodyR(p), w = rz(-(p.tilt || 0), ry(-(p._ang || 0), x.dir)), q = project([pos[0] + w[0] * R, pos[1] + w[1] * R, pos[2] + w[2] * R]), vis = dot(w, [-CF[0], -CF[1], -CF[2]]);
+  const pos = planetPos(p, i), R = bodyR(p), w = pdUt(p, rz(-(p.tilt || 0), ry(-(p._ang || 0), x.dir))), q = project([pos[0] + w[0] * R, pos[1] + w[1] * R, pos[2] + w[2] * R]), vis = dot(w, [-CF[0], -CF[1], -CF[2]]);
   if (q && vis > .15 && cq.hi > .05){ const t = TRACKS.get(x.id); const title = t ? t.title : x.title || ''; const pc = Math.max(1, Math.round(x.share * 100));
     place(lab('hl', `<b>${esc(title)}</b>${regName(p, x)}${regNext(p, x) ? ' · ' + regNext(p, x) : ''}`, 'terr'), q.x, q.y - 12 * RS, cq.hi * clamp((vis - .15) * 4, 0, 1)); } }
 const bodyR = p => (.45 + p.size * .42) * growth(p);
@@ -3127,7 +3136,8 @@ function advanceOrbits(sys, dt){ sys.planets.forEach((p, i) => { const R = orbit
   const el = orbEl(p), ca = 1 + el.e * Math.cos((p._orb ?? p.phase) - el.w);
   p._orb = (p._orb ?? p.phase) + dt * (.55 / Math.pow(R, 1.5)) * (.22 + 1.9 * p._a) * ca * ca / Math.pow(1 - el.e * el.e, 1.5);
   if (p._flash) p._flash = Math.max(0, p._flash - dt * 2.6);
-  if (!(mode === 'planet' && p.id === focus) && !(HL && HL.pid === p.id && focus === p.id)) p._ang = (p._ang ?? p.seed) + dt * p.spin * .18 * (.35 + .65 * p._a); }); }
+  if (!(mode === 'planet' && p.id === focus) && !(HL && HL.pid === p.id && focus === p.id)) p._ang = (p._ang ?? p.seed) + dt * p.spin * .18 * (.35 + .65 * p._a);
+  if (p._q && !(mode === 'planet' && p.id === focus) && !pdPivotHeld(p)) pdRelax(p, dt); }); }
 function fitDist(sys){ const n = Math.max(sys.planets.length, 1); const maxR = orbitR(n - 1) + 1.8; const asp = clamp(W / H, .6, 1.25); return clamp(maxR / (Math.tan(FOV / 2) * asp) * .95, 12, 500); }
 let pz = 1;
 function overview(){ if (focus && mode === 'system') PDA.nav('depart'); pz = 1; focus = null; cam.g.t = [0,0,0]; cam.g.dist = fitDist(VIEW); cam.g.pitch = .72; }
@@ -3162,6 +3172,9 @@ function pdFrame(x, y){ const asp = W / H; let dx = (x / W * 2 - 1) * asp / P5, 
   return F; }
 const pdInF = (F, v, out, k) => { const a = v[k], b = v[k + 1], c = v[k + 2]; out[k] = F[0] * a + F[1] * b + F[2] * c; out[k + 1] = F[3] * a + F[4] * b + F[5] * c; out[k + 2] = F[6] * a + F[7] * b + F[8] * c; return out; };
 function pdFrameW(x, y){ pdFrame(x, y); const V = PDB_VW; return [[V[0], V[1], V[2]], [V[3], V[4], V[5]], [V[6], V[7], V[8]]]; }
+/* V9 · U replié dans le repère de vue de l'astre : chaque colonne c (axe de vue exprimé dans le monde) devient U·c */
+const PDB_VQ = new Float32Array(9);
+function pdVWq(q, V){ for (let c = 0; c < 9; c += 3){ const r = qRot(q, [V[c], V[c + 1], V[c + 2]]); PDB_VQ[c] = r[0]; PDB_VQ[c + 1] = r[1]; PDB_VQ[c + 2] = r[2]; } return PDB_VQ; }
 function drawBody(o){
   const u = SP.u;
   if (o.kind === 2){ if (!(o.alpha > .004) || !(o.r > .3)) return; if (GB.on){ glowAdd(o); return; } gl.uniform1i(u.uKind, 2); gl.uniform2f(u.uC, o.x, o.y); gl.uniform1f(u.uR, o.r); gl.uniform1f(u.uQ, o.q); gl.uniform1f(u.uAsp, 1); gl.uniform1f(u.uIrr, 0);
@@ -3177,7 +3190,7 @@ function drawBody(o){
   gl.uniform1i(u.uTerN, o.terN || 0); gl.uniform1i(u.uSel, o.sel ?? -1);
   gl.uniform1f(u.uPlay, o.play || 0); gl.uniform1f(u.uBeat, o.beat || 0); gl.uniform1f(u.uLv, o.lv || 0); gl.uniform1f(u.uBs, o.bs || 0); if (u.uSp) gl.uniform4fv(u.uSp, o.spb || [0, 0, 0, 0]); gl.uniform1f(u.uBt, o.bt ?? 9); gl.uniform1f(u.uSunI, o.sunI ?? 1); gl.uniform3fv(u.uSun, o.sun || [1, 1, 1]); gl.uniform1f(u.uIrr, o.irr || 0);
   if (o.terN){ gl.uniform4fv(u.uTer, o.ter); gl.uniform4fv(u.uTerB, o.terB); }
-  gl.uniformMatrix3fv(u.uVW, false, fr ? PDB_VW : (o.vw || VWM)); if (o.pd9) pd9Seen(o, fr ? PDB_VW : (o.vw || VWM)); gl.uniform1i(u.uOccN, o.occN || 0); if (o.occN){ OCC12.fill(0); for (let i = 0; i < 12 && i < o.occ.length; i++) OCC12[i] = o.occ[i]; if (fr) for (let k = 0; k < 12; k += 4) pdInF(fr, OCC12, OCC12, k); gl.uniform4fv(u.uOcc, OCC12); }
+  const vwU = o.uq ? pdVWq(o.uq, fr ? PDB_VW : (o.vw || VWM)) : (fr ? PDB_VW : (o.vw || VWM)); gl.uniformMatrix3fv(u.uVW, false, vwU); if (o.pd9) pd9Seen(o, vwU); gl.uniform1i(u.uOccN, o.occN || 0); if (o.occN){ OCC12.fill(0); for (let i = 0; i < 12 && i < o.occ.length; i++) OCC12[i] = o.occ[i]; if (fr) for (let k = 0; k < 12; k += 4) pdInF(fr, OCC12, OCC12, k); gl.uniform4fv(u.uOcc, OCC12); }
   gl.uniform1f(u.uArch, o.arch || 0); gl.uniform1f(u.uQual, QUAL); gl.uniform1f(u.uEvo, o.evo || 0); if (o.evo) gl.uniform3fv(u.uEvoD, o.evoD); gl.uniform1f(u.uWx, o.wx || 0); gl.uniform1f(u.uFlash, o.flash || 0);
   gl.uniform1i(u.uTkN, o.cq ? o.cq.n : 0); gl.uniform1i(u.uTkSel, o.cq ? o.cq.sel : -1); gl.uniform1f(u.uTkHi, o.cq ? o.cq.hi : 0); if (o.cq && o.cq.n){ gl.uniform4fv(u.uTk, o.cq.tk); gl.uniform4fv(u.uTkB, o.cq.tkB); }
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -3232,13 +3245,17 @@ function gravityGrid(sys){
 }
 function planetBody0(p, pos, pr, r, lvl, extra){ const cq0 = conquest(p), lm0 = liveMix(p, cq0), lv0 = isLive(p);
   const Lw = norm([-pos[0], -pos[1], -pos[2]]); const L = norm(toView(Lw));
-  const ringS = clamp(Math.abs(Math.sin(cam.pitch + p.ringTilt)), .06, 1);
+  let ringS = clamp(Math.abs(Math.sin(cam.pitch + p.ringTilt)), .06, 1), roll = p.ringRoll;
+  if (p._q && p.ring){ const V0 = Math.sqrt(Math.max(0, 1 - ringS * ringS)), nv = [Math.sin(roll) * V0, Math.cos(roll) * V0, ringS], M = VWM;   // V9 : les anneaux suivent le pivot
+    const nw = pdUt(p, [M[0] * nv[0] + M[3] * nv[1] + M[6] * nv[2], M[1] * nv[0] + M[4] * nv[1] + M[7] * nv[2], M[2] * nv[0] + M[5] * nv[1] + M[8] * nv[2]]);
+    let a = M[0] * nw[0] + M[1] * nw[1] + M[2] * nw[2], b = M[3] * nw[0] + M[4] * nw[1] + M[5] * nw[2], c = M[6] * nw[0] + M[7] * nw[1] + M[8] * nw[2]; if (c < 0){ a = -a; b = -b; c = -c; }
+    roll = Math.atan2(a, b); ringS = clamp(c, .06, 1); }
   const reach = p.ring === 2 ? 2.45 : p.ring === 1 ? 1.85 : 1;
   return Object.assign({w: pr.w, kind: 0, type: p.type, x: pr.x, y: pr.y, r, q: Math.max(reach + .05, 1 + p.atmo * .55 + .12),
     c1: hsl(...p.c1), c2: hsl(...p.c2), at: hsl(p.atH, .85, .62), atmo: p.atmo, seed: p.seed, ang: p._ang || 0, tilt: p.tilt,
-    roll: p.ringRoll, ringS, rk: p.ring ? [1.32, p.ring === 2 ? 2.4 : 1.8] : null, rc: hsl(p.ringH, .45, .72), L, audio: 0, clouds: p.clouds,
+    roll, ringS, rk: p.ring ? [1.32, p.ring === 2 ? 2.4 : 1.8] : null, rc: hsl(p.ringH, .45, .72), L, audio: 0, clouds: p.clouds,
     stage: stageF(p), lc: LIGHTS[Math.max(0, pathOf(p)[0])], path: pathOf(p), alpha: starIgnite, reach,
-    play: lm0, beat: lv0 ? beatLvl : 0, lv: lv0 ? audioLvl : 0, bs: lv0 ? bassLvl : 0, spb: lv0 ? SPB : null, bt: lv0 ? time - beatT : 9, wx: stormLvl(p), flash: p._flash || 0, cq: cq0, pd9: p, sun: VIEW ? starCol(VIEW).map(v => .5 + v * .45) : [1, 1, 1], sunI: clamp(1.35 / Math.sqrt(Math.hypot(pos[0], pos[2]) / 3.4 + .55), .6, 1.05), irr: p.type === 10 ? .02 + .04 * (Math.abs(p.seed * 5.13) % 1) : 0}, extra || {});
+    play: lm0, beat: lv0 ? beatLvl : 0, lv: lv0 ? audioLvl : 0, bs: lv0 ? bassLvl : 0, spb: lv0 ? SPB : null, bt: lv0 ? time - beatT : 9, wx: stormLvl(p), flash: p._flash || 0, cq: cq0, pd9: p, uq: p._q || null, sun: VIEW ? starCol(VIEW).map(v => .5 + v * .45) : [1, 1, 1], sunI: clamp(1.35 / Math.sqrt(Math.hypot(pos[0], pos[2]) / 3.4 + .55), .6, 1.05), irr: p.type === 10 ? .02 + .04 * (Math.abs(p.seed * 5.13) % 1) : 0}, extra || {});
 }
 
 /* ================= labels ================= */
@@ -3500,11 +3517,11 @@ function renderSystem(dt, flyIn){ { const kT = 1 + Math.max(0, starR(VIEW) - .55
     satellites(p, pos, R, bodies);
     if (ZUP.length && !mk && VIEW === SYS){ const cqz = conquest(p), toE = norm([EYE[0] - pos[0], EYE[1] - pos[1], EYE[2] - pos[2]]);
       ZUP.forEach(z => { if (z.pid !== p.id) return; const u = time - z.t; if (u > 7) return; const x = cqz.map.get(z.id); if (!x || !x.dir) return;
-        const w = rz(-(p.tilt || 0), ry(-(p._ang || 0), x.dir)), f = dot(w, toE); const q = project([pos[0] + w[0] * R * 1.04, pos[1] + w[1] * R * 1.04, pos[2] + w[2] * R * 1.04]); if (!q) return;
+        const w = pdUt(p, rz(-(p.tilt || 0), ry(-(p._ang || 0), x.dir))), f = dot(w, toE); const q = project([pos[0] + w[0] * R * 1.04, pos[1] + w[1] * R * 1.04, pos[2] + w[2] * R * 1.04]); if (!q) return;
         const op = clamp(u / .6, 0, 1) * (1 - sstep(5.5, 7, u)) * sstep(.05, .3, f); if (op < .02) return;
         place(lab('zu' + z.id, `<b>${esc(z.n)}</b>${esc(z.title)}`, 'zu'), q.x, q.y - (14 + u * 3) * RS, op); }); }
     { const ev = EVO.find(x => x.pid === p.id); if (ev){ const u = (time - ev.t0) / 20; if (u > 1){ EVO.splice(EVO.indexOf(ev), 1); } else { const hc = hsl(p.c1[0], .6, .78);
-         if (!ev.d) ev.d = norm(ry(p._ang || 0, rz(p.tilt || 0, norm([EYE[0] - pos[0], EYE[1] - pos[1], EYE[2] - pos[2]])))); b.evo = Math.max(.001, u); b.evoD = new Float32Array(ev.d); } } }
+         if (!ev.d) ev.d = norm(ry(p._ang || 0, rz(p.tilt || 0, pdU(p, norm([EYE[0] - pos[0], EYE[1] - pos[1], EYE[2] - pos[2]]))))); b.evo = Math.max(.001, u); b.evoD = new Float32Array(ev.d); } } }
     if (!mk && stage(p) >= 4){ const nT = stage(p) - 2, hc2 = hsl(p.c1[0], .4, .85); for (let k = 0; k < nT; k++){ const a = time * (.6 + k * .07) + k * 2.4 + p.seed, rr = R * (1.3 + (k % 3) * .12), incl = .5 * Math.sin(k * 1.3 + p.seed);
         const q = project([pos[0] + Math.cos(a) * rr, pos[1] + Math.sin(a) * rr * incl, pos[2] + Math.sin(a) * rr]); if (q) bodies.push({w: q.w, kind: 2, x: q.x, y: q.y, r: Math.max(1 * RS, pxR(R * .025, q.w)), q: 1, c1: hc2, atmo: .15, alpha: .5 * starIgnite}); } }
     
@@ -3609,9 +3626,9 @@ function terrUniforms(p, mapA){
   return {ter, terB, terN: T.length, sel: selT, map: mapA};
 }
 function seedDir(t){ const la = t.lat, lo = t.lon; return [Math.cos(la) * Math.cos(lo), Math.sin(la), Math.cos(la) * Math.sin(lo)]; }
-function viewOf(p, s){ const w = rz(-p.tilt, ry(-(p._ang || 0), s)); if (curP && curP.p === p){ const F = pdFrameW(curP.x, curP.y); return [dot(w, F[0]), dot(w, F[1]), dot(w, F[2])]; } const z = [-CF[0], -CF[1], -CF[2]]; return [dot(w, CR), dot(w, CU), dot(w, z)]; }
-function surfOf(p, n){ if (curP && curP.p === p){ const F = pdFrameW(curP.x, curP.y); return ry(p._ang || 0, rz(p.tilt, [0, 1, 2].map(k => F[0][k] * n[0] + F[1][k] * n[1] + F[2][k] * n[2]))); }
-  const w = [CR[0] * n[0] + CU[0] * n[1] - CF[0] * n[2], CR[1] * n[0] + CU[1] * n[1] - CF[1] * n[2], CR[2] * n[0] + CU[2] * n[1] - CF[2] * n[2]]; return ry(p._ang || 0, rz(p.tilt, w)); }
+function viewOf(p, s){ const w = pdUt(p, rz(-p.tilt, ry(-(p._ang || 0), s))); if (curP && curP.p === p){ const F = pdFrameW(curP.x, curP.y); return [dot(w, F[0]), dot(w, F[1]), dot(w, F[2])]; } const z = [-CF[0], -CF[1], -CF[2]]; return [dot(w, CR), dot(w, CU), dot(w, z)]; }
+function surfOf(p, n){ if (curP && curP.p === p){ const F = pdFrameW(curP.x, curP.y); return ry(p._ang || 0, rz(p.tilt, pdU(p, [0, 1, 2].map(k => F[0][k] * n[0] + F[1][k] * n[1] + F[2][k] * n[2])))); }
+  const w = [CR[0] * n[0] + CU[0] * n[1] - CF[0] * n[2], CR[1] * n[0] + CU[1] * n[1] - CF[1] * n[2], CR[2] * n[0] + CU[2] * n[1] - CF[2] * n[2]]; return ry(p._ang || 0, rz(p.tilt, pdU(p, w))); }
 let mapA = 0, angT = null;
 function renderPlanet(dt){ PASS.clear();
   const sys = VIEW; const i = sys.planets.findIndex(x => x.id === focus); if (i < 0){ backToSystem(); return; }
@@ -3620,6 +3637,7 @@ function renderPlanet(dt){ PASS.clear();
   mapA = Math.min(1, mapA + dt * 1.2);
   if (angT !== null){ p._ang = lerp(p._ang || 0, angT, 1 - Math.exp(-dt * 4)); if (Math.abs(p._ang - angT) < .002) angT = null; }
   else if (!dragging) p._ang = (p._ang || 0) + dt * .03;
+  if (!dragging && PIV.w > .015 && PIV.p === p){ pdPivot(p, PIV.ax, PIV.w * Math.min(dt, .05)); PIV.w *= Math.exp(-Math.min(dt, .05) * 3); } else if (!dragging) PIV.w = 0;   // V9 : élan du doigt
   skyFromCam();
   drawBG(cam.yaw * .06, cam.pitch * .06, speedFx(), null, null, 1.35);
   const pos = planetPos(p, i, time), pr = project(pos); picks = []; labsBegin();
@@ -3649,7 +3667,7 @@ function tapPlanet(x, y){
 }
 function selectTerr(i, scroll){
   const p = curP ? curP.p : null; if (!p) return; if (selT !== i) PDA.nav('zone', {i}); selT = i; const t = p.terr[i]; if (!t) return;
-  const s = seedDir(t), u = rz(p.tilt, [-CF[0], -CF[1], -CF[2]]); angT = wrapA(Math.atan2(s[0], s[2]) - Math.atan2(u[0], u[2]), p._ang || 0);
+  const s = seedDir(t), u = rz(p.tilt, pdU(p, [-CF[0], -CF[1], -CF[2]])); angT = wrapA(Math.atan2(s[0], s[2]) - Math.atan2(u[0], u[2]), p._ang || 0);
   document.querySelectorAll('.mc').forEach(c => c.classList.toggle('sel', +c.dataset.i === i));
   if (scroll){ const c = document.querySelector(`.mc[data-i="${i}"]`); if (c) c.scrollIntoView({behavior: 'smooth', inline: 'center', block: 'nearest'}); }
 }
@@ -4026,7 +4044,7 @@ function cineCamera(dt, sys){ if (cine.album) return; if (cine.dir){ pdDirCam(dt
   const i = sys.planets.findIndex(p => p.id === cine.pid); if (i < 0){ exitCine(); return; }
   const p = sys.planets[i], pos = planetPos(p, i), R = bodyR(p) * 1.15; cine.t += dt;
   const lr = conquest(p).items.find(x => x.live), out = Math.atan2(pos[0], pos[2]); let yaw = out + .9, pitch = .25;
-  if (lr && lr.dir){ const w = rz(-(p.tilt || 0), ry(-(p._ang || 0), lr.dir)); yaw = Math.atan2(w[0], w[2]); pitch = clamp(Math.asin(clamp(w[1], -1, 1)) * .8, -.3, 1); }
+  if (lr && lr.dir){ const w = pdUt(p, rz(-(p.tilt || 0), ry(-(p._ang || 0), lr.dir))); yaw = Math.atan2(w[0], w[2]); pitch = clamp(Math.asin(clamp(w[1], -1, 1)) * .8, -.3, 1); }
   const fr = 40 * Math.PI / 180, th = Math.tan(fr / 2), d = Math.max(R / (.8 * th), R / (.86 * th * (W / H))) + R * .2;
   cam.g.t = pos; cam.g.yaw = wrapA(yaw + Math.sin(cine.t * .11) * .1, cam.yaw); cam.g.pitch = pitch + Math.sin(cine.t * .08) * .035; cam.g.dist = d * (1 - bassLvl * .01);
   FOV = lerp(FOV, fr, 1 - Math.exp(-dt * 1.2)); }
@@ -4082,10 +4100,20 @@ function arrive(){ setTimeout(() => document.body.classList.remove('pdT'), 380);
 }
 
 /* ================= input ================= */
+/* V9 · pivot à 360° : le doigt fait rouler la planète comme une boule (axe = perpendiculaire au geste, dans le plan de l'écran),
+   elle garde un peu d'élan, se tourne aussi à deux doigts, et reprend doucement sa pose naturelle quand on la quitte */
+function pdPivot(p, ax, an){ if (!p || !(Math.abs(an) > 1e-6)) return; const q = qMul(p._q || [0, 0, 0, 1], qAx(ax, -an)), l = Math.hypot(q[0], q[1], q[2], q[3]) || 1; p._q = [q[0] / l, q[1] / l, q[2] / l, q[3] / l]; }
+function pdDragPivot(dx, dy){ const p = curP && curP.p; if (!p) return; const an = Math.hypot(dx, dy) * clamp(1.15 / Math.max(60, (curP.r || 120) / Math.max(RS, .2)), .004, .012); if (an < 1e-5) return;
+  const F = pdFrameW(curP.x, curP.y), ax = [F[0][0] * dy + F[1][0] * dx, F[0][1] * dy + F[1][1] * dx, F[0][2] * dy + F[1][2] * dx]; pdPivot(p, ax, an);
+  const now = performance.now(), dts = clamp((now - (PIV.t || now - 16)) / 1000, .008, .1), w = Math.min(an / dts, 6); PIV.t = now;
+  PIV.w = PIV.p === p ? PIV.w * .45 + w * .55 : w; PIV.p = p; const l = Math.hypot(ax[0], ax[1], ax[2]) || 1; PIV.ax = [ax[0] / l, ax[1] / l, ax[2] / l]; }
+function pdPivotHeld(p){ return false; }   // étape 6 : un plan cinématique peut tenir la pose d'une planète
+function pdRelax(p, dt){ const q = p._q, k = 1 - Math.exp(-dt * 1.6), sg = q[3] < 0 ? -1 : 1, r = [q[0] * (1 - k), q[1] * (1 - k), q[2] * (1 - k), q[3] * (1 - k) + sg * k], l = Math.hypot(r[0], r[1], r[2], r[3]) || 1;
+  p._q = Math.abs(r[3] / l) > .99999 ? null : [r[0] / l, r[1] / l, r[2] / l, r[3] / l]; if (PIV.p === p) PIV.w = 0; }
 const ptrs = new Map(); let pinch = null, gestureMulti = false, dragging = false, lastInteract = performance.now();
 cv.addEventListener('pointerdown', e => { lastInteract = performance.now(); try { cv.setPointerCapture(e.pointerId); } catch(_){}
   ptrs.set(e.pointerId, {x: e.clientX, y: e.clientY, t0: performance.now(), moved: 0});
-  if (ptrs.size === 2){ gestureMulti = true; const [a, b] = [...ptrs.values()]; pinch = {d: Math.hypot(a.x - b.x, a.y - b.y), dist: cam.g.dist, pz}; } });
+  if (ptrs.size === 2){ gestureMulti = true; const [a, b] = [...ptrs.values()]; pinch = {d: Math.hypot(a.x - b.x, a.y - b.y), dist: cam.g.dist, pz, a: Math.atan2(b.y - a.y, b.x - a.x)}; } PIV.w = 0; });
 cv.addEventListener('pointermove', e => {
   if (mode === 'splash'){ tilt.tx = (e.clientX / innerWidth - .5) * .35; tilt.ty = (e.clientY / innerHeight - .5) * .28; }
   const p = ptrs.get(e.pointerId); if (!p) return;
@@ -4094,14 +4122,15 @@ cv.addEventListener('pointermove', e => {
   if (mode === 'splash' || p.moved < 6) return;
   dragging = true;
   if (ptrs.size === 1){
-    if (mode === 'planet' && curP){ angT = null; curP.p._ang = (curP.p._ang || 0) - dx * .008; cam.g.pitch = clamp(cam.g.pitch + dy * .002, -.3, .7); }
+    if (mode === 'planet' && curP){ angT = null; pdDragPivot(dx, dy); }
     else if (mode === 'galaxy'){ const k = cam.dist * .0022; const fx = [CF[0], 0, CF[2]], fl = Math.hypot(fx[0], fx[2]) || 1;
       cam.g.t = [cam.g.t[0] - CR[0] * dx * k + fx[0] / fl * dy * k, 0, cam.g.t[2] - CR[2] * dx * k + fx[2] / fl * dy * k]; gManual = false; }
     else if (!MENU.open){ cam.g.yaw -= dx * .006; cam.g.pitch = clamp(cam.g.pitch + dy * .004, .02, 1.45); }
   } else if (ptrs.size === 2 && pinch){ const [a, b] = [...ptrs.values()]; const d = Math.hypot(a.x - b.x, a.y - b.y);
-    if (mode === 'planet' || (mode === 'system' && focus)) pz = clamp(pinch.pz * pinch.d / Math.max(d, 1), .2, 1.8); else cam.g.dist = clamp(pinch.dist * pinch.d / Math.max(d, 1), 2.5, 600); }
+    if (mode === 'planet' || (mode === 'system' && focus)) pz = clamp(pinch.pz * pinch.d / Math.max(d, 1), .2, 1.8); else cam.g.dist = clamp(pinch.dist * pinch.d / Math.max(d, 1), 2.5, 600);
+    if (mode === 'planet' && curP){ const an = Math.atan2(b.y - a.y, b.x - a.x), da = wrapA(an - pinch.a, 0); pinch.a = an; if (Math.abs(da) > 1e-4 && Math.abs(da) < .6){ const F = pdFrameW(curP.x, curP.y); pdPivot(curP.p, F[2], -da); } } }
 });
-const endPtr = e => { const p = ptrs.get(e.pointerId); ptrs.delete(e.pointerId); if (ptrs.size < 2) pinch = null; if (!ptrs.size) dragging = false;
+const endPtr = e => { const p = ptrs.get(e.pointerId); ptrs.delete(e.pointerId); if (ptrs.size < 2) pinch = null; if (!ptrs.size){ dragging = false; if (performance.now() - PIV.t > 90 || gestureMulti) PIV.w = 0; }
   if (p && !gestureMulti && !ptrs.size && p.moved < 14 && performance.now() - p.t0 < 550) { const r=cv.getBoundingClientRect(); tap((e.clientX-r.left)*cv.width/r.width,(e.clientY-r.top)*cv.height/r.height); }
   if (!ptrs.size) gestureMulti = false; if (mode === 'splash'){ tilt.tx = 0; tilt.ty = 0; } };
 cv.addEventListener('pointerup', endPtr); cv.addEventListener('pointercancel', e => { ptrs.delete(e.pointerId); pinch = null; dragging = false; });
@@ -5074,10 +5103,10 @@ function mixBio(a, b, w){ if (!b || w <= 0) return a; const o = {night: !!(a.nig
   new Set([...Object.keys(a.ev || {}), ...Object.keys(b.ev || {})]).forEach(k => { const x = (a.ev || {})[k] || [0, 0], y = (b.ev || {})[k] || [0, 0]; o.ev[k] = [lerp(x[0], y[0], w), lerp(x[1], y[1], w)]; }); return o; }
 /* which conquered zone faces the camera (or the one you just touched) */
 function facingRegion(p, q){ const cq = conquest(p); if (!cq.n) return null; if (HL && HL.pid === p.id && cq.sel >= 0) return cq.items[cq.sel];
-  const w = norm([EYE[0] - q[0], EYE[1] - q[1], EYE[2] - q[2]]), bd = ry(p._ang || 0, rz(p.tilt || 0, w)); let best = 0, r = null;
+  const w = norm([EYE[0] - q[0], EYE[1] - q[1], EYE[2] - q[2]]), bd = ry(p._ang || 0, rz(p.tilt || 0, pdU(p, w))); let best = 0, r = null;
   cq.items.forEach(x => { const st = (dot(bd, x.dir) - (1 - 2 * x.share)) / Math.max(2 * x.share, 1e-3); if (st > best){ best = st; r = x; } }); return r; }
 function facingBiome(p, q){ const cq = conquest(p); if (!cq.n) return -1; if (HL && HL.pid === p.id && cq.sel >= 0) return cq.items[cq.sel].biome;
-  const w = norm([EYE[0] - q[0], EYE[1] - q[1], EYE[2] - q[2]]), bd = ry(p._ang || 0, rz(p.tilt || 0, w)); let best = 0, bi = -1;
+  const w = norm([EYE[0] - q[0], EYE[1] - q[1], EYE[2] - q[2]]), bd = ry(p._ang || 0, rz(p.tilt || 0, pdU(p, w))); let best = 0, bi = -1;
   cq.items.forEach(x => { const st = (dot(bd, x.dir) - (1 - 2 * x.share)) / Math.max(2 * x.share, 1e-3); if (st > best){ best = st; bi = x.biome; } }); return bi; }
 const PASS = new Map(); let passBudget = 0, FDT = .016;
 function passTrack(id, x, y, r, kind){ if (!actx || !SND.ab || SND.ui === false) return; const pv = PASS.get(id); const P = {x, y, tm: time, last: pv ? pv.last : -9}; PASS.set(id, P);
@@ -5950,7 +5979,7 @@ addEventListener('pointermove', e => { HOVP = e.pointerType === 'mouse' && !e.bu
 // the planet you listen to, seen like in its exploration view: the zone being played turned toward you, its waves around it
 function cineFocusPlanet(dt){ const c = cine, i = VIEW.planets.findIndex(p => p.id === c.pid); if (i < 0){ exitCine(); return; } const p = VIEW.planets[i]; c.t = time - (c.t0 ?? time);
   if (pdStoryCamP(dt, p)) return;
-  const lr = conquest(p).items.find(x => x.live); if (lr && lr.dir){ const w = rz(-(p.tilt || 0), ry(-(p._ang || 0), lr.dir)); cam.g.yaw = wrapA(Math.atan2(w[0], w[2]) + Math.sin(c.t * .11) * .12, cam.yaw); cam.g.pitch = clamp(Math.asin(clamp(w[1], -1, 1)) * .75, -.35, .9) + Math.sin(c.t * .08) * .03; }
+  const lr = conquest(p).items.find(x => x.live); if (lr && lr.dir){ const w = pdUt(p, rz(-(p.tilt || 0), ry(-(p._ang || 0), lr.dir))); cam.g.yaw = wrapA(Math.atan2(w[0], w[2]) + Math.sin(c.t * .11) * .12, cam.yaw); cam.g.pitch = clamp(Math.asin(clamp(w[1], -1, 1)) * .75, -.35, .9) + Math.sin(c.t * .08) * .03; }
   else cam.g.yaw += dt * .04; FOV = lerp(FOV, FOV0, 1 - Math.exp(-dt * 1.5)); }
 
 /* ================= V6.6 · stories with the music (15 s), SoundCloud account and playlists ================= */
@@ -6486,7 +6515,7 @@ const PDSC = ['zone', 'orbit', 'low', 'reveal', 'top', 'pass']; var PDSC_PZ0 = n
 function pdStoryCamP(dt, p){ const S = STORY; if (!S || S.done || !S.focus || !cine || cine.album){ if (PDSC_PZ0 !== null){ pz = PDSC_PZ0; PDSC_PZ0 = null; } return false; }
   if (PDSC_PZ0 === null) PDSC_PZ0 = pz; const c = cine, st = c.st || (c.st = {i: -1, j: 0, base: cam.yaw});
   const lr = conquest(p).items.find(x => x.live); let yawZ = st.base, pitchZ = .2;
-  if (lr && lr.dir){ const w = rz(-(p.tilt || 0), ry(-(p._ang || 0), lr.dir)); yawZ = Math.atan2(w[0], w[2]); pitchZ = clamp(Math.asin(clamp(w[1], -1, 1)) * .75, -.35, .9); }
+  if (lr && lr.dir){ const w = pdUt(p, rz(-(p.tilt || 0), ry(-(p._ang || 0), lr.dir))); yawZ = Math.atan2(w[0], w[2]); pitchZ = clamp(Math.asin(clamp(w[1], -1, 1)) * .75, -.35, .9); }
   const bc = beatClock(), bps = bc ? (bc.bpm > 110 ? 8 : 4) : 0; let k, u;
   if (bc){ const b = bc.beat / bps; k = Math.floor(b); u = b - k; } else { const q = (time - (c.t0 ?? time)) / 3.2; k = Math.floor(q); u = q - k; }
   let cut = false; if (k !== st.i){ if (st.i === -1) st.j = 0; else { st.j = (st.j + 1 + (k % 2)) % PDSC.length; cut = true; } st.i = k; }
@@ -6534,7 +6563,7 @@ const PDSEQ = [['zone', 4, 'glide'], ['orbit', 6, 'fade'], ['silhouette', 4, 'gl
 const PDSEQ_T = PDSEQ.reduce((a, x) => a + x[1], 0);
 function pdDirCtx(sys){ const c = cine, i = sys.planets.findIndex(p => p.id === c.pid); if (i < 0) return null; const p = sys.planets[i], pos = planetPos(p, i), R = bodyR(p) * 1.05;
   let zy = c.zy ?? Math.atan2(pos[0], pos[2]) + .9, zp = .2; const lr = conquest(p).items.find(x => x.live);
-  if (lr && lr.dir){ const w = rz(-(p.tilt || 0), ry(-(p._ang || 0), lr.dir)); zy = Math.atan2(w[0], w[2]); zp = clamp(Math.asin(clamp(w[1], -1, 1)) * .8, -.35, .9); }
+  if (lr && lr.dir){ const w = pdUt(p, rz(-(p.tilt || 0), ry(-(p._ang || 0), lr.dir))); zy = Math.atan2(w[0], w[2]); zp = clamp(Math.asin(clamp(w[1], -1, 1)) * .8, -.35, .9); }
   c.zy = zy; const pd = Math.hypot(pos[0], pos[2]) || 1, sun = Math.atan2(-pos[0], -pos[2]), dA = ((sun - zy + Math.PI) % TAU + TAU) % TAU - Math.PI;
   return {p, pos, R, zy, zp, pd, ly: zy + dA * .42, sy: Math.atan2(pos[0], pos[2]), sd: pdSysD(sys)}; }
 function pdSysD(sys){ const n = Math.max(sys.planets.length, 1), maxR = orbitR(n - 1) + 1.8; return clamp(maxR / (Math.tan(55 * Math.PI / 360) * clamp(W / H, .6, 1.25)) * .95, 12, 500); }
