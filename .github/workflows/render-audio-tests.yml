@@ -1,0 +1,22 @@
+name: Render and audio regression tests
+on:
+  push:
+    branches: [dev/v8.5-cinematic]
+    paths:
+      - index.html
+      - 'tests/**'
+      - '.github/workflows/render-audio-tests.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  regression:
+    if: github.ref == 'refs/heads/dev/v8.5-cinematic'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/render-audio.test.cjs
