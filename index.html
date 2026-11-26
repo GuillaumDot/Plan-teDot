@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#010208">
 <title>planèteDot · ton univers musical</title>
-<meta name="pd-version" content="9.2">
+<meta name="pd-version" content="9.3">
 <meta name="description" content="PlanèteDot · l’album de GuillaumDot et ton univers musical en 3D : chaque planète est un morceau.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PlanèteDot">
@@ -602,6 +602,23 @@ body.cine #scDock,body.pdT #scDock{opacity:0;pointer-events:none}
 #pList .pdAu{font-size:9.5px;padding:2px 6px;border-radius:7px;border:0}
 #rx9m{width:min(316px,calc(100vw - 24px));padding:10px 10px 0;border-radius:20px}#rx9m>b{font-size:11.5px;margin:0 2px 6px}
 #rx9m .rx9e{gap:5px;margin:0 0 7px}#rx9m .rx9b.e{font-size:19px;border-radius:12px}#rx9m .rx9t{gap:5px;margin:0 0 9px}#rx9m .rx9b.t{min-height:28px;font-size:12px;padding:0 9px 0 7px;border-radius:14px}#rx9m .rx9b.t span{font-size:13px}
+/* V9.3 · interface épurée (26/11) : verre plus clair et plus fin, icônes sans pastille, barres et carte plus petites ;
+   au repos (4 s sans toucher l'écran), l'interface s'efface presque (body.pd93z) et revient au premier toucher */
+.glass{background:linear-gradient(180deg,rgba(16,20,38,.1),rgba(6,8,20,.24));backdrop-filter:blur(24px) saturate(165%);-webkit-backdrop-filter:blur(24px) saturate(165%);border:.5px solid rgba(255,255,255,.09);box-shadow:inset 0 .5px 0 rgba(255,255,255,.1)}
+.lowfx .glass{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(10,14,28,.8)}
+#top .circ.glass{background:transparent;border:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;width:30px;height:30px}
+#top .circ svg{width:15px;height:15px;filter:drop-shadow(0 1px 3px rgba(0,0,0,.75))}
+#title h1{font-size:12.5px;font-weight:600;letter-spacing:.05em;text-shadow:0 1px 8px rgba(0,0,0,.7)}
+#dock{height:36px;border-radius:18px;width:min(292px,calc(100% - 76px));bottom:calc(10px + var(--sab))}
+#dock .tab{width:30px;height:30px}#np{height:30px}#np b{font-size:11.5px}#np span{font-size:10px;opacity:.72}#pp,#pp .ring{width:28px;height:28px}#bLib img{width:18px;height:18px}
+#card{width:min(292px,calc(100% - 44px));padding:12px 14px 11px;border-radius:18px}#card h2{font-size:17px;margin:0 0 3px}#card p{font-size:12px;margin:0 0 10px}#card .btn{height:30px;font-size:12px}
+#top,#dock,#card,#filters,#rail,#gp,#accountBtn,#guestExit,#labels{transition:opacity .9s ease,transform .6s cubic-bezier(.2,.8,.2,1),filter .6s}
+body.pd93z #top,body.pd93z #filters,body.pd93z #rail,body.pd93z #accountBtn,body.pd93z #guestExit{opacity:.08}
+body.pd93z #card,body.pd93z #gp{opacity:.12}body.pd93z #dock{opacity:.28}body.pd93z #labels{opacity:.4}
+#rail{align-items:flex-end;gap:10px;bottom:calc(52px + var(--sab))}
+.mc{width:min(224px,64vw);padding:10px 12px;gap:6px;border-radius:16px;border:.5px solid rgba(255,255,255,.08);background:linear-gradient(180deg,rgba(18,22,40,.06),rgba(8,10,22,.24))}
+.mc.sel{border-color:rgba(255,255,255,.34)}.mc h4{font-size:14px}.mc .k{font-size:10.5px;gap:6px}.mc .k i{width:8px;height:8px}.mc .meta{font-size:11px;gap:8px}.mc .lib{height:3px}.mc .btn{height:28px;font-size:11.5px}.mc .acts{gap:6px}
+@media (prefers-reduced-motion:reduce){#top,#dock,#card,#filters,#rail,#gp,#labels{transition:none}}
 </style>
 <link rel="stylesheet" href="pd-cinematic.css?v=85-preview">
 </head>
@@ -1534,6 +1551,194 @@ void main(){
   o=vec4((col*al+g)*uA,al*uA);
 }`);
 
+const PD93 = `
+/* V9.3 · réalisme (26/11) : de vraies villes et de vrais volcans dans les zones.
+   Villes : quartiers plus ou moins denses, îlots et rues orientés, avenues, voies rapides et périphérique, immeubles et leurs ombres
+   (selon la hauteur du soleil), parcs ; la nuit, lampadaires le long des rues, fenêtres, centre plus blanc, halo, trafic qui circule,
+   feux rouges des tours. Volcans : cône aux flancs ravinés éclairé par le soleil, cratère, ombre portée, coulées de lave qui avancent
+   et refroidissent, lac de lave aux plaques qui dérivent, gerbes au rythme de la musique, panache de fumée poussé par le vent et son
+   ombre. Le détail suit la taille à l'écran (pas de scintillement de loin), sans dérivées (calculs dans des branches). */
+float h93(vec2 p){ vec3 q=fract(p.xyx*.1031); q+=dot(q,q.yzx+33.33); return fract((q.x+q.y)*q.z); }
+float n93(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.-2.*f); return mix(mix(h93(i),h93(i+vec2(1.,0.)),f.x),mix(h93(i+vec2(0.,1.)),h93(i+vec2(1.,1.)),f.x),f.y); }
+float f93(vec2 p){ return n93(p)*.6+n93(p*2.13+5.2)*.3+n93(p*4.37+1.7)*.1; }
+float gCity93=0.;   // la ville couvre ce point : les anciennes lumières de civilisation s'effacent dessous
+float gCK93=0.;     // la ville est dessinée ici : forêts, rochers, neige et rivières du relief ne la repeignent pas
+float gPl93=0.; vec3 gPc93=vec3(0.), gPe93=vec3(0.);   // panache de fumée : posé après l'éclairage du sol, car il flotte au-dessus
+// hauteur de l'immeuble sous ce point de la grille (0 = rue, cour, terrain vide ou parc) ; pk = parc, lot = tirage du lot
+float bH93(vec2 g,float dens,float sw,float sd,float tall,out float pk,out float lot){
+  vec2 c=floor(g), f=fract(g); pk=step(h93(c+sd),.05+.09*(1.-dens));
+  float bu=step(h93(c+sd+9.1),dens*1.3+.04)*(1.-pk);                                   // îlot bâti (la banlieue se troue)
+  float de=.5-max(abs(f.x-.5),abs(f.y-.5)), dn=step(.42,dens);                         // centre : 4 immeubles par îlot ; banlieue : 1 maison
+  vec2 li=floor(f*2.), lf=fract(f*2.); lot=h93(c*2.+li*dn+sd*1.7);
+  float inL=dn>.5?step(max(abs(lf.x-.5),abs(lf.y-.5)),.39):step(max(abs(f.x-.5),abs(f.y-.5)),.5-sw*.5-.12);
+  float h=(.12+.5*dens*dens+.9*tall*pow(lot,6.)*dens)*(.55+.45*lot);
+  return h*inL*step(sw*.5+.03,de)*bu; }
+// lac ou mer de lave : croûte en plaques qui dérivent, fissures incandescentes (cellules de Voronoï à la taille de l'écran)
+void lake93(vec2 uv,float lk,float cs0,float pxr,float sd,float nn,float Bl,inout vec3 col,inout vec3 emi,inout float spec){
+  if(lk<.004) return; float cs=max(cs0,pxr*6.); vec2 p=uv/cs+vec2(uT*.02,uT*.011)+sd; p+=(vec2(n93(p*.3+sd),n93(p*.3+sd+4.))-.5)*1.1; vec2 ci=floor(p), cf=fract(p); float d1=9., d2=9.;
+  for(int j=0;j<9;j++){ vec2 o=vec2(float(j-3*(j/3))-1.,float(j/3)-1.), k=ci+o; vec2 pt=o+.5+.38*sin(vec2(h93(k),h93(k+3.))*6.2832+uT*.09)-cf; float dd=dot(pt,pt);
+    if(dd<d1){ d2=d1; d1=dd; } else if(dd<d2) d2=dd; }
+  float sm=sqrt(d2)-sqrt(d1), seam=(1.-smoothstep(.0,.16,sm))*(.5+.5*smoothstep(.25,.7,n93(p*.45+uT*.05))), hot=smoothstep(.55,.9,n93(uv/cs*.31+uT*.04+sd));
+  col=mix(col,vec3(.055,.042,.036)*(.75+.5*h93(ci+sd)),lk); spec=max(spec,lk*.22);
+  vec3 lav=mix(vec3(1.,.3,.04),vec3(1.,.74,.32),seam*seam);
+  emi+=lav*lk*(seam*(.95+.7*hot)+hot*.22+.05)*(1.+.25*sin(uT*.8+sd)+Bl*uBeat)*(.75+.25*nn); }
+float city93(vec2 uv,vec2 dv,float m,float rb,float ph,float w2,float w3,vec2 lt,float Lz,float lit,float nn,
+             float e1,float e2,float e3,float e4,float e5,vec3 roof,vec3 lc,float lw,float km,float Bl,float pxr,
+             inout vec3 col,inout vec3 emi,inout float spec){
+  float ca=cos(ph*2.3), sa=sin(ph*2.3); mat2 R=mat2(ca,-sa,sa,ca); vec2 ru=R*uv; float sd=fract(ph*.173)*97.;
+  float ngt=smoothstep(.1,-.06,Lz);   // les lumières s'allument quand le soleil se couche (pas sous l'ombre d'un nuage ou d'une montagne)
+  float rr=length(dv), an=atan(dv.y,dv.x), nR=3.+floor(h93(vec2(sd,3.))*3.);
+  float aK0=floor((an-sd)*nR/6.2832+.5)*6.2832/nR+sd;                                              // grands axes qui partent du centre, chacun sa courbe
+  float aw=an+(n93(vec2(rr*2.6,aK0*3.1+sd))-.5)*.9*smoothstep(.05,.5,rr), aK=floor((aw-sd)*nR/6.2832+.5)*6.2832/nR+sd;           // grands axes qui partent du centre
+  float ax=pow(max(cos((aw-aK)*nR*.5),0.),20.);
+  vec2 wq=ru*60.+sd; wq+=(vec2(n93(wq*.45),n93(wq*.45+5.2))-.5)*1.5; float dist=f93(wq);           // quartiers aux contours naturels
+  float sprawl=m*1.1+(dist-.5)*1.1+ax*.45*smoothstep(-.7,.2,m)*w2;
+  if(w3>0.){ vec2 cc=ru*20.+sd; vec2 ci=floor(cc), cf=fract(cc); float tn=0.;                        // pays : des villes et des bourgs dans la campagne
+    for(int j=0;j<9;j++){ vec2 o=vec2(float(j-3*(j/3))-1.,float(j/3)-1.), k=ci+o; float hs=h93(k+11.); if(hs<.45) continue;
+      vec2 pc=o+vec2(h93(k),h93(k+7.))*.8+.1-cf; tn=max(tn,smoothstep(.12+.3*hs*hs,0.,length(pc))); }
+    sprawl=max(sprawl*(1.-.4*w3),(tn*1.3-.15+(dist-.5)*.8)*w3*smoothstep(-.5,.05,m)); }
+  float dens=smoothstep(0.,1.,sprawl)*lw*km*(.5+.5*w2);
+  // routes : voies rapides (courbes douces), routes qui serpentent entre les quartiers et vers la campagne
+  float bs=.0042*mix(1.35,1.,w2), bpx=bs/pxr, fine=smoothstep(2.2,5.5,bpx);
+  float dH=abs(sin(aw-aK))*rr*rb, wh=bs*.26, wH=max(wh,pxr*.65);
+  float hw=(1.-smoothstep(wH*.55,wH,dH))*min(wh/wH,1.)*smoothstep(.12,.3,rr)*(1.-smoothstep(1.1,1.9,rr))*w2*lw*km*(1.-.5*w3)*(.3+.7*smoothstep(0.,.25,dens));
+  float F=34.; float n1=n93(ru*F+sd+40.), n2=n93(ru*F*1.37+sd+70.), wr=bs*.16, wR=max(wr,pxr*.55);
+  float orr=max(1.-smoothstep(wR*.55,wR,abs(n1-.5)/(F*1.7)),1.-smoothstep(wR*.55,wR,abs(n2-.5)/(F*1.37*1.7)))*min(wr/wR,1.)*smoothstep(.02,.25,dens+ax*.15)*lw*km;
+  if(dens<.003&&hw<.003&&orr<.003) return 0.;
+  float park=smoothstep(.27,.2,f93(wq*1.7+9.))*smoothstep(.95,.5,dens);                            // parcs et bois
+  float ind=smoothstep(.7,.78,n93(ru*22.+sd+3.))*smoothstep(.15,.4,dens)*(.4+.6*e2);                  // zones industrielles
+  // grille des rues et immeubles (de près)
+  float sw=mix(.3,.2,dens); vec2 g=ru/bs; if(e3<.99) g+=(vec2(n93(ru*55.+sd),n93(ru*55.+sd+7.))-.5)*1.6*(1.-e3);   // rues anciennes : tracé sinueux
+  float tall=e4*w2*(.25+.75*smoothstep(.65,.95,dens));                                              // tours au centre (ère moderne)
+  vec2 f=abs(fract(g)-.5); float de=.5-max(f.x,f.y);
+  vec2 fa=abs(fract(g/7.+.5)-.5); float pa=pxr/bs, ave=(1.-smoothstep(.3,.3+pa*1.3,(.5-max(fa.x,fa.y))*7.))*smoothstep(.15,.4,dens)*min(1.,.5/pa+.35);   // avenues tous les 7 pâtés : la trame de la ville se lit de loin
+  float st=(1.-smoothstep(sw*.5-.06,sw*.5+.06,de))*fine*smoothstep(.15,.35,dens);
+  float pk=0., lot=0., h0=0., shd=0., ll=length(lt);
+  if(fine>.01&&dens>.05){ h0=bH93(g,dens,sw,sd,tall,pk,lot);
+    if(lit>.01&&ll>.02){ vec2 sg=R*(lt/ll); float tE=Lz/ll, p0, l0;
+      for(int k=1;k<=2;k++){ float t=float(k)*.34; float hk=bH93(g+sg*t,dens,sw,sd,tall,p0,l0); shd=max(shd,smoothstep(-.02,.06,(hk-h0)*1.5-t*tE)); } } }
+  float blk=n93(g*.5+sd), blk2=n93(g*.5+sd+31.);                                                   // nuances d'un pâté de maisons à l'autre (de loin)
+  shd=mix(clamp(dens*dens*.5/max(Lz/max(ll,.02),.3),0.,.5)*.3,shd,fine);
+  float bld=mix(dens*.62,step(.001,h0),fine)*(1.-park*.85);
+  // jour : toits, asphalte, parcs, friches ; ombres des immeubles
+  vec3 asph=mix(vec3(.25,.25,.26),vec3(.3,.28,.26),e1*(1.-e3))*(.85+.3*blk);
+  float lv=fine>.01?h93(vec2(lot*91.,sd)):blk2; vec3 rf=roof*(.74+.5*mix(blk,lot,fine));
+  rf=mix(rf,vec3(.56,.55,.52),step(.84,lv)*.7); rf=mix(rf,vec3(.36,.18,.12),step(lv,.2)*(1.-e4)*.6);              // toits clairs, tuiles
+  rf=mix(rf,vec3(.5,.49,.47)+vec3(.04,.01,-.02)*blk,ind*.7);
+  float gls=step(.55,h0)*e4*fine; rf=mix(rf,vec3(.1,.13,.17)+lc*.02,gls*.85);                                       // tours de verre
+  vec3 grn=vec3(.1,.2,.07)*(.75+.5*n93(ru*700.));
+  float dtn=h93(floor(g/7.+.5)+sd*3.);                                                                 // chaque quartier (entre deux avenues) a sa teinte de toits
+  vec3 cc=mix(col*.9,mix(asph,rf,.62+.3*blk2)*(.95+.2*dist)*(.92+.3*dens)*(.8+.45*dtn),smoothstep(0.,.45,dens));                                    // de loin : un tissu urbain clair, plus dense au centre
+  cc=mix(cc,rf,bld*fine); cc=mix(cc,asph,st); cc=mix(cc,asph*.8,ave*.75); cc=mix(cc,grn,park*.8);
+  cc=mix(cc,asph*1.15,max(hw,orr)*(.55+.45*fine));
+  cc*=1.-shd*.6*lit;
+  float k=smoothstep(0.,.3,dens+max(hw,orr)*.6)*km; col=mix(col,cc,k); spec=max(spec,gls*1.2*k);
+  // nuit : rues et routes éclairées, fenêtres, centre plus blanc, halo ; de loin, des points de lumière par pâté de maisons
+  vec3 sod=mix(vec3(1.,.55,.16),vec3(1.,.66,.3),e3), led=vec3(.92,.95,1.); vec3 lamp=mix(sod,led,e4*.35); lamp=mix(lamp,lc,.2);
+  vec3 core=mix(lamp,mix(vec3(1.,.9,.75),led,e4),smoothstep(.6,1.,dens));
+  float spk=mix(smoothstep(.38,.8,blk2)*.85+.15,1.,fine);
+  float alongS=dot(fract(g)-.5,step(f.xy,f.yx))*4.;
+  float dots=.35+.65*smoothstep(.3,.0,abs(fract(alongS)-.5));
+  float win=step(lv,.3+.4*dens)*(.35+.65*h0)*step(.001,h0)*mix(1.,.6,e3*(1.-e4));
+  float far=pow(dens,1.3)*spk*(1.-park*.9)*(1.-ind*.5)*1.05;
+  float near=st*dots*.6+win*.5;
+  float lane=step(0.,sin(aw-aK)), along=rr*rb/(bs*1.3)-uT*(1.1+lane*.25)*(lane*2.-1.);
+  float trH=hw*smoothstep(.72,.96,fract(along+h93(vec2(aK,lane))))*fine*1.4;
+  vec2 lf=fract(fract(g)*2.); float tow=step(.72,h0)*smoothstep(.12,.0,length(lf-.5)*.5)*step(.86,fract(uT*.7+lot*7.))*fine;
+  float act=(1.+Bl*uBeat*.9)*(.88+.12*sin(uT*.35+blk*30.));
+  float inC=smoothstep(.04,.3,dens), dsh=step(.55,fract(rr*rb/(bs*2.3)+h93(vec2(aK,sd))));   // hors de la ville : quelques lumières en pointillé le long des routes
+  vec3 ne=core*mix(far,near,fine)*act+lamp*(hw*(.38*inC+.16*dsh)+orr*(.18*inC+.04*dsh)+ave*.3*inC)*act+core*pow(dens,3.)*.3
+    +mix(vec3(1.,.95,.9),vec3(1.,.14,.06),lane)*trH+vec3(1.,.08,.04)*tow*2.;
+  emi+=ne*mix(.15,1.,e2)*ngt*k*(1.+wvG*.8);
+  if(e2<.99){ float fire=(1.-e2)*smoothstep(.75,.92,n93(ru*700.+floor(uT*1.3)))*dens*ngt; emi+=vec3(1.,.45,.12)*fire*.9*k; }   // feux des premiers temps
+  gCK93=max(gCK93,k); return k*max(bld,dens*.6); }
+
+// hauteur d'un volcan (unités du rayon de la zone) : cône aux flancs concaves, cratère profond, lèvre, crêtes et ravines rayonnantes
+float vH93(vec2 d,float rc0,float sd){ float r=length(d), rc=rc0*(1.+(n93(d/(r+.001)*1.7+sd*.3)-.5)*.3), top=pow(1.-rc0,1.6);   // lèvre irrégulière
+  float h=r<rc?top-(1.-r*r/(rc*rc))*top*.55:pow(max(1.-r,0.),1.6)*(1.+.12*smoothstep(1.,.6,r));
+  h+=exp(-(r-rc)*(r-rc)*700.)*.04;
+  float gr=n93(d/(r+.001)*3.3+vec2(r*1.9+sd,sd)); gr=1.-abs(gr*2.-1.); h+=(gr-.55)*.09*smoothstep(rc,rc+.12,r)*smoothstep(1.05,.5,r);
+  return h; }
+// cratère d'impact : cuvette, rempart, éjectas
+float cH93(vec2 d){ float r=length(d); return r<1.?(r*r-1.)*.22+exp(-(r-1.)*(r-1.)*60.)*.06:exp(-(r-1.)*(r-1.)*60.)*.06*smoothstep(1.7,1.,r); }
+void volc93(vec2 d0,vec2 uv,float rb,float r0,float ph,float jb,float w2,float w3,float w4,float bn,vec2 lt,float Lz,float lit,float nn,float km,float Bl,float pxr,
+            inout vec3 col,inout vec3 emi,inout float spec){
+  float sc=mix(1.,.6,w4), Rm=2.*r0*sc;                                                        // un grand volcan au centre de la zone
+  vec2 d=uv/Rm, dc=d0/(sc*1.25); float r=length(d), rcn=length(dc), an=atan(d.y,d.x), sd=fract(ph*.31)*50.+3.7;
+  float pr=step(.5,jb)*w2, kp=.55*rb/Rm, sdp=fract(ph*.31+jb*.17)*50.+jb*7.1; vec2 dp=d0/.55; float rp=length(dp);   // cônes secondaires sur ses flancs (2e, 3e volcan)
+  float rc=mix(.12+.05*fract(sd*.37),.42,w3), ll=length(lt); vec2 ldn=ll>.02?lt/ll:vec2(0.);   // niveau 3 : grande caldeira
+  float tE=Lz/max(ll,.02), S=.85, e=.02, ngt=smoothstep(.1,-.06,Lz);
+  float act=w2*(.6+.4*fract(sd*.61)), actp=pr*step(.35,fract(sdp*.61));                       // volcan plus ou moins actif
+  float vm=smoothstep(1.25,.95,r), vp=pr*smoothstep(1.1,.9,rp);
+  float vk=w2*km*max(vm,vp);
+  float crk=(1.-w2)*km*smoothstep(1.7,1.,rcn);                                                 // cratères d'impact (premiers niveaux)
+  float sea=w4*km*smoothstep(.92,1.1,r)*(1.-vp);                                               // mer de lave autour de l'île ; les petits cônes deviennent des îlots
+  float wa=sd*5.+uT*.006; vec2 wd=vec2(cos(wa),sin(wa)), wp=vec2(-wd.y,wd.x);                    // vent
+  float px=dot(d,wd), py=dot(d,wp), wdt=.07+.3*max(px,0.);
+  float pm=act*km*smoothstep(-.12,.05,px)*exp(-max(px,0.)*.85)*exp(-py*py/(wdt*wdt)*1.6), ps=0.;   // empreinte du panache (il s'étire loin sous le vent)
+  if(ll>.02&&lit>.01&&act>.01){ vec2 q=d+ldn*(.1+.25*(1.-Lz)); float qx=dot(q,wd), qy=dot(q,wp), qw=.07+.3*max(qx,0.);
+    ps=smoothstep(-.12,.05,qx)*exp(-max(qx,0.)*.85)*exp(-qy*qy/(qw*qw)*1.6)*act*km; }
+  if(vk<.004&&crk<.004&&sea<.004&&pm<.004&&ps<.004) return;
+  float sk=max(vk,crk), rl=smoothstep(3.,12.,(w2>.5?Rm*.6:rb*sc)/pxr);                        // relief visible seulement s'il couvre assez de pixels
+  vec3 hotC=vec3(1.,.8,.42), midC=vec3(1.,.38,.07), cold=vec3(.7,.09,.02);
+  float bt=1.+Bl*uBeat*1.1+wvG*.8, fl=0.;
+  if(sk>.004){
+    float h0, hx, hy; bool pc=pr>.5&&rp<1.15;
+    if(vk>.004){ float ep=e/kp; h0=vH93(d,rc,sd); hx=vH93(d+vec2(e,0.),rc,sd); hy=vH93(d+vec2(0.,e),rc,sd);
+      if(pc){ h0+=vH93(dp,.3,sdp)*kp; hx+=vH93(dp+vec2(ep,0.),.3,sdp)*kp; hy+=vH93(dp+vec2(0.,ep),.3,sdp)*kp; } }
+    else { h0=cH93(dc); hx=cH93(dc+vec2(e,0.)); hy=cH93(dc+vec2(0.,e)); }
+    vec3 N=normalize(vec3(-(hx-h0)/e*S,-(hy-h0)/e*S,1.)); float sh=clamp(dot(N,vec3(lt,Lz)),0.,1.)/max(Lz,.05);
+    float occ=0.; if(ll>.02&&lit>.01){ for(int k=1;k<=3;k++){ float t=float(k*k)*.05+.03; float hq;
+      if(vk>.004){ hq=vH93(d+ldn*t,rc,sd); if(pc) hq+=vH93(dp+ldn*t/kp,.3,sdp)*kp; } else hq=cH93(dc+ldn*t);
+      occ=max(occ,smoothstep(0.,.03,(hq-h0)*S-t*tE)); } }
+    vec3 c=col;
+    if(vk>.004){
+      float gr=n93(d/(r+.001)*5.5+vec2(r*1.9+sd,sd)); gr=1.-abs(gr*2.-1.);
+      vec3 bas=mix(vec3(.3,.27,.24),uC2*.35+.06,.25), ash=vec3(.62,.58,.53);
+      c=mix(bas,ash,smoothstep(1.05,.2,r)*(.45+.55*gr));                                         // cendres claires en haut, basalte en bas, crêtes plus claires
+      if(pc) c=mix(c,ash*1.05,smoothstep(.9,.35,rp)*.7);
+      c*=.86+.28*n93(d*38.+sd);
+      // coulées : langues sombres qui descendent les flancs en s'élargissant ; les plus récentes sont encore chaudes
+      float nA=1.+2.*act;
+      for(int k=0;k<4;k++){ float fk=float(k), hk=h93(vec2(sd,fk*3.1)), hj=h93(vec2(fk*7.3,sd));
+        float ak=sd*1.7+fk*1.75+(hk-.5)*1.6+(n93(vec2(r*2.6,fk*5.+sd))-.5)*.7;
+        float w=(.02+.26*pow(max(r-rc,0.),1.1)*(.5+hj))*(.55+.9*n93(vec2(r*6.,fk*9.+sd)));          // étroite près de la bouche, en éventail plus bas
+        float dd=abs(mod(an-ak+3.1416,6.2832)-3.1416)*r+(n93(d*16.+fk*3.)-.5)*w*.6;               // bords en lobes
+        bool hotK=fk<nA&&act>.01; float Lk=hotK?rc+(.4+.48*hk)*(.86+.14*sin(uT*.03+fk*2.+sd)):rc+.35+.55*hk;   // jusqu'au pied du volcan pour les plus longues
+        float mk=(1.-smoothstep(w*.6,w,dd))*smoothstep(rc*.9,rc*1.2,r)*(1.-smoothstep(Lk-.08,Lk,r+(n93(vec2(an*9.,fk*4.+sd))-.5)*.1))*vk*vm;
+        if(mk<.002) continue; fl=max(fl,mk*(hotK?1.:.55+.45*hk));
+        if(hotK){ float tp=exp(-(r-rc)*3.2), chn=1.-smoothstep(0.,w*.38,dd);                     // chenal chaud au milieu, croûte sur les bords et plus bas
+          float cz=n93(vec2(dd/w*3.+fk*7.,r*18.-uT*.35)), crk2=1.-smoothstep(0.,.07+.05*(1.-tp),abs(cz-.5));
+          vec3 lc2=mix(cold,mix(midC,hotC,tp*tp),tp);
+          emi+=lc2*mk*(chn*tp*tp*1.5+crk2*ngt*(.4+.6*tp)+.08*ngt)*bt*act;
+          emi+=hotC*mk*exp(-(r-Lk+.04)*(r-Lk+.04)*500.)*(.2+.8*ngt)*act; } }                      // front de la coulée
+      c=mix(c,vec3(.06,.052,.048)*(.8+.4*n93(d*60.+sd)),fl*.9); spec=max(spec,fl*.4);
+      if(uType==4) c=mix(c,vec3(.74,.68,.34),exp(-(r-rc)*(r-rc)*400.)*smoothstep(.45,.75,n93(d*26.+sd))*.6);   // soufre sur la lèvre
+      c=mix(c,vec3(.07,.06,.055),smoothstep(rc,rc*.8,r));                                          // fond du cratère
+      if(pc) c=mix(c,vec3(.07,.06,.055),smoothstep(.3,.24,rp));
+      c=mix(c,col,smoothstep(.85,1.28,r)*(1.-(pc?smoothstep(1.,.7,rp):0.)));                        // les flancs rejoignent le sol
+    } else {
+      float ej=smoothstep(.5,.8,n93(dc/(rcn+.001)*5.+vec2(sd)))*smoothstep(1.6,1.05,rcn)*step(1.,rcn);
+      c=mix(col,col*1.25+.02,ej*.5); c=mix(c,col*.7,smoothstep(1.,.3,rcn)*.35);
+    }
+    float l2=mix(1.,max(clamp(sh,0.,2.2)*(1.-occ*.85),.3),lit*rl);                              // le flanc à l'ombre garde la lumière du ciel
+    col=mix(col,c*l2,sk); }
+  if(sea>.004) lake93(uv,sea,r0*.07,pxr,sd*1.3,nn,Bl,col,emi,spec);
+  if(vk>.004){
+    // lac de lave au fond du cratère, gerbes au rythme, lueur
+    float lake=smoothstep(rc*mix(.62,.8,w3),rc*mix(.45,.62,w3),r)*act*km; if(lake>.004) lake93(uv,lake,rc*Rm*.09,pxr,sd,nn,Bl,col,emi,spec);
+    float spk=smoothstep(.9,.985,h93(floor(d*90.)+floor(uT*10.)))*smoothstep(rc*1.9,rc*.3,r)*(Bl*uBeat*1.6+.12*act)*km;
+    emi+=hotC*spk*2.2;
+    emi+=midC*exp(-r*r/(rc*rc)*1.6)*act*km*(.05+.6*ngt)*(.8+.2*sin(uT*2.3+sd));               // lueur au-dessus du cratère (la nuit)
+    if(actp>.01) emi+=midC*exp(-rp*rp*28.)*actp*km*(.08+.5*ngt)*(.8+.2*sin(uT*2.9+sdp)); }     // bouche secondaire qui rougeoie
+  // panache de vapeur et de cendres : volutes éclairées d'un côté, ombre sur le sol, lueur orange par-dessous la nuit
+  col*=1.-ps*.3*lit*(1.-pm);
+  if(pm>.003){ vec2 bq=vec2(px*3.2-uT*.25,py*5.)+sd; float bl=f93(bq);
+    float pl=pm*smoothstep(.08,.5,bl+.15)*(.85+.15*smoothstep(0.,1.,Bl+uBeat*.5));
+    float bs=f93(bq+vec2(dot(ldn,wd)*3.2,dot(ldn,wp)*5.)*.07), shp=clamp(.95+(bl-bs)*5.,.5,1.2);   // plus dense vers le soleil : côté à l'ombre
+    gPl93=min(pl*1.2,.92); gPc93=mix(vec3(.66,.65,.64),vec3(.95,.95,.94),smoothstep(.2,.8,bl))*shp; gPe93=midC*exp(-max(px,0.)*4.)*ngt*act*.5; spec*=1.-pl; }
+}
+`;
 const SP = pdCompile2(`#version 300 es
 in vec2 a; uniform vec2 uRes,uC; uniform float uR,uQ,uAsp; out vec2 vP;
 void main(){vec2 px=uC+a*uR*uQ*vec2(uAsp,1.); vec2 ndc=px/uRes*2.-1.; gl_Position=vec4(ndc.x,-ndc.y,0.,1.); vP=vec2(a.x*uAsp,-a.y)*uQ;}`,
@@ -1617,7 +1822,7 @@ float zM(vec2 uv,float r0,float cnt,float ph,float en){ float m=-2.; for(int j=0
   vec2 o=j==0?vec2(0.):vec2(cos(an),sin(an))*r0*1.25; m=max(m,1.-length((uv-o)/(r0*sqrt(aj)))+en); } return m; }
 vec3 biomeC(int b,vec3 sp,out float bs,inout vec3 em){
   bs=0.; float f=fbm3(sp*2.3); float g=n3(sp*11.); vec3 c;
-  if(b==0){ c=mix(vec3(.05,.04,.04),vec3(.17,.1,.08),f); float cr=1.-smoothstep(0.,.06,abs(fbm3(sp*3.7+uT*.02)-.5)); em+=vec3(1.,.38,.08)*cr*(.9+uAudio*2.)*(.6+.4*sin(uT*1.7+f*9.)); }
+  if(b==0){ c=mix(vec3(.05,.04,.04),vec3(.17,.1,.08),f); float fz=fbm3(sp*3.7+uT*.02)-.5+(n3(sp*31.)-.5)*.07*smoothstep(200.,700.,uR), wc=.06*clamp(260./max(uR,1.),.1,1.); float cr=1.-smoothstep(0.,wc,abs(fz)); cr=cr*cr+(1.-smoothstep(0.,wc*5.,abs(fz)))*.14;   /* V9.3 : fissures nettes */ em+=vec3(1.,.38,.08)*cr*(.9+uAudio*2.)*(.6+.4*sin(uT*1.7+f*9.)); }
   else if(b==1){ float strata=sin(f*26.+sp.y*7.)*.5+.5; c=mix(vec3(.42,.17,.08),vec3(.74,.44,.24),strata)*(.75+g*.4); c*=1.-smoothstep(.55,.7,fbm3(sp*5.))*.4; }
   else if(b==2){ float qp=n3(sp*4.+fbm3(sp*2.)*.6)*5.; float seam=1.-smoothstep(0.,.06,min(fract(qp),1.-fract(qp))); c=mix(vec3(.3,.32,.36),vec3(.64,.67,.72),fract(floor(qp)*.618))*(1.-seam*.5); bs=1.3;
     em+=vec3(1.,.76,.42)*seam*.16*smoothstep(.55,.7,n3(sp*18.)); }
@@ -1843,21 +2048,27 @@ vec3 solid84(float dif,inout vec3 emi,inout float spec,out float rl){
   }
   return c;
 }
+${PD93}
 vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
   vec3 sp=s*1.6+uSeed*7.; vec4 cwvG=cloudWave(s); wvG=min(wvG,1.5);
   TXR=0.; TXK=0.; if(uTxOn>.5){ gW=pow(abs(s),vec3(4.)); gW/=dot(gW,vec3(1.)); gW=max(gW-.03,0.); gW/=dot(gW,vec3(1.)); gMu=max(n.z,.22); gS=s; gLo=RM*L; gE=clamp(1.6/max(uR,1.),.0015,.03); }
   bool sT=uTxOn>.5&&uR>3.&&(uType==10||uType==9||uType==4); gST=sT;   /* V8.4 : rocheuse, métallique ou volcanique faite par solid84 */
   float det=clamp((uR-14.)/95.,0.,1.)*uQual; vec3 n0=n, nb=n; float gh=.5;
   float bA=uType==10?2.8:uType==9?1.5:uType==4?2.:uType==0?1.9:uType==3?1.6:(uType==11||uType==1)?2.:0.;
-  float shd=occShadow(n0,L)*ringShadow(n0,L);
+  float shd=occShadow(n0,L)*ringShadow(n0,L), rSh=1.; vec3 wvN=vec3(0.);
   if(sT) bA=uType==10?1.:uType==9?.8:.9;
   if(bA>0.&&uR>14.){ float e=clamp(2.5/uR,.004,.02); vec3 b0=RM*n; float gc,hx,hy;
     if(sT){ gh=relief84(b0); gc=gh; hx=relief84(RM*normalize(n+vec3(e,0.,0.)))-gh; hy=relief84(RM*normalize(n+vec3(0.,e,0.)))-gh; }   /* V8.4 */
     else { gh=reliefB(b0,det,gc); float dg=uQual>.85?det:0.; float g0=dg>0.?gh:gc; hx=relief(RM*normalize(n+vec3(e,0.,0.)),dg)-g0; hy=relief(RM*normalize(n+vec3(0.,e,0.)),dg)-g0; }
     nb=normalize(n-vec3(hx,hy,0.)/e*bA*.1*smoothstep(9.,34.,uR));
-    if(det>.2&&uQual>.55&&!sT){ vec3 lb=RM*L; float oc=1.; float tl=1.+2.5*(1.-clamp(dot(n0,L),0.,1.)); int mk=uQual>.8?3:2; for(int k=1;k<=3;k++){ if(k>mk) break; float st=.011*float(k*k)*tl; float hl=relief(normalize(b0+lb*st),0.); oc=min(oc,clamp((gc-hl)*12./float(k)+.8,0.,1.)); }
-      shd*=mix(1.,.1+.9*oc,min(1.,det*1.5)*smoothstep(-.1,.4,dot(n0,L))); } }
-  if(!(uType==11||uType==1)) n=nb;
+    if(det>.2&&uQual>.55){ vec3 lb=RM*L; float Lz0=dot(n0,L); vec3 lt3=lb-b0*dot(lb,b0); float ltl=length(lt3);
+      /* V9.3 · ombres portées du relief : on remonte vers le soleil et le rayon monte avec sa hauteur (ombres longues au lever et au coucher,
+         presque rien à midi), pénombre douce, jamais noires (la lumière du ciel les éclaire) ; posées plus bas sur les terres seulement */
+      if(ltl>.03&&Lz0>-.15&&Lz0<.6){ vec3 ld=lt3/ltl; float tE=max(Lz0,0.)/ltl, H=bA*.045, oc=0.; int mk=uQual>.8?4:3;
+        for(int k=1;k<=4;k++){ if(k>mk) break; float t=.0055*float(k*k)+.0045; vec3 bq=normalize(b0+ld*t); float hl=sT?relief84(bq):relief(bq,0.);
+          oc=max(oc,smoothstep(0.,1.,((hl-gc)*H-t*tE)/(t*.4+.003))); }
+        rSh=1.-oc*.6*min(1.,det*1.5)*smoothstep(-.15,.05,Lz0)*smoothstep(.6,.45,Lz0); } } }
+  if(!(uType==11||uType==1)){ n=nb; shd*=rSh; }
   float ndl=dot(n,L); float dif=lam(ndl)*shd; float amb=.038;
   vec3 col; vec3 emi=vec3(0.); float a=1.; float land=1.; float spec=0.;
   if(sT){ col=vec3(.4); }   /* V8.4 : couleur faite plus bas par solid84 */
@@ -1881,7 +2092,7 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
       float beach=smoothstep(sea+.026,sea+.004,f)*(1.-smoothstep(.55,.75,lat)); ground=mix(ground,vec3(.76,.68,.5)*(.88+.24*n3(sp*60.)),beach*.75); }
     ocean=mix(ocean,vec3(.05,.38,.42),smoothstep(sea-.03,sea,f)*(1.-lm)*.7); float foam=smoothstep(sea-.008,sea,f)*(1.-smoothstep(sea,sea+.006,f)); ocean=mix(ocean,vec3(.82,.88,.9),foam*.45*(.35+det));
     col=mix(ocean,ground,lm); col=mix(col,vec3(.93,.96,1.),smoothstep(.8,.9,lat+fbm3(sp*3.)*.1));
-    land=lm; spec=(1.-lm)*1.1; n=normalize(mix(n0,nb,lm)); ndl=dot(n,L); dif=lam(ndl)*shd;
+    land=lm; spec=(1.-lm)*1.1; n=normalize(mix(n0,nb,lm)); shd*=mix(1.,rSh,lm); ndl=dot(n,L); dif=lam(ndl)*shd;
     if(uTxOn>.5){ float rl; vec3 t=txS(0.,1.25,rl); ground=mix(ground,ground*t*vec3(2.04,2.33,3.18),.6); ground=mix(ground,t*vec3(.92,.96,.9),.28); TXR=rl*lm; TXK=2.6; }
     ground=mix(ground,vec3(.95),smoothstep(.62,.8,gh)*.75*lm); col=mix(ocean,ground,lm); col=mix(col,vec3(.93,.96,1.),smoothstep(.8,.9,lat+fbm3(sp*3.)*.1));
     vec4 cwv=cwvG; vec3 cq=rotY(uT*.0003)*(sp-cwv.xyz*1.6); cq+=vec3(fbm3(cq*2.+uT*.0015),fbm3(cq*2.+3.),0.)*.7;
@@ -1897,7 +2108,7 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
     vec3 ground=mix(uC2*.55,vec3(.55,.45,.3),smoothstep(.6,.75,f))*(.6+.6*fbm(sp*4.)); sea=mix(sea,mix(sea,vec3(.08,.42,.45),.6),smoothstep(.49,.53,f));
     if(uTxOn>.5){ float rl; vec3 t=txS(0.,1.25,rl); ground=mix(ground,ground*t*vec3(2.04,2.33,3.18),.6); TXR=rl*land; TXK=2.2; }
     if(trop){ ground=mix(vec3(.93,.85,.62),mix(vec3(.08,.36,.1),vec3(.2,.5,.14),n3(sp*9.)),smoothstep(.56,.6,f)); }
-    col=mix(sea,ground,land); col=mix(col,vec3(.95,.97,1.),smoothstep(trop?.9:.78,trop?.98:.92,abs(s.y))); n=normalize(mix(n0,nb,land)); ndl=dot(n,L); dif=lam(ndl)*shd;
+    col=mix(sea,ground,land); col=mix(col,vec3(.95,.97,1.),smoothstep(trop?.9:.78,trop?.98:.92,abs(s.y))); n=normalize(mix(n0,nb,land)); shd*=mix(1.,rSh,land); ndl=dot(n,L); dif=lam(ndl)*shd;
     float veg=smoothstep(.6,.2,abs(s.y))*clamp(uStage/3.,.1,1.)*land; col=mix(col,vec3(.12,.32,.1)*(.7+fbm3(sp*9.)*.6),veg*.5);
     vec4 cwv=cwvG; vec3 cpp=sp-cwv.xyz*1.6;
     float cl=smoothstep(.48,.8,fbm(rotY(uT*.00025)*cpp*1.7+3.+uT*.0015)+(n3(cpp*26.+uT*.004)-.5)*.09*det)*uClouds; int gS=gOct; gOct=min(gOct,4); float cs=smoothstep(.48,.8,fbm(rotY(uT*.00025)*(cpp+L*.05)*1.7+3.+uT*.0015))*uClouds; gOct=gS;
@@ -1947,7 +2158,8 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
   }
   lvA[0]=0.; lvA[1]=0.; lvE[0]=0.; lvE[1]=0.; lvW[0]=1.; lvW[1]=1.; lvC[0]=vec3(1.); lvC[1]=vec3(1.); lvD[0]=vec3(0.,0.,1.); lvD[1]=lvD[0]; lvT[0]=.9; lvT[1]=.9;
   if(uTkN>0&&uType!=8&&uR>3.){
-    vec3 sw=normalize(s+(vec3(n3(sp*1.5),n3(sp*1.5+7.),n3(sp*1.5+13.))-.5)*.26);
+    vec3 sq=mat3(.6,.8,0.,-.64,.48,.6,.48,-.36,.8)*sp;   /* V9.3 : contours des zones plus naturels (deux échelles, axes tournés : plus de bords droits) */
+    vec3 sw=normalize(s+(vec3(n3(sp*1.5),n3(sq*1.5+7.),n3(sq.zxy*1.7+13.))-.5)*.21+(vec3(n3(sq*4.3+3.),n3(sp*4.3+9.),n3(sq.yzx*4.3+17.))-.5)*.08);
     float topo=(uType==11?(1.-smoothstep(.0,1.,land))*.22:0.)+(bA>0.?smoothstep(.55,.9,gh)*.18:0.);
     float b1=-9.,b2=-9.; int bi=0; int li0=-1,li1=-1; float ls0=0.,ls1=0.;
     for(int i=0;i<16;i++){ if(i>=uTkN) break; float st=(dot(sw,uTk[i].xyz)-uTk[i].w)/max(1.-uTk[i].w,1e-3)-topo; float a=mod(uTkB[i].z,2.);
@@ -1982,48 +2194,32 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
         vec2 uv=vec2(dot(s,t1),dot(s,t2)); float gt=min(lv,4.999); float tier=max(floor(gt),1.); float cnt=gt<1.?1.:pow(4.,fract(gt));
         float r0=max(.035*pow(2.1,tier-1.)*(gt<1.?sqrt(gt):1.),2.4/uR); float ph=B.y*40.+uSeed;
         float ef=min(.8/r0,uR*.22); float bn=n3(sp*ef*2.2+2.); float en=(n3(sp*ef)-.5)*.55+(bn-.5)*.25;
-        float m=-2.; vec2 dv=uv/r0; float pop=0.;
+        float m=-2.; vec2 dv=uv/r0; float pop=0., rb=r0, jb=0.;
         for(int j=0;j<4;j++){ float aj=j==0?1.:clamp(cnt-float(j),0.,1.); if(aj<=0.) break; float an=ph+float(j)*2.094;
-          vec2 o=j==0?vec2(0.):vec2(cos(an),sin(an))*r0*1.25; vec2 q=(uv-o)/(r0*sqrt(aj)); float mj=1.-length(q)+en; pop=max(pop,aj*(1.-aj)*4.*smoothstep(-.4,.5,mj)); if(mj>m){ m=mj; dv=q; } }
-        emi+=mix(hc,vec3(1.),.4)*pop*.22*km*(.4+nn);
+          vec2 o=j==0?vec2(0.):vec2(cos(an),sin(an))*r0*1.25; vec2 q=(uv-o)/(r0*sqrt(aj)); float mj=1.-length(q)+en; pop=max(pop,aj*(1.-aj)*4.*smoothstep(-.4,.5,mj)); if(mj>m){ m=mj; dv=q; rb=r0*sqrt(aj); jb=float(j); } }
+        emi+=mix(hc,vec3(1.),.4)*pop*.22*km*(.4+nn)*((uType==1||uType==9||uType==2||uType==6||uType==7)?1.:.2);
         float ft=smoothstep(0.,.22,m)*km*smoothstep(0.,.08,dot(s,c0)); float prof=clamp(m,0.,1.);
         vec3 lB2=RM*L; vec2 lt=vec2(dot(lB2,t1),dot(lB2,t2)); float lsl=dot(normalize(dv+1e-4),normalize(lt+1e-4))*smoothstep(0.,.25,m)*(1.-smoothstep(.8,1.,m));
-        float lit=smoothstep(-.05,.3,dot(n0,L)); float ang=atan(dv.y,dv.x), rr=length(dv);
+        float lit=smoothstep(-.05,.3,dot(n0,L)); float ang=atan(dv.y,dv.x), rr=length(dv), pxr=1./(uR*max(n0.z,.12));
         float w2=smoothstep(1.75,2.05,gt), w3=smoothstep(2.75,3.05,gt); float tw=.8+.2*sin(uT*.4+bn*40.); float pts=mix(1.,smoothstep(.4,.72,n3(sp*75.))*1.7,det);
         int th=uType==1?1:uType==9?2:(uType==10||uType==4)?3:uType==2?4:(uType==6||uType==7)?5:0;
-        float csh=0.; if((th==2||th==3)&&uR>24.){ float mS=zM(uv+normalize(lt+1e-4)*r0*.24,r0,cnt,ph,en); csh=smoothstep(0.,.3,mS-m)*smoothstep(-.5,.1,mS)*lit*km; }
+        float csh=0.; if(th==2&&uR>24.){ float mS=zM(uv+normalize(lt+1e-4)*r0*.24,r0,cnt,ph,en); csh=smoothstep(0.,.3,mS-m)*smoothstep(-.5,.1,mS)*lit*km; }
         if(th==0){ float lw3=1.;
           if(uType==11){ float mi=1.-length(uv)/max(min(r0,.06),2.4/uR)+en; float isl=smoothstep(-.25,.15,mi)*(1.-land)*km;
             col=mix(col,mix(vec3(.78,.72,.52),vec3(.2,.36,.14),smoothstep(-.05,.25,mi)),isl); spec*=1.-isl; lw3=max(land,smoothstep(0.,.2,mi)); }
-          lw3*=1.-cloudA*.75; float dn=n3(sp*26.)*.6+n3(sp*63.)*.4;
-          float bt=ft*lw3*mix(1.,smoothstep(.5,.58,dn+prof*.3),w3);
-          float farm=smoothstep(-.55,-.05,m)*(1.-bt)*lw3*km*smoothstep(.3,1.2,gt)*smoothstep(.72,.5,gh);
+          lw3*=1.-cloudA*.75;
+          float farm=smoothstep(-.55,-.05,m)*(1.-ft)*lw3*km*smoothstep(.3,1.2,gt)*smoothstep(.72,.5,gh);
           col=mix(col,mix(vec3(.52,.47,.2),vec3(.24,.38,.13),smoothstep(.42,.58,n3(sp*50.+fbm3(sp*8.)))),farm*.42);
           float e1=smoothstep(.5,1.5,uStage), e2=smoothstep(1.5,2.5,uStage), e3=smoothstep(2.5,3.5,uStage), e4=smoothstep(3.5,4.5,uStage), e5=smoothstep(4.3,5.,uStage);
           vec3 rf0=mix(vec3(.46,.34,.22),vec3(.6,.4,.28),e1); rf0=mix(rf0,vec3(.52,.36,.32),e2*.7);
           vec3 rf1=mix(vec3(.56,.5,.42),vec3(.5,.42,.4),e2); rf1=mix(rf1,vec3(.62,.6,.57),e3); rf1=mix(rf1,vec3(.68,.74,.82),e4*.7);
-          vec3 roof=mix(rf0,rf1,w2)*(.74+.5*n3(sp*110.));
+          vec3 roof=mix(rf0,rf1,w2);
           vec3 lc=mix(vec3(1.,.5,.16),vec3(1.,.84,.58),e2); lc=mix(lc,vec3(.95,.97,1.),e4*.6); lc=mix(hc,lc,.65); lc=mix(lc,mix(hc,vec3(.4,.95,1.),.5),e5*.5);
           if(uType==3){ roof=mix(roof,vec3(.72,.82,.92),.55); lc=mix(lc,vec3(.7,.9,1.),.4); } if(uType==5){ roof=mix(roof,vec3(.5,.36,.8),.6); lc=mix(lc,vec3(.65,.9,1.),.5); }
-          col=mix(col,roof,bt*.8);
-          if(uR>120.){ float cz=smoothstep(120.,300.,uR)*bt; vec2 cg=uv*mix(150.,105.,w2)+ph*3.; vec2 ci=floor(cg), cf=fract(cg)-.5; float hcell=fract(sin(dot(ci,vec2(12.9898,78.233)))*43758.5);
-            vec2 ldr=normalize(lt+1e-4); float inb=1.-smoothstep(.3,.42,max(abs(cf.x),abs(cf.y)));
-            float hs=w2>.5?1.:step(.45,hcell)*(1.-smoothstep(.22,.3,max(abs(cf.x),abs(cf.y))));
-            float bh=mix(.75,1.3,hcell)*(1.+.35*w3*step(.7,hcell)); float sd=clamp(dot(cf,ldr)*2.,-1.,1.);
-            float bld=mix(hs,inb,w2)*cz; col=mix(col,col*bh*(.85+.25*sd*lit),bld*.85);
-            col=mix(col,mix(vec3(.24,.25,.27),vec3(.35,.33,.3),1.-w2),(1.-inb)*w2*cz*.55);
-            col*=1.-smoothstep(0.,.25,-sd)*bld*(.25+.2*w3)*lit;
-            float win=step(.55,fract(hcell*17.3+floor(cf.x*6.+.5)*.37+floor(cf.y*6.+.5)*.71));
-            emi+=lc*(bld*win*mix(.35,.6,w2)+(1.-inb)*w2*cz*step(.6,fract(hcell*5.3))*.5)*nn*tw; }
-          float dwn=smoothstep(.62,.9,m+(bn-.5)*.3)*w2*bt; col=mix(col,vec3(.64,.66,.7),dwn*.5); spec=max(spec,dwn*.5);
-          float rd=(1.-smoothstep(0.,.022,abs(n3(sp*9.+fbm3(sp*2.5))-.5)))*w2*smoothstep(-.4,.1,m)*lw3*km; col=mix(col,vec3(.36),rd*.3);
-          emi+=lc*(bt*(.6+.5*w2)*pts+dwn*1.3+rd*.5)*nn*tw*(.4+.6*e2+.25*e4)*(.9+Bl*uBeat*1.3);
-          emi+=lc*(bt*(.6+.5*w2)*pts+dwn*1.3+rd*.6)*wvG*(1.1*nn+.16)*(1.-Bl*.5);
-          if(e2<.99&&bt>.01&&uR>24.){ float fire=(1.-e2)*smoothstep(.7,.85,n3(sp*60.))*bt*(.6+.4*sin(uT*3.+bn*50.)); emi+=vec3(1.,.45,.12)*fire*.5*nn; }
+          /* V9.3 · une vraie ville : quartiers, rues, immeubles et leurs ombres, lumières de nuit, trafic (city93) */
+          float bt=city93(uv,dv,m,rb,ph,w2,w3,lt,dot(n0,L),lit,nn,e1,e2,e3,e4,e5,roof,lc,lw3,km*smoothstep(0.,.08,dot(s,c0)),Bl,pxr,col,emi,spec); gCity93=max(gCity93,ft*lw3);
+          if(bt>.01){ float fz=bt*.7; n=normalize(mix(n,n0,fz)); ndl=dot(n,L); dif=lam(ndl)*shd; TXR*=1.-bt*.9; }   // la ville aplanit le grain du sol (elle reste sur ses collines)
           if(e2>.01&&e4<.99&&bt*w2>.01){ float smk=e2*(1.-e4*.8)*smoothstep(.55,.8,fbm3(sp*10.+vec3(uT*.012,uT*.004,0.)))*bt*w2; col=mix(col,vec3(.42,.4,.39),smk*.45); }
-          if(e3>.01&&rd>.01){ float trf=rd*e3*pow(.5+.5*sin(n3(sp*9.)*90.-uT*1.6),6.); emi+=mix(vec3(1.,.9,.7),vec3(1.,.3,.2),step(.5,fract(n3(sp*30.)*7.)))*trf*.5*(nn+.15); }
-          vec2 gq=abs(fract(dv*4.)-.5); float grd=(1.-smoothstep(0.,.06,min(gq.x,gq.y)))*dwn*e5; emi+=mix(hc,vec3(.35,.95,1.),.55)*grd*.7*(nn+.35)*(.8+.2*sin(uT*.9+rr*8.));
-          spec=max(spec,dwn*e4*.9);
           if(uR>20.&&(e3>.01||gt>.8)){ for(int k=0;k<3;k++){ float fk=float(k); float a=uT*(.045+.018*fk)+fk*2.1+ph; vec2 pq=vec2(cos(a),sin(a*1.3+fk))*r0*(1.1+.45*fk); float dd=length(uv-pq)*uR;
             emi+=vec3(1.,.95,.85)*exp(-dd*dd*1.2)*e3*(.45+.55*step(.5,fract(uT*1.4+fk*.3)))*(.4+nn)*.9;
             vec2 bq=vec2(cos(a*.35+fk*1.7),sin(a*.35+fk*1.7))*r0*(1.35+.3*fk); float db=length(uv-bq)*uR; float wat=uType==11?(1.-land):uType==1?1.:0.;
@@ -2041,13 +2237,8 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
           float fc=smoothstep(.5,.75,m+(rdg-.5)*.3)*w3*km; col=mix(col,vec3(.2,.21,.24),fc*.6);
           emi+=vec3(1.,.5,.14)*(.7+.12*uStage)*fc*(.22+.5*smoothstep(.6,.9,n3(sp*18.+vec3(0.,uT*.1,0.))))*(.35+nn)*(1.+Bl*uBeat*1.2+wvG*1.3); emi+=vec3(1.,.86,.62)*fc*smoothstep(.55,.8,n3(sp*70.))*nn*.8*tw;
           float smk=smoothstep(.5,.8,fbm3(sp*6.+vec3(uT*.01,0.,0.)))*fc; col=mix(col,vec3(.34,.33,.33),smk*.5); setl=max(setl,fc); col*=1.-csh*.55; }
-        else if(th==3){ float crt=ft*(1.-w2);
-          col*=1.-crt*.42*smoothstep(.15,.8,m); col*=1.-crt*lsl*.6*lit; col+=vec3(.13,.11,.1)*crt*(smoothstep(0.,.1,m)-smoothstep(.1,.28,m))*(.4+lit);
-          float vo=ft*w2; col=mix(col,mix(vec3(.21,.16,.14),vec3(.09,.07,.07),prof)*(.8+.4*bn),vo*.72); col*=1.+vo*lsl*.85*lit;
-          vec3 lava=vec3(1.,.42,.08)*(.75+.1*uStage); float vent=smoothstep(.78,.92,m)*vo; emi+=lava*vent*(1.1+.4*sin(uT*.8+ph))*(1.+Bl*uBeat*1.5+wvG*1.4);
-          float fl=(1.-smoothstep(0.,.1,abs(n3(vec3(ang*2.6,rr*1.6,ph))-.5)))*vo*smoothstep(.12,.75,m)*(1.-vent); emi+=lava*fl*.6*(.8+.2*sin(uT*.5+rr*6.));
-          float lk=smoothstep(.3,.5,m+(bn-.5)*.5)*w3*km; float cst=smoothstep(0.,.1,abs(fbm3(sp*min(3./r0,40.)+uT*.01)-.5));
-          col=mix(col,vec3(.07,.05,.05),lk); emi+=lava*lk*(1.-cst*.85)*(.9+.3*sin(uT*.6+bn*9.))*(1.+Bl*uBeat); col*=1.-csh*.55; }
+        else if(th==3){   /* V9.3 · cratères d'impact, puis vrais volcans (cône, cratère, coulées, fumée), lacs et mers de lave (volc93) */
+          volc93(dv,uv,rb,r0,ph,jb,w2,w3,smoothstep(3.75,4.05,gt),bn,lt,dot(n0,L),lit,nn,km*smoothstep(0.,.08,dot(s,c0)),Bl,pxr,col,emi,spec); }
         else if(th==4){ float bil=fbm3(sp*min(2.2/r0,30.)+vec3(uT*.004,0.,0.)); float cm=smoothstep(-.1,.45,m+(bil-.5)*.6)*km;
           col=mix(col,mix(hc,vec3(1.),.35)*(.55+.6*bil),cm*(.5+.2*w2));
           float sw2=.5+.5*sin(ang*mix(3.,2.,w3)+log(rr+.05)*mix(4.,7.,w3)-uT*.05+bil*3.); col=mix(col,col*(.55+.8*sw2),cm*w2*.7);
@@ -2066,7 +2257,7 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
           float cy=(.5+.5*sin(an*2.+dc*26.-uT*.2))*smoothstep(0.,.05,dc)*ez; col=mix(col,vec3(.95,.97,1.),cy*.8); }
         else if(bb==5){ float cl=smoothstep(.45,.75,fbm3(sp*3.+vec3(uT*.008,0.,0.)))*ez; col=mix(col,vec3(.3,.33,.4),cl*.7); float lt2=uT*1.3; emi+=vec3(.75,.85,1.)*smoothstep(.7,.88,n3(sp*6.+floor(lt2)*3.3))*pow(1.-fract(lt2),3.)*cl*1.4; }
         else { float sg=pow(.5+.5*sin(dot(sp,vec3(3.,2.,4.))*4.-uT*1.5),3.); emi+=hc*sg*ez*.45; } } } }
-  if(bA>0.){ float lk=(uType==11||uType==1)?land:1.; float slope=1.-dot(nb,n0);
+  if(bA>0.){ float lk=((uType==11||uType==1)?land:1.)*(1.-gCK93*.85); float slope=1.-dot(nb,n0);
     col=mix(col,col*.55+vec3(.07,.06,.05),smoothstep(.04,.16,slope)*.55*lk);
     col*=mix(vec3(1.),vec3(1.1,.97,.88),smoothstep(.35,.75,fbm3(sp*.6+3.))*.35*lk);
     col*=mix(1.,.64+.8*gh,.6*lk);
@@ -2116,9 +2307,9 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
     float swp=pow(max(0.,sin(dot(sp,vec3(1.3,.7,.9))-uT*.25)),30.); spec*=1.+swp*1.5; col*=1.+swp*.12*dif; }
   if(uType==10&&!sT){ float md=n3(sp*30.)-n3((sp+lbD*.014)*30.); col*=clamp(1.+md*1.8*(.3+det),.55,1.5); float strat=sin(gh*70.+n3(sp*6.)*4.); col*=1.+strat*.07; float vn=1.-smoothstep(0.,.012,abs(n3(sp*11.+4.)-.5)); float ore=vn*smoothstep(.45,.7,n3(sp*2.)); col=mix(col,vec3(.8,.62,.32),ore*.55); spec=max(spec,ore*.9);
     col=mix(col,col*1.18+.03,smoothstep(.6,.82,n3(sp*3.+vec3(uT*.003,0.,0.)))*.3); float tal=smoothstep(.1,.22,1.-dot(nb,n0)); col=mix(col,col*1.25,tal*.3); }                                                      // fine cloud-top striations
-  if(uType==11||uType==1){ float ci=smoothstep(.58,.82,n3(vec3(sp.x*2.,sp.y*14.,sp.z*2.)+uT*.0003))*.28*(1.-land*.3); col=mix(col,vec3(.95,.97,1.),ci); cloudA=max(cloudA,ci);
+  if(uType==11||uType==1){ float wy=fbm3(sp*1.9+2.); float ci=smoothstep(.6,.86,n3(vec3(sp.x*2.4+wy*1.5,sp.y*10.+wy*6.,sp.z*2.4)+uT*.0003))*smoothstep(.3,.62,n3(sp*2.6+4.))*.26*(1.-land*.3);   /* V9.3 : cirrus en voiles ondulés, plus de rayures droites */ col=mix(col,vec3(.95,.97,1.),ci); cloudA=max(cloudA,ci);
     col=mix(col,col*vec3(.78,.8,.88),cloudA*(1.-dif)*.35); }                                                       // cirrus streaks, darker cloud undersides
-  float dq=smoothstep(15.,26.,uR); col=mix(colB0,col,dq); emi=mix(emiB0,emi,dq); }
+  float dq=smoothstep(15.,26.,uR)*(1.-gCK93*.92); col=mix(colB0,col,dq); emi=mix(emiB0,emi,dq); }   // V9.3 : pas de forêt ni de rocher peints sur la ville
   if(uPlay>0.&&uType!=8){ for(int j=0;j<2;j++){ float A=lvA[j]; if(A<=.004) continue; float E=lvE[j]; vec3 C=lvC[j]; float dbo=max(-E,0.)*lvW[j]*2.4; float out0=smoothstep(0.,.015,dbo);
     float sl,swv,q,az01; float hw=wvAt(s,lvD[j],lvT[j],sl,swv,q,az01);
     float env=exp(-q*2.6)*(1.-smoothstep(.7,1.,q))*smoothstep(0.,.05,q)*out0; float sw2=swv*A*out0*exp(-q*2.2);
@@ -2129,7 +2320,12 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
       float rph=mix(ang-a0,wvD,.45)*2.1-uT*(.5+uLv*.22+uBs*.35), rc=.5+.5*cos(rph*6.2832), r2=rc*rc, r4=r2*r2, cr=r4*r4*r2;   // crête fine (rc^10)
       float aa=smoothstep(.18,.55,fwidth(rph)), rg=mix(cr+r4*.3,.15,aa);   // halo doux ; anneaux trop serrés à l'écran : une lueur égale au lieu d'un scintillement
       float e0=(.3+uLv*.6+uBs*.85+uBeat*.3)*(.55+.75*wvB)*env*A*(1.-.3*q), rl=(rg*e0+sw2*.85)*uBreath.x; vec3 rcl=mix(wc,vec3(1.),.3);
-      emi+=rcl*rl*(.1+.22*(1.-dif)); col=mix(col,col*1.08,min(rl,1.)*.3*dif); spec+=rl*.08;
+      /* V9.3 · ondes réelles : l'anneau soulève la surface (crête pointue, creux plat) ; le soleil éclaire un versant et laisse l'autre dans l'ombre,
+         l'eau renvoie des reflets sur les crêtes ; la lueur ne reste que du côté nuit, pour qu'on les voie encore dans le noir */
+      float x6=rph*6.2832, cx=cos(x6), sx=sin(x6), pk=exp((cx-1.)*2.4), en2=exp((cx-1.)*.9);   // crête principale et petites rides qui l'accompagnent
+      float tl2=(-2.4*sx*pk+.3*(3.*cos(x6*3.)-.9*sx*sin(x6*3.))*en2)*(1.-aa)*min(e0,1.4)*.5*uBreath.x;
+      vec3 rdv=normalize(s-lvD[j]*dot(s,lvD[j])+1e-5)*RM; wvN-=rdv*tl2; n=normalize(n-rdv*tl2); ndl=dot(n,L); dif=lam(ndl)*shd;
+      emi+=rcl*rl*(.03+.25*(1.-dif)); col=mix(col,col*1.08,min(rl,1.)*.3*dif); spec+=rl*.08+pk*e0*.25*uBreath.x;
       float bf=min((mix(cr,.15,aa)*e0+sw2*.6)*uBreath.x,1.2); if(bf>.01) breathFx(s,sp,normalize(s-lvD[j]*dot(s,lvD[j])+1e-5),ang,az01,bf,wc,dif,land,col,emi,spec); }
     float px=abs(E)/max(fwidth(E),1e-5); float wl=.8+uR*.0032;
     float core=(1.-smoothstep(wl*.4,wl*.4+1.,px))*A*smoothstep(4.,14.,uR); float inner=exp(-max(E,0.)*5.)*step(0.,E)*(1.-core)*A;
@@ -2150,9 +2346,10 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
   float civ=clamp((uStage-.8)/4.2,0.,1.);
   if(civ>0.&&uType!=8){
     float mask=uPath.y==1.?smoothstep(.55,.7,fbm3(sp*1.4+5.)):smoothstep(.42,.6,fbm3(sp*2.6));
-    mask=mix(mask,1.,.55)*setl;
+    mask=mix(mask,1.,.55)*setl*(1.-gCity93);
     float th=mix(.8,uPath.y==0.?.56:.64,civ);
     float ct=smoothstep(th,th+.06,n3(sp*26.))*mask*((uType==1||uType==11)?land:1.);
+    if(uR>150.) ct*=mix(1.,smoothstep(.35,.78,n3(sp*190.))*1.7,smoothstep(150.,480.,uR));   // V9.3 : de près, les lumières se séparent en grains (rues, quartiers) au lieu de taches lisses
     if(uType==0||uType==1||uType==11||uType==9||uType==10){ float lw=(uType==1||uType==11)?land*(1.-cloudA):1.; float urb=smoothstep(th-.08,th+.02,n3(sp*26.))*mask*lw*civ;
       col=mix(col,vec3(.46,.44,.42)*(.8+.4*n3(sp*120.)),urb*.55);
       float farm=smoothstep(.3,.6,mask)*(1.-urb)*civ*lw*step(1.5,uStage)*((uType==9||uType==10)?0.:1.);
@@ -2187,6 +2384,7 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
   vec3 sun=uSun*uSunI; if(uType==2) col*=.62+.38*pow(max(n0.z,0.),.35); if(uType==10||uType==0||uType==9) dif*=1.+.22*pow(max(L.z,0.),8.)*shd;
   vec3 sky=mix(sun,uAt*1.2,.55*clamp(uAtmo*1.4,0.,1.));
   vec3 lit=col*(amb*mix(vec3(1.),sky,.7)+dif*sun+(1.-shd)*max(ndl,0.)*sky*.06*uAtmo)+emi;
+  if(gPl93>.003){ float pL=lam(dot(n0,L)+.08)*mix(1.,shd,.7); lit=mix(lit,gPc93*(amb*mix(vec3(1.),sky,.7)+pL*sun)+gPe93,gPl93); }   // V9.3 : panache de fumée au-dessus du sol
   lit+=vec3(.95,.72,.55)*cloudA*max(0.,lam(ndl+.14)-lam(ndl))*sun*.9;
   if(uType==3) lit+=col*vec3(.25,.55,.95)*max(0.,lam(ndl+.3)-dif)*.35*sun;
   if(uType==2) lit+=col*pow(1.-max(n0.z,0.),3.)*dif*.25*sun;
@@ -2201,7 +2399,7 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
   if(uType==9) lit+=sun*col*pow(1.-max(n0.z,0.),2.5)*.5*dif+sun*.1*pow(max(dot(reflect(-L,n),vec3(0.,0.,1.)),0.),6.)*shd;
   if(uType==3||uType==5) lit+=sun*vec3(.7,.85,1.)*pow(max(dot(reflect(-L,n),vec3(0.,0.,1.)),0.),14.)*.35*shd+sun*col*max(0.,lam(ndl+.25)-dif)*.3;
   if(uType==1||uType==11){ float wat=(1.-land)*(1.-cloudA);
-    vec3 nw=normalize(n0+vec3(n3(sp*46.+vec3(uT*.25,0.,0.))-.5,n3(sp*46.+vec3(0.,uT*.21,7.))-.5,0.)*.14*(.35+det));
+    vec3 nw=normalize(n0+wvN*1.5+vec3(n3(sp*46.+vec3(uT*.25,0.,0.))-.5,n3(sp*46.+vec3(0.,uT*.21,7.))-.5,0.)*.14*(.35+det));
     vec3 hw=normalize(L+vec3(0.,0.,1.)); float a2=.0016; float nh=max(dot(nw,hw),0.); float dd=nh*nh*(a2-1.)+1.; float Dw=a2/(3.14159*dd*dd); float Fw=.02+.98*pow(1.-max(nw.z,0.),5.);
     lit+=sun*min(Dw*.018,2.2)*wat*max(ndl,0.)*shd;
     lit+=mix(vec3(.24,.4,.6),uAt,.5)*Fw*wat*.45*lam(ndl+.15); }
@@ -2368,7 +2566,7 @@ float zM(vec2 uv,float r0,float cnt,float ph,float en){ float m=-2.; for(int j=0
   vec2 o=j==0?vec2(0.):vec2(cos(an),sin(an))*r0*1.25; m=max(m,1.-length((uv-o)/(r0*sqrt(aj)))+en); } return m; }
 vec3 biomeC(int b,vec3 sp,out float bs,inout vec3 em){
   bs=0.; float f=fbm3(sp*2.3); float g=n3(sp*11.); vec3 c;
-  if(b==0){ c=mix(vec3(.05,.04,.04),vec3(.17,.1,.08),f); float cr=1.-smoothstep(0.,.06,abs(fbm3(sp*3.7+uT*.02)-.5)); em+=vec3(1.,.38,.08)*cr*(.9+uAudio*2.)*(.6+.4*sin(uT*1.7+f*9.)); }
+  if(b==0){ c=mix(vec3(.05,.04,.04),vec3(.17,.1,.08),f); float fz=fbm3(sp*3.7+uT*.02)-.5+(n3(sp*31.)-.5)*.07*smoothstep(200.,700.,uR), wc=.06*clamp(260./max(uR,1.),.1,1.); float cr=1.-smoothstep(0.,wc,abs(fz)); cr=cr*cr+(1.-smoothstep(0.,wc*5.,abs(fz)))*.14;   /* V9.3 : fissures nettes */ em+=vec3(1.,.38,.08)*cr*(.9+uAudio*2.)*(.6+.4*sin(uT*1.7+f*9.)); }
   else if(b==1){ float strata=sin(f*26.+sp.y*7.)*.5+.5; c=mix(vec3(.42,.17,.08),vec3(.74,.44,.24),strata)*(.75+g*.4); c*=1.-smoothstep(.55,.7,fbm3(sp*5.))*.4; }
   else if(b==2){ float qp=n3(sp*4.+fbm3(sp*2.)*.6)*5.; float seam=1.-smoothstep(0.,.06,min(fract(qp),1.-fract(qp))); c=mix(vec3(.3,.32,.36),vec3(.64,.67,.72),fract(floor(qp)*.618))*(1.-seam*.5); bs=1.3;
     em+=vec3(1.,.76,.42)*seam*.16*smoothstep(.55,.7,n3(sp*18.)); }
@@ -2410,17 +2608,21 @@ vec4 cloudWave(vec3 s){ vec4 r=vec4(0.); if(uPlay<=0.||uTkN<=0) return r; float 
     float env=exp(-q*2.6)*(1.-smoothstep(.7,1.,q))*smoothstep(0.,.03,q)*A; vec3 tv=normalize(s-uTk[i].xyz*dot(s,uTk[i].xyz)+1e-5);
     wvG+=(smoothstep(.25,.9,h)*(.45+uLv*.65+uBs*.8)+sw*1.4)*env; r.w+=sw*env*(1.-smoothstep(.45,1.,q)); }
   return r; }
+${PD93}
 vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
   vec3 sp=s*1.6+uSeed*7.; vec4 cwvG=cloudWave(s); wvG=min(wvG,1.5);
   float det=clamp((uR-14.)/95.,0.,1.)*uQual; vec3 n0=n, nb=n; float gh=.5;
   float bA=uType==10?2.8:uType==9?1.5:uType==4?2.:uType==0?1.9:uType==3?1.6:(uType==11||uType==1)?2.:0.;
-  float shd=occShadow(n0,L)*ringShadow(n0,L);
+  float shd=occShadow(n0,L)*ringShadow(n0,L), rSh=1.; vec3 wvN=vec3(0.);
   if(bA>0.&&uR>14.){ float e=clamp(2.5/uR,.004,.02); vec3 b0=RM*n; float gc; gh=reliefB(b0,det,gc); float dg=uQual>.85?det:0.; float g0=dg>0.?gh:gc;
     float hx=relief(RM*normalize(n+vec3(e,0.,0.)),dg)-g0, hy=relief(RM*normalize(n+vec3(0.,e,0.)),dg)-g0;
     nb=normalize(n-vec3(hx,hy,0.)/e*bA*.1*smoothstep(9.,34.,uR));
-    if(det>.2&&uQual>.55){ vec3 lb=RM*L; float oc=1.; float tl=1.+2.5*(1.-clamp(dot(n0,L),0.,1.)); int mk=uQual>.8?3:2; for(int k=1;k<=3;k++){ if(k>mk) break; float st=.011*float(k*k)*tl; float hl=relief(normalize(b0+lb*st),0.); oc=min(oc,clamp((gc-hl)*12./float(k)+.8,0.,1.)); }
-      shd*=mix(1.,.1+.9*oc,min(1.,det*1.5)*smoothstep(-.1,.4,dot(n0,L))); } }
-  if(!(uType==11||uType==1)) n=nb;
+    if(det>.2&&uQual>.55){ vec3 lb=RM*L; float Lz0=dot(n0,L); vec3 lt3=lb-b0*dot(lb,b0); float ltl=length(lt3);   /* V9.3 · ombres portées du relief (voir la variante principale) */
+      if(ltl>.03&&Lz0>-.15&&Lz0<.6){ vec3 ld=lt3/ltl; float tE=max(Lz0,0.)/ltl, H=bA*.045, oc=0.; int mk=uQual>.8?4:3;
+        for(int k=1;k<=4;k++){ if(k>mk) break; float t=.0055*float(k*k)+.0045; float hl=relief(normalize(b0+ld*t),0.);
+          oc=max(oc,smoothstep(0.,1.,((hl-gc)*H-t*tE)/(t*.4+.003))); }
+        rSh=1.-oc*.6*min(1.,det*1.5)*smoothstep(-.15,.05,Lz0)*smoothstep(.6,.45,Lz0); } } }
+  if(!(uType==11||uType==1)){ n=nb; shd*=rSh; }
   float ndl=dot(n,L); float dif=lam(ndl)*shd; float amb=.038;
   vec3 col; vec3 emi=vec3(0.); float a=1.; float land=1.; float spec=0.;
   if(uType==0){ float f=fbm(sp*1.3); float cr=fbm(sp*5.); col=mix(uC2*.45,uC1,smoothstep(.3,.7,f)); col*=.68+.55*cr; col*=.9+.2*sin(dot(sp,vec3(9.,3.,7.))+fbm3(sp*4.)*6.)*(.3+det); col*=.93+.14*sin(s.y*90.+fbm3(sp*3.)*9.)*det;
@@ -2443,7 +2645,7 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
       float beach=smoothstep(sea+.026,sea+.004,f)*(1.-smoothstep(.55,.75,lat)); ground=mix(ground,vec3(.76,.68,.5)*(.88+.24*n3(sp*60.)),beach*.75); }
     ocean=mix(ocean,vec3(.05,.38,.42),smoothstep(sea-.03,sea,f)*(1.-lm)*.7); float foam=smoothstep(sea-.008,sea,f)*(1.-smoothstep(sea,sea+.006,f)); ocean=mix(ocean,vec3(.82,.88,.9),foam*.45*(.35+det));
     col=mix(ocean,ground,lm); col=mix(col,vec3(.93,.96,1.),smoothstep(.8,.9,lat+fbm3(sp*3.)*.1));
-    land=lm; spec=(1.-lm)*1.1; n=normalize(mix(n0,nb,lm)); ndl=dot(n,L); dif=lam(ndl)*shd;
+    land=lm; spec=(1.-lm)*1.1; n=normalize(mix(n0,nb,lm)); shd*=mix(1.,rSh,lm); ndl=dot(n,L); dif=lam(ndl)*shd;
     ground=mix(ground,vec3(.95),smoothstep(.62,.8,gh)*.75*lm); col=mix(ocean,ground,lm); col=mix(col,vec3(.93,.96,1.),smoothstep(.8,.9,lat+fbm3(sp*3.)*.1));
     vec4 cwv=cwvG; vec3 cq=rotY(uT*.0003)*(sp-cwv.xyz*1.6); cq+=vec3(fbm3(cq*2.+uT*.0015),fbm3(cq*2.+3.),0.)*.7;
     float cl=smoothstep(.48,.79,fbm(cq*1.9+3.)+(n3(cq*14.+uT*.004)-.5)*.13*(.3+det)+(n3(cq*31.-uT*.006)-.5)*.07*det+(det>.5?(n3(cq*70.)-.5)*.045*det*det:0.))*(.5+uClouds*.6); int gS=gOct; gOct=min(gOct,4); float cs=smoothstep(.48,.79,fbm((cq+L*.05)*1.9+3.))*(.5+uClouds*.6); gOct=gS;
@@ -2455,7 +2657,7 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
   else if(uType==1){ float f=fbm(sp*1.1); bool trop=uArch>2.5&&uArch<3.5; if(trop) f=mix(f,fbm(sp*3.3+4.),.62)-.015; land=smoothstep(.53,.57,f); vec3 sea=mix(uC1*.18,uC1*.7,smoothstep(.3,.55,f)); if(trop) sea=mix(sea,vec3(.05,.55,.6),smoothstep(.4,.53,f)*.75);
     vec3 ground=mix(uC2*.55,vec3(.55,.45,.3),smoothstep(.6,.75,f))*(.6+.6*fbm(sp*4.)); sea=mix(sea,mix(sea,vec3(.08,.42,.45),.6),smoothstep(.49,.53,f));
     if(trop){ ground=mix(vec3(.93,.85,.62),mix(vec3(.08,.36,.1),vec3(.2,.5,.14),n3(sp*9.)),smoothstep(.56,.6,f)); }
-    col=mix(sea,ground,land); col=mix(col,vec3(.95,.97,1.),smoothstep(trop?.9:.78,trop?.98:.92,abs(s.y))); n=normalize(mix(n0,nb,land)); ndl=dot(n,L); dif=lam(ndl)*shd;
+    col=mix(sea,ground,land); col=mix(col,vec3(.95,.97,1.),smoothstep(trop?.9:.78,trop?.98:.92,abs(s.y))); n=normalize(mix(n0,nb,land)); shd*=mix(1.,rSh,land); ndl=dot(n,L); dif=lam(ndl)*shd;
     float veg=smoothstep(.6,.2,abs(s.y))*clamp(uStage/3.,.1,1.)*land; col=mix(col,vec3(.12,.32,.1)*(.7+fbm3(sp*9.)*.6),veg*.5);
     vec4 cwv=cwvG; vec3 cpp=sp-cwv.xyz*1.6;
     float cl=smoothstep(.48,.8,fbm(rotY(uT*.00025)*cpp*1.7+3.+uT*.0015)+(n3(cpp*26.+uT*.004)-.5)*.09*det)*uClouds; int gS=gOct; gOct=min(gOct,4); float cs=smoothstep(.48,.8,fbm(rotY(uT*.00025)*(cpp+L*.05)*1.7+3.+uT*.0015))*uClouds; gOct=gS;
@@ -2493,7 +2695,8 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
     emi+=uC2*pow(f,4.)*(1.6+uAudio*3.); land=.5; }
   lvA[0]=0.; lvA[1]=0.; lvE[0]=0.; lvE[1]=0.; lvW[0]=1.; lvW[1]=1.; lvC[0]=vec3(1.); lvC[1]=vec3(1.); lvD[0]=vec3(0.,0.,1.); lvD[1]=lvD[0]; lvT[0]=.9; lvT[1]=.9;
   if(uTkN>0&&uType!=8&&uR>3.){
-    vec3 sw=normalize(s+(vec3(n3(sp*1.5),n3(sp*1.5+7.),n3(sp*1.5+13.))-.5)*.26);
+    vec3 sq=mat3(.6,.8,0.,-.64,.48,.6,.48,-.36,.8)*sp;   /* V9.3 : contours des zones plus naturels (deux échelles, axes tournés : plus de bords droits) */
+    vec3 sw=normalize(s+(vec3(n3(sp*1.5),n3(sq*1.5+7.),n3(sq.zxy*1.7+13.))-.5)*.21+(vec3(n3(sq*4.3+3.),n3(sp*4.3+9.),n3(sq.yzx*4.3+17.))-.5)*.08);
     float topo=(uType==11?(1.-smoothstep(.0,1.,land))*.22:0.)+(bA>0.?smoothstep(.55,.9,gh)*.18:0.);
     float b1=-9.,b2=-9.; int bi=0; int li0=-1,li1=-1; float ls0=0.,ls1=0.;
     for(int i=0;i<16;i++){ if(i>=uTkN) break; float st=(dot(sw,uTk[i].xyz)-uTk[i].w)/max(1.-uTk[i].w,1e-3)-topo; float a=mod(uTkB[i].z,2.);
@@ -2528,48 +2731,32 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
         vec2 uv=vec2(dot(s,t1),dot(s,t2)); float gt=min(lv,4.999); float tier=max(floor(gt),1.); float cnt=gt<1.?1.:pow(4.,fract(gt));
         float r0=max(.035*pow(2.1,tier-1.)*(gt<1.?sqrt(gt):1.),2.4/uR); float ph=B.y*40.+uSeed;
         float ef=min(.8/r0,uR*.22); float bn=n3(sp*ef*2.2+2.); float en=(n3(sp*ef)-.5)*.55+(bn-.5)*.25;
-        float m=-2.; vec2 dv=uv/r0; float pop=0.;
+        float m=-2.; vec2 dv=uv/r0; float pop=0., rb=r0, jb=0.;
         for(int j=0;j<4;j++){ float aj=j==0?1.:clamp(cnt-float(j),0.,1.); if(aj<=0.) break; float an=ph+float(j)*2.094;
-          vec2 o=j==0?vec2(0.):vec2(cos(an),sin(an))*r0*1.25; vec2 q=(uv-o)/(r0*sqrt(aj)); float mj=1.-length(q)+en; pop=max(pop,aj*(1.-aj)*4.*smoothstep(-.4,.5,mj)); if(mj>m){ m=mj; dv=q; } }
-        emi+=mix(hc,vec3(1.),.4)*pop*.22*km*(.4+nn);
+          vec2 o=j==0?vec2(0.):vec2(cos(an),sin(an))*r0*1.25; vec2 q=(uv-o)/(r0*sqrt(aj)); float mj=1.-length(q)+en; pop=max(pop,aj*(1.-aj)*4.*smoothstep(-.4,.5,mj)); if(mj>m){ m=mj; dv=q; rb=r0*sqrt(aj); jb=float(j); } }
+        emi+=mix(hc,vec3(1.),.4)*pop*.22*km*(.4+nn)*((uType==1||uType==9||uType==2||uType==6||uType==7)?1.:.2);
         float ft=smoothstep(0.,.22,m)*km*smoothstep(0.,.08,dot(s,c0)); float prof=clamp(m,0.,1.);
         vec3 lB2=RM*L; vec2 lt=vec2(dot(lB2,t1),dot(lB2,t2)); float lsl=dot(normalize(dv+1e-4),normalize(lt+1e-4))*smoothstep(0.,.25,m)*(1.-smoothstep(.8,1.,m));
-        float lit=smoothstep(-.05,.3,dot(n0,L)); float ang=atan(dv.y,dv.x), rr=length(dv);
+        float lit=smoothstep(-.05,.3,dot(n0,L)); float ang=atan(dv.y,dv.x), rr=length(dv), pxr=1./(uR*max(n0.z,.12));
         float w2=smoothstep(1.75,2.05,gt), w3=smoothstep(2.75,3.05,gt); float tw=.8+.2*sin(uT*.4+bn*40.); float pts=mix(1.,smoothstep(.4,.72,n3(sp*75.))*1.7,det);
         int th=uType==1?1:uType==9?2:(uType==10||uType==4)?3:uType==2?4:(uType==6||uType==7)?5:0;
-        float csh=0.; if((th==2||th==3)&&uR>24.){ float mS=zM(uv+normalize(lt+1e-4)*r0*.24,r0,cnt,ph,en); csh=smoothstep(0.,.3,mS-m)*smoothstep(-.5,.1,mS)*lit*km; }
+        float csh=0.; if(th==2&&uR>24.){ float mS=zM(uv+normalize(lt+1e-4)*r0*.24,r0,cnt,ph,en); csh=smoothstep(0.,.3,mS-m)*smoothstep(-.5,.1,mS)*lit*km; }
         if(th==0){ float lw3=1.;
           if(uType==11){ float mi=1.-length(uv)/max(min(r0,.06),2.4/uR)+en; float isl=smoothstep(-.25,.15,mi)*(1.-land)*km;
             col=mix(col,mix(vec3(.78,.72,.52),vec3(.2,.36,.14),smoothstep(-.05,.25,mi)),isl); spec*=1.-isl; lw3=max(land,smoothstep(0.,.2,mi)); }
-          lw3*=1.-cloudA*.75; float dn=n3(sp*26.)*.6+n3(sp*63.)*.4;
-          float bt=ft*lw3*mix(1.,smoothstep(.5,.58,dn+prof*.3),w3);
-          float farm=smoothstep(-.55,-.05,m)*(1.-bt)*lw3*km*smoothstep(.3,1.2,gt)*smoothstep(.72,.5,gh);
+          lw3*=1.-cloudA*.75;
+          float farm=smoothstep(-.55,-.05,m)*(1.-ft)*lw3*km*smoothstep(.3,1.2,gt)*smoothstep(.72,.5,gh);
           col=mix(col,mix(vec3(.52,.47,.2),vec3(.24,.38,.13),smoothstep(.42,.58,n3(sp*50.+fbm3(sp*8.)))),farm*.42);
           float e1=smoothstep(.5,1.5,uStage), e2=smoothstep(1.5,2.5,uStage), e3=smoothstep(2.5,3.5,uStage), e4=smoothstep(3.5,4.5,uStage), e5=smoothstep(4.3,5.,uStage);
           vec3 rf0=mix(vec3(.46,.34,.22),vec3(.6,.4,.28),e1); rf0=mix(rf0,vec3(.52,.36,.32),e2*.7);
           vec3 rf1=mix(vec3(.56,.5,.42),vec3(.5,.42,.4),e2); rf1=mix(rf1,vec3(.62,.6,.57),e3); rf1=mix(rf1,vec3(.68,.74,.82),e4*.7);
-          vec3 roof=mix(rf0,rf1,w2)*(.74+.5*n3(sp*110.));
+          vec3 roof=mix(rf0,rf1,w2);
           vec3 lc=mix(vec3(1.,.5,.16),vec3(1.,.84,.58),e2); lc=mix(lc,vec3(.95,.97,1.),e4*.6); lc=mix(hc,lc,.65); lc=mix(lc,mix(hc,vec3(.4,.95,1.),.5),e5*.5);
           if(uType==3){ roof=mix(roof,vec3(.72,.82,.92),.55); lc=mix(lc,vec3(.7,.9,1.),.4); } if(uType==5){ roof=mix(roof,vec3(.5,.36,.8),.6); lc=mix(lc,vec3(.65,.9,1.),.5); }
-          col=mix(col,roof,bt*.8);
-          if(uR>120.){ float cz=smoothstep(120.,300.,uR)*bt; vec2 cg=uv*mix(150.,105.,w2)+ph*3.; vec2 ci=floor(cg), cf=fract(cg)-.5; float hcell=fract(sin(dot(ci,vec2(12.9898,78.233)))*43758.5);
-            vec2 ldr=normalize(lt+1e-4); float inb=1.-smoothstep(.3,.42,max(abs(cf.x),abs(cf.y)));
-            float hs=w2>.5?1.:step(.45,hcell)*(1.-smoothstep(.22,.3,max(abs(cf.x),abs(cf.y))));
-            float bh=mix(.75,1.3,hcell)*(1.+.35*w3*step(.7,hcell)); float sd=clamp(dot(cf,ldr)*2.,-1.,1.);
-            float bld=mix(hs,inb,w2)*cz; col=mix(col,col*bh*(.85+.25*sd*lit),bld*.85);
-            col=mix(col,mix(vec3(.24,.25,.27),vec3(.35,.33,.3),1.-w2),(1.-inb)*w2*cz*.55);
-            col*=1.-smoothstep(0.,.25,-sd)*bld*(.25+.2*w3)*lit;
-            float win=step(.55,fract(hcell*17.3+floor(cf.x*6.+.5)*.37+floor(cf.y*6.+.5)*.71));
-            emi+=lc*(bld*win*mix(.35,.6,w2)+(1.-inb)*w2*cz*step(.6,fract(hcell*5.3))*.5)*nn*tw; }
-          float dwn=smoothstep(.62,.9,m+(bn-.5)*.3)*w2*bt; col=mix(col,vec3(.64,.66,.7),dwn*.5); spec=max(spec,dwn*.5);
-          float rd=(1.-smoothstep(0.,.022,abs(n3(sp*9.+fbm3(sp*2.5))-.5)))*w2*smoothstep(-.4,.1,m)*lw3*km; col=mix(col,vec3(.36),rd*.3);
-          emi+=lc*(bt*(.6+.5*w2)*pts+dwn*1.3+rd*.5)*nn*tw*(.4+.6*e2+.25*e4)*(.9+Bl*uBeat*1.3);
-          emi+=lc*(bt*(.6+.5*w2)*pts+dwn*1.3+rd*.6)*wvG*(1.1*nn+.16)*(1.-Bl*.5);
-          if(e2<.99&&bt>.01&&uR>24.){ float fire=(1.-e2)*smoothstep(.7,.85,n3(sp*60.))*bt*(.6+.4*sin(uT*3.+bn*50.)); emi+=vec3(1.,.45,.12)*fire*.5*nn; }
+          /* V9.3 · une vraie ville : quartiers, rues, immeubles et leurs ombres, lumières de nuit, trafic (city93) */
+          float bt=city93(uv,dv,m,rb,ph,w2,w3,lt,dot(n0,L),lit,nn,e1,e2,e3,e4,e5,roof,lc,lw3,km*smoothstep(0.,.08,dot(s,c0)),Bl,pxr,col,emi,spec); gCity93=max(gCity93,ft*lw3);
+          if(bt>.01){ float fz=bt*.7; n=normalize(mix(n,n0,fz)); ndl=dot(n,L); dif=lam(ndl)*shd; }   // la ville aplanit le grain du sol (elle reste sur ses collines)
           if(e2>.01&&e4<.99&&bt*w2>.01){ float smk=e2*(1.-e4*.8)*smoothstep(.55,.8,fbm3(sp*10.+vec3(uT*.012,uT*.004,0.)))*bt*w2; col=mix(col,vec3(.42,.4,.39),smk*.45); }
-          if(e3>.01&&rd>.01){ float trf=rd*e3*pow(.5+.5*sin(n3(sp*9.)*90.-uT*1.6),6.); emi+=mix(vec3(1.,.9,.7),vec3(1.,.3,.2),step(.5,fract(n3(sp*30.)*7.)))*trf*.5*(nn+.15); }
-          vec2 gq=abs(fract(dv*4.)-.5); float grd=(1.-smoothstep(0.,.06,min(gq.x,gq.y)))*dwn*e5; emi+=mix(hc,vec3(.35,.95,1.),.55)*grd*.7*(nn+.35)*(.8+.2*sin(uT*.9+rr*8.));
-          spec=max(spec,dwn*e4*.9);
           if(uR>20.&&(e3>.01||gt>.8)){ for(int k=0;k<3;k++){ float fk=float(k); float a=uT*(.045+.018*fk)+fk*2.1+ph; vec2 pq=vec2(cos(a),sin(a*1.3+fk))*r0*(1.1+.45*fk); float dd=length(uv-pq)*uR;
             emi+=vec3(1.,.95,.85)*exp(-dd*dd*1.2)*e3*(.45+.55*step(.5,fract(uT*1.4+fk*.3)))*(.4+nn)*.9;
             vec2 bq=vec2(cos(a*.35+fk*1.7),sin(a*.35+fk*1.7))*r0*(1.35+.3*fk); float db=length(uv-bq)*uR; float wat=uType==11?(1.-land):uType==1?1.:0.;
@@ -2587,13 +2774,8 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
           float fc=smoothstep(.5,.75,m+(rdg-.5)*.3)*w3*km; col=mix(col,vec3(.2,.21,.24),fc*.6);
           emi+=vec3(1.,.5,.14)*(.7+.12*uStage)*fc*(.22+.5*smoothstep(.6,.9,n3(sp*18.+vec3(0.,uT*.1,0.))))*(.35+nn)*(1.+Bl*uBeat*1.2+wvG*1.3); emi+=vec3(1.,.86,.62)*fc*smoothstep(.55,.8,n3(sp*70.))*nn*.8*tw;
           float smk=smoothstep(.5,.8,fbm3(sp*6.+vec3(uT*.01,0.,0.)))*fc; col=mix(col,vec3(.34,.33,.33),smk*.5); setl=max(setl,fc); col*=1.-csh*.55; }
-        else if(th==3){ float crt=ft*(1.-w2);
-          col*=1.-crt*.42*smoothstep(.15,.8,m); col*=1.-crt*lsl*.6*lit; col+=vec3(.13,.11,.1)*crt*(smoothstep(0.,.1,m)-smoothstep(.1,.28,m))*(.4+lit);
-          float vo=ft*w2; col=mix(col,mix(vec3(.21,.16,.14),vec3(.09,.07,.07),prof)*(.8+.4*bn),vo*.72); col*=1.+vo*lsl*.85*lit;
-          vec3 lava=vec3(1.,.42,.08)*(.75+.1*uStage); float vent=smoothstep(.78,.92,m)*vo; emi+=lava*vent*(1.1+.4*sin(uT*.8+ph))*(1.+Bl*uBeat*1.5+wvG*1.4);
-          float fl=(1.-smoothstep(0.,.1,abs(n3(vec3(ang*2.6,rr*1.6,ph))-.5)))*vo*smoothstep(.12,.75,m)*(1.-vent); emi+=lava*fl*.6*(.8+.2*sin(uT*.5+rr*6.));
-          float lk=smoothstep(.3,.5,m+(bn-.5)*.5)*w3*km; float cst=smoothstep(0.,.1,abs(fbm3(sp*min(3./r0,40.)+uT*.01)-.5));
-          col=mix(col,vec3(.07,.05,.05),lk); emi+=lava*lk*(1.-cst*.85)*(.9+.3*sin(uT*.6+bn*9.))*(1.+Bl*uBeat); col*=1.-csh*.55; }
+        else if(th==3){   /* V9.3 · cratères d'impact, puis vrais volcans (cône, cratère, coulées, fumée), lacs et mers de lave (volc93) */
+          volc93(dv,uv,rb,r0,ph,jb,w2,w3,smoothstep(3.75,4.05,gt),bn,lt,dot(n0,L),lit,nn,km*smoothstep(0.,.08,dot(s,c0)),Bl,pxr,col,emi,spec); }
         else if(th==4){ float bil=fbm3(sp*min(2.2/r0,30.)+vec3(uT*.004,0.,0.)); float cm=smoothstep(-.1,.45,m+(bil-.5)*.6)*km;
           col=mix(col,mix(hc,vec3(1.),.35)*(.55+.6*bil),cm*(.5+.2*w2));
           float sw2=.5+.5*sin(ang*mix(3.,2.,w3)+log(rr+.05)*mix(4.,7.,w3)-uT*.05+bil*3.); col=mix(col,col*(.55+.8*sw2),cm*w2*.7);
@@ -2612,7 +2794,7 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
           float cy=(.5+.5*sin(an*2.+dc*26.-uT*.2))*smoothstep(0.,.05,dc)*ez; col=mix(col,vec3(.95,.97,1.),cy*.8); }
         else if(bb==5){ float cl=smoothstep(.45,.75,fbm3(sp*3.+vec3(uT*.008,0.,0.)))*ez; col=mix(col,vec3(.3,.33,.4),cl*.7); float lt2=uT*1.3; emi+=vec3(.75,.85,1.)*smoothstep(.7,.88,n3(sp*6.+floor(lt2)*3.3))*pow(1.-fract(lt2),3.)*cl*1.4; }
         else { float sg=pow(.5+.5*sin(dot(sp,vec3(3.,2.,4.))*4.-uT*1.5),3.); emi+=hc*sg*ez*.45; } } } }
-  if(bA>0.){ float lk=(uType==11||uType==1)?land:1.; float slope=1.-dot(nb,n0);
+  if(bA>0.){ float lk=((uType==11||uType==1)?land:1.)*(1.-gCK93*.85); float slope=1.-dot(nb,n0);
     col=mix(col,col*.55+vec3(.07,.06,.05),smoothstep(.04,.16,slope)*.55*lk);
     col*=mix(vec3(1.),vec3(1.1,.97,.88),smoothstep(.35,.75,fbm3(sp*.6+3.))*.35*lk);
     col*=mix(1.,.64+.8*gh,.6*lk);
@@ -2662,9 +2844,9 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
     float swp=pow(max(0.,sin(dot(sp,vec3(1.3,.7,.9))-uT*.25)),30.); spec*=1.+swp*1.5; col*=1.+swp*.12*dif; }
   if(uType==10){ float md=n3(sp*30.)-n3((sp+lbD*.014)*30.); col*=clamp(1.+md*1.8*(.3+det),.55,1.5); float strat=sin(gh*70.+n3(sp*6.)*4.); col*=1.+strat*.07; float vn=1.-smoothstep(0.,.012,abs(n3(sp*11.+4.)-.5)); float ore=vn*smoothstep(.45,.7,n3(sp*2.)); col=mix(col,vec3(.8,.62,.32),ore*.55); spec=max(spec,ore*.9);
     col=mix(col,col*1.18+.03,smoothstep(.6,.82,n3(sp*3.+vec3(uT*.003,0.,0.)))*.3); float tal=smoothstep(.1,.22,1.-dot(nb,n0)); col=mix(col,col*1.25,tal*.3); }                                                      // fine cloud-top striations
-  if(uType==11||uType==1){ float ci=smoothstep(.58,.82,n3(vec3(sp.x*2.,sp.y*14.,sp.z*2.)+uT*.0003))*.28*(1.-land*.3); col=mix(col,vec3(.95,.97,1.),ci); cloudA=max(cloudA,ci);
+  if(uType==11||uType==1){ float wy=fbm3(sp*1.9+2.); float ci=smoothstep(.6,.86,n3(vec3(sp.x*2.4+wy*1.5,sp.y*10.+wy*6.,sp.z*2.4)+uT*.0003))*smoothstep(.3,.62,n3(sp*2.6+4.))*.26*(1.-land*.3);   /* V9.3 : cirrus en voiles ondulés, plus de rayures droites */ col=mix(col,vec3(.95,.97,1.),ci); cloudA=max(cloudA,ci);
     col=mix(col,col*vec3(.78,.8,.88),cloudA*(1.-dif)*.35); }                                                       // cirrus streaks, darker cloud undersides
-  float dq=smoothstep(15.,26.,uR); col=mix(colB0,col,dq); emi=mix(emiB0,emi,dq); }
+  float dq=smoothstep(15.,26.,uR)*(1.-gCK93*.92); col=mix(colB0,col,dq); emi=mix(emiB0,emi,dq); }   // V9.3 : pas de forêt ni de rocher peints sur la ville
   if(uPlay>0.&&uType!=8){ for(int j=0;j<2;j++){ float A=lvA[j]; if(A<=.004) continue; float E=lvE[j]; vec3 C=lvC[j]; float dbo=max(-E,0.)*lvW[j]*2.4; float out0=smoothstep(0.,.015,dbo);
     float sl,swv,q,az01; float hw=wvAt(s,lvD[j],lvT[j],sl,swv,q,az01);
     float env=exp(-q*2.6)*(1.-smoothstep(.7,1.,q))*smoothstep(0.,.05,q)*out0; float sw2=swv*A*out0*exp(-q*2.2);
@@ -2672,7 +2854,13 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
     { float ang=acos(clamp(dot(s,lvD[j]),-1.,1.)), a0=acos(clamp(lvT[j],-1.,1.));   /* V9.2 · les mêmes anneaux de lumière */
       float rph=mix(ang-a0,wvD,.45)*2.1-uT*(.5+uLv*.22+uBs*.35), rc=.5+.5*cos(rph*6.2832), r2=rc*rc, r4=r2*r2, cr=r4*r4*r2;
       float rg=mix(cr+r4*.3,.15,smoothstep(.18,.55,fwidth(rph))), rl=rg*(.3+uLv*.6+uBs*.85+uBeat*.3)*(.55+.75*wvB)*env*A*(1.-.3*q)+sw2*.85; vec3 rcl=mix(wc,vec3(1.),.3);
-      emi+=rcl*rl*(.1+.22*(1.-dif)); col=mix(col,col*1.08,min(rl,1.)*.3*dif); spec+=rl*.08; }
+      /* V9.3 · ondes réelles : l'anneau soulève la surface (crête pointue, creux plat) ; le soleil éclaire un versant et laisse l'autre dans l'ombre,
+         l'eau renvoie des reflets sur les crêtes ; la lueur ne reste que du côté nuit, pour qu'on les voie encore dans le noir */
+      float aa=smoothstep(.18,.55,fwidth(rph)), e0=(.3+uLv*.6+uBs*.85+uBeat*.3)*(.55+.75*wvB)*env*A*(1.-.3*q);
+      float x6=rph*6.2832, cx=cos(x6), sx=sin(x6), pk=exp((cx-1.)*2.4), en2=exp((cx-1.)*.9);
+      float tl2=(-2.4*sx*pk+.3*(3.*cos(x6*3.)-.9*sx*sin(x6*3.))*en2)*(1.-aa)*min(e0,1.4)*.5;
+      vec3 rdv=normalize(s-lvD[j]*dot(s,lvD[j])+1e-5)*RM; wvN-=rdv*tl2; n=normalize(n-rdv*tl2); ndl=dot(n,L); dif=lam(ndl)*shd;
+      emi+=rcl*rl*(.03+.25*(1.-dif)); col=mix(col,col*1.08,min(rl,1.)*.3*dif); spec+=rl*.08+pk*e0*.25; }
     float px=abs(E)/max(fwidth(E),1e-5); float wl=.8+uR*.0032;
     float core=(1.-smoothstep(wl*.4,wl*.4+1.,px))*A*smoothstep(4.,14.,uR); float inner=exp(-max(E,0.)*5.)*step(0.,E)*(1.-core)*A;
     float run=.85+.15*sin(n3(sp*5.)*12.-uT*1.2);
@@ -2692,9 +2880,10 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
   float civ=clamp((uStage-.8)/4.2,0.,1.);
   if(civ>0.&&uType!=8){
     float mask=uPath.y==1.?smoothstep(.55,.7,fbm3(sp*1.4+5.)):smoothstep(.42,.6,fbm3(sp*2.6));
-    mask=mix(mask,1.,.55)*setl;
+    mask=mix(mask,1.,.55)*setl*(1.-gCity93);
     float th=mix(.8,uPath.y==0.?.56:.64,civ);
     float ct=smoothstep(th,th+.06,n3(sp*26.))*mask*((uType==1||uType==11)?land:1.);
+    if(uR>150.) ct*=mix(1.,smoothstep(.35,.78,n3(sp*190.))*1.7,smoothstep(150.,480.,uR));   // V9.3 : de près, les lumières se séparent en grains (rues, quartiers) au lieu de taches lisses
     if(uType==0||uType==1||uType==11||uType==9||uType==10){ float lw=(uType==1||uType==11)?land*(1.-cloudA):1.; float urb=smoothstep(th-.08,th+.02,n3(sp*26.))*mask*lw*civ;
       col=mix(col,vec3(.46,.44,.42)*(.8+.4*n3(sp*120.)),urb*.55);
       float farm=smoothstep(.3,.6,mask)*(1.-urb)*civ*lw*step(1.5,uStage)*((uType==9||uType==10)?0.:1.);
@@ -2724,6 +2913,7 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
   vec3 sun=uSun*uSunI; if(uType==2) col*=.62+.38*pow(max(n0.z,0.),.35); if(uType==10||uType==0||uType==9) dif*=1.+.22*pow(max(L.z,0.),8.)*shd;
   vec3 sky=mix(sun,uAt*1.2,.55*clamp(uAtmo*1.4,0.,1.));
   vec3 lit=col*(amb*mix(vec3(1.),sky,.7)+dif*sun+(1.-shd)*max(ndl,0.)*sky*.06*uAtmo)+emi;
+  if(gPl93>.003){ float pL=lam(dot(n0,L)+.08)*mix(1.,shd,.7); lit=mix(lit,gPc93*(amb*mix(vec3(1.),sky,.7)+pL*sun)+gPe93,gPl93); }   // V9.3 : panache de fumée au-dessus du sol
   lit+=vec3(.95,.72,.55)*cloudA*max(0.,lam(ndl+.14)-lam(ndl))*sun*.9;
   if(uType==3) lit+=col*vec3(.25,.55,.95)*max(0.,lam(ndl+.3)-dif)*.35*sun;
   if(uType==2) lit+=col*pow(1.-max(n0.z,0.),3.)*dif*.25*sun;
@@ -2736,7 +2926,7 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
   if(uType==9) lit+=sun*col*pow(1.-max(n0.z,0.),2.5)*.5*dif+sun*.1*pow(max(dot(reflect(-L,n),vec3(0.,0.,1.)),0.),6.)*shd;
   if(uType==3||uType==5) lit+=sun*vec3(.7,.85,1.)*pow(max(dot(reflect(-L,n),vec3(0.,0.,1.)),0.),14.)*.35*shd+sun*col*max(0.,lam(ndl+.25)-dif)*.3;
   if(uType==1||uType==11){ float wat=(1.-land)*(1.-cloudA);
-    vec3 nw=normalize(n0+vec3(n3(sp*46.+vec3(uT*.25,0.,0.))-.5,n3(sp*46.+vec3(0.,uT*.21,7.))-.5,0.)*.14*(.35+det));
+    vec3 nw=normalize(n0+wvN*1.5+vec3(n3(sp*46.+vec3(uT*.25,0.,0.))-.5,n3(sp*46.+vec3(0.,uT*.21,7.))-.5,0.)*.14*(.35+det));
     vec3 hw=normalize(L+vec3(0.,0.,1.)); float a2=.0016; float nh=max(dot(nw,hw),0.); float dd=nh*nh*(a2-1.)+1.; float Dw=a2/(3.14159*dd*dd); float Fw=.02+.98*pow(1.-max(nw.z,0.),5.);
     lit+=sun*min(Dw*.018,2.2)*wat*max(ndl,0.)*shd;
     lit+=mix(vec3(.24,.4,.6),uAt,.5)*Fw*wat*.45*lam(ndl+.15); }
@@ -4270,6 +4460,20 @@ function cineCamera(dt, sys){ if (cine.album) return; if (cine.dir){ pdDirCam(dt
 $('#cineCatch').addEventListener('pointerdown', e => { e.preventDefault(); exitCine(); });
 addEventListener('keydown', () => { if (cine) exitCine(); }, true);
 document.addEventListener('pointerdown', () => { lastInteract = performance.now(); }, true);
+/* V9.3 · au repos, l'interface s'efface presque ; elle revient au premier toucher (rien ne change pendant une saisie, un menu, une fiche ou le guide) */
+const PD93Z = {t: performance.now() + 5000, on: false, sw: 0};   // 1er effacement plus tardif à l'ouverture
+function pd93Wake(e){ PD93Z.t = performance.now(); if (!PD93Z.on) return; PD93Z.on = false; document.body.classList.remove('pd93z');
+  const h = e && e.type === 'pointerdown' && e.target && e.target.closest ? e.target.closest('#top,#filters,#rail,#accountBtn,#guestExit,#card,#gp') : null;
+  if (h) PD93Z.sw = performance.now(); }   // toucher sur l'interface presque invisible : il la fait revenir sans appuyer sur un bouton qu'on ne voyait pas
+['pointerdown', 'keydown', 'wheel'].forEach(ev => addEventListener(ev, pd93Wake, {capture: true, passive: true}));
+addEventListener('click', e => { const s = PD93Z.sw; PD93Z.sw = 0; if (s && performance.now() - s < 900){ e.preventDefault(); e.stopImmediatePropagation(); } }, true);
+setInterval(() => { if (PD93Z.on || performance.now() - PD93Z.t < 4200) return; const b = document.body, ae = document.activeElement;
+  try { if (sheetOpen || MENU.open || tutoI >= 0 || b.classList.contains('menu') || b.classList.contains('kbt')) return; } catch(e){ return; }
+  if (ae && /INPUT|TEXTAREA|SELECT/.test(ae.tagName)) return;
+  const g = document.getElementById('authGate'); if (g && !g.hidden && !g.classList.contains('pdi')) return;
+  for (const id of ['mpanel', 'tuto', 'evo']){ const el = document.getElementById(id); if (el && !el.classList.contains('off')) return; }
+  const m = document.getElementById('rx9m'); if (m && m.classList.contains('on')) return;
+  PD93Z.on = true; b.classList.add('pd93z'); }, 700);
 function fade(dt){ const f = $('#flash'); const fo = parseFloat(f.style.opacity || 0); if (fo > 0) f.style.opacity = Math.max(0, fo - dt * 1.6); }
 function frame(now, once){
   if (!running && !once) return;
