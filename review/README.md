@@ -8,3 +8,9 @@ Branche de travail de Claude pour la V9.4 : rien ici n'est publié sur le site.
 - `logo/` : le logo 3D actuel de l'appli (constante LOGO3D de index.html) exporté tel quel en glTF, pour servir de référence.
   41 066 sommets, 66 088 triangles, +Y en haut (glTF), largeur 1,24, épaisseur 0,15.
   COLOR_0 = matière d'origine du logo (0 = face avant, 0,25 = face arrière en miroir, 0,5 = flanc chromé, visible seulement là où l'image est claire au bord ; dans index.html : aT 0, 1, 2), `export_logo.py` refait l'export.
+
+## Relief cuit (essai V9.4, 26/11)
+- `v94/relief/avant-apres-volcan.png` : même planète volcanique, volcan de niveau 2,6, à gauche le volcan V9.3 calculé, à droite le relief cuit dans Blender (jour, soleil rasant, nuit). Rendu du labo (SwiftShader).
+- `v94/relief/volcan-blender-apercu.png` : le relief d'essai rendu en perspective dans Cycles (érosion simulée, quatre coulées dans les ravines).
+- `v94/relief/volcan-images-cuites.png` : les deux images lues par le shader (`-hn` normales + hauteur, `-ao` occlusion + lave + ravines).
+- Code : branche `dev/claude-v94` (a160420), `tools/blender/relief/` (format, recette, scripts).
