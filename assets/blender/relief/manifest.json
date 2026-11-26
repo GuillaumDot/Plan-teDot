@@ -1,0 +1,25 @@
+{
+ "nom": "volcan",
+ "taille": 1024,
+ "cadrage": [
+  -1.25,
+  1.25
+ ],
+ "hmax": 0.74037,
+ "repere": "vH93 : rayon 1 = pied du volcan",
+ "hn": "R,G normale tangente OpenGL (X=+u, Y=+v), B = hauteur/hmax",
+ "ao": "R occlusion, G lave, B ravines",
+ "blender": "5.3.0",
+ "ao_distance": 0.18,
+ "fichiers": {
+  "1024": [
+   "volcan-hn.png",
+   "volcan-ao.png"
+  ],
+  "512": [
+   "volcan-hn-512.png",
+   "volcan-ao-512.png"
+  ]
+ },
+ "source": "essai Claude : champ de hauteur érodé (gen_volcano.py) cuit par Cycles (bake_stamp.py), à remplacer par les modèles du lot A"
+}

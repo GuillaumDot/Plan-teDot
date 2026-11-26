@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#010208">
 <title>planèteDot · ton univers musical</title>
-<meta name="pd-version" content="9.3.1">
+<meta name="pd-version" content="9.4-essai">
 <meta name="description" content="PlanèteDot · l’album de GuillaumDot et ton univers musical en 3D : chaque planète est un morceau.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PlanèteDot">
@@ -1559,6 +1559,10 @@ const PD93 = `
    et refroidissent, lac de lave aux plaques qui dérivent, gerbes au rythme de la musique, panache de fumée poussé par le vent et son
    ombre. Le détail suit la taille à l'écran (pas de scintillement de loin), sans dérivées (calculs dans des branches). */
 float h93(vec2 p){ vec3 q=fract(p.xyx*.1031); q+=dot(q,q.yzx+33.33); return fract((q.x+q.y)*q.z); }
+/* V9.4 · relief cuit dans Blender (essai sur le volcan principal) : hauteur, normales et occlusion vues de dessus, lave dans les ravines.
+   Image carrée qui couvre d dans [-1.25 ; 1.25] (rayon 1 = pied du volcan), tournée et retournée selon la graine de la zone. */
+uniform sampler2D uVS0,uVS1; uniform float uVSOn;
+mat2 vsM(float sd){ float a=fract(sd*.618)*6.2832, c=cos(a), s=sin(a), f=fract(sd*.37)>.5?-1.:1.; return mat2(c*f,s,-s*f,c); }
 float n93(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.-2.*f); return mix(mix(h93(i),h93(i+vec2(1.,0.)),f.x),mix(h93(i+vec2(0.,1.)),h93(i+vec2(1.,1.)),f.x),f.y); }
 float f93(vec2 p){ return n93(p)*.6+n93(p*2.13+5.2)*.3+n93(p*4.37+1.7)*.1; }
 float gCity93=0.;   // la ville couvre ce point : les anciennes lumières de civilisation s'effacent dessous
@@ -1682,25 +1686,36 @@ void volc93(vec2 d0,vec2 uv,float rb,float r0,float ph,float jb,float w2,float w
   float sk=max(vk,crk), rl=smoothstep(3.,12.,(w2>.5?Rm*.6:rb*sc)/pxr);                        // relief visible seulement s'il couvre assez de pixels
   vec3 hotC=vec3(1.,.8,.42), midC=vec3(1.,.38,.07), cold=vec3(.7,.09,.02);
   float bt=1.+Bl*uBeat*1.1+wvG*.8, fl=0.;
+  mat2 VM=vsM(sd); bool bk=uVSOn*(1.-w3)>.5&&vk>.004; vec4 s1v=vec4(1.,0.,0.,0.); float vsL=0.;
   if(sk>.004){
     float h0, hx, hy; bool pc=pr>.5&&rp<1.15;
-    if(vk>.004){ float ep=e/kp; h0=vH93(d,rc,sd); hx=vH93(d+vec2(e,0.),rc,sd); hy=vH93(d+vec2(0.,e),rc,sd);
+    if(bk){ vsL=log2(max(pxr/Rm*float(textureSize(uVS0,0).x)*.4,1e-3)); vec2 tq=VM*d*.4+.5; vec4 s0=textureLod(uVS0,tq,vsL); s1v=textureLod(uVS1,tq,vsL);
+      vec2 nx=s0.rg*2.-1., g=(-nx/max(sqrt(max(1.-dot(nx,nx),0.)),.08))*VM; float ep=e/kp;
+      h0=s0.b*.74; hx=h0+g.x*e; hy=h0+g.y*e;
+      if(pc){ h0+=vH93(dp,.3,sdp)*kp; hx+=vH93(dp+vec2(ep,0.),.3,sdp)*kp; hy+=vH93(dp+vec2(0.,ep),.3,sdp)*kp; } }
+    else if(vk>.004){ float ep=e/kp; h0=vH93(d,rc,sd); hx=vH93(d+vec2(e,0.),rc,sd); hy=vH93(d+vec2(0.,e),rc,sd);
       if(pc){ h0+=vH93(dp,.3,sdp)*kp; hx+=vH93(dp+vec2(ep,0.),.3,sdp)*kp; hy+=vH93(dp+vec2(0.,ep),.3,sdp)*kp; } }
     else { h0=cH93(dc); hx=cH93(dc+vec2(e,0.)); hy=cH93(dc+vec2(0.,e)); }
     vec3 N=normalize(vec3(-(hx-h0)/e*S,-(hy-h0)/e*S,1.)); float sh=clamp(dot(N,vec3(lt,Lz)),0.,1.)/max(Lz,.05);
     float occ=0.; if(ll>.02&&lit>.01){ for(int k=1;k<=3;k++){ float t=float(k*k)*.05+.03; float hq;
-      if(vk>.004){ hq=vH93(d+ldn*t,rc,sd); if(pc) hq+=vH93(dp+ldn*t/kp,.3,sdp)*kp; } else hq=cH93(dc+ldn*t);
+      if(bk){ hq=textureLod(uVS0,VM*(d+ldn*t)*.4+.5,vsL).b*.74; if(pc) hq+=vH93(dp+ldn*t/kp,.3,sdp)*kp; }
+      else if(vk>.004){ hq=vH93(d+ldn*t,rc,sd); if(pc) hq+=vH93(dp+ldn*t/kp,.3,sdp)*kp; } else hq=cH93(dc+ldn*t);
       occ=max(occ,smoothstep(0.,.03,(hq-h0)*S-t*tE)); } }
     vec3 c=col;
     if(vk>.004){
-      float gr=n93(d/(r+.001)*5.5+vec2(r*1.9+sd,sd)); gr=1.-abs(gr*2.-1.);
+      float gr=n93(d/(r+.001)*5.5+vec2(r*1.9+sd,sd)); gr=bk?smoothstep(.55,1.,s1v.r):1.-abs(gr*2.-1.);   // V9.4 : crêtes claires, ravines sombres
       vec3 bas=mix(vec3(.3,.27,.24),uC2*.35+.06,.25), ash=vec3(.62,.58,.53);
       c=mix(bas,ash,smoothstep(1.05,.2,r)*(.45+.55*gr));                                         // cendres claires en haut, basalte en bas, crêtes plus claires
       if(pc) c=mix(c,ash*1.05,smoothstep(.9,.35,rp)*.7);
       c*=.86+.28*n93(d*38.+sd);
       // coulées : langues sombres qui descendent les flancs en s'élargissant ; les plus récentes sont encore chaudes
       float nA=1.+2.*act;
-      for(int k=0;k<4;k++){ float fk=float(k), hk=h93(vec2(sd,fk*3.1)), hj=h93(vec2(fk*7.3,sd));
+      if(bk){ float mk=smoothstep(.04,.5,s1v.g)*vk*vm; if(mk>.002){ fl=mk*(act>.01?1.:.7);   // V9.4 : la lave suit les ravines cuites
+          if(act>.01){ float tp=exp(-(r-rc)*3.2), chn=smoothstep(.3,.8,s1v.g);
+            float cz=n93(vec2(s1v.g*5.+an*4.,r*18.-uT*.35)), crk2=1.-smoothstep(0.,.07+.05*(1.-tp),abs(cz-.5));
+            vec3 lc2=mix(cold,mix(midC,hotC,tp*tp),tp);
+            emi+=lc2*mk*(chn*tp*tp*2.2+chn*.25+crk2*ngt*(.4+.6*tp)+.08*ngt)*bt*act; } } }
+      else for(int k=0;k<4;k++){ float fk=float(k), hk=h93(vec2(sd,fk*3.1)), hj=h93(vec2(fk*7.3,sd));
         float ak=sd*1.7+fk*1.75+(hk-.5)*1.6+(n93(vec2(r*2.6,fk*5.+sd))-.5)*.7;
         float w=(.02+.26*pow(max(r-rc,0.),1.1)*(.5+hj))*(.55+.9*n93(vec2(r*6.,fk*9.+sd)));          // étroite près de la bouche, en éventail plus bas
         float dd=abs(mod(an-ak+3.1416,6.2832)-3.1416)*r+(n93(d*16.+fk*3.)-.5)*w*.6;               // bords en lobes
@@ -1722,7 +1737,7 @@ void volc93(vec2 d0,vec2 uv,float rb,float r0,float ph,float jb,float w2,float w
       c=mix(col,col*1.25+.02,ej*.5); c=mix(c,col*.7,smoothstep(1.,.3,rcn)*.35);
     }
     float l2=mix(1.,max(clamp(sh,0.,2.2)*(1.-occ*.85),.3),lit*rl);                              // le flanc à l'ombre garde la lumière du ciel
-    col=mix(col,c*l2,sk); }
+    col=mix(col,c*l2*(bk?.25+.75*s1v.r:1.),sk); }   // V9.4 : occlusion cuite dans les ravines
   if(sea>.004) lake93(uv,sea,r0*.07,pxr,sd*1.3,nn,Bl,col,emi,spec);
   if(vk>.004){
     // lac de lave au fond du cratère, gerbes au rythme, lueur
@@ -3114,6 +3129,26 @@ function pd9PbrDraw(o){
   gl.uniform2f(SP.u.uPDMaterial,t?.35:0,entry?entry[1]:.5);
 }
 pd9PbrInit();
+// V9.4 · relief cuit dans Blender (essai sur le volcan principal) : chargé après l'ouverture, sans rien bloquer.
+// S'il manque ou si le téléphone refuse, le volcan V9.3 reste tel quel. ?relief=0 pour comparer.
+const PDRV = {on: 0};
+function pdRvInit(){
+  if (!SP.u.uVS0 || !SP.u.uVS1 || !SP.u.uVSOn) return;
+  const G = gl, one = new Uint8Array([128, 128, 0, 255]);
+  const tx = [pdTxMk(5, G.TEXTURE_2D, G.CLAMP_TO_EDGE, G.CLAMP_TO_EDGE, true), pdTxMk(6, G.TEXTURE_2D, G.CLAMP_TO_EDGE, G.CLAMP_TO_EDGE, true)];
+  tx.forEach((t, i) => pdTxUp(5 + i, () => { G.bindTexture(G.TEXTURE_2D, t); G.texImage2D(G.TEXTURE_2D, 0, G.RGBA, 1, 1, 0, G.RGBA, G.UNSIGNED_BYTE, one); }));
+  const pp = G.getParameter(G.CURRENT_PROGRAM); G.useProgram(SP.p); G.uniform1i(SP.u.uVS0, 5); G.uniform1i(SP.u.uVS1, 6); G.uniform1f(SP.u.uVSOn, 0); G.useProgram(pp);
+  if (new URLSearchParams(location.search).get('relief') === '0') return;
+  const sz = TIER === 0 ? '-512' : '', base = new URL('assets/blender/relief/', document.baseURI);
+  const load = f => new Promise(res => { const im = new Image(); im.onload = () => (im.decode ? im.decode().catch(() => {}) : Promise.resolve()).then(() => res(im)); im.onerror = () => res(null); im.src = new URL(f, base).href; });
+  setTimeout(async () => { try {
+      const a = await load('volcan-hn' + sz + '.png'), b = a && await load('volcan-ao' + sz + '.png');
+      if (!a || !b || G.isContextLost()) return;
+      [a, b].forEach((im, i) => pdTxUp(5 + i, () => { G.bindTexture(G.TEXTURE_2D, tx[i]); G.pixelStorei(G.UNPACK_FLIP_Y_WEBGL, true); G.texImage2D(G.TEXTURE_2D, 0, G.RGBA, G.RGBA, G.UNSIGNED_BYTE, im); G.generateMipmap(G.TEXTURE_2D); }));
+      const p2 = G.getParameter(G.CURRENT_PROGRAM); G.useProgram(SP.p); G.uniform1f(SP.u.uVSOn, 1); G.useProgram(p2); PDRV.on = 1;
+    } catch(e){ console.warn('[PlanèteDot] relief Blender indisponible, volcan V9.3 gardé', e); } }, 2500);
+}
+pdRvInit();
 
 const PT = compile(`#version 300 es
 in vec3 a; in float s; uniform mat4 uVP; uniform float uT,uDpr,uScale,uRot; out float vB;
