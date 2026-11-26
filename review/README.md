@@ -14,3 +14,10 @@ Branche de travail de Claude pour la V9.4 : rien ici n'est publié sur le site.
 - `v94/relief/volcan-blender-apercu.png` : le relief d'essai rendu en perspective dans Cycles (érosion simulée, quatre coulées dans les ravines).
 - `v94/relief/volcan-images-cuites.png` : les deux images lues par le shader (`-hn` normales + hauteur, `-ao` occlusion + lave + ravines).
 - Code : branche `dev/claude-v94` (a160420), `tools/blender/relief/` (format, recette, scripts).
+
+## La lave suit le relief (essai V9.4, 26/11)
+Règle du fondateur (26/11) : pour tous les modèles, la lave part de la lèvre ou du sommet, descend par la plus grande pente, donc par les ravines, et s'arrête dans la plaine ou une cuvette. Jamais sur une crête, jamais par-dessus un cône.
+- `v94/lave/lave-relief-volcan.png` : volcan de niveau 2,6, avant / après (jour, soleil rasant, nuit). Plus aucune fissure de zone sur le cône ; les coulées partent de son pied et descendent la pente.
+- `v94/lave/lave-relief-autres.png` : grand volcan (niveau 3,3), cratère d'impact, montagnes métalliques (métal en fusion dans les vallées).
+- `v94/lave/lave-tracee.png` : lave des images cuites. En haut, volcan d'essai : première cuisson (une partie sur les crêtes) / lave tracée sur le relief. En bas, pilote glTF de ChatGPT (`v94_pilot.py`) : son masque COLOR_0 (morcelé, indépendant du relief) / lave tracée.
+- Outil : `tools/blender/relief/lava_relief.py` (branche `dev/claude-v94`, 1d9c4ed) ; `bake_relief.py --lave auto` (par défaut) trace la lave et affiche le contrôle « x % sur les crêtes, y % dans les ravines », avec une alerte si crêtes > 0,5 × ravines. Pilote de ChatGPT : son masque 27 % / 28 % (alerte), lave tracée 8 % / 44 %.
