@@ -7,4 +7,4 @@ Branche de travail de Claude pour la V9.4 : rien ici n'est publié sur le site.
   `preview.py` = script des aperçus (`python preview.py <dossier où le script a tourné> <dossier des aperçus>`).
 - `logo/` : le logo 3D actuel de l'appli (constante LOGO3D de index.html) exporté tel quel en glTF, pour servir de référence.
   41 066 sommets, 66 088 triangles, +Y en haut (glTF), largeur 1,24, épaisseur 0,15.
-  COLOR_0 = matière d'origine du logo (0 = face avant, 0,25 = face arrière en miroir, 0,5 = troisième matière), `export_logo.py` refait l'export.
+  COLOR_0 = matière d'origine du logo (0 = face avant, 0,25 = face arrière en miroir, 0,5 = flanc chromé, visible seulement là où l'image est claire au bord ; dans index.html : aT 0, 1, 2), `export_logo.py` refait l'export.
