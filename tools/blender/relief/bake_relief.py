@@ -3,14 +3,19 @@ Entrée : un champ de hauteur .npz (h, lava, gully en lignes de bas en haut) OU 
 Sortie (RGB 8 bits, sans alpha : Safari dégrade les couleurs des images à alpha) :
   <nom>-hn.png : R,G = normale tangente (OpenGL, X = +u, Y = +v), B = hauteur / hmax
   <nom>-ao.png : R = occlusion ambiante cuite (Cycles), G = lave, B = ravines
+Lave : par défaut (--lave auto) elle est TRACÉE SUR LE RELIEF CUIT (lava_relief.py) : départ sous la lèvre, plus grande pente,
+  ravines, cuvettes qui débordent, jamais sur une crête. --lave modele garde le masque du modèle, contrôlé (alerte s'il passe sur les crêtes).
 Cadrage : carré d dans [-1.25, 1.25]^2 (repère vH93), Blender X = u, Y = v, Z = hauteur.
-Usage : python bake_relief.py --npz volcan.npz --out DIR --name volcan --size 1024 [--preview]"""
+Usage : python bake_relief.py --npz volcan.npz --out DIR --name volcan --size 1024 [--lave auto|modele] [--coulees 5] [--graine 11] [--preview]"""
 import bpy, numpy as np, argparse, json, os, sys, time
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from lava_relief import coulees, ravines, controle   # V9.4 : la lave suit le relief
 
 ap = argparse.ArgumentParser()
 ap.add_argument('--npz'); ap.add_argument('--glb'); ap.add_argument('--out', required=True); ap.add_argument('--name', default='stamp')
 ap.add_argument('--size', type=int, default=1024); ap.add_argument('--grid', type=int, default=1024); ap.add_argument('--ao-samples', type=int, default=96)
 ap.add_argument('--ao-dist', type=float, default=.18); ap.add_argument('--preview', action='store_true')
+ap.add_argument('--lave', choices=['auto', 'modele'], default='auto'); ap.add_argument('--coulees', type=int, default=5); ap.add_argument('--graine', type=int, default=11)
 a = ap.parse_args(sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else sys.argv[1:])
 os.makedirs(a.out, exist_ok=True); t0 = time.time()
 bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -105,6 +110,12 @@ def blur(x, it=1):
 AO = blur(AO, 1)
 # hors du relief : sol plat, rien d'occulté, pas de masque
 NRM = NRM * COV[..., None] + np.array([.5, .5, 1.]) * (1 - COV[..., None]); AO = AO * COV + (1 - COV); MK = MK * COV[..., None]; H = H * COV
+# lave et ravines déduites du relief cuit (la lave suit les creux, jamais les crêtes)
+Hn = H / max(float(H.max()), 1e-6)
+if a.lave == 'auto' or MK[..., 0].max() < .01: MK[..., 0] = coulees(Hn, n=a.coulees, graine=a.graine) * COV
+if a.lave == 'auto' or MK[..., 1].max() < .01: MK[..., 1] = ravines(Hn) * COV
+cr, rv = controle(Hn, MK[..., 0])
+print(f'lave : {cr:.0%} sur les crêtes, {rv:.0%} dans les ravines' + ('  ATTENTION : la lave ne suit pas le relief (relancer avec --lave auto)' if cr > .5 * rv else '  ok, elle suit le relief'))
 
 def save_rgb(arr, path):
     """arr : (S, S, 3) dans 0..1, ligne 0 = bas ; écrit un PNG RGB 8 bits sans conversion de couleur."""
@@ -120,7 +131,8 @@ ao = np.dstack([AO, MK[..., 0], MK[..., 1]])
 save_rgb(hn, os.path.join(a.out, f'{a.name}-hn.png')); save_rgb(ao, os.path.join(a.out, f'{a.name}-ao.png'))
 man = {'nom': a.name, 'taille': a.size, 'cadrage': [-1.25, 1.25], 'hmax': round(hmax, 5), 'repere': 'vH93 : rayon 1 = pied du volcan',
        'hn': 'R,G normale tangente OpenGL (X=+u, Y=+v), B = hauteur/hmax', 'ao': 'R occlusion, G lave, B ravines',
-       'blender': bpy.app.version_string, 'ao_distance': a.ao_dist}
+       'blender': bpy.app.version_string, 'ao_distance': a.ao_dist,
+       'lave': ('tracée sur le relief' if a.lave == 'auto' else 'masque du modèle') + f' (crêtes {cr:.2f}, ravines {rv:.2f})'}
 json.dump(man, open(os.path.join(a.out, f'{a.name}.json'), 'w'), ensure_ascii=False, indent=1)
 print('hauteur max', hmax, 'occlusion min', float(AO.min()), 'moyenne', float(AO.mean()))
 

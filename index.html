@@ -1562,6 +1562,7 @@ float h93(vec2 p){ vec3 q=fract(p.xyx*.1031); q+=dot(q,q.yzx+33.33); return frac
 /* V9.4 · relief cuit dans Blender (essai sur le volcan principal) : hauteur, normales et occlusion vues de dessus, lave dans les ravines.
    Image carrée qui couvre d dans [-1.25 ; 1.25] (rayon 1 = pied du volcan), tournée et retournée selon la graine de la zone. */
 uniform sampler2D uVS0,uVS1; uniform float uVSOn;
+float gZr93=0.; vec3 gBem93=vec3(0.);   // V9.4 : part du relief de la zone (cône, rempart) au point : la lave de la planète ne monte pas dessus
 mat2 vsM(float sd){ float a=fract(sd*.618)*6.2832, c=cos(a), s=sin(a), f=fract(sd*.37)>.5?-1.:1.; return mat2(c*f,s,-s*f,c); }
 float n93(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.-2.*f); return mix(mix(h93(i),h93(i+vec2(1.,0.)),f.x),mix(h93(i+vec2(0.,1.)),h93(i+vec2(1.,1.)),f.x),f.y); }
 float f93(vec2 p){ return n93(p)*.6+n93(p*2.13+5.2)*.3+n93(p*4.37+1.7)*.1; }
@@ -1667,7 +1668,7 @@ float vH93(vec2 d,float rc0,float sd){ float r=length(d), rc=rc0*(1.+(n93(d/(r+.
 float cH93(vec2 d){ float r=length(d); return r<1.?(r*r-1.)*.22+exp(-(r-1.)*(r-1.)*60.)*.06:exp(-(r-1.)*(r-1.)*60.)*.06*smoothstep(1.7,1.,r); }
 void volc93(vec2 d0,vec2 uv,float rb,float r0,float ph,float jb,float w2,float w3,float w4,float bn,vec2 lt,float Lz,float lit,float nn,float km,float Bl,float pxr,
             inout vec3 col,inout vec3 emi,inout float spec){
-  float sc=mix(1.,.6,w4), Rm=2.*r0*sc;                                                        // un grand volcan au centre de la zone
+  gZr93=0.; float sc=mix(1.,.6,w4), Rm=2.*r0*sc;                                                        // un grand volcan au centre de la zone
   vec2 d=uv/Rm, dc=d0/(sc*1.25); float r=length(d), rcn=length(dc), an=atan(d.y,d.x), sd=fract(ph*.31)*50.+3.7;
   float pr=step(.5,jb)*w2, kp=.55*rb/Rm, sdp=fract(ph*.31+jb*.17)*50.+jb*7.1; vec2 dp=d0/.55; float rp=length(dp);   // cônes secondaires sur ses flancs (2e, 3e volcan)
   float rc=mix(.12+.05*fract(sd*.37),.42,w3), ll=length(lt); vec2 ldn=ll>.02?lt/ll:vec2(0.);   // niveau 3 : grande caldeira
@@ -1696,14 +1697,14 @@ void volc93(vec2 d0,vec2 uv,float rb,float r0,float ph,float jb,float w2,float w
     else if(vk>.004){ float ep=e/kp; h0=vH93(d,rc,sd); hx=vH93(d+vec2(e,0.),rc,sd); hy=vH93(d+vec2(0.,e),rc,sd);
       if(pc){ h0+=vH93(dp,.3,sdp)*kp; hx+=vH93(dp+vec2(ep,0.),.3,sdp)*kp; hy+=vH93(dp+vec2(0.,ep),.3,sdp)*kp; } }
     else { h0=cH93(dc); hx=cH93(dc+vec2(e,0.)); hy=cH93(dc+vec2(0.,e)); }
-    vec3 N=normalize(vec3(-(hx-h0)/e*S,-(hy-h0)/e*S,1.)); float sh=clamp(dot(N,vec3(lt,Lz)),0.,1.)/max(Lz,.05);
+    vec3 N=normalize(vec3(-(hx-h0)/e*S,-(hy-h0)/e*S,1.)); float sh=clamp(dot(N,vec3(lt,Lz)),0.,1.)/max(Lz,.05); gZr93=max(smoothstep(.012,.07,h0)*sk,vk*smoothstep(1.3,.85,r));
     float occ=0.; if(ll>.02&&lit>.01){ for(int k=1;k<=3;k++){ float t=float(k*k)*.05+.03; float hq;
       if(bk){ hq=textureLod(uVS0,VM*(d+ldn*t)*.4+.5,vsL).b*.74; if(pc) hq+=vH93(dp+ldn*t/kp,.3,sdp)*kp; }
       else if(vk>.004){ hq=vH93(d+ldn*t,rc,sd); if(pc) hq+=vH93(dp+ldn*t/kp,.3,sdp)*kp; } else hq=cH93(dc+ldn*t);
       occ=max(occ,smoothstep(0.,.03,(hq-h0)*S-t*tE)); } }
     vec3 c=col;
     if(vk>.004){
-      float gr=n93(d/(r+.001)*5.5+vec2(r*1.9+sd,sd)); gr=bk?smoothstep(.55,1.,s1v.r):1.-abs(gr*2.-1.);   // V9.4 : crêtes claires, ravines sombres
+      float gr=n93(d/(r+.001)*3.3+vec2(r*1.9+sd,sd)); gr=bk?smoothstep(.55,1.,s1v.r):1.-abs(gr*2.-1.); float rvn=bk?1.:smoothstep(.62,.2,gr);   // V9.4 : mêmes crêtes que le relief ; rvn = fond des ravines   // V9.4 : crêtes claires, ravines sombres
       vec3 bas=mix(vec3(.3,.27,.24),uC2*.35+.06,.25), ash=vec3(.62,.58,.53);
       c=mix(bas,ash,smoothstep(1.05,.2,r)*(.45+.55*gr));                                         // cendres claires en haut, basalte en bas, crêtes plus claires
       if(pc) c=mix(c,ash*1.05,smoothstep(.9,.35,rp)*.7);
@@ -1720,7 +1721,7 @@ void volc93(vec2 d0,vec2 uv,float rb,float r0,float ph,float jb,float w2,float w
         float w=(.02+.26*pow(max(r-rc,0.),1.1)*(.5+hj))*(.55+.9*n93(vec2(r*6.,fk*9.+sd)));          // étroite près de la bouche, en éventail plus bas
         float dd=abs(mod(an-ak+3.1416,6.2832)-3.1416)*r+(n93(d*16.+fk*3.)-.5)*w*.6;               // bords en lobes
         bool hotK=fk<nA&&act>.01; float Lk=hotK?rc+(.4+.48*hk)*(.86+.14*sin(uT*.03+fk*2.+sd)):rc+.35+.55*hk;   // jusqu'au pied du volcan pour les plus longues
-        float mk=(1.-smoothstep(w*.6,w,dd))*smoothstep(rc*.9,rc*1.2,r)*(1.-smoothstep(Lk-.08,Lk,r+(n93(vec2(an*9.,fk*4.+sd))-.5)*.1))*vk*vm;
+        float mk=(1.-smoothstep(w*.6,w,dd))*smoothstep(rc*.9,rc*1.2,r)*(1.-smoothstep(Lk-.08,Lk,r+(n93(vec2(an*9.,fk*4.+sd))-.5)*.1))*vk*vm*mix(1.,rvn,smoothstep(rc,rc+.12,r)*smoothstep(1.05,.5,r));   // V9.4 : la coulée descend par les ravines
         if(mk<.002) continue; fl=max(fl,mk*(hotK?1.:.55+.45*hk));
         if(hotK){ float tp=exp(-(r-rc)*3.2), chn=1.-smoothstep(0.,w*.38,dd);                     // chenal chaud au milieu, croûte sur les bords et plus bas
           float cz=n93(vec2(dd/w*3.+fk*7.,r*18.-uT*.35)), crk2=1.-smoothstep(0.,.07+.05*(1.-tp),abs(cz-.5));
@@ -1788,8 +1789,9 @@ vec3 gW=vec3(0.,0.,1.),gS=vec3(0.,0.,1.),gLo=vec3(0.,0.,1.); float gMu=1.,gE=.01
 vec3 txT(float ly,vec3 p,float lod){ vec3 c=vec3(0.); if(gW.x>0.) c+=textureLod(uTx,vec3(p.yz,ly),lod).rgb*gW.x; if(gW.y>0.) c+=textureLod(uTx,vec3(p.zx,ly),lod).rgb*gW.y;
   if(gW.z>0.) c+=textureLod(uTx,vec3(p.xy,ly),lod).rgb*gW.z; return c; }   /* V8.4 : une face sans poids ne lit plus la texture (moins de lectures) */
 float gLB=0.; bool gST=false; float txL(float sc){ return log2(max(uTxS*sc/(max(uR,1.)*gMu),1e-3))-.35+gLB; }
+float hot84(float ly,vec3 t);   // V9.4 : définie plus bas (chaleur lue dans la texture)
 vec3 txS(float ly,float sc,out float rl){ vec3 o=fract(vec3(.37,.71,.53)*(uSeed+ly*.31))*4.; float lod=txL(sc); vec3 c=txT(ly,gS*sc+o,lod); rl=0.;
-  if(uR>16.){ vec3 c1=txT(ly,(gS+gLo*gE)*sc+o,lod); rl=dot(c1-c,vec3(.3,.59,.11)); } return c; }
+  if(uR>16.){ vec3 c1=txT(ly,(gS+gLo*gE)*sc+o,lod); rl=dot(c1-c,vec3(.3,.59,.11)); if(uType==4||abs(ly-2.)<.5) rl-=(hot84(ly,c1)-hot84(ly,c))*.75; } return c; }   // V9.4 : la lave est en contrebas de ses rives
 
 ${NOISE.replace('s+=a*n3(p);t+=a;','if(i>=gOct)break;s+=a*n3(p);t+=a;').replace('i<' + OCT + ';i++){if(i>=gOct)', 'i<' + (OCT + 2) + ';i++){if(i>=gOct)')}
 mat3 rotY(float t){float c=cos(t),s=sin(t);return mat3(c,0,-s,0,1,0,s,0,c);}
@@ -1824,8 +1826,13 @@ float ringShadow(vec3 P,vec3 L){ if(uRingK.y<=0.) return 1.; vec3 nr=ringN(); fl
   if(uTxOn>.5){ float t2=fract(uSeed*.29)>.5?1.-tt:tt; band=textureLod(uRingT,vec2(t2*.94+.03,.5),0.).a*smoothstep(0.,.025,tt)*smoothstep(1.,.975,tt); }
   return 1.-band*.72; }
 /* biomes conquered by each track, painted from its sound */
+vec3 gVt1=vec3(1.,0.,0.),gVt2=vec3(0.,1.,0.); float gVR=1.,gVw=0.,gVs=0.,gCm0=1.,gFz0=1.,gWc0=.06;   // V9.4 : repère du volcan de la zone (les coulées partent de son pied)
+float fz0(vec3 q,out float rv,out float wr){ float fz=fbm3(q*3.7+uT*.02)-.5; rv=9.; wr=0.;   // V9.4 : lit des coulées ; près d'un volcan il rayonne depuis le pied du cône (la pente)
+  if(gVw>.001){ vec3 s0=(q-uSeed*7.)/1.6; vec2 vd=vec2(dot(s0,gVt1),dot(s0,gVt2))/gVR; rv=length(vd); wr=gVw*smoothstep(3.4,1.3,rv);
+    if(wr>.001){ vec2 u=vd/max(rv,1e-4); fz=mix(fz,(n3(vec3(u*3.2,rv*.2+gVs+uT*.004))-.5)*clamp(gVR*2.3,.25,1.6),wr); } }
+  return fz; }
 float biomeH(int b,vec3 q){
-  if(b==0){ return smoothstep(0.,.14,abs(fbm3(q*3.7+uT*.02)-.5))*.7+n3(q*15.)*.3; }
+  if(b==0){ float rv,wr; return smoothstep(0.,.14,abs(fz0(q,rv,wr)))*.7+n3(q*15.)*.3; }
   if(b==1){ float t=(n3(q*2.6)*.65+n3(q*6.3)*.35)*7.; return (floor(t)+smoothstep(.55,1.,fract(t)))/7.; }
   if(b==2){ float qp=n3(q*4.+fbm3(q*2.)*.6)*5.; float e=min(fract(qp),1.-fract(qp)); return fract(floor(qp)*.618)*.5+smoothstep(0.,.08,e)*.5; }
   if(b==3){ float qn=n3(q*5.+fbm3(q*2.))*7.; return floor(qn)/7.*.55+fract(qn)*.45; }
@@ -1837,7 +1844,9 @@ float zM(vec2 uv,float r0,float cnt,float ph,float en){ float m=-2.; for(int j=0
   vec2 o=j==0?vec2(0.):vec2(cos(an),sin(an))*r0*1.25; m=max(m,1.-length((uv-o)/(r0*sqrt(aj)))+en); } return m; }
 vec3 biomeC(int b,vec3 sp,out float bs,inout vec3 em){
   bs=0.; float f=fbm3(sp*2.3); float g=n3(sp*11.); vec3 c;
-  if(b==0){ c=mix(vec3(.05,.04,.04),vec3(.17,.1,.08),f); float fz=fbm3(sp*3.7+uT*.02)-.5+(n3(sp*31.)-.5)*.07*smoothstep(200.,700.,uR), wc=.06*clamp(260./max(uR,1.),.1,1.); float cr=1.-smoothstep(0.,wc,abs(fz)); cr=cr*cr+(1.-smoothstep(0.,wc*5.,abs(fz)))*.14;   /* V9.3 : fissures nettes */ em+=vec3(1.,.38,.08)*cr*(.9+uAudio*2.)*(.6+.4*sin(uT*1.7+f*9.)); }
+  if(b==0){ c=mix(vec3(.05,.04,.04),vec3(.17,.1,.08),f); float rv,wr, fz=fz0(sp,rv,wr)+(n3(sp*31.)-.5)*.07*smoothstep(200.,700.,uR)*(1.-wr*.75), wc=.06*clamp(260./max(uR,1.),.1,1.); float cr=1.-smoothstep(0.,wc,abs(fz)); cr=cr*cr+(1.-smoothstep(0.,wc*5.,abs(fz)))*.14;   /* V9.3 : fissures nettes */
+    float cm=1.-gVw*smoothstep(1.12,.9,rv); gCm0=cm; gFz0=fz; gWc0=wc; cr*=cm;   /* V9.4 : pas de coulée sur le cône ; autour, elles partent de son pied et la lueur descend la pente */
+    em+=vec3(1.,.38,.08)*cr*(.9+uAudio*2.)*(.6+.4*sin(uT*1.7+mix(f*9.,-rv*9.,wr)))*(1.+wr*1.6*exp(-max(rv-1.,0.)*1.4)); }
   else if(b==1){ float strata=sin(f*26.+sp.y*7.)*.5+.5; c=mix(vec3(.42,.17,.08),vec3(.74,.44,.24),strata)*(.75+g*.4); c*=1.-smoothstep(.55,.7,fbm3(sp*5.))*.4; }
   else if(b==2){ float qp=n3(sp*4.+fbm3(sp*2.)*.6)*5.; float seam=1.-smoothstep(0.,.06,min(fract(qp),1.-fract(qp))); c=mix(vec3(.3,.32,.36),vec3(.64,.67,.72),fract(floor(qp)*.618))*(1.-seam*.5); bs=1.3;
     em+=vec3(1.,.76,.42)*seam*.16*smoothstep(.55,.7,n3(sp*18.)); }
@@ -1850,10 +1859,12 @@ vec3 biomeC(int b,vec3 sp,out float bs,inout vec3 em){
   if(uTxOn>.5){ float rl=0.; int ly=b==0?2:b==1?4:b==2?5:b==3?6:b==4?3:b==5?10:b==6?11:12; float sc=b>=5?4.6:b==2?2.:b==3?1.7:b==4?1.5:1.9;
     vec3 t=txS(float(ly),sc,rl); vec3 tm=ly==2?vec3(.31,.18,.13):ly==4?vec3(.58,.36,.24):ly==5?vec3(.42,.4,.384):ly==6?vec3(.44,.41,.49):ly==3?vec3(.62,.6,.6):ly==10?vec3(.17,.25,.15):ly==11?vec3(.66,.52,.32):vec3(.33,.46,.25);
     c=mix(c,c*t/tm,b>=5?.62:.5); c=mix(c,t,b>=5?.22:.42);
-    if(b==0){ float hot=smoothstep(.3,.75,t.r-t.b); em+=vec3(1.,.42,.1)*hot*hot*(.85+uAudio*2.5)*(.72+.28*sin(uT*1.5+t.g*9.)); }
+    if(b==0){ float hot=smoothstep(.3,.75,t.r-t.b)*gCm0; em+=vec3(1.,.42,.1)*hot*hot*(.85+uAudio*2.5)*(.72+.28*sin(uT*1.5+t.g*9.)); }
     if(b==3){ em+=rainbow(dot(t,vec3(.3,.59,.11))+uT*.03)*pow(clamp((t.b-.55)*2.2,0.,1.),3.)*.5*(1.+uAudio); }
     if(b==7){ float lake=smoothstep(.12,.0,t.g-t.b*.9); bs=max(bs,lake*1.2); }
-    BZR=rl; BZK=b==2?3.:b==0?2.4:2.2; }
+    BZR=rl; BZK=b==2?3.:b==0?2.4:2.2;
+    if(b==0&&uR>16.){ float wt=gWc0*2.; if(abs(gFz0)<wt*1.6){ float rv1,wr1; vec3 q1=sp+gLo*gE*1.6; float fz1=fz0(q1,rv1,wr1)+(n3(q1*31.)-.5)*.07*smoothstep(200.,700.,uR)*(1.-wr1*.75);   /* V9.4 : la coulée coule dans un lit, en contrebas de ses rives */
+      BZR+=(smoothstep(0.,wt,abs(fz1))-smoothstep(0.,wt,abs(gFz0)))*.3*gCm0; } } }
   return c; }
 /* a storm system: spiral arms around a clear eye, stronger in bad weather */
 float cyclone(vec3 s,float k){ vec3 c=normalize(vec3(sin(uSeed*3.1),.45*cos(uSeed*5.3),cos(uSeed*3.1))); c=rotY(uT*.00025)*c; float d=acos(clamp(dot(s,c),-1.,1.)); if(d>.75) return 0.;
@@ -2010,7 +2021,7 @@ vec3 gasV83(vec3 S,vec3 wd,float dif,inout vec3 emi){
    lueur de lave tirée de la texture. Le relief procédural fin (cratères en taches, bruit qui scintillait) n'est plus calculé pour ces planètes. */
 const vec3 TXM[20]=vec3[20](vec3(.477,.428,.313),vec3(.465,.439,.415),vec3(.318,.183,.132),vec3(.617,.597,.592),vec3(.585,.363,.242),vec3(.42,.4,.384),vec3(.434,.406,.492),vec3(.292),vec3(.579),vec3(.621,.527,.454),
   vec3(.173,.245,.148),vec3(.658,.52,.317),vec3(.329,.455,.251),vec3(.419,.377,.339),vec3(.269,.246,.232),vec3(.578,.429,.325),vec3(.304,.287,.276),vec3(.685,.547,.326),vec3(.44,.247,.171),vec3(.231,.2,.192));
-float gHot84=0.; vec3 gGc84=vec3(1.,.4,.08);   // lave : chaleur et couleur de la lueur, reprises par les éruptions plus bas
+float gHot84=0.; vec3 gGc84=vec3(1.,.4,.08); float gGh84=.5; vec3 gLE84=vec3(0.);   // V9.4 : hauteur du relief au point, lueur de la lave de la planète   // lave : chaleur et couleur de la lueur, reprises par les éruptions plus bas
 vec3 txNrm(float ly,vec3 c,float k){ return c*(k/max(dot(TXM[int(ly+.5)],vec3(.3,.59,.11)),.05)); }
 // chaleur lue dans la couleur de la texture, proportionnelle à la surface en fusion (les fissures fines gardent leur lueur de loin)
 float hot84(float ly,vec3 t){ if(abs(ly-17.)<.5){ float h=clamp((t.r-t.g-.18)/.25,0.,1.)*clamp((t.r-.55)/.3,0.,1.); return h*h*.7; }
@@ -2032,7 +2043,7 @@ vec3 solid84(float dif,inout vec3 emi,inout float spec,out float rl){
   vec3 pq=gS*1.05+uSeed*3.1; pq+=(n3(pq*1.7+1.)-.5)*vec3(.7,-.6,.5);
   float t0=.5+(.5-cov)*.34+(v3-.5)*.05; float m=smoothstep(t0-.03,t0+.03,fbm3(pq));
   gLB=.4; float rA=0.,rB=0.; vec3 a=vec3(.45),b=a; if(m<.996) a=txS(A,sa,rA); if(m>.004) b=txS(B,sb,rB); gLB=0.;
-  float hot=uType==4?mix(hot84(A,a),hot84(B,b),m):0.;
+  float hot=uType==4?mix(hot84(A,a),hot84(B,b),m):0., hot0=hot; hot*=1.-smoothstep(.42,.58,gGh84);   // V9.4 : la lave vive reste dans les creux du relief
   vec3 t=mix(txNrm(A,a,kA),txNrm(B,b,kB),m); rl=mix(rA,rB,m); float lum=dot(t,vec3(.3,.59,.11));
   vec3 pal=mix(uC2,uC1,smoothstep(.15,.6,lum)); float pl=dot(pal,vec3(.3,.59,.11)); pal=mix(vec3(pl),pal,.8)/max(pl,.06);   // couleur choisie, en teinte
   float big=smoothstep(.3,.7,n3(gS*1.1+uSeed*1.7));   // grandes nuances claires et sombres
@@ -2052,13 +2063,13 @@ vec3 solid84(float dif,inout vec3 emi,inout float spec,out float rl){
     spec=max(spec,(.7+.8*smoothstep(.25,.6,lum))*(1.-rust*1.4));                                        // le métal poli brille, l'oxyde non
   }
   else {
-    c=mix(t,lum*mix(vec3(1.),uC2*1.4+.15,.5),.2)*(.9+.2*v3); c=mix(c,c*.25,hot);
+    c=mix(t,lum*mix(vec3(1.),uC2*1.4+.15,.5),.2)*(.9+.2*v3); c=mix(c,c*.25,hot); c=mix(c,vec3(.055,.048,.044)*(.75+.5*lum),(hot0-hot)*.9);   // V9.4 : sur les hauteurs, coulée figée
     if(vr==1.) c=mix(c,max(mix(vec3(dot(c,vec3(.3,.59,.11))),c,1.35),0.),1.-m);                       // soufre plus franc
     float act=.5+.5*smoothstep(.3,.7,n3(gS*1.8+vec3(uT*.004,0.,0.)+uSeed));                          // régions plus ou moins actives, qui changent lentement
     float fl=.84+.16*sin(uT*1.3+lum*11.+gS.x*7.+gS.z*5.);
     vec3 g0=mix(vec3(1.,.2,.03),vec3(1.,.32,.05),v2), g1=mix(vec3(1.,.5,.1),vec3(1.,.66,.2),v2);
     vec3 gc=mix(mix(g0,g1,smoothstep(.35,.95,hot)),uC1*1.15,.2);                                         // bords rouges, cœur orange
-    emi+=gc*hot*act*fl*(1.2+uAudio*2.2+uBeat*.8)*(.55+.45*(1.-dif*.8)); rl*=1.-hot; gHot84=hot; gGc84=gc;
+    vec3 le=gc*hot*act*fl*(1.2+uAudio*2.2+uBeat*.8)*(.55+.45*(1.-dif*.8)); emi+=le; gLE84=le; rl*=1.-hot*.6; gHot84=hot; gGc84=gc;
     float ob=(A==19.?1.-m:0.)+(B==19.?m:0.);                                                             // obsidienne : verre noir brillant
     spec=max(spec,(.12+.45*ob)*(1.-hot));
   }
@@ -2162,7 +2173,7 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
   else { vec3 q=sp*1.2; q+=vec3(fbm(q+uT*.04),fbm(q+4.),fbm(q+9.))*1.6; float f=fbm(q); col=mix(uC1*.5,uC2,f*f*1.5);
     emi+=uC2*pow(f,4.)*(1.6+uAudio*3.); land=.5; }
   if(uTxOn>.5&&uR>3.){ float rl=0.; vec3 t;
-    if(sT){ emi=vec3(0.); spec=0.; col=solid84(dif,emi,spec,rl); TXR=rl; TXK=uType==9?1.4:uType==4?1.6:1.8; }   /* V8.4 */
+    if(sT){ emi=vec3(0.); spec=0.; gGh84=gh; col=solid84(dif,emi,spec,rl); TXR=rl; TXK=uType==9?1.4:uType==4?1.6:1.8; }   /* V8.4 */
     else if(uType==3){ t=txS(3.,1.1,rl); col=mix(col,col*t*1.65,.6); col=mix(col,t*mix(vec3(1.),uC1+.25,.3),.3); TXR=rl; TXK=1.8; }
     else if(uType==4){ t=txS(2.,1.3,rl); float hot=smoothstep(.3,.75,t.r-t.b); col=mix(col,t*.5+col*.3,.75); emi+=mix(uC1,vec3(1.,.5,.12),.55)*hot*hot*(.9+uAudio*2.5+uBeat*.9)*(.78+.22*sin(uT*1.4+t.g*9.)); TXR=rl*(1.-hot); TXK=2.6; }
     else if(uType==5){ t=txS(6.,2.6,rl); col=mix(col,col*t*2.3,.65); col+=t*t*t*.12; spec=max(spec,smoothstep(.55,.85,dot(t,vec3(.33)))*.9); TXR=rl; TXK=2.; }
@@ -2185,8 +2196,10 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
     if(li1>=0){ float ob=(bi==li1)?b2:b1; lvE[1]=ls1-max(ob,0.); lvW[1]=1.-uTk[li1].w; lvC[1]=mix(hue(uTkB[li1].y),vec3(1.),.45); lvD[1]=uTk[li1].xyz; lvT[1]=uTk[li1].w; liveZ+=lvA[1]*smoothstep(0.,.05,lvE[1]); }
     liveZ=min(liveZ,1.);
     if(b1>0.){ vec4 B=uTkB[bi]; float k=smoothstep(0.,.06,b1)*((uType==2||uType==6||uType==7)?.55:1.)*((uType==1||uType==11)?mix(.3,1.,land):1.);
+      gVw=0.; if((uType==4||uType==10)&&B.w>1.7&&uR>8.){ vec3 vc=uTk[bi].xyz; gVt1=normalize(cross(vc,vec3(0.,1.,.001))); gVt2=cross(vc,gVt1); float vg=min(B.w,4.999), vt=max(floor(vg),1.);   // V9.4 : volcan de la zone
+        gVR=2.*max(.035*pow(2.1,vt-1.),2.4/uR)*mix(1.,.6,smoothstep(3.75,4.05,vg)); gVw=smoothstep(1.75,2.05,vg)*smoothstep(0.,.08,dot(s,vc)); gVs=fract(B.y*7.31)*40.; }
       float bsp=0.; vec3 bem=vec3(0.); vec3 bc=biomeC(int(B.x+.5),sp,bsp,bem); float nn=pow(clamp(1.-dif*1.6,0.,1.),2.);
-      float kb=k*(uArch>.5?.38:1.); col=mix(col,bc,kb); spec=mix(spec,bsp,kb); emi+=bem*kb*(nn*.8+.25); if(uTxOn>.5){ TXR=mix(TXR,BZR,kb); TXK=mix(TXK,BZK,kb); }
+      float kb=k*(uArch>.5?.38:1.); col=mix(col,bc,kb); spec=mix(spec,bsp,kb); gBem93=bem*kb*(nn*.8+.25); emi+=gBem93; if(uTxOn>.5){ TXR=mix(TXR,BZR,kb); TXK=mix(TXK,BZK,kb); }
       if(uTxOn<.5&&uR>18.&&uQual>.55&&k>.01&&uType!=2&&uType!=6&&uType!=7){ int b0=int(B.x+.5); vec3 lB=RM*L; float h0=biomeH(b0,sp), h1=biomeH(b0,sp+lB*.016), h2=h0+(h1-h0)*2.2;
         float dz=smoothstep(18.,36.,uR)*k*smoothstep(-.05,.3,dot(n0,L))*((uType==1||uType==11)?land:1.);
         float sl=clamp(1.-(h1-h0)*3.4,.42,1.65), shd=1.-smoothstep(.1,.38,h2-h0)*.45, ao=mix(.68,1.1,h0);
@@ -2250,11 +2263,12 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
         else if(th==2){ float rdg=n3(sp*min(2.5/r0,uR*.3)); float val=ft*(1.-w2);
           col*=1.-val*.45*smoothstep(.1,.7,m); col*=1.-val*lsl*.55*lit; col+=vec3(.1,.1,.11)*val*(smoothstep(0.,.12,m)-smoothstep(.12,.3,m))*(.4+lit);
           float mt=ft*w2; col=mix(col,mix(vec3(.4,.42,.48),vec3(.82,.84,.88),prof)*(.78+.44*rdg),mt*.88); col*=1.+mt*lsl*1.1*lit; spec=mix(spec,1.5,mt*prof);
-          float fc=smoothstep(.5,.75,m+(rdg-.5)*.3)*w3*km; col=mix(col,vec3(.2,.21,.24),fc*.6);
+          float fc=smoothstep(.36,.2,rdg)*smoothstep(.02,.22,m)*(1.-smoothstep(.62,.9,m))*w3*km;   /* V9.4 : métal en fusion dans les vallées */ col=mix(col,vec3(.2,.21,.24),fc*.6);
           emi+=vec3(1.,.5,.14)*(.7+.12*uStage)*fc*(.22+.5*smoothstep(.6,.9,n3(sp*18.+vec3(0.,uT*.1,0.))))*(.35+nn)*(1.+Bl*uBeat*1.2+wvG*1.3); emi+=vec3(1.,.86,.62)*fc*smoothstep(.55,.8,n3(sp*70.))*nn*.8*tw;
           float smk=smoothstep(.5,.8,fbm3(sp*6.+vec3(uT*.01,0.,0.)))*fc; col=mix(col,vec3(.34,.33,.33),smk*.5); setl=max(setl,fc); col*=1.-csh*.55; }
         else if(th==3){   /* V9.3 · cratères d'impact, puis vrais volcans (cône, cratère, coulées, fumée), lacs et mers de lave (volc93) */
-          volc93(dv,uv,rb,r0,ph,jb,w2,w3,smoothstep(3.75,4.05,gt),bn,lt,dot(n0,L),lit,nn,km*smoothstep(0.,.08,dot(s,c0)),Bl,pxr,col,emi,spec); }
+          volc93(dv,uv,rb,r0,ph,jb,w2,w3,smoothstep(3.75,4.05,gt),bn,lt,dot(n0,L),lit,nn,km*smoothstep(0.,.08,dot(s,c0)),Bl,pxr,col,emi,spec);
+          emi=max(emi-gBem93*gZr93*(1.-gVw),0.); if(sT){ emi=max(emi-gLE84*gZr93,0.); gHot84*=1.-gZr93; } }   // V9.4 : la lave de la planète s'arrête au pied du cône et du rempart
         else if(th==4){ float bil=fbm3(sp*min(2.2/r0,30.)+vec3(uT*.004,0.,0.)); float cm=smoothstep(-.1,.45,m+(bil-.5)*.6)*km;
           col=mix(col,mix(hc,vec3(1.),.35)*(.55+.6*bil),cm*(.5+.2*w2));
           float sw2=.5+.5*sin(ang*mix(3.,2.,w3)+log(rr+.05)*mix(4.,7.,w3)-uT*.05+bil*3.); col=mix(col,col*(.55+.8*sw2),cm*w2*.7);
@@ -2312,7 +2326,8 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
     float crown=det>.3?smoothstep(.3,.8,n3(sp*190.))*det:0.; float clump=smoothstep(.35,.7,n3(sp*24.));
     col=mix(col,fc*(.7+.45*n3(sp*30.)+.25*clump+.35*(crown-.5)),fo*.72); col*=1.-fo*(.16+.12*(1.-crown)*det)*(1.-dif*.6); }
   if(uType==4&&!sT){ float qc=n3(sp*6.+fbm3(sp*2.))*4.; float ce=1.-smoothstep(0.,.07,min(fract(qc),1.-fract(qc)));                // lava crust plates with glowing seams
-    col*=.85+.25*fract(floor(qc)*.618); emi+=uC1*ce*(.35+.25*sin(uT*.5+floor(qc)*3.))*(.4+.6*(1.-dif)); }
+    vec3 q4=sp*vec3(1.+.32*sin(uSeed*1.7),1.+.28*sin(uSeed*2.9),1.+.32*cos(uSeed*2.3)); float fq=abs(fbm(q4*1.5+uT*.03)-.5), ch=1.-smoothstep(0.,.07,fq), cc=1.-smoothstep(0.,.02,fq);   /* V9.4 : la lave coule dans les chenaux du relief */
+    col*=.85+.25*fract(floor(qc)*.618); col=mix(col,col*.45,ch*.6); emi+=uC1*(ce*.45*(1.-smoothstep(.5,.85,gh))+cc*1.3+ch*.1)*(.35+.25*sin(uT*.5+floor(qc)*3.))*(.4+.6*(1.-dif)); }
   if((uType==10&&!sT)||uType==0){ float ck=1.-smoothstep(0.,.018,abs(n3(sp*8.+3.)-.5)); col*=1.-ck*.35*(.4+det); }                // fracture networks
   if(uType!=2&&uType!=8&&uType!=6&&uType!=7){ float cav=smoothstep(.22,.82,gh); col*=mix(1.,mix(.8,1.1,cav),(.35+.65*det)*(1.-cloudA)*((uType==1||uType==11)?land:1.)); }
   if(uType==3){ float pool=smoothstep(.72,.75,n3(sp*6.+9.))*(1.-cloudA); col=mix(col,vec3(.28,.58,.88),pool*.7); spec=max(spec,pool*1.2); } // meltwater pools
@@ -2569,8 +2584,13 @@ float ringShadow(vec3 P,vec3 L){ if(uRingK.y<=0.) return 1.; vec3 nr=ringN(); fl
   float tt=(rr-uRingK.x)/(uRingK.y-uRingK.x); float band=.55+.45*sin(rr*38.+n3(vec3(rr*9.,uSeed,0.))*7.); band*=smoothstep(0.,.07,tt)*smoothstep(1.,.85,tt);
   return 1.-band*.72; }
 /* biomes conquered by each track, painted from its sound */
+vec3 gVt1=vec3(1.,0.,0.),gVt2=vec3(0.,1.,0.); float gVR=1.,gVw=0.,gVs=0.,gCm0=1.,gFz0=1.,gWc0=.06;   // V9.4 : repère du volcan de la zone (les coulées partent de son pied)
+float fz0(vec3 q,out float rv,out float wr){ float fz=fbm3(q*3.7+uT*.02)-.5; rv=9.; wr=0.;   // V9.4 : lit des coulées ; près d'un volcan il rayonne depuis le pied du cône (la pente)
+  if(gVw>.001){ vec3 s0=(q-uSeed*7.)/1.6; vec2 vd=vec2(dot(s0,gVt1),dot(s0,gVt2))/gVR; rv=length(vd); wr=gVw*smoothstep(3.4,1.3,rv);
+    if(wr>.001){ vec2 u=vd/max(rv,1e-4); fz=mix(fz,(n3(vec3(u*3.2,rv*.2+gVs+uT*.004))-.5)*clamp(gVR*2.3,.25,1.6),wr); } }
+  return fz; }
 float biomeH(int b,vec3 q){
-  if(b==0){ return smoothstep(0.,.14,abs(fbm3(q*3.7+uT*.02)-.5))*.7+n3(q*15.)*.3; }
+  if(b==0){ float rv,wr; return smoothstep(0.,.14,abs(fz0(q,rv,wr)))*.7+n3(q*15.)*.3; }
   if(b==1){ float t=(n3(q*2.6)*.65+n3(q*6.3)*.35)*7.; return (floor(t)+smoothstep(.55,1.,fract(t)))/7.; }
   if(b==2){ float qp=n3(q*4.+fbm3(q*2.)*.6)*5.; float e=min(fract(qp),1.-fract(qp)); return fract(floor(qp)*.618)*.5+smoothstep(0.,.08,e)*.5; }
   if(b==3){ float qn=n3(q*5.+fbm3(q*2.))*7.; return floor(qn)/7.*.55+fract(qn)*.45; }
@@ -2582,7 +2602,9 @@ float zM(vec2 uv,float r0,float cnt,float ph,float en){ float m=-2.; for(int j=0
   vec2 o=j==0?vec2(0.):vec2(cos(an),sin(an))*r0*1.25; m=max(m,1.-length((uv-o)/(r0*sqrt(aj)))+en); } return m; }
 vec3 biomeC(int b,vec3 sp,out float bs,inout vec3 em){
   bs=0.; float f=fbm3(sp*2.3); float g=n3(sp*11.); vec3 c;
-  if(b==0){ c=mix(vec3(.05,.04,.04),vec3(.17,.1,.08),f); float fz=fbm3(sp*3.7+uT*.02)-.5+(n3(sp*31.)-.5)*.07*smoothstep(200.,700.,uR), wc=.06*clamp(260./max(uR,1.),.1,1.); float cr=1.-smoothstep(0.,wc,abs(fz)); cr=cr*cr+(1.-smoothstep(0.,wc*5.,abs(fz)))*.14;   /* V9.3 : fissures nettes */ em+=vec3(1.,.38,.08)*cr*(.9+uAudio*2.)*(.6+.4*sin(uT*1.7+f*9.)); }
+  if(b==0){ c=mix(vec3(.05,.04,.04),vec3(.17,.1,.08),f); float rv,wr, fz=fz0(sp,rv,wr)+(n3(sp*31.)-.5)*.07*smoothstep(200.,700.,uR)*(1.-wr*.75), wc=.06*clamp(260./max(uR,1.),.1,1.); float cr=1.-smoothstep(0.,wc,abs(fz)); cr=cr*cr+(1.-smoothstep(0.,wc*5.,abs(fz)))*.14;   /* V9.3 : fissures nettes */
+    float cm=1.-gVw*smoothstep(1.12,.9,rv); gCm0=cm; gFz0=fz; gWc0=wc; cr*=cm;   /* V9.4 : pas de coulée sur le cône ; autour, elles partent de son pied et la lueur descend la pente */
+    em+=vec3(1.,.38,.08)*cr*(.9+uAudio*2.)*(.6+.4*sin(uT*1.7+mix(f*9.,-rv*9.,wr)))*(1.+wr*1.6*exp(-max(rv-1.,0.)*1.4)); }
   else if(b==1){ float strata=sin(f*26.+sp.y*7.)*.5+.5; c=mix(vec3(.42,.17,.08),vec3(.74,.44,.24),strata)*(.75+g*.4); c*=1.-smoothstep(.55,.7,fbm3(sp*5.))*.4; }
   else if(b==2){ float qp=n3(sp*4.+fbm3(sp*2.)*.6)*5.; float seam=1.-smoothstep(0.,.06,min(fract(qp),1.-fract(qp))); c=mix(vec3(.3,.32,.36),vec3(.64,.67,.72),fract(floor(qp)*.618))*(1.-seam*.5); bs=1.3;
     em+=vec3(1.,.76,.42)*seam*.16*smoothstep(.55,.7,n3(sp*18.)); }
@@ -2723,8 +2745,10 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
     if(li1>=0){ float ob=(bi==li1)?b2:b1; lvE[1]=ls1-max(ob,0.); lvW[1]=1.-uTk[li1].w; lvC[1]=mix(hue(uTkB[li1].y),vec3(1.),.45); lvD[1]=uTk[li1].xyz; lvT[1]=uTk[li1].w; liveZ+=lvA[1]*smoothstep(0.,.05,lvE[1]); }
     liveZ=min(liveZ,1.);
     if(b1>0.){ vec4 B=uTkB[bi]; float k=smoothstep(0.,.06,b1)*((uType==2||uType==6||uType==7)?.55:1.)*((uType==1||uType==11)?mix(.3,1.,land):1.);
+      gVw=0.; if((uType==4||uType==10)&&B.w>1.7&&uR>8.){ vec3 vc=uTk[bi].xyz; gVt1=normalize(cross(vc,vec3(0.,1.,.001))); gVt2=cross(vc,gVt1); float vg=min(B.w,4.999), vt=max(floor(vg),1.);   // V9.4 : volcan de la zone
+        gVR=2.*max(.035*pow(2.1,vt-1.),2.4/uR)*mix(1.,.6,smoothstep(3.75,4.05,vg)); gVw=smoothstep(1.75,2.05,vg)*smoothstep(0.,.08,dot(s,vc)); gVs=fract(B.y*7.31)*40.; }
       float bsp=0.; vec3 bem=vec3(0.); vec3 bc=biomeC(int(B.x+.5),sp,bsp,bem); float nn=pow(clamp(1.-dif*1.6,0.,1.),2.);
-      float kb=k*(uArch>.5?.38:1.); col=mix(col,bc,kb); spec=mix(spec,bsp,kb); emi+=bem*kb*(nn*.8+.25);
+      float kb=k*(uArch>.5?.38:1.); col=mix(col,bc,kb); spec=mix(spec,bsp,kb); gBem93=bem*kb*(nn*.8+.25); emi+=gBem93;
       if(uR>18.&&uQual>.55&&k>.01&&uType!=2&&uType!=6&&uType!=7){ int b0=int(B.x+.5); vec3 lB=RM*L; float h0=biomeH(b0,sp), h1=biomeH(b0,sp+lB*.016), h2=h0+(h1-h0)*2.2;
         float dz=smoothstep(18.,36.,uR)*k*smoothstep(-.05,.3,dot(n0,L))*((uType==1||uType==11)?land:1.);
         float sl=clamp(1.-(h1-h0)*3.4,.42,1.65), shd=1.-smoothstep(.1,.38,h2-h0)*.45, ao=mix(.68,1.1,h0);
@@ -2788,11 +2812,11 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
         else if(th==2){ float rdg=n3(sp*min(2.5/r0,uR*.3)); float val=ft*(1.-w2);
           col*=1.-val*.45*smoothstep(.1,.7,m); col*=1.-val*lsl*.55*lit; col+=vec3(.1,.1,.11)*val*(smoothstep(0.,.12,m)-smoothstep(.12,.3,m))*(.4+lit);
           float mt=ft*w2; col=mix(col,mix(vec3(.4,.42,.48),vec3(.82,.84,.88),prof)*(.78+.44*rdg),mt*.88); col*=1.+mt*lsl*1.1*lit; spec=mix(spec,1.5,mt*prof);
-          float fc=smoothstep(.5,.75,m+(rdg-.5)*.3)*w3*km; col=mix(col,vec3(.2,.21,.24),fc*.6);
+          float fc=smoothstep(.36,.2,rdg)*smoothstep(.02,.22,m)*(1.-smoothstep(.62,.9,m))*w3*km;   /* V9.4 : métal en fusion dans les vallées */ col=mix(col,vec3(.2,.21,.24),fc*.6);
           emi+=vec3(1.,.5,.14)*(.7+.12*uStage)*fc*(.22+.5*smoothstep(.6,.9,n3(sp*18.+vec3(0.,uT*.1,0.))))*(.35+nn)*(1.+Bl*uBeat*1.2+wvG*1.3); emi+=vec3(1.,.86,.62)*fc*smoothstep(.55,.8,n3(sp*70.))*nn*.8*tw;
           float smk=smoothstep(.5,.8,fbm3(sp*6.+vec3(uT*.01,0.,0.)))*fc; col=mix(col,vec3(.34,.33,.33),smk*.5); setl=max(setl,fc); col*=1.-csh*.55; }
         else if(th==3){   /* V9.3 · cratères d'impact, puis vrais volcans (cône, cratère, coulées, fumée), lacs et mers de lave (volc93) */
-          volc93(dv,uv,rb,r0,ph,jb,w2,w3,smoothstep(3.75,4.05,gt),bn,lt,dot(n0,L),lit,nn,km*smoothstep(0.,.08,dot(s,c0)),Bl,pxr,col,emi,spec); }
+          volc93(dv,uv,rb,r0,ph,jb,w2,w3,smoothstep(3.75,4.05,gt),bn,lt,dot(n0,L),lit,nn,km*smoothstep(0.,.08,dot(s,c0)),Bl,pxr,col,emi,spec); emi=max(emi-gBem93*gZr93*(1.-gVw),0.); }
         else if(th==4){ float bil=fbm3(sp*min(2.2/r0,30.)+vec3(uT*.004,0.,0.)); float cm=smoothstep(-.1,.45,m+(bil-.5)*.6)*km;
           col=mix(col,mix(hc,vec3(1.),.35)*(.55+.6*bil),cm*(.5+.2*w2));
           float sw2=.5+.5*sin(ang*mix(3.,2.,w3)+log(rr+.05)*mix(4.,7.,w3)-uT*.05+bil*3.); col=mix(col,col*(.55+.8*sw2),cm*w2*.7);
@@ -2850,7 +2874,8 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
     float crown=det>.3?smoothstep(.3,.8,n3(sp*190.))*det:0.; float clump=smoothstep(.35,.7,n3(sp*24.));
     col=mix(col,fc*(.7+.45*n3(sp*30.)+.25*clump+.35*(crown-.5)),fo*.72); col*=1.-fo*(.16+.12*(1.-crown)*det)*(1.-dif*.6); }
   if(uType==4){ float qc=n3(sp*6.+fbm3(sp*2.))*4.; float ce=1.-smoothstep(0.,.07,min(fract(qc),1.-fract(qc)));                // lava crust plates with glowing seams
-    col*=.85+.25*fract(floor(qc)*.618); emi+=uC1*ce*(.35+.25*sin(uT*.5+floor(qc)*3.))*(.4+.6*(1.-dif)); }
+    vec3 q4=sp*vec3(1.+.32*sin(uSeed*1.7),1.+.28*sin(uSeed*2.9),1.+.32*cos(uSeed*2.3)); float fq=abs(fbm(q4*1.5+uT*.03)-.5), ch=1.-smoothstep(0.,.07,fq), cc=1.-smoothstep(0.,.02,fq);   /* V9.4 : la lave coule dans les chenaux du relief */
+    col*=.85+.25*fract(floor(qc)*.618); col=mix(col,col*.45,ch*.6); emi+=uC1*(ce*.45*(1.-smoothstep(.5,.85,gh))+cc*1.3+ch*.1)*(.35+.25*sin(uT*.5+floor(qc)*3.))*(.4+.6*(1.-dif)); }
   if(uType==10||uType==0){ float ck=1.-smoothstep(0.,.018,abs(n3(sp*8.+3.)-.5)); col*=1.-ck*.35*(.4+det); }                // fracture networks
   if(uType!=2&&uType!=8&&uType!=6&&uType!=7){ float cav=smoothstep(.22,.82,gh); col*=mix(1.,mix(.8,1.1,cav),(.35+.65*det)*(1.-cloudA)*((uType==1||uType==11)?land:1.)); }
   if(uType==3){ float pool=smoothstep(.72,.75,n3(sp*6.+9.))*(1.-cloudA); col=mix(col,vec3(.28,.58,.88),pool*.7); spec=max(spec,pool*1.2); } // meltwater pools

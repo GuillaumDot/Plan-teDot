@@ -21,5 +21,6 @@
    "volcan-ao-512.png"
   ]
  },
- "source": "essai Claude : champ de hauteur érodé (gen_volcano.py) cuit par Cycles (bake_stamp.py), à remplacer par les modèles du lot A"
+ "source": "essai Claude : champ de hauteur érodé (gen_volcano.py) cuit par Cycles (bake_stamp.py), à remplacer par les modèles du lot A",
+ "lave": "tracée sur le relief cuit (tools/blender/relief/lava_relief.py, 5 coulées, graine 11) : 18 % sur les crêtes, 42 % dans les ravines"
 }
