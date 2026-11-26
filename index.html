@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#010208">
 <title>planèteDot · ton univers musical</title>
-<meta name="pd-version" content="9.5">
+<meta name="pd-version" content="9.6-essai">
 <meta name="description" content="PlanèteDot · l’album de GuillaumDot et ton univers musical en 3D : chaque planète est un morceau.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PlanèteDot">
@@ -527,6 +527,13 @@ button:focus-visible,.btn:focus-visible{outline:2px solid rgba(167,212,255,.8);o
 #pdIntroHint{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 8vh);margin:0;text-align:center;font:500 11px var(--font);letter-spacing:.34em;text-transform:uppercase;color:rgba(214,232,255,.88);opacity:0;transition:opacity .8s;text-shadow:0 0 12px rgba(90,160,255,.85);pointer-events:none}
 #pdIntroHint.on{opacity:1;animation:pdHint 2.7s ease-in-out infinite}#pdIntroHint.off{opacity:0;animation:none;transition:opacity .25s}
 @keyframes pdHint{50%{opacity:.4}}
+/* V9.6 · barre du voyage (chargement des textures pendant la plongée, 5 s au plus) */
+#pd96L{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 7.5vh);width:min(300px,78vw);display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;transform:translate(-50%,6px);opacity:0;transition:opacity .5s ease,transform .6s cubic-bezier(.16,1,.3,1);pointer-events:none;font:500 10px var(--font);letter-spacing:.26em;text-transform:uppercase;color:rgba(214,232,255,.86);text-shadow:0 0 12px rgba(90,160,255,.85);white-space:nowrap}
+#pd96L.on{opacity:1;transform:translate(-50%,0)}#pd96L.off{opacity:0;transition:opacity .3s}
+#pd96L span{margin:0 0 10px}#pd96L b{font-weight:600;margin-left:1em;letter-spacing:.08em;color:#fff;font-variant-numeric:tabular-nums}
+#pd96L i{display:block;flex:0 0 100%;position:relative;height:3px;border-radius:3px;background:rgba(160,200,255,.16)}
+#pd96L u{position:absolute;inset:0;border-radius:3px;transform-origin:0 50%;transform:scaleX(var(--p,0));background:linear-gradient(90deg,#4f7dff,#5aa9ff 30%,#8ef3ff 55%,#b48cff 80%,#ff9ad9);box-shadow:0 0 10px rgba(120,190,255,.9),0 0 22px rgba(150,120,255,.5)}
+#pd96L em{position:absolute;top:50%;left:calc(var(--p,0) * 100%);width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;background:radial-gradient(circle,#fff,rgba(170,225,255,.65) 38%,rgba(170,225,255,0) 70%)}
 #authGate.pdi{opacity:0;pointer-events:none;background:none;backdrop-filter:none;-webkit-backdrop-filter:none;animation:pdSafe .3s 20s forwards}
 @keyframes pdSafe{to{opacity:1;pointer-events:auto}}
 #authGate.rise{animation:pdGateIn .9s ease both}
@@ -602,6 +609,27 @@ body.cine #scDock,body.pdT #scDock{opacity:0;pointer-events:none}
 #pList .pdAu{font-size:9.5px;padding:2px 6px;border-radius:7px;border:0}
 #rx9m{width:min(316px,calc(100vw - 24px));padding:10px 10px 0;border-radius:20px}#rx9m>b{font-size:11.5px;margin:0 2px 6px}
 #rx9m .rx9e{gap:5px;margin:0 0 7px}#rx9m .rx9b.e{font-size:19px;border-radius:12px}#rx9m .rx9t{gap:5px;margin:0 0 9px}#rx9m .rx9b.t{min-height:28px;font-size:12px;padding:0 9px 0 7px;border-radius:14px}#rx9m .rx9b.t span{font-size:13px}
+/* V9.6 · réagir (26/11) : un bouton dédié dans le lecteur à la place du globe, un éventail de réactions rapides, l'émoji choisi s'envole vers la zone jouée */
+.rx9k svg{width:18px;height:18px}.tr .rx9k svg{width:17px;height:17px}
+.nph .npg6{width:36px;height:36px;flex:none;background:rgba(255,255,255,.09);color:var(--mute)}.nph .npg6 svg{width:18px;height:18px}
+.ctrls .rx96k{color:#ffd27a}.ctrls .rx96k svg{animation:rx96w 6s ease-in-out 2s infinite;transform-origin:50% 60%}
+.ctrls .rx96k::after{content:'';position:absolute;inset:3px;border-radius:50%;background:radial-gradient(circle,rgba(255,200,100,.2),rgba(255,200,100,0) 70%);pointer-events:none}
+.rx96k[aria-expanded=true]{background:rgba(255,205,110,.16)}.rx96k[aria-expanded=true] svg{animation:none}
+@keyframes rx96w{0%,82%,100%{transform:none}86%{transform:rotate(-13deg) scale(1.1)}90%{transform:rotate(11deg) scale(1.1)}94%{transform:rotate(-5deg)}}
+#rx9m.fan{width:auto;padding:5px;border-radius:30px;overflow:visible;background:rgba(16,20,40,.88);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5);border:.5px solid rgba(255,255,255,.18);box-shadow:0 16px 44px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.14);transform:translateY(8px) scale(.92)}
+#rx9m.fan.on{transform:none}
+.rx96{display:flex;align-items:center;gap:1px}
+.rx96b{width:46px;height:46px;border-radius:50%;border:0;padding:0;background:transparent;display:grid;place-items:center;font:inherit;font-size:27px;line-height:1;cursor:pointer;color:var(--ink);transition:transform .14s,background .2s;-webkit-tap-highlight-color:transparent}
+#rx9m.fan.on .rx96b{animation:rx96in .46s cubic-bezier(.2,1.6,.35,1) backwards;animation-delay:calc(var(--k) * 34ms)}
+@keyframes rx96in{from{opacity:0;transform:translateY(14px) scale(.3)}}
+.rx96b:active{transform:translateY(-7px) scale(1.3)}
+.rx96b span{display:block;pointer-events:none}.rx96b.pop span{animation:rx9p .55s cubic-bezier(.2,1.6,.4,1)}.rx96b.sent{background:rgba(255,205,110,.2)}
+.rx96m{width:38px;height:38px;margin:0 3px 0 4px;background:rgba(255,255,255,.1)}.rx96m svg{width:18px;height:18px}
+.rx96f,.rx96t{position:fixed;left:0;top:0;z-index:60;pointer-events:none;will-change:transform,opacity}
+.rx96f{font-size:34px;line-height:1;filter:drop-shadow(0 0 10px rgba(150,205,255,.85)) drop-shadow(0 0 3px rgba(255,255,255,.7))}
+.rx96t{width:calc(16px * var(--s,1));height:calc(16px * var(--s,1));border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.95),rgba(150,205,255,.5) 40%,rgba(150,205,255,0) 70%)}
+@media (max-width:380px){.rx96b{width:42px;height:42px;font-size:24px}.rx96m{width:34px;height:34px}}
+@media (prefers-reduced-motion:reduce){.ctrls .rx96k svg{animation:none}#rx9m.fan.on .rx96b{animation:none}}
 /* V9.3 · interface épurée (26/11) : verre plus clair et plus fin, icônes sans pastille, barres et carte plus petites ;
    au repos (4 s sans toucher l'écran), l'interface s'efface presque (body.pd93z) et revient au premier toucher */
 .glass{background:linear-gradient(180deg,rgba(16,20,38,.1),rgba(6,8,20,.24));backdrop-filter:blur(24px) saturate(165%);-webkit-backdrop-filter:blur(24px) saturate(165%);border:.5px solid rgba(255,255,255,.09);box-shadow:inset 0 .5px 0 rgba(255,255,255,.1)}
@@ -1231,7 +1259,18 @@ in vec2 a; out vec2 vUv; void main(){vUv=a*.5+.5; gl_Position=vec4(a,0.,1.);}`;
    Pas de textures sur les appareils modestes, en économie de données, sur réseau très lent, ou si le téléphone peine :
    l'appli garde alors exactement le rendu V8.0. */
 const PD_MOBILE = /iPhone|iPad|iPod|Android|Mobile|Silk|Kindle/i.test(navigator.userAgent || '') || (/Macintosh/.test(navigator.userAgent || '') && navigator.maxTouchPoints > 1);
-const PDTX = {on: 0, bad: 0, ready: 0, off: 0, sz: (TIER >= 2 && !PD_MOBILE) ? 1024 : 512, t: null, ms: 0, st: 0, q: [], n: 0, lm: '', lt: 0, w0: 0};
+const PDTX = {on: 0, bad: 0, ready: 0, off: 0, sz: (TIER >= 2 && !PD_MOBILE) ? 1024 : 512, t: null, ms: 0, st: 0, q: [], n: 0, lm: '', lt: 0, w0: 0, dn: 0, fail: 0, mipWait: 0};
+/* V9.6 · lancement (26/11) : au toucher du logo, les textures (planètes, ciel, galaxies, souffles) partent toutes en priorité haute pendant que la caméra
+   plonge dans le logo ; elles sont envoyées à la carte graphique pendant la plongée et le tunnel, finies au flash d'arrivée. Une barre suit le chargement
+   (5 s au plus après le toucher) ; si le réseau est lent, la fin continue en arrière-plan comme avant. */
+const PDL6 = {go: 0, t0: 0, b84: 0, t84: 0, b9: 0, t9: 0, v: 0, el: null, pc: -1, goR: null, goP: null};
+PDL6.goP = new Promise(r => { PDL6.goR = r; });
+async function pd96Get(file, kb, kt){ const r = await fetch(file + '?v=' + encodeURIComponent((document.querySelector('meta[name="pd-version"]') || {}).content || ''), {priority: PDL6.go ? 'high' : 'low'}); if (!r.ok) throw new Error(file + ' : ' + r.status);
+  const tot = +(r.headers.get('content-length') || 0); if (tot > 0) PDL6[kt] = tot;
+  if (!r.body || !r.body.getReader){ const b = await r.arrayBuffer(); PDL6[kb] = PDL6[kt] = b.byteLength; return b; }
+  const rd = r.body.getReader(), parts = []; let n = 0;
+  for (;;){ const {done, value} = await rd.read(); if (done) break; parts.push(value); n += value.length; PDL6[kb] = n; }
+  const u = new Uint8Array(n); let o = 0; for (const p of parts){ u.set(p, o); o += p.length; } PDL6[kt] = Math.max(PDL6[kt] || 0, n); PDL6[kb] = n; return u.buffer; }
 const PD_RING = '//nnLf/55S//+OQ0//nkOP/55Tz/+ONB//XfTv/z3lz/7tqA//Hc5f/y3u7/8d2+//PesP/04aj/8+Gh//bmqv/36aj/+e21//nuqf/4643/9uiH//Xldv/042T/9+l8//TeRv/03nb/+O////ju///26f//9ejl//fu///16v7/9ur4//Xm+v/36eH/9+3///jw///68f//9+f//+/ctv/05P//+vD///ju///68P//8tz6//Ha8//v18r/9eSy//fq///t0Mj/79Pv/+3N3v/tyPH/89P///PV///76f//67/X//Hb///y4Pz/8NzM//Hbrf/y2dD/9eDq//fqrP/05Ov/9ebj//Xmi//35Lv/9NzK//npkv/253X/9N/Q//jo///454P/9eO8//biof7/8X//++Np//HZv//25LD/+Oi6//np2v/04eL/9uXO//jrrv/45lr/9ePL//ntmf/04KX/9ODS//rtuv/68bv/+vHl//310fH//Qv/7tkt//fs/v/89sv/9OYH/+zZCv/25wz//e0K//XpC//w4wv/9uwK//XmCv7/6gr/8ugK/+XeCf/y6gn/9uEJ/+/cCf/u2Qj/8OMI//LcCP/w3Qj/4c0I/+/iCv7/5Qr//OsL/+3aC//q4gz/8OoM//LdDP/1zQz/78oM//jvD//43Q3/99MO/v/ZDv/12g//+PHF//frhP/78dn/+++5//HgDf/05Av/+eoK//feDf/66pv/+Ov///jq0//35sX/9N3d//fncv/35///9N/r//Te0v/03v3/9eCm//Pd6P/z25z/9uA1//Lb1P/w1qH/89+Z//Tj8P/039j/893i//Pd7f/z3uX/8dr///Lb3f/w2f//8Nj///PZ///pwtn/++r//+zJ///syv//6cTc/+jC6P/owtX/68ip//DW+f/z2cT/8NXl/+/T7f/t0s//8Nn///Xf///x2P//8NP///DTn//qzLv/7dH///Tg///25///9+r///Pcq//79M7/+PP5//bq3v/16LP/9OX1//Tgyv/15uD/9N7//+/Qgf/nxyH/7N0G/+bOBv/n0QX/8tuL//LZiv/x2dP/9d/6//Pc5P/z3dv/79XY/+7Sxv/x2ez/89z///Xg///04eb/9OL///Ph9P/14v//892b//Pd///y3e//79nA//HZ0//x2rj/89/q//Ph6f/x2bb/8NWW/+/Uaf/z3Hf/9OBo//Xia//143L/9eR8//blhv/25IP/9uST//Thif/03pb/8tmW//HWnf/x06r/8Nbf/+/V0P/v1Iz/8txX//XgSP/34kH/+OU6//flNv/45DX/+OUy//jnLv/46Cj/+Osl/+3cBQ==';
 const PD_TXN = ['s0_terrain', 's1_moon', 's2_lava', 's3_ice', 's4_desert', 's5_metal', 's6_crystal', 's7_clouds', 's8_sun', 's9_gas', 's10_forest', 's11_savanna', 's12_prairie',
   's13_mercury', 's14_basalt', 's15_canyon', 's16_metalflow', 's17_sulfur', 's18_lavariver', 's19_obsidian'];   // V8.4 · sols rocheux, métalliques et volcaniques
@@ -1264,13 +1303,12 @@ function pdTxSoon(ms){ if (PDTX.st) return; PDTX.st = 1; setTimeout(pdTxFetch, m
 const PD_TXSRC = 'pack';   // 'pack' : un seul fichier .bin à côté de index.html (GitHub) ; 'dir' : les 28 images une à une (version test dans Claude)
 const PD_GZN = ['gz_0', 'gz_1', 'gz_2', 'gz_3'];   // V8.3 · géantes gazeuses (2:1)
 const PD_TXALL = PD_TXN.concat(['gal_a', 'gal_b', 'sky_mw', 'sky_neb'], PD_GZN);
-async function pdTxFetch(){ try { await Promise.race([Promise.resolve(SESSP).catch(() => {}), new Promise(r => setTimeout(r, 15000))]); } catch(e){}   // the account first, the textures after
+async function pdTxFetch(){ try { await Promise.race([Promise.resolve(SESSP).catch(() => {}), new Promise(r => setTimeout(r, 15000)), PDL6.goP]); } catch(e){}   // the account first, the textures after (V9.6 : au toucher du logo, tout part tout de suite)
   const why = pdTxWhy(); if (why){ console.info('[PlanèteDot] textures 8.2 non chargées (' + why + ') : rendu V8.0'); return; }
   const t0 = performance.now(), hd = PDTX.sz >= 1024;
   try { let items;
     if (PD_TXSRC === 'dir'){ const d = hd ? 'tx-hd/' : 'tx-mobile/'; items = PD_TXALL.map(n => ({n, u: d + n + '.jpg'})); }
-    else { const file = hd ? 'textures84-hd.bin' : 'textures84-mobile.bin', r = await fetch(file + '?v=' + encodeURIComponent((document.querySelector('meta[name="pd-version"]') || {}).content || ''), {priority: 'low'}); if (!r.ok) throw new Error(file + ' : ' + r.status);
-      const buf = await r.arrayBuffer(), u8 = new Uint8Array(buf);
+    else { const file = hd ? 'textures84-hd.bin' : 'textures84-mobile.bin', buf = await pd96Get(file, 'b84', 't84'), u8 = new Uint8Array(buf);
       if (u8[0] !== 80 || u8[1] !== 68 || u8[2] !== 84 || u8[3] !== 88) throw new Error(file + ' : format');
       const hl = new DataView(buf).getUint32(4, true), H = JSON.parse(new TextDecoder().decode(u8.subarray(8, 8 + hl))), base = 8 + hl;
       if (!H || !H.f || H.f.length !== PD_TXALL.length) throw new Error(file + ' : contenu');
@@ -1278,11 +1316,11 @@ async function pdTxFetch(){ try { await Promise.race([Promise.resolve(SESSP).cat
     PDTX.n = items.length;
     const dec = async (b, n) => { if (window.createImageBitmap) try { return await createImageBitmap(b, {premultiplyAlpha: 'none', colorSpaceConversion: 'none'}); } catch(err){}
       return await new Promise((ok, ko) => { const u = URL.createObjectURL(b), im = new Image(); im.onload = () => { URL.revokeObjectURL(u); ok(im); }; im.onerror = () => { URL.revokeObjectURL(u); ko(new Error('image ' + n)); }; im.src = u; }); };
-    for (const it of items){ if (PDTX.off || !PDTX.n) return; while (PDTX.q.length > 2) await new Promise(r => setTimeout(r, 120));   // one image at a time
+    for (const it of items){ if (PDTX.off || !PDTX.n) return; while (PDTX.q.length > (INTRO.on ? 30 : 2)) await new Promise(r => setTimeout(r, 120));   // one image at a time (V9.6 : décodées d'avance pendant l'ouverture)
       let b = it.b; if (!b){ const r = await fetch(it.u, {priority: 'low'}); if (!r.ok) throw new Error(it.u + ' : ' + r.status); b = await r.blob(); }
-      PDTX.q.push({e: {n: it.n}, im: await dec(b, it.n)}); }
+      PDTX.q.push({e: {n: it.n}, im: await dec(b, it.n)}); PDTX.dn++; }
     PDTX.dl = PDTX.ms = Math.round(performance.now() - t0);
-  } catch(err){ console.warn('[PlanèteDot] textures 8.2 indisponibles (' + (err && err.message || err) + ') : rendu V8.0 gardé'); PDTX.q = []; PDTX.n = 0; } }
+  } catch(err){ console.warn('[PlanèteDot] textures 8.2 indisponibles (' + (err && err.message || err) + ') : rendu V8.0 gardé'); PDTX.q = []; PDTX.n = 0; PDTX.fail = 1; } }
 // one upload per frame, never during the opening animation
 function pdTxPut(x){ const G = gl, e = x.e, im = x.im, sz = PDTX.sz, T = PDTX.t, lv = n => Math.floor(Math.log2(n)) + 1;
   try { const i = PD_TXN.indexOf(e.n);
@@ -1297,9 +1335,16 @@ function pdTxPut(x){ const G = gl, e = x.e, im = x.im, sz = PDTX.sz, T = PDTX.t,
     PDTX.got = (PDTX.got || 0) + 1;
   } catch(err){ console.warn('[PlanèteDot] texture ' + e.n, err); PDTX.n = 0; PDTX.q = []; }
   try { if (im.close) im.close(); } catch(_){}
-  if (PDTX.n && PDTX.got === PDTX.n){ try { pdTxUp(8, () => { G.bindTexture(G.TEXTURE_2D_ARRAY, T.arr2); G.generateMipmap(G.TEXTURE_2D_ARRAY); }); pdTxUp(10, () => { G.bindTexture(G.TEXTURE_2D_ARRAY, T.gal2); G.generateMipmap(G.TEXTURE_2D_ARRAY); });
+  if (PDTX.n && PDTX.got === PDTX.n){ if (INTRO.on && INTRO.ph === 'seq' && !INTRO.flashed){ PDTX.mipWait = 1; return; } pdTxFin(); } }   // V9.6 : pendant l'ouverture, la fin (mipmaps) se fait sous le flash d'arrivée
+function pdTxFin(){ const G = gl, T = PDTX.t; PDTX.mipWait = 0; if (!T || !T.arr2 || !T.gal2) return;
+  { try { pdTxUp(8, () => { G.bindTexture(G.TEXTURE_2D_ARRAY, T.arr2); G.generateMipmap(G.TEXTURE_2D_ARRAY); }); pdTxUp(10, () => { G.bindTexture(G.TEXTURE_2D_ARRAY, T.gal2); G.generateMipmap(G.TEXTURE_2D_ARRAY); });
       G.deleteTexture(T.arr); G.deleteTexture(T.gal); T.arr = T.arr2; T.gal = T.gal2;
       if (T.gz2){ pdTxUp(13, () => { G.bindTexture(G.TEXTURE_2D_ARRAY, T.gz2); G.generateMipmap(G.TEXTURE_2D_ARRAY); }); G.deleteTexture(T.gz); T.gz = T.gz2; } PDTX.ready = 1; } catch(err){ console.warn('[PlanèteDot] textures', err); } } }
+// V9.6 · progression du chargement (0 à 1) : octets reçus, images décodées, images envoyées ; 1 tout de suite si rien n'est à charger sur cet appareil
+function pd96P(){ const br = pd96BrOk() ? (PDBR9.st >= 2 ? 1 : PDBR9.got / 2) : 1;
+  if (PDTX.ready || PDTX.mipWait) return br >= 1 ? 1 : .97 + .03 * br; if (PDTX.fail || PDTX.off || PDTX.bad || pdTxWhy()) return 1;
+  const n = PDTX.n || 28, b9 = pd96BrOk() && PDBR9.st !== 3, T = (PDL6.t84 || 1) + (b9 ? PDL6.t9 || 0 : 0), B = (PDL6.b84 || 0) + (b9 ? PDL6.b9 || 0 : 0);
+  return Math.min(.97, .6 * Math.min(1, B / T) + .2 * Math.min(1, PDTX.dn / n) + .2 * Math.min(1, (PDTX.got || 0) / n)); }
 // the change is switched on when it cannot be seen: under the login page, during the opening, a warp, a flash or a change of view (at most 9 s later)
 function pdTxHidden(){ if (document.hidden || INTRO.on || warpT >= 0) return true;
   if (mode === 'splash'){ const g = document.getElementById('authGate'); return !!g && !g.hidden && !g.classList.contains('pdi'); }
@@ -1310,8 +1355,7 @@ function pdTxHidden(){ if (document.hidden || INTRO.on || warpT >= 0) return tru
    seulement quand les textures 8.2 sont allumées, téléversé une couche par image, puis uBreath.z = 1. Sans lui, les souffles restent procéduraux. */
 const PDBR9 = {st: 0, q: [], t: null, got: 0};
 async function pd9BrFetch(){ PDBR9.st = 1; const file = PDTX.sz >= 1024 ? 'textures9-hd.bin' : 'textures9-mobile.bin';
-  try { const r = await fetch(file + '?v=' + encodeURIComponent((document.querySelector('meta[name="pd-version"]') || {}).content || ''), {priority: 'low'}); if (!r.ok) throw new Error(file + ' : ' + r.status);
-    const buf = await r.arrayBuffer(), u8 = new Uint8Array(buf); if (u8[0] !== 80 || u8[1] !== 68 || u8[2] !== 84 || u8[3] !== 88) throw new Error(file + ' : format');
+  try { const buf = await pd96Get(file, 'b9', 't9'), u8 = new Uint8Array(buf); if (u8[0] !== 80 || u8[1] !== 68 || u8[2] !== 84 || u8[3] !== 88) throw new Error(file + ' : format');
     const hl = new DataView(buf).getUint32(4, true), H = JSON.parse(new TextDecoder().decode(u8.subarray(8, 8 + hl))), base = 8 + hl;
     if (!H || !Array.isArray(H.f) || H.f.length !== 2 || !(H.sz >= 64 && H.sz <= 2048)) throw new Error(file + ' : contenu');
     for (const e of H.f){ const b = new Blob([u8.subarray(base + e.o, base + e.o + e.l)], {type: 'image/jpeg'}); let im = null;
@@ -1319,16 +1363,20 @@ async function pd9BrFetch(){ PDBR9.st = 1; const file = PDTX.sz >= 1024 ? 'textu
       if (!im) im = await new Promise((ok, ko) => { const u = URL.createObjectURL(b), i = new Image(); i.onload = () => { URL.revokeObjectURL(u); ok(i); }; i.onerror = () => { URL.revokeObjectURL(u); ko(new Error('souffle ' + e.n)); }; i.src = u; });
       PDBR9.q.push({l: e.n === 'br_b' ? 1 : 0, im, sz: H.sz}); }
   } catch(err){ console.info('[PlanèteDot] souffles Figma non chargés (' + (err && err.message || err) + ') : souffles procéduraux gardés'); PDBR9.q = []; PDBR9.st = 3; } }
-function pd9BrTick(){ if (PDBR9.st === 0){ if (PDTX.on && PDTX.ready && !PDTX.off && TIER > 0 && SP.u.uBr && PDTX.t) pd9BrFetch(); return; }
-  if (!PDBR9.q.length || PDTX.off || INTRO.gl) return; const x = PDBR9.q.shift(), G = gl, lv = n => Math.floor(Math.log2(n)) + 1;
+const pd96BrOk = () => !PDTX.off && TIER > 0 && !!SP.u.uBr && !!PDTX.t && !PDTX.bad && !pdTxWhy();
+function pd9BrTick(){ if (PDBR9.st === 0){ if (((PDTX.on && PDTX.ready) || PDL6.go) && pd96BrOk()) pd9BrFetch(); return; }
+  if (!PDBR9.q.length || PDTX.off || !pd96Up()) return; const x = PDBR9.q.shift(), G = gl, lv = n => Math.floor(Math.log2(n)) + 1;
   try { if (!PDBR9.t){ PDBR9.t = pdTxMk(14, G.TEXTURE_2D_ARRAY, G.REPEAT, G.REPEAT, true); pdTxUp(14, () => { G.bindTexture(G.TEXTURE_2D_ARRAY, PDBR9.t); G.texStorage3D(G.TEXTURE_2D_ARRAY, lv(x.sz), G.RGBA8, x.sz, x.sz, 2); }); }
     pdTxUp(14, () => { G.bindTexture(G.TEXTURE_2D_ARRAY, PDBR9.t); G.texSubImage3D(G.TEXTURE_2D_ARRAY, 0, 0, 0, x.l, x.sz, x.sz, 1, G.RGBA, G.UNSIGNED_BYTE, x.im); });
     if (++PDBR9.got === 2){ pdTxUp(14, () => { G.bindTexture(G.TEXTURE_2D_ARRAY, PDBR9.t); G.generateMipmap(G.TEXTURE_2D_ARRAY); });
       if (PDTX.t && PDTX.t.br){ G.deleteTexture(PDTX.t.br); PDTX.t.br = PDBR9.t; } PDBR.tx = 1; PDBR9.st = 2; console.info('[PlanèteDot] souffles Figma allumés (' + x.sz + ' px)'); }
   } catch(err){ console.warn('[PlanèteDot] souffles Figma', err); PDBR9.q = []; PDBR9.st = 3; PDBR.tx = 0; }
   try { if (x.im.close) x.im.close(); } catch(_){} }
+// V9.6 · combien d'images envoyer à la carte graphique à cette image : 1 hors ouverture ; pendant l'ouverture, une sur deux avant le toucher, aucune pendant le tour du logo, 1 pendant la plongée, 2 dans le tunnel
+function pd96Up(){ const I = INTRO; if (!I.gl) return 1; if (I.ph === 'img') return (window.__pdF || 0) & 1; if (!I.K || time < I.K + I.SP) return 0; return time >= I.K + I.SP + I.DV ? 2 : 1; }
+function pd96Calm(){ const I = INTRO; return !I.gl || I.ph === 'img' || (!!I.K && time >= I.K + I.SP + I.DV); }
 function pdTxTick(){ window.__pdF = (window.__pdF || 0) + 1; pd9BrTick(); if (!PDTX.st && !INTRO.on && time > 2.5) pdTxSoon(600);   // no opening animation (or it is over): start anyway
-  if (PDTX.q.length && !PDTX.off && !INTRO.gl) pdTxPut(PDTX.q.shift());
+  for (let i = pd96Up(); i > 0 && PDTX.q.length && !PDTX.off; i--) pdTxPut(PDTX.q.shift());
   if (PDTX.ready && !PDTX.on && !PDTX.off && pdTxHidden()){ PDTX.on = 1; console.info('[PlanèteDot] textures 8.2 allumées (' + PDTX.sz + ' px, ' + PDTX.dl + ' ms)'); } }
 // a phone that keeps struggling at the lowest resolution: textures off for this visit (V8.0 rendering), and the next opening starts one notch lower
 const PDG = {n: 0, hint: 0, no: (() => { try { return localStorage.getItem('pd.nogov') === '1' || localStorage.getItem('planetedot.quality') !== null; } catch(e){ return false; } })()};
@@ -1755,6 +1803,12 @@ void volc93(vec2 d0,vec2 uv,float rb,float r0,float ph,float jb,float w2,float w
     gPl93=min(pl*1.2,.92); gPc93=mix(vec3(.66,.65,.64),vec3(.95,.95,.94),smoothstep(.2,.8,bl))*shp; gPe93=midC*exp(-max(px,0.)*4.)*ngt*act*.5; spec*=1.-pl; }
 }
 `;
+const PD96 = `
+/* V9.6 · plus aucun pixel qui saute (vidéo du fondateur, 26/11) : un détail ou une étincelle ne s'affiche que s'il fait plusieurs pixels à l'écran.
+   sp = s*1.6 : un bruit de fréquence f a des cellules de uR*gFs/(f*1.6) pixels ; sous 3 pixels il disparaît, au-delà de 7 il est entier. */
+float pxK(float f){ return smoothstep(3.,7.,uR*gFs/(f*1.6)); }
+float pxN(vec3 p,float f){ return mix(.5,n3(p),pxK(f)); }
+`;
 const PD95 = `
 /* V9.5 · climats des planètes Terre et Océanique (26/11, demande du fondateur : déserts, montagnes, forêts cohérents).
    Un seul relief dessine les côtes, les chaînes de montagnes et les vallées ; la température vient de la latitude et de l'altitude,
@@ -1854,7 +1908,8 @@ vec3 txT(float ly,vec3 p,float lod){ vec3 c=vec3(0.); if(gW.x>0.) c+=textureLod(
 float gLB=0.; bool gST=false; float txL(float sc){ return log2(max(uTxS*sc/(max(uR,1.)*gMu),1e-3))-.35+gLB; }
 float hot84(float ly,vec3 t);   // V9.4 : définie plus bas (chaleur lue dans la texture)
 vec3 txS(float ly,float sc,out float rl){ vec3 o=fract(vec3(.37,.71,.53)*(uSeed+ly*.31))*4.; float lod=txL(sc); vec3 c=txT(ly,gS*sc+o,lod); rl=0.;
-  if(uR>16.){ vec3 c1=txT(ly,(gS+gLo*gE)*sc+o,lod); rl=dot(c1-c,vec3(.3,.59,.11)); if(uType==4||abs(ly-2.)<.5) rl-=(hot84(ly,c1)-hot84(ly,c))*.75; } return c; }   // V9.4 : la lave est en contrebas de ses rives
+  if(uR>16.){ bool cl0=lod<1.1; float lb=cl0?1.5:lod, eB=cl0?max(gE,exp2(lb)*1.2/(uTxS*sc)):gE, kB=sqrt(gE/eB); vec3 cb=cl0?txT(ly,gS*sc+o,lb):c, c1=txT(ly,(gS+gLo*eB)*sc+o,lb);   /* V9.6 : de près, relief lu sur une image plus floue (plus de neige d'écran) */
+    rl=dot(c1-cb,vec3(.3,.59,.11))*kB; if(uType==4||abs(ly-2.)<.5) rl-=(hot84(ly,c1)-hot84(ly,cb))*.75*kB; } return c; }   // V9.4 : la lave est en contrebas de ses rives
 
 ${NOISE.replace('s+=a*n3(p);t+=a;','if(i>=gOct)break;s+=a*n3(p);t+=a;').replace('i<' + OCT + ';i++){if(i>=gOct)', 'i<' + (OCT + 2) + ';i++){if(i>=gOct)')}
 mat3 rotY(float t){float c=cos(t),s=sin(t);return mat3(c,0,-s,0,1,0,s,0,c);}
@@ -1866,6 +1921,7 @@ float fbm2(vec3 p){ return n3(p)*.66+n3(p*2.03+vec3(1.7,9.2,3.1))*.34; }   /* V8
 float relief84(vec3 b){ vec3 q=b*1.6+uSeed*7.; q*=vec3(1.+.32*sin(uSeed*1.7),1.+.28*sin(uSeed*2.9),1.+.32*cos(uSeed*2.3));
   return uType==10?fbm2(q*1.1)*.8-smoothstep(.56,.84,n3(q*1.35+5.))*.3:uType==9?fbm2(q*1.3)*.75:fbm2(q*1.4)*.65+smoothstep(.6,.88,n3(q*2.+9.))*.35; }
 ${PD95}
+${PD96}
 float reliefB(vec3 b,float det,out float hb){
   vec3 q=b*1.6+uSeed*7.; q*=vec3(1.+.32*sin(uSeed*1.7),1.+.28*sin(uSeed*2.9),1.+.32*cos(uSeed*2.3)); float h;
   if(uType==11||uType==1){ h=terraH(b,det); }   /* V9.5 : continents, chaînes et vallées (voir PD95) */
@@ -2177,7 +2233,7 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){ gFs=max(n.z,.12);
     land=lm; spec=spc; n=normalize(mix(n0,nb,lm)); shd*=mix(1.,rSh,lm); ndl=dot(n,L); dif=lam(ndl)*shd;
     vec4 cwv=cwvG; vec3 cq=rotY(uT*.0003)*(sp-cwv.xyz*1.6); cq+=vec3(fbm3(cq*2.+uT*.0015),fbm3(cq*2.+3.),0.)*.7;
     float cl=smoothstep(.48,.79,fbm(cq*1.9+3.)+(n3(cq*14.+uT*.004)-.5)*.13*(.3+det)+(n3(cq*31.-uT*.006)-.5)*.07*det+(det>.5?(n3(cq*70.)-.5)*.045*det*det:0.))*(uType==1?uClouds*1.05:.5+uClouds*.6); int gS=gOct; gOct=min(gOct,4); float cs=smoothstep(.48,.79,fbm((cq+L*.05)*1.9+3.))*(uType==1?uClouds*1.05:.5+uClouds*.6); gOct=gS;
-    if(uTxOn>.5){ float tlc=txL(1.15); float tc=txT(7.,cq*.72,tlc).r; cl=clamp(mix(cl,cl*(.3+1.25*tc)+tc*.1*smoothstep(.15,.45,cl),.75),0.,1.);
+    if(uTxOn>.5){ float tlc=max(txL(1.15),1.6);   /* V9.6 : plus de marches d'escalier au bord des nuages */ float tc=txT(7.,cq*.72,tlc).r; cl=clamp(mix(cl,cl*(.3+1.25*tc)+tc*.1*smoothstep(.15,.45,cl),.75),0.,1.);
       float tcs=txT(7.,(cq+L*.05)*.72,tlc+.5).r; cs=clamp(mix(cs,cs*(.3+1.25*tcs),.75),0.,1.); }
     float cy=.4+.6*uWx; cl=max(cl,cyclone(s,cy)); cs=max(cs,cyclone(normalize(s+L*.03),cy)); { float bc=0.; if(brF>.01) bc=uBreath.z>.5?brRev(brTx(rotY(uT*.02)*s*2.2+uSeed,s,0.,brL(2.2)).r,brF,.5)*min(1.,brF*1.5):brF*smoothstep(.4,.75,fbm3(cq*1.3+brT*uT*.05+vec3(7.))); cl=max(cl,bc*.8); cs=max(cs,bc*.45); }
     vec3 ccol=mix(vec3(.97),vec3(.58,.62,.68),smoothstep(.6,1.,cl)*uWx*.7); ccol+=vec3(1.,.95,.86)*smoothstep(.02,.18,cl)*(1.-smoothstep(.2,.5,cl))*smoothstep(0.,.5,dot(n0,L))*.18;
@@ -2266,10 +2322,10 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){ gFs=max(n.z,.12);
           emi+=gc3*(wv*(1.2+(1.-dif))+k*P*P*P*.18); col=mix(col,col*(1.+hc*.8)+gc3*.22,wv*.55); emi+=gc3*smoothstep(.12,0.,b1)*km*smoothstep(.45,.75,ph)*(1.-ph)*4.; }
         if(gg.y>.01){ float fz=smoothstep(.13,0.,b1)*km*gg.y, sh=.45+.55*sin(uT*2.6-b1*40.+n3(sp*9.)*6.); emi+=mix(hc,vec3(1.),.4)*fz*sh*(.45+.5*(1.-dif)); col=mix(col,col*(1.+hc*.6),fz*.4); } }
       emi+=hc*Bl*k*(.02+.025*uBeat+.03*uLv)*(nn+.25);
-      if(Bl>.004){ float night=1.-smoothstep(-.05,.35,dot(n0,L)); float t7=uT*6.; vec3 g3=sp*140.; float sa=n3(g3+floor(t7)*vec3(1.7,.3,2.1)), sb=n3(g3+(floor(t7)+1.)*vec3(1.7,.3,2.1));
-        float tw2=pow(mix(sa,sb,smoothstep(0.,1.,fract(t7))),12.)*Bl*km*smoothstep(10.,30.,uR);
-        emi+=mix(hc,vec3(1.),.6)*tw2*(1.1+uBeat*.7+uBs*.5)*(.35+night*1.2);
-        emi+=hc*Bl*km*(.02+night*(.035+.05*uLv+.025*uBeat))*(.55+.45*n3(sp*12.+uT*.3)); }
+      if(Bl>.004){ float night=1.-smoothstep(-.05,.35,dot(n0,L));   /* V9.6 : plus d'étincelles d'un pixel ; des voiles de lumière douce dérivent sur la zone jouée et respirent avec la musique */
+        float vl=smoothstep(.5,.85,n3(sp*3.1+vec3(uT*.05,-uT*.03,uT*.04))*.62+pxN(sp*6.3-vec3(uT*.07,0.,uT*.05),6.3)*.38);
+        emi+=mix(hc,vec3(1.),.45)*vl*Bl*km*smoothstep(10.,30.,uR)*(.05+.09*uLv+.06*uBeat+.05*uBs)*(.35+night*1.1);
+        emi+=hc*Bl*km*(.02+night*(.035+.05*uLv+.025*uBeat))*(.55+.45*pxN(sp*12.+uT*.3,12.)); }
       if(lv>.02&&uR>8.){ vec3 c0=uTk[bi].xyz; vec3 t1=normalize(cross(c0,vec3(0.,1.,.001))); vec3 t2=cross(c0,t1);
         vec2 uv=vec2(dot(s,t1),dot(s,t2)); float gt=min(lv,4.999); float tier=max(floor(gt),1.); float cnt=gt<1.?1.:pow(4.,fract(gt));
         float r0=max(.047*pow(2.1,tier-1.)*(gt<1.?sqrt(gt):1.),2.4/uR);   /* V9.5 : villes 35 % plus étendues */ float ph=B.y*40.+uSeed;
@@ -2281,7 +2337,7 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){ gFs=max(n.z,.12);
         float ft=smoothstep(0.,.22,m)*km*smoothstep(0.,.08,dot(s,c0)); float prof=clamp(m,0.,1.);
         vec3 lB2=RM*L; vec2 lt=vec2(dot(lB2,t1),dot(lB2,t2)); float lsl=dot(normalize(dv+1e-4),normalize(lt+1e-4))*smoothstep(0.,.25,m)*(1.-smoothstep(.8,1.,m));
         float lit=smoothstep(-.05,.3,dot(n0,L)); float ang=atan(dv.y,dv.x), rr=length(dv), pxr=1./(uR*max(n0.z,.12));
-        float w2=smoothstep(1.75,2.05,gt), w3=smoothstep(2.75,3.05,gt); float tw=.8+.2*sin(uT*.4+bn*40.); float pts=mix(1.,smoothstep(.4,.72,n3(sp*75.))*1.7,det);
+        float w2=smoothstep(1.75,2.05,gt), w3=smoothstep(2.75,3.05,gt); float tw=.8+.2*sin(uT*.4+bn*40.); float pts=mix(1.,smoothstep(.4,.72,n3(sp*75.))*1.7,det*pxK(75.));
         int th=uType==1?1:uType==9?2:(uType==10||uType==4)?3:uType==2?4:(uType==6||uType==7)?5:0;
         float csh=0.; if(th==2&&uR>24.){ float mS=zM(uv+normalize(lt+1e-4)*r0*.24,r0,cnt,ph,en); csh=smoothstep(0.,.3,mS-m)*smoothstep(-.5,.1,mS)*lit*km; }
         if(th==0){ float lw3=1.;
@@ -2304,18 +2360,19 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){ gFs=max(n.z,.12);
             emi+=vec3(1.,.95,.85)*exp(-dd*dd*1.2)*e3*(.45+.55*step(.5,fract(uT*1.4+fk*.3)))*(.4+nn)*.9;
             vec2 bq=vec2(cos(a*.35+fk*1.7),sin(a*.35+fk*1.7))*r0*(1.35+.3*fk); float db=length(uv-bq)*uR; float wat=uType==11?(1.-land):uType==1?1.:0.;
             emi+=vec3(1.,.82,.55)*exp(-db*db*1.6)*wat*km*smoothstep(.8,1.6,gt)*(.3+nn)*.7; col=mix(col,col*1.25,exp(-db*.35)*wat*km*smoothstep(.8,1.6,gt)*.4); } }
-          if(Bl>.01&&bt>.01){ float ftm=uT*.9; float fw=smoothstep(.8,.9,n3(sp*26.+floor(ftm)*7.3))*sin(3.1416*fract(ftm))*Bl*bt*step(1.,gt); emi+=rainbow(n3(sp*9.+floor(ftm))+uT*.05)*fw*(.7+uBeat*2.)*(.15+nn); }
+          if(Bl>.01&&bt>.01){ float ftm=uT*.9, fk=floor(ftm), fq=pxK(13.); float fw=smoothstep(.74,.95,n3(sp*13.+fk*7.3))*sin(3.1416*fract(ftm))*Bl*bt*step(1.,gt)*fq;   /* V9.6 : gerbes douces de plusieurs pixels, couleur de la zone (plus de confettis) */
+            emi+=mix(mix(hc,vec3(1.,.84,.58),.5+.5*sin(fk*2.4)),vec3(1.),.25)*fw*(.8+uBeat*.8)*(.15+nn); }
           setl=max(setl,ft*lw3); }
         else if(th==1){ float bt=ft*(1.-cloudA*.75); float rg=1.-smoothstep(0.,.07,abs(fract(m*3.+.5)-.5)); float pl=smoothstep(.2,.5,m+(bn-.5)*.4);
           col=mix(col,mix(vec3(.6,.73,.76),vec3(.86,.9,.92),bn),bt*(pl*.62+rg*.25)); spec=mix(spec,.5,bt*pl);
           emi+=vec3(.12,.7,.82)*bt*(.04+.09*rg)*(.4+nn); emi+=mix(hc,vec3(.6,.95,1.),.6)*bt*(pl*.9*pts+rg*.5)*(nn*tw*(.9+Bl*uBeat*1.3)+wvG*(1.1*nn+.16));
-          float ftm=uT*.9; float fw=smoothstep(.82,.9,n3(sp*26.+floor(ftm)*7.3))*sin(3.1416*fract(ftm))*Bl*bt*step(2.,gt); emi+=rainbow(n3(sp*9.+floor(ftm))+uT*.05)*fw*(.6+uBeat*2.)*(.15+nn);
+          float ftm=uT*.9, fk=floor(ftm); float fw=smoothstep(.76,.95,n3(sp*13.+fk*7.3))*sin(3.1416*fract(ftm))*Bl*bt*step(2.,gt)*pxK(13.); emi+=mix(mix(hc,vec3(.6,.95,1.),.5+.5*sin(fk*2.4)),vec3(1.),.25)*fw*(.7+uBeat*.8)*(.15+nn);   /* V9.6 */
           setl=max(setl,bt); }
         else if(th==2){ float rdg=n3(sp*min(2.5/r0,uR*.3)); float val=ft*(1.-w2);
           col*=1.-val*.45*smoothstep(.1,.7,m); col*=1.-val*lsl*.55*lit; col+=vec3(.1,.1,.11)*val*(smoothstep(0.,.12,m)-smoothstep(.12,.3,m))*(.4+lit);
           float mt=ft*w2; col=mix(col,mix(vec3(.4,.42,.48),vec3(.82,.84,.88),prof)*(.78+.44*rdg),mt*.88); col*=1.+mt*lsl*1.1*lit; spec=mix(spec,1.5,mt*prof);
           float fc=smoothstep(.36,.2,rdg)*smoothstep(.02,.22,m)*(1.-smoothstep(.62,.9,m))*w3*km;   /* V9.4 : métal en fusion dans les vallées */ col=mix(col,vec3(.2,.21,.24),fc*.6);
-          emi+=vec3(1.,.5,.14)*(.7+.12*uStage)*fc*(.22+.5*smoothstep(.6,.9,n3(sp*18.+vec3(0.,uT*.1,0.))))*(.35+nn)*(1.+Bl*uBeat*1.2+wvG*1.3); emi+=vec3(1.,.86,.62)*fc*smoothstep(.55,.8,n3(sp*70.))*nn*.8*tw;
+          emi+=vec3(1.,.5,.14)*(.7+.12*uStage)*fc*(.22+.5*smoothstep(.6,.9,n3(sp*18.+vec3(0.,uT*.1,0.))))*(.35+nn)*(1.+Bl*uBeat*1.2+wvG*1.3); emi+=vec3(1.,.86,.62)*fc*smoothstep(.55,.8,n3(sp*35.))*nn*.8*tw*pxK(35.);
           float smk=smoothstep(.5,.8,fbm3(sp*6.+vec3(uT*.01,0.,0.)))*fc; col=mix(col,vec3(.34,.33,.33),smk*.5); setl=max(setl,fc); col*=1.-csh*.55; }
         else if(th==3){   /* V9.3 · cratères d'impact, puis vrais volcans (cône, cratère, coulées, fumée), lacs et mers de lave (volc93) */
           volc93(dv,uv,rb,r0,ph,jb,w2,w3,smoothstep(3.75,4.05,gt),bn,lt,dot(n0,L),lit,nn,km*smoothstep(0.,.08,dot(s,c0)),Bl,pxr,col,emi,spec);
@@ -2327,7 +2384,7 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){ gFs=max(n.z,.12);
           float ltm=uT*1.2; float fl=smoothstep(.75,.9,n3(sp*6.+floor(ltm)*3.3))*pow(1.-fract(ltm),3.)*cm*w2; emi+=vec3(.8,.88,1.)*fl*(.3+.08*uStage+Bl*uBeat*2.+wvG*1.6); }
         else { float bil=fbm3(sp*min(2.2/r0,30.)+vec3(0.,uT*.006,0.)); float cm=smoothstep(-.1,.45,m+(bil-.5)*.6)*km;
           col=mix(col,mix(hc*.5,vec3(.3,.2,.5),.4)*(.5+.7*bil),cm*.5); emi+=hc*cm*bil*.14;
-          float fk=floor(uT*2.); float fil=1.-smoothstep(0.,.035,abs(n3(sp*min(5./r0,60.)+vec3(0.,0.,fk*1.7))-.5));
+          float fk=floor(uT*2.); float fln=n3(sp*min(5./r0,60.)+vec3(0.,0.,fk*1.7))-.5, flw=max(.035,fwidth(fln)*1.6); float fil=(1.-smoothstep(0.,flw,abs(fln)))*.035/flw;   /* V9.6 : trait jamais plus fin qu'un pixel et demi */
           emi+=mix(hc,vec3(.9,.95,1.),.6)*fil*pow(1.-fract(uT*2.),2.)*cm*(.3+Bl*uBeat*1.5+wvG*1.3)*smoothstep(.6,.8,n3(sp*3.+fk));
           vec3 rb=rainbow(ang*.159+rr*.8-uT*.02+bil*.5); float sw2=.5+.5*sin(ang*3.+log(rr+.05)*5.-uT*.06);
           emi+=rb*cm*w2*(.12+.22*sw2)*(.7+.12*uStage)*(1.+Bl*uBeat); col=mix(col,rb*.6,cm*w2*.35*sw2); } }
@@ -2342,7 +2399,7 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){ gFs=max(n.z,.12);
     col=mix(col,col*.55+vec3(.07,.06,.05),smoothstep(.04,.16,slope)*.55*lk);
     col*=mix(vec3(1.),vec3(1.1,.97,.88),smoothstep(.35,.75,fbm3(sp*.6+3.))*.35*lk);
     col*=mix(1.,.64+.8*gh,.6*lk);
-    if(!sT){ col*=1.+det*(n3(sp*38.)-.5)*.26+det*det*(n3(sp*90.)-.5)*.14; spec*=.75+.5*n3(sp*30.); } }
+    if(!sT){ col*=1.+det*(n3(sp*38.)-.5)*.26*pxK(38.)+det*det*(n3(sp*90.)-.5)*.14*pxK(90.); spec*=.75+.5*pxN(sp*30.,30.); } }
   if(uType==0||uType==3||uType==10){ float hz=smoothstep(.55,.82,fbm3(rotY(uT*.0002)*sp*1.4+11.)+(n3(sp*12.)-.5)*.1)*(.18+uWx*.55)*(uType==10?.5:1.);
     col=mix(col,uType==3?vec3(.93,.96,1.):vec3(.72,.56,.4),hz*.6); cloudA=max(cloudA,hz*.5); }
   { float vr=floor(fract(uSeed*13.17)*4.);
@@ -2459,7 +2516,7 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){ gFs=max(n.z,.12);
     emi+=mix(vec3(.2,1.,.6),uLC,.3)*band*wav*aur*(.35+uAudio*2.5); }
   if(bA>0.){ col=mix(vec3(dot(col,vec3(.3,.59,.11))),col,1.04); col*=.92+.16*(gh-.5)*2.; }
   if(bA>0.&&(uType==0||uType==1||uType==11)) col=mix(col,col*vec3(1.08,.95,.82),smoothstep(.55,.8,gh)*.5*land);
-  if((uType==10||uType==9||uType==0)&&!sT) col*=1.+det*det*(n3(sp*300.)-.5)*.14;
+  if((uType==10||uType==9||uType==0)&&!sT) col*=1.+det*det*(n3(sp*300.)-.5)*.14*pxK(300.);
   col=mix(col,uAt*.55+col*.3,pow(1.-max(n0.z,0.),3.)*uAtmo*.55);
   // [PBR] normal : n = normale d’éclairage (repère vue), n0 = normale de la sphère, s = direction sur la planète (UV inchangées), RM = vue → planète ; TXR/TXK = relief Figma actuel
   float pdMask=(uType==1||uType==11)?1.-land:1.;
@@ -2616,6 +2673,7 @@ vec4 over(vec4 t,vec4 u){return t+u*(1.-t.a);}
 /* relief: height field per environment, with distance LOD (detail octaves fade in as the body grows on screen) */
 float ridge(float x){return 1.-abs(x*2.-1.);}
 ${PD95}
+${PD96}
 float reliefB(vec3 b,float det,out float hb){
   vec3 q=b*1.6+uSeed*7.; q*=vec3(1.+.32*sin(uSeed*1.7),1.+.28*sin(uSeed*2.9),1.+.32*cos(uSeed*2.3)); float h;
   if(uType==11||uType==1){ h=terraH(b,det); }   /* V9.5 : continents, chaînes et vallées (voir PD95) */
@@ -2807,10 +2865,10 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){ gFs=max(n.z,.12);
           emi+=gc3*(wv*(1.2+(1.-dif))+k*P*P*P*.18); col=mix(col,col*(1.+hc*.8)+gc3*.22,wv*.55); emi+=gc3*smoothstep(.12,0.,b1)*km*smoothstep(.45,.75,ph)*(1.-ph)*4.; }
         if(gg.y>.01){ float fz=smoothstep(.13,0.,b1)*km*gg.y, sh=.45+.55*sin(uT*2.6-b1*40.+n3(sp*9.)*6.); emi+=mix(hc,vec3(1.),.4)*fz*sh*(.45+.5*(1.-dif)); col=mix(col,col*(1.+hc*.6),fz*.4); } }
       emi+=hc*Bl*k*(.02+.025*uBeat+.03*uLv)*(nn+.25);
-      if(Bl>.004){ float night=1.-smoothstep(-.05,.35,dot(n0,L)); float t7=uT*6.; vec3 g3=sp*140.; float sa=n3(g3+floor(t7)*vec3(1.7,.3,2.1)), sb=n3(g3+(floor(t7)+1.)*vec3(1.7,.3,2.1));
-        float tw2=pow(mix(sa,sb,smoothstep(0.,1.,fract(t7))),12.)*Bl*km*smoothstep(10.,30.,uR);
-        emi+=mix(hc,vec3(1.),.6)*tw2*(1.1+uBeat*.7+uBs*.5)*(.35+night*1.2);
-        emi+=hc*Bl*km*(.02+night*(.035+.05*uLv+.025*uBeat))*(.55+.45*n3(sp*12.+uT*.3)); }
+      if(Bl>.004){ float night=1.-smoothstep(-.05,.35,dot(n0,L));   /* V9.6 : plus d'étincelles d'un pixel ; des voiles de lumière douce dérivent sur la zone jouée et respirent avec la musique */
+        float vl=smoothstep(.5,.85,n3(sp*3.1+vec3(uT*.05,-uT*.03,uT*.04))*.62+pxN(sp*6.3-vec3(uT*.07,0.,uT*.05),6.3)*.38);
+        emi+=mix(hc,vec3(1.),.45)*vl*Bl*km*smoothstep(10.,30.,uR)*(.05+.09*uLv+.06*uBeat+.05*uBs)*(.35+night*1.1);
+        emi+=hc*Bl*km*(.02+night*(.035+.05*uLv+.025*uBeat))*(.55+.45*pxN(sp*12.+uT*.3,12.)); }
       if(lv>.02&&uR>8.){ vec3 c0=uTk[bi].xyz; vec3 t1=normalize(cross(c0,vec3(0.,1.,.001))); vec3 t2=cross(c0,t1);
         vec2 uv=vec2(dot(s,t1),dot(s,t2)); float gt=min(lv,4.999); float tier=max(floor(gt),1.); float cnt=gt<1.?1.:pow(4.,fract(gt));
         float r0=max(.047*pow(2.1,tier-1.)*(gt<1.?sqrt(gt):1.),2.4/uR);   /* V9.5 : villes 35 % plus étendues */ float ph=B.y*40.+uSeed;
@@ -2822,7 +2880,7 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){ gFs=max(n.z,.12);
         float ft=smoothstep(0.,.22,m)*km*smoothstep(0.,.08,dot(s,c0)); float prof=clamp(m,0.,1.);
         vec3 lB2=RM*L; vec2 lt=vec2(dot(lB2,t1),dot(lB2,t2)); float lsl=dot(normalize(dv+1e-4),normalize(lt+1e-4))*smoothstep(0.,.25,m)*(1.-smoothstep(.8,1.,m));
         float lit=smoothstep(-.05,.3,dot(n0,L)); float ang=atan(dv.y,dv.x), rr=length(dv), pxr=1./(uR*max(n0.z,.12));
-        float w2=smoothstep(1.75,2.05,gt), w3=smoothstep(2.75,3.05,gt); float tw=.8+.2*sin(uT*.4+bn*40.); float pts=mix(1.,smoothstep(.4,.72,n3(sp*75.))*1.7,det);
+        float w2=smoothstep(1.75,2.05,gt), w3=smoothstep(2.75,3.05,gt); float tw=.8+.2*sin(uT*.4+bn*40.); float pts=mix(1.,smoothstep(.4,.72,n3(sp*75.))*1.7,det*pxK(75.));
         int th=uType==1?1:uType==9?2:(uType==10||uType==4)?3:uType==2?4:(uType==6||uType==7)?5:0;
         float csh=0.; if(th==2&&uR>24.){ float mS=zM(uv+normalize(lt+1e-4)*r0*.24,r0,cnt,ph,en); csh=smoothstep(0.,.3,mS-m)*smoothstep(-.5,.1,mS)*lit*km; }
         if(th==0){ float lw3=1.;
@@ -2845,18 +2903,19 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){ gFs=max(n.z,.12);
             emi+=vec3(1.,.95,.85)*exp(-dd*dd*1.2)*e3*(.45+.55*step(.5,fract(uT*1.4+fk*.3)))*(.4+nn)*.9;
             vec2 bq=vec2(cos(a*.35+fk*1.7),sin(a*.35+fk*1.7))*r0*(1.35+.3*fk); float db=length(uv-bq)*uR; float wat=uType==11?(1.-land):uType==1?1.:0.;
             emi+=vec3(1.,.82,.55)*exp(-db*db*1.6)*wat*km*smoothstep(.8,1.6,gt)*(.3+nn)*.7; col=mix(col,col*1.25,exp(-db*.35)*wat*km*smoothstep(.8,1.6,gt)*.4); } }
-          if(Bl>.01&&bt>.01){ float ftm=uT*.9; float fw=smoothstep(.8,.9,n3(sp*26.+floor(ftm)*7.3))*sin(3.1416*fract(ftm))*Bl*bt*step(1.,gt); emi+=rainbow(n3(sp*9.+floor(ftm))+uT*.05)*fw*(.7+uBeat*2.)*(.15+nn); }
+          if(Bl>.01&&bt>.01){ float ftm=uT*.9, fk=floor(ftm), fq=pxK(13.); float fw=smoothstep(.74,.95,n3(sp*13.+fk*7.3))*sin(3.1416*fract(ftm))*Bl*bt*step(1.,gt)*fq;   /* V9.6 : gerbes douces de plusieurs pixels, couleur de la zone (plus de confettis) */
+            emi+=mix(mix(hc,vec3(1.,.84,.58),.5+.5*sin(fk*2.4)),vec3(1.),.25)*fw*(.8+uBeat*.8)*(.15+nn); }
           setl=max(setl,ft*lw3); }
         else if(th==1){ float bt=ft*(1.-cloudA*.75); float rg=1.-smoothstep(0.,.07,abs(fract(m*3.+.5)-.5)); float pl=smoothstep(.2,.5,m+(bn-.5)*.4);
           col=mix(col,mix(vec3(.6,.73,.76),vec3(.86,.9,.92),bn),bt*(pl*.62+rg*.25)); spec=mix(spec,.5,bt*pl);
           emi+=vec3(.12,.7,.82)*bt*(.04+.09*rg)*(.4+nn); emi+=mix(hc,vec3(.6,.95,1.),.6)*bt*(pl*.9*pts+rg*.5)*(nn*tw*(.9+Bl*uBeat*1.3)+wvG*(1.1*nn+.16));
-          float ftm=uT*.9; float fw=smoothstep(.82,.9,n3(sp*26.+floor(ftm)*7.3))*sin(3.1416*fract(ftm))*Bl*bt*step(2.,gt); emi+=rainbow(n3(sp*9.+floor(ftm))+uT*.05)*fw*(.6+uBeat*2.)*(.15+nn);
+          float ftm=uT*.9, fk=floor(ftm); float fw=smoothstep(.76,.95,n3(sp*13.+fk*7.3))*sin(3.1416*fract(ftm))*Bl*bt*step(2.,gt)*pxK(13.); emi+=mix(mix(hc,vec3(.6,.95,1.),.5+.5*sin(fk*2.4)),vec3(1.),.25)*fw*(.7+uBeat*.8)*(.15+nn);   /* V9.6 */
           setl=max(setl,bt); }
         else if(th==2){ float rdg=n3(sp*min(2.5/r0,uR*.3)); float val=ft*(1.-w2);
           col*=1.-val*.45*smoothstep(.1,.7,m); col*=1.-val*lsl*.55*lit; col+=vec3(.1,.1,.11)*val*(smoothstep(0.,.12,m)-smoothstep(.12,.3,m))*(.4+lit);
           float mt=ft*w2; col=mix(col,mix(vec3(.4,.42,.48),vec3(.82,.84,.88),prof)*(.78+.44*rdg),mt*.88); col*=1.+mt*lsl*1.1*lit; spec=mix(spec,1.5,mt*prof);
           float fc=smoothstep(.36,.2,rdg)*smoothstep(.02,.22,m)*(1.-smoothstep(.62,.9,m))*w3*km;   /* V9.4 : métal en fusion dans les vallées */ col=mix(col,vec3(.2,.21,.24),fc*.6);
-          emi+=vec3(1.,.5,.14)*(.7+.12*uStage)*fc*(.22+.5*smoothstep(.6,.9,n3(sp*18.+vec3(0.,uT*.1,0.))))*(.35+nn)*(1.+Bl*uBeat*1.2+wvG*1.3); emi+=vec3(1.,.86,.62)*fc*smoothstep(.55,.8,n3(sp*70.))*nn*.8*tw;
+          emi+=vec3(1.,.5,.14)*(.7+.12*uStage)*fc*(.22+.5*smoothstep(.6,.9,n3(sp*18.+vec3(0.,uT*.1,0.))))*(.35+nn)*(1.+Bl*uBeat*1.2+wvG*1.3); emi+=vec3(1.,.86,.62)*fc*smoothstep(.55,.8,n3(sp*35.))*nn*.8*tw*pxK(35.);
           float smk=smoothstep(.5,.8,fbm3(sp*6.+vec3(uT*.01,0.,0.)))*fc; col=mix(col,vec3(.34,.33,.33),smk*.5); setl=max(setl,fc); col*=1.-csh*.55; }
         else if(th==3){   /* V9.3 · cratères d'impact, puis vrais volcans (cône, cratère, coulées, fumée), lacs et mers de lave (volc93) */
           volc93(dv,uv,rb,r0,ph,jb,w2,w3,smoothstep(3.75,4.05,gt),bn,lt,dot(n0,L),lit,nn,km*smoothstep(0.,.08,dot(s,c0)),Bl,pxr,col,emi,spec); emi=max(emi-gBem93*gZr93*(1.-gVw),0.); }
@@ -2867,7 +2926,7 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){ gFs=max(n.z,.12);
           float ltm=uT*1.2; float fl=smoothstep(.75,.9,n3(sp*6.+floor(ltm)*3.3))*pow(1.-fract(ltm),3.)*cm*w2; emi+=vec3(.8,.88,1.)*fl*(.3+.08*uStage+Bl*uBeat*2.+wvG*1.6); }
         else { float bil=fbm3(sp*min(2.2/r0,30.)+vec3(0.,uT*.006,0.)); float cm=smoothstep(-.1,.45,m+(bil-.5)*.6)*km;
           col=mix(col,mix(hc*.5,vec3(.3,.2,.5),.4)*(.5+.7*bil),cm*.5); emi+=hc*cm*bil*.14;
-          float fk=floor(uT*2.); float fil=1.-smoothstep(0.,.035,abs(n3(sp*min(5./r0,60.)+vec3(0.,0.,fk*1.7))-.5));
+          float fk=floor(uT*2.); float fln=n3(sp*min(5./r0,60.)+vec3(0.,0.,fk*1.7))-.5, flw=max(.035,fwidth(fln)*1.6); float fil=(1.-smoothstep(0.,flw,abs(fln)))*.035/flw;   /* V9.6 : trait jamais plus fin qu'un pixel et demi */
           emi+=mix(hc,vec3(.9,.95,1.),.6)*fil*pow(1.-fract(uT*2.),2.)*cm*(.3+Bl*uBeat*1.5+wvG*1.3)*smoothstep(.6,.8,n3(sp*3.+fk));
           vec3 rb=rainbow(ang*.159+rr*.8-uT*.02+bil*.5); float sw2=.5+.5*sin(ang*3.+log(rr+.05)*5.-uT*.06);
           emi+=rb*cm*w2*(.12+.22*sw2)*(.7+.12*uStage)*(1.+Bl*uBeat); col=mix(col,rb*.6,cm*w2*.35*sw2); } }
@@ -2882,7 +2941,7 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){ gFs=max(n.z,.12);
     col=mix(col,col*.55+vec3(.07,.06,.05),smoothstep(.04,.16,slope)*.55*lk);
     col*=mix(vec3(1.),vec3(1.1,.97,.88),smoothstep(.35,.75,fbm3(sp*.6+3.))*.35*lk);
     col*=mix(1.,.64+.8*gh,.6*lk);
-    col*=1.+det*(n3(sp*38.)-.5)*.26+det*det*(n3(sp*90.)-.5)*.14; spec*=.75+.5*n3(sp*30.); }
+    col*=1.+det*(n3(sp*38.)-.5)*.26*pxK(38.)+det*det*(n3(sp*90.)-.5)*.14*pxK(90.); spec*=.75+.5*pxN(sp*30.,30.); }
   if(uType==0||uType==3||uType==10){ float hz=smoothstep(.55,.82,fbm3(rotY(uT*.0002)*sp*1.4+11.)+(n3(sp*12.)-.5)*.1)*(.18+uWx*.55)*(uType==10?.5:1.);
     col=mix(col,uType==3?vec3(.93,.96,1.):vec3(.72,.56,.4),hz*.6); cloudA=max(cloudA,hz*.5); }
   { float vr=floor(fract(uSeed*13.17)*4.);
@@ -2995,7 +3054,7 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){ gFs=max(n.z,.12);
     emi+=mix(vec3(.2,1.,.6),uLC,.3)*band*wav*aur*(.35+uAudio*2.5); }
   if(bA>0.){ col=mix(vec3(dot(col,vec3(.3,.59,.11))),col,1.04); col*=.92+.16*(gh-.5)*2.; }
   if(bA>0.&&(uType==0||uType==1||uType==11)) col=mix(col,col*vec3(1.08,.95,.82),smoothstep(.55,.8,gh)*.5*land);
-  if(uType==10||uType==9||uType==0) col*=1.+det*det*(n3(sp*300.)-.5)*.14;
+  if(uType==10||uType==9||uType==0) col*=1.+det*det*(n3(sp*300.)-.5)*.14*pxK(300.);
   col=mix(col,uAt*.55+col*.3,pow(1.-max(n0.z,0.),3.)*uAtmo*.55);
   vec3 sun=uSun*uSunI; if(uType==2) col*=.62+.38*pow(max(n0.z,0.),.35); if(uType==10||uType==0||uType==9) dif*=1.+.22*pow(max(L.z,0.),8.)*shd;
   vec3 sky=mix(sun,uAt*1.2,.55*clamp(uAtmo*1.4,0.,1.));
@@ -3214,7 +3273,7 @@ function pdRvInit(){
   const load = f => new Promise(res => { const im = new Image(); im.onload = () => (im.decode ? im.decode().catch(() => {}) : Promise.resolve()).then(() => res(im)); im.onerror = () => res(null); im.src = new URL(f, base).href + '?v=' + encodeURIComponent((document.querySelector('meta[name="pd-version"]') || {}).content || ''); });   // V9.4 : nouvelle image à chaque version
   setTimeout(async () => { try {
       const a = await load('volcan-hn' + sz + '.png'), b = a && await load('volcan-ao' + sz + '.png');
-      if (!a || !b || G.isContextLost()) return;
+      if (!a || !b || G.isContextLost()) return; while (!pd96Calm()) await new Promise(r => setTimeout(r, 120));   // V9.6 : jamais pendant le tour du logo
       [a, b].forEach((im, i) => pdTxUp(5 + i, () => { G.bindTexture(G.TEXTURE_2D, tx[i]); G.pixelStorei(G.UNPACK_FLIP_Y_WEBGL, true); G.texImage2D(G.TEXTURE_2D, 0, G.RGBA, G.RGBA, G.UNSIGNED_BYTE, im); G.generateMipmap(G.TEXTURE_2D); }));
       const p2 = G.getParameter(G.CURRENT_PROGRAM); G.useProgram(SP.p); G.uniform1f(SP.u.uVSOn, 1); G.useProgram(p2); PDRV.on = 1;
     } catch(e){ console.warn('[PlanèteDot] relief Blender indisponible, volcan V9.3 gardé', e); } }, 2500);
@@ -4224,17 +4283,17 @@ function gdSync(){ if (!GD) return; const p = GD.planets[0]; let tot = 0;
 function playAlbum(i){ unlockAudio(); if (radio) stopRadio(); playList(GD_IDS, i || 0, GD_PID); }
 function fetchBlob(url){ return new Promise((res, rej) => { try { const x = new XMLHttpRequest(); x.open('GET', url); x.responseType = 'blob'; x.onload = () => (x.status === 200 || x.status === 0) && x.response && x.response.size ? res(x.response) : rej(); x.onerror = rej; x.send(); } catch(e){ rej(e); } }); }
 function openAlbum(){ const p = GD.planets[0];
-  openSheet('album', head('PlanèteDot', 'Album de GuillaumDot · sortie le ??/??/2026', '<button class="rx9k" id="aRxK" aria-label="Réagir à l’album" aria-haspopup="dialog" aria-expanded="false">⋯</button>') +
+  openSheet('album', head('PlanèteDot', 'Album de GuillaumDot · sortie le ??/??/2026', '<button class="rx9k" id="aRxK" aria-label="Réagir à l’album" aria-haspopup="dialog" aria-expanded="false">' + ICON_RX + '</button>') +
     `<div class="alb"><img src="${GD_COVER}" alt="Pochette de l’album PlanèteDot"><p>Le logo de planèteDot est la pochette de cet album. L’appli le fait vivre : chaque titre est une zone de la planète PlanèteDot, qui grandit avec les écoutes de toute la communauté.</p></div>
      <div class="row"><button class="btn pri wide" id="aPlay">${ICON.play}Écouter l’album</button>${VIEW === GD ? `<button class="btn wide" id="aCopy">${ICON.plus}Copier la planète</button>` : `<button class="btn wide" id="aGo">${ICON.jump}Y aller</button>`}</div>
      <div id="pdAlStats"></div><h4 class="pdal-t">Titres</h4>
-     <ul class="list" id="aList">${GD_TR.map((t, i) => `<li class="tr${Q[qi] === GD_IDS[i] && !au.paused ? ' on' : ''}" data-i="${i}" style="cursor:pointer"><span class="n">${i + 1}</span><div class="m"><b>${esc(t[0])}</b><span data-pc="${i}">GuillaumDot</span></div><span class="spk-w" data-sp="${i}"></span><span class="d">${fmt(t[1])}</span><button class="rx9k" data-rxi="${i}" aria-label="Réagir à ${esc(t[0])}" aria-haspopup="dialog" aria-expanded="false">⋯</button></li>`).join('')}</ul>`, () => {
+     <ul class="list" id="aList">${GD_TR.map((t, i) => `<li class="tr${Q[qi] === GD_IDS[i] && !au.paused ? ' on' : ''}" data-i="${i}" style="cursor:pointer"><span class="n">${i + 1}</span><div class="m"><b>${esc(t[0])}</b><span data-pc="${i}">GuillaumDot</span></div><span class="spk-w" data-sp="${i}"></span><span class="d">${fmt(t[1])}</span><button class="rx9k" data-rxi="${i}" aria-label="Réagir à ${esc(t[0])}" aria-haspopup="dialog" aria-expanded="false">${ICON_RX}</button></li>`).join('')}</ul>`, () => {
     pdAlbumPaint(); pdAlbumLoad(true);
-    { const k = $('#aRxK'); if (k) k.onclick = () => pd9Menu(k, 'Réagir à l’album', () => ({o: GD_ID, p: GD_PID, pn: 'PlanèteDot', t: 'playlist'})); }   // chaque titre a aussi son « ⋯ » dans la liste
+    { const k = $('#aRxK'); if (k) k.onclick = () => pd9Menu(k, 'Réagir à l’album', () => ({o: GD_ID, p: GD_PID, pn: 'PlanèteDot', t: 'playlist'}), 1); }   // chaque titre a aussi son « ⋯ » dans la liste
     $('#aPlay').onclick = () => { playAlbum(0); setTimeout(() => sheetKind === 'album' && openAlbum(), 200); };
     const cp = $('#aCopy'); if (cp) cp.onclick = () => { closeSheet(true); copyPlanet(p); };
     const go = $('#aGo'); if (go) go.onclick = () => { closeSheet(true); if (mode === 'galaxy') jumpTo(GDO); else enterSystem(GD, true, GD_ID); };
-    $('#aList').onclick = e => { const k = e.target.closest('.rx9k'); if (k){ const T = GD_TR[+k.dataset.rxi]; if (T) pd9Menu(k, 'Réagir · ' + T[0], () => pd9TrackTg(GD_ID, GD_PID, 'PlanèteDot', T[0], 'GuillaumDot')); return; }
+    $('#aList').onclick = e => { const k = e.target.closest('.rx9k'); if (k){ const T = GD_TR[+k.dataset.rxi]; if (T) pd9Menu(k, 'Réagir · ' + T[0], () => pd9TrackTg(GD_ID, GD_PID, 'PlanèteDot', T[0], 'GuillaumDot'), 1); return; }
       const li = e.target.closest('[data-i]'); if (!li) return; playAlbum(+li.dataset.i); setTimeout(() => sheetKind === 'album' && openAlbum(), 200); }; }); }
 function sysPos(id){ if (id === GD_ID) return [0, 0, 0]; return pdOrbAt(id, 0); }
 function statsOf(o){ const s = o.s || {}; if (o.mine) return {pl: SYS.planets.length, v: (COUNTS.get(ME) || {}).v || 0, c: (COUNTS.get(ME) || {}).c || 0, f: Math.max(followersOf(ME || 'me'), (COUNTS.get(ME) || {}).f || 0), h: (SYS.secs || 0) / 3600};
@@ -4905,9 +4964,9 @@ function openPlaylist(p, fromLib){
     return `<li class="tr${on ? ' on' : ''}" data-i="${i}" data-id="${t.id}">${on ? eqHTML : `<span class="n">${i + 1}</span>`}<div class="m" data-play><b>${esc(t.title)}</b><span>${esc(t.artist || 'Artiste inconnu')}${ro ? '' : srcTag(t)}${bioTag(t)}</span></div><span class="d">${fmt(t.dur)}</span></li>`; }).join('');
   const dot = t => { const x = cqOf(t); return x ? `<i class="bd" style="background:${trackCss(x)}"></i>` : ''; };
   const rowsHTML2 = tr.map((t, i) => { const on = !ro && Q[qi] === t.id && !au.paused;
-    return `<li class="tr${on ? ' on' : ''}" data-i="${i}" data-id="${t.id}" style="--i:${i}">${on ? eqHTML : `<span class="n">${i + 1}</span>`}<div class="m" data-play><b>${esc(t.title)}</b><span>${dot(t)}${esc(t.artist || 'Artiste inconnu')}${(x => x && x.lvl != null ? ' · ' + regName(p, x) + (x.ev ? ' · ' + REG_EVN[x.evType] : '') : '')(cqOf(t))}</span></div><span class="d">${fmt(t.dur)}</span>${rxOK && t.ro ? `<button class="rx9k" data-rxi="${i}" aria-label="Réagir à ${esc(t.title)}" aria-haspopup="dialog" aria-expanded="false">⋯</button>` : ''}</li>`; }).join('');
+    return `<li class="tr${on ? ' on' : ''}" data-i="${i}" data-id="${t.id}" style="--i:${i}">${on ? eqHTML : `<span class="n">${i + 1}</span>`}<div class="m" data-play><b>${esc(t.title)}</b><span>${dot(t)}${esc(t.artist || 'Artiste inconnu')}${(x => x && x.lvl != null ? ' · ' + regName(p, x) + (x.ev ? ' · ' + REG_EVN[x.evType] : '') : '')(cqOf(t))}</span></div><span class="d">${fmt(t.dur)}</span>${rxOK && t.ro ? `<button class="rx9k" data-rxi="${i}" aria-label="Réagir à ${esc(t.title)}" aria-haspopup="dialog" aria-expanded="false">${ICON_RX}</button>` : ''}</li>`; }).join('');
   openSheet('scan', `<div class="sh shx"><div></div><button class="x" data-close aria-label="Fermer">${ICON.x}</button></div>
-    <div class="ph2 ph2c">${privateView ? '<span class="pd-lock" aria-hidden="true">🔒</span>' : ''}${rxOK ? '<div class="ph2t">' : ''}<h2 id="pName" ${ro ? '' : 'title="Renommer"'}>${esc(p.name)}</h2>${rxOK ? '<button class="rx9k" id="sRxK" aria-label="Réagir à cette playlist" aria-haspopup="dialog" aria-expanded="false">⋯</button></div>' : ''}
+    <div class="ph2 ph2c">${privateView ? '<span class="pd-lock" aria-hidden="true">🔒</span>' : ''}${rxOK ? '<div class="ph2t">' : ''}<h2 id="pName" ${ro ? '' : 'title="Renommer"'}>${esc(p.name)}</h2>${rxOK ? '<button class="rx9k" id="sRxK" aria-label="Réagir à cette playlist" aria-haspopup="dialog" aria-expanded="false">' + ICON_RX + '</button></div>' : ''}
       <p>${plural(tr.length, 'titre')}${scLinks(p.links).length ? ' · ' + plural(scLinks(p.links).length, 'lien SoundCloud', 'liens SoundCloud') : ''}${dur ? ' · ' + fmtLong(dur) : ''}${live ? ' · <span style="color:#4aa3ff">en écoute</span>' : ''}${(n9 => n9 ? ' · ✦ ' + plural(n9, 'réaction') : '')(pd9Count(p))}</p>${(() => { const EI = eraInfo(p); if (EI.e >= 6) return '<p class="eran">' + esc(eraName(p)) + ' · ère finale</p>'; return `<p class="eran era1"><span class="erab"><i style="width:${Math.round(EI.pc * 100)}%"></i></span>${esc(eraName(p))} · ${esc(EI.need)}</p>`; })()}</div>
     <div class="pact2">${ro ? `${p.gd ? `<button class="btn pri" id="sAlb">${ICON.play}Écouter</button>` : ''}<button class="btn${p.gd ? '' : ' pri'}" id="sLand">${ICON.land}Explorer</button>${privateView ? '<span class="chip" aria-label="Planète verrouillée">🔒 Privée · écoute et copie verrouillées</span>' : `${p.gd ? '' : `<button class="btn" id="sRemote">${ICON.play}Écouter</button>`}<button class="btn" id="sCopy">${ICON.plus}Copier</button>`}`
       : tr.length ? `<button class="btn pri" id="sPlay">${live ? ICON.pauseS + 'Pause' : ICON.play + 'Lecture'}</button><button class="btn" id="sShuf">${ICON.shuf}Aléatoire</button>`
@@ -4917,7 +4976,7 @@ function openPlaylist(p, fromLib){
       <dl class="spec">${rows.map(r => `<div><dt>${r[0]}</dt><dd class="${r[2] || ''}">${esc(r[1])}${r[3] || ''}</dd></div>`).join('')}</dl></div>
     ${tr.length ? `<ul class="list" id="pList">${rowsHTML2}</ul>` : ''}${scSection(p, ro)}${tr.length || scLinks(p.links).length ? '' : ro ? '<div class="empty">Aucun titre visible.</div>' : '<div class="empty">Planète vide.</div>'}`, () => {
     const on = (id, f) => sbody.querySelectorAll('#' + id).forEach(e => e.onclick = f);
-    on('sMore', () => { $('#pMore').classList.toggle('off'); sfx('tick'); }); on('sRxK', e => pd9Menu(e.currentTarget, 'Réagir à cette playlist', () => ({o: ownerId, p: p.id, pn: p.name, t: 'playlist'}))); try { pdScBindSheet(p, fromLib, ro); } catch(e){ console.warn('SoundCloud', e); }
+    on('sMore', () => { $('#pMore').classList.toggle('off'); sfx('tick'); }); on('sRxK', e => pd9Menu(e.currentTarget, 'Réagir à cette playlist', () => ({o: ownerId, p: p.id, pn: p.name, t: 'playlist'}), 1)); try { pdScBindSheet(p, fromLib, ro); } catch(e){ console.warn('SoundCloud', e); }
     on('sPrivacy', async () => { const wasPublic=p.isPublic!==false; if(wasPublic && !(await pdRevokePlanet(p))){toast('Impossible de révoquer les fichiers publics : confidentialité inchangée');return;} p.isPublic=!wasPublic; save(); if(remoteReady) publishPublicGalaxy(); if(p.isPublic) pdAutoShareSoon(3000); toast(p.isPublic ? 'Playlist publique · ses morceaux seront partagés automatiquement' : 'Playlist privée · audio partagé révoqué'); openPlaylist(p, fromLib); });
     on('sPublishAudio', async () => { if(p.isPublic===false){toast('Rends cette planète publique avant de partager son audio');return;} if(!confirm('Publier les fichiers audio de cette planète pour une écoute par tous, y compris les visiteurs ? Vérifie que tu possèdes les droits de partage.'))return; await pdPublishPlanetAudio(p); });
     on('sRemote',()=>pdPlayRemotePlanet(p,0)); on('sLand', () => { if (fromLib && mode === 'system') focusOn(p.id); land(p); }); on('sCopy', () => copyPlanet(p)); on('sAlb', () => playAlbum(0)); on('sAdd', () => openPicker(p, null)); on('sSig', () => composeSignal(ownerId, VIEW));
@@ -4931,20 +4990,22 @@ function openPlaylist(p, fromLib){
     on('pName', ren); on('sRen', ren);
     sbody.querySelectorAll('.pimp').forEach(im => im.onchange = e => importFiles(e.target.files, p).then(() => { if (sheetKind === 'scan') openPlaylist(p, fromLib); }));
     if ($('#pList') && p.gd) $('#pList').onclick = e => { const li = e.target.closest('.tr'); if (li) playAlbum(+li.dataset.i); };
-    if (rxOK && $('#pList')) $('#pList').addEventListener('click', e => { const k = e.target.closest('.rx9k'); if (!k) return; e.stopImmediatePropagation(); const x = (p.tracksRO || [])[+k.dataset.rxi]; if (x) pd9Menu(k, 'Réagir · ' + x[0], () => pd9TrackTg(ownerId, p.id, p.name, x[0], x[1])); }, true);
+    if (rxOK && $('#pList')) $('#pList').addEventListener('click', e => { const k = e.target.closest('.rx9k'); if (!k) return; e.stopImmediatePropagation(); const x = (p.tracksRO || [])[+k.dataset.rxi]; if (x) pd9Menu(k, 'Réagir · ' + x[0], () => pd9TrackTg(ownerId, p.id, p.name, x[0], x[1]), 1); }, true);
     const L = $('#pList'); if (L && !ro) L.onclick = e => { const li = e.target.closest('.tr'); if (!li) return; highlightTrack(p, li.dataset.id); playList(p.tracks, +li.dataset.i, p.id); setTimeout(() => sheetKind === 'scan' && openPlaylist(p, fromLib), 150); };
     else if (L && !p.gd) L.onclick = e => { const li = e.target.closest('.tr'); if (!li) return; if(p.isPublic===false){toast('🔒 Cette planète est privée');return;} pdPlayRemotePlanet(p,+li.dataset.i); };
     if (ro && !p.gd && !privateView) pdShMark(p);
   });
 }
 function openPlayer(){
-  const t = TRACKS.get(Q[qi]); if (!t){ openLibrary(); return; } const p = SYS.planets.find(x => x.id === qPlanet);
-  openSheet('player', `<div class="nph"><div style="flex:1;overflow:hidden"><h2>${esc(t.title)}</h2><p class="note" style="margin:2px 0 0">${esc(t.artist || 'Artiste inconnu')}${p ? ' · ' + esc(p.name) : ''}${srcTag(t)}</p></div>${pd9PlayTarget() ? '<button class="rx9k" id="npRxK" aria-label="Réagir à ce titre" aria-haspopup="dialog" aria-expanded="false">⋯</button>' : ''}<button class="x" data-close aria-label="Fermer">${ICON.x}</button></div>
+  const t = TRACKS.get(Q[qi]); if (!t){ openLibrary(); return; } const p = SYS.planets.find(x => x.id === qPlanet); pd9MenuClose();
+  // V9.6 · réagir à la place du globe (capture du 26/11) : le globe « Voir la planète » monte à côté de ✕ quand le titre peut recevoir des réactions
+  const rxT = !!pd9PlayTarget(), glb = `<button class="icb${rxT ? ' npg6' : ''}" id="npG" aria-label="Voir la planète">${ICON.land}</button>`;
+  openSheet('player', `<div class="nph"><div style="flex:1;overflow:hidden"><h2>${esc(t.title)}</h2><p class="note" style="margin:2px 0 0">${esc(t.artist || 'Artiste inconnu')}${p ? ' · ' + esc(p.name) : ''}${srcTag(t)}</p></div>${rxT ? glb : ''}<button class="x" data-close aria-label="Fermer">${ICON.x}</button></div>
     <input type="range" class="scrub" id="npR" min="0" max="1000" value="0" aria-label="Position"><div class="times"><span id="npC">0:00</span><span id="npD">${fmt(au.duration) || fmt(t.dur)}</span></div>
     <div class="ctrls"><button class="icb${shuf ? ' on' : ''}" id="npS" aria-label="Aléatoire">${ICON.shuf}</button><button class="icb" id="npP" aria-label="Précédent">${ICON.prev}</button>
-      <button class="playbig" id="npX" aria-label="Lecture">${au.paused ? ICON.play : ICON.pauseS}</button><button class="icb" id="npN" aria-label="Suivant">${ICON.next}</button><button class="icb" id="npG" aria-label="Voir la planète">${ICON.land}</button></div>
+      <button class="playbig" id="npX" aria-label="Lecture">${au.paused ? ICON.play : ICON.pauseS}</button><button class="icb" id="npN" aria-label="Suivant">${ICON.next}</button>${rxT ? `<button class="icb rx96k" id="npRx" aria-label="Réagir à ce titre" aria-haspopup="dialog" aria-expanded="false">${ICON_RX}</button>` : glb}</div>
     ${pdDurRow()}<div class="row shr"><button class="btn wide" id="npStory">${ICON_SHARE}Story</button><button class="btn wide" id="npWa">WhatsApp</button><button class="btn wide" id="npTxt">Partager</button></div>`, () => {
-    pdDurBind(); { const k = $('#npRxK'); if (k) k.onclick = () => pd9Menu(k, 'Réagir · ' + t.title, pd9PlayTarget); } $('#npStory').onclick = () => { PDWA = false; shareStory(); }; { const wb = $('#npWa'); if (wb) wb.onclick = () => { PDWA = true; shareStory(); }; } $('#npTxt').onclick = () => shareText();
+    pdDurBind(); { const k = $('#npRx'); if (k) k.onclick = () => pd9Menu(k, 'Réagir · ' + t.title, pd9PlayTarget, 1); } $('#npStory').onclick = () => { PDWA = false; shareStory(); }; { const wb = $('#npWa'); if (wb) wb.onclick = () => { PDWA = true; shareStory(); }; } $('#npTxt').onclick = () => shareText();
     $('#npP').onclick = () => { if (au.currentTime > 3) au.currentTime = 0; else next(-1); setTimeout(openPlayer, 120); };
     $('#npN').onclick = () => { next(1); setTimeout(openPlayer, 120); };
     $('#npX').onclick = () => { if (au.paused) au.play().catch(() => {}); else au.pause(); setTimeout(openPlayer, 80); };
@@ -6342,8 +6403,51 @@ function introSound(lead, SP, DV){ if (!actx || !SND.bus || !SND.ui) return; con
     [146.8, 220, 293.7, 369.99, 440, 587.3, 880].forEach((f, i) => tone(f, K + .02 + i * .035, 3 - i * .2, .022 - i * .002, i < 3 ? 'triangle' : 'sine')); tone(1174.7, K + .45, 2.2, .006); tone(1760, K + .65, 2, .004);
     swell(K + .3, Math.max(.4, SP - .2), .03, 400, 2400);                                                                                           // the turn moves the air
     const D = K + SP; noiseHit(D, DV + .35, .09, 'bandpass', 160, 4200, .8); tone(70, D, DV, .05, 'sawtooth', true, 560); swell(D, DV, .05, 300, 5200);  // the dive
-    const Fh = D + DV; tone(46, Fh, 1.8, .12, 'sine'); noiseHit(Fh, .5, .05, 'highpass', 3000, 9000, .5); [1174.7, 1568, 2349.3].forEach((f, i) => tone(f, Fh + i * .04, 1.6, .01));
+    swell(D + DV - .15, 1.7, .026, 700, 2600);   // V9.6 : le vent du tunnel ; le flash sonne à l'arrivée réelle (introFlashSnd)
   } catch(e){ console.warn('Son de l’ouverture', e); } }
+
+function introFlashSnd(){ if (!actx || !SND.bus || !SND.ui) return; try { const Fh = actx.currentTime + .01; tone(46, Fh, 1.8, .12, 'sine'); noiseHit(Fh, .5, .05, 'highpass', 3000, 9000, .5); [1174.7, 1568, 2349.3].forEach((f, i) => tone(f, Fh + i * .04, 1.6, .01)); } catch(e){} }
+function pd96GateSnd(){ if (!actx || !SND.bus || !SND.ui || document.hidden) return; try { const n = actx.currentTime + .01; swell(n, .42, .028, 420, 4200); tone(92 + Math.random() * 30, n + .28, .5, .018, 'sine', true, 46); } catch(e){} }
+
+/* ---------- V9.6 · le voyage interdimensionnel : un tunnel de lumière qui s'ouvre dans le trou du disque pendant la plongée, puis nous entoure
+   (filaments irisés étirés par la vitesse, spirale, portails à franchir, lumière du bout qui grandit avec le chargement) ---------- */
+const PD96_G = 1.7;
+const PD96_TUN = `#version 300 es
+precision highp float;
+in vec2 vUv; out vec4 o;
+uniform vec2 uRes,uC; uniform float uT,uA,uZ,uP,uM,uG;
+float h21(vec2 p){ vec3 q=fract(p.xyx*.1031); q+=dot(q,q.yzx+33.33); return fract((q.x+q.y)*q.z); }
+float vnA(vec2 p,float per){ vec2 i=floor(p),f=fract(p); f=f*f*(3.-2.*f); float i0=mod(i.x,per),i1=mod(i.x+1.,per);
+  return mix(mix(h21(vec2(i0,i.y)),h21(vec2(i1,i.y)),f.x),mix(h21(vec2(i0,i.y+1.)),h21(vec2(i1,i.y+1.)),f.x),f.y); }
+vec3 pal(float t){ return .5+.5*cos(6.2832*(t+vec3(0.,.33,.67))); }
+void main(){ vec2 d=gl_FragCoord.xy-uC,q=d/uRes.y; float r=length(q),a=atan(q.y,q.x)/6.2832;
+  float z=.3/max(r,.003),zt=z+uZ,tw=a+z*.05+uZ*.02;
+  float w1=vnA(vec2(tw*20.,zt*.7),20.),w2=vnA(vec2(tw*40.+5.,zt*1.5+9.),40.),mist=vnA(vec2(tw*6.,zt*.25+2.),6.);
+  float fil=pow(smoothstep(.45,1.,w1),2.)*1.2+.7*pow(smoothstep(.55,1.,w2),2.5), wall=smoothstep(.05,.28,r);   // parois effacées au centre : rien de trop fin
+  vec3 col=mix(pal(zt*.05+.22*sin(6.2832*tw)+uT*.12),vec3(.5,.7,1.),.2);   // les couleurs changent de dimension en dimension (sans couture sur le côté)
+  vec3 c=col*(fil*(.6+.6*smoothstep(.1,.5,r))+.18*mist*mist)*wall;
+  float gp=fract(zt/uG),ring=smoothstep(.07,0.,abs(gp-.5))*smoothstep(.04,.16,r);
+  c+=mix(vec3(.8,.92,1.),pal(floor(zt/uG)*.27+.15),.5)*ring*1.1;
+  c+=vec3(.85,.93,1.)*exp(-r*r*mix(70.,12.,uP))*(.35+1.2*uP);
+  c*=1.-.3*smoothstep(.5,1.1,r);
+  o=vec4(c*uA*(1.-smoothstep(uM*.7,uM*1.6,length(d))),1.); }`;
+let PD96T = null;
+function pd96TunProg(){ if (PD96T !== null) return PD96T; try { PD96T = compile(FSQ, PD96_TUN); } catch(e){ console.warn('[PlanèteDot] tunnel de l’ouverture indisponible', e); PD96T = false; } return PD96T; }
+function pd96Tunnel(cx, cy, a, m, pr){ const T = pd96TunProg(); if (!T || a < .005) return; gl.disable(gl.BLEND); gl.useProgram(T.p); gl.bindVertexArray(quad);
+  gl.uniform2f(T.u.uRes, W, H); gl.uniform2f(T.u.uC, cx, H - cy); gl.uniform1f(T.u.uT, time); gl.uniform1f(T.u.uA, a); gl.uniform1f(T.u.uZ, INTRO.z || 0); gl.uniform1f(T.u.uP, pr); gl.uniform1f(T.u.uM, m); gl.uniform1f(T.u.uG, PD96_G);
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); gl.enable(gl.BLEND); }
+/* la barre de chargement : elle part au toucher du logo et finit au flash d'arrivée, 5 s au plus ; jamais en avance sur le voyage ni sur le chargement */
+function pd96Go(){ if (PDL6.go) return; PDL6.go = 1; PDL6.t0 = time; const hd = PDTX.sz >= 1024; PDL6.t84 = PDL6.t84 || (hd ? 9.35e6 : 2.99e6); PDL6.t9 = PDL6.t9 || (hd ? 2.19e6 : .64e6);
+  try { if (PDL6.goR) PDL6.goR(); } catch(e){} pdTxSoon(0);
+  const I = INTRO; if (!I.el) return; const b = document.createElement('div'); b.id = 'pd96L'; b.setAttribute('aria-hidden', 'true');
+  b.innerHTML = '<span>Voyage interdimensionnel</span><b>0 %</b><i><u></u><em></em></i>'; I.el.appendChild(b); PDL6.el = b; PDL6.v = 0; PDL6.pc = -1; PDL6.vF = null;
+  const ins = document.getElementById('pdInst'); if (ins){ ins.style.pointerEvents = 'none'; try { ins.animate([{opacity: getComputedStyle(ins).opacity}, {opacity: 0}], {duration: 450, fill: 'forwards'}); } catch(e){ ins.style.visibility = 'hidden'; } }   // la barre prend la place de l'aide à l'installation (toujours dans le tutoriel)
+  requestAnimationFrame(() => b.classList.add('on')); }
+function pd96Bar(t, dt){ const I = INTRO, el = PDL6.el; if (!el || !I.Fmin) return; const p = pd96P();
+  let tgt = Math.min(p, clamp((t - PDL6.t0) / Math.max(.5, I.Fmin + .28 - PDL6.t0), 0, 1));
+  if (t > I.Fmin){ if (PDL6.vF == null) PDL6.vF = PDL6.v; tgt = Math.max(tgt, p, lerp(PDL6.vF, 1, clamp((t - I.Fmin) / Math.max(.1, I.Fcap - I.Fmin), 0, 1))); }
+  if (I.Fgo || I.flashed) tgt = 1; PDL6.v = Math.max(PDL6.v, lerp(PDL6.v, tgt, 1 - Math.exp(-dt * 9))); if (I.flashed) PDL6.v = 1; const pc = Math.round(PDL6.v * 100);
+  el.style.setProperty('--p', PDL6.v.toFixed(4)); if (pc !== PDL6.pc){ PDL6.pc = pc; el.querySelector('b').textContent = pc + ' %'; if (pc >= 100) el.querySelector('span').textContent = 'Arrivée'; } }
 
 /* ---------- the opening ---------- */
 function introVClock(){ const I = INTRO, v = I.v; if (v && !I.imgEl && !v.paused && v.readyState >= 2) return v.currentTime % 2.7; return ((time - I.tIn) % 2.7 + 2.7) % 2.7; }
@@ -6366,6 +6470,7 @@ function introBoot(){ const el = document.getElementById('pdIntro'), gate = docu
 function introGo(){ const I = INTRO; if (I.ph !== 'img') return; I.ph = 'seq'; pdIntroGuard(); pdTxSoon(0); I.hint.classList.remove('on'); I.hint.classList.add('off');
   const per = 1.35, vt = introVClock(); let lead = per - (vt % per); while (lead < .7 || time + lead < I.tIn + 1.65 || (!logoReady && lead < 5)) lead += per;
   I.K = time + lead; I.short = !!LS.get('pd.intro'); I.SP = I.short ? 1.2 : 1.65; I.DV = I.short ? .8 : 1; I.F = I.K + I.SP + I.DV; LS.set('pd.intro', 1);
+  { const D0 = I.F; I.cap = time + 5; I.Fmin = Math.max(D0 + .35, Math.min(D0 + .9, I.cap - .28)); I.Fcap = Math.max(I.cap - .28, I.Fmin); I.Fgo = 0; I.z = 0; I.gph = -1; pd96Go(); }   // V9.6 : tunnel puis arrivée, 5 s au plus après le toucher
   I.wrap.style.transition = 'none'; I.wrap.classList.add('in'); SIG = true; introSound(lead, I.SP, I.DV); if (navigator.vibrate) try { navigator.vibrate(12); } catch(e){} }
 function introPose(t){ const I = INTRO, G = introGeo(), K = I.K; let S = G.S, cx = G.cx, cy = G.cy, yaw = 0, pitch = 0, roll = 0, a = 1;
   if (t < K){ const sp = clamp((t - (K - .62)) / .56, 0, 1); yaw = .06 * sp * sp; }
@@ -6376,9 +6481,12 @@ function introPose(t){ const I = INTRO, G = introGeo(), K = I.K; let S = G.S, cx
     S = G.S * z; cx = tx - INTRO_HUB[0] * S / INTRO_W; cy = ty - INTRO_HUB[1] * S / INTRO_W; a = 1 - sstep(.8, 1, dv); }
   return {cx, cy, S, rot: [yaw, pitch, roll], a, dv}; }
 function introGL(){ gl.clearColor(0, 0, 0, 1); gl.clear(gl.COLOR_BUFFER_BIT); gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA); }
-function introDraw(){ const I = INTRO; if (!I.gl || !I.K || time < I.K - .62) return;
+function introDraw(dt){ const I = INTRO; if (!I.gl || !I.K || time < I.K - .62) return;
   const P = introPose(time), kb = time > I.K ? Math.exp(-(time - I.K) * 2.2) : 0; LOGO_LC.set([.75, .85, 1, .75, .85, 1, .7, .8, 1]);
-  POST.bloom = .9 + kb * 1.2 + P.dv * 1.4; if (P.dv > 0){ const hb = hubOf(P.cx, P.cy, P.S); POST.zb = Math.max(POST.zb, P.dv * P.dv * .9); POST.zc[0] = clamp(hb[0] / W, 0, 1); POST.zc[1] = clamp(1 - hb[1] / H, 0, 1); } gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA); drawLogo(P.cx, P.cy, P.S, P.rot, INTRO_L(), P.a, {vel: [0, 0], boost: kb}); }
+  POST.bloom = .9 + kb * 1.2 + P.dv * 1.4; if (P.dv > 0){ const hb = hubOf(P.cx, P.cy, P.S), D0 = I.K + I.SP + I.DV, inT = time >= D0, kT = clamp((time - D0) / .5, 0, 1); POST.zb = Math.max(POST.zb, P.dv * P.dv * (.9 - .62 * kT)); POST.zc[0] = clamp(hb[0] / W, 0, 1); POST.zc[1] = clamp(1 - hb[1] / H, 0, 1);
+    // V9.6 · le tunnel interdimensionnel s'ouvre dans le trou du disque, puis nous entoure ; on y avance de plus en plus vite
+    I.z = (I.z || 0) + (dt || 0) * (inT ? 3 + (I.Fgo ? 2.5 : 0) : .5 + 2.4 * P.dv); POST.bloom = Math.min(POST.bloom, 2.3 - .6 * kT);
+    const end = I.Fgo ? clamp(1 - (I.Fgo - time) / .28, 0, 1) : 0; pd96Tunnel(hb[0], hb[1], sstep(0, .35, P.dv), P.S * .05, Math.max(.12 + .5 * (PDL6.v || 0), end)); } gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA); drawLogo(P.cx, P.cy, P.S, P.rot, INTRO_L(), P.a, {vel: [0, 0], boost: kb}); }
 /* V9.5 · lancement plus fluide : pendant que l'intro attend le toucher, on dessine une fois une planète d'un pixel, presque transparente.
    Le téléphone prépare alors le gros programme des planètes (traduction et compilation) à ce moment calme, et non à l'arrivée dans le système.
    Les textures partent aussi plus tôt si la vidéo d'intro est déjà prête (moins de travail pendant l'animation du logo). */
@@ -6386,14 +6494,16 @@ const PDWARM = {done: false};
 function pdWarm(){ if (PDWARM.done || !SP || !SP.p) return; PDWARM.done = true; const t0 = performance.now();
   try { useSP(); drawBody({kind: 0, type: 11, x: 1, y: 1, r: 1.5, q: 1.2, asp: 1, c1: [.3, .55, .35], c2: [.25, .4, .55], at: [.45, .65, 1], atmo: .7, seed: 3.3, ang: 0, tilt: 0, vw: [1, 0, 0, 0, 1, 0, 0, 0, 1],
     L: [.75, .35, .56], audio: 0, alpha: .002, clouds: .5, stage: 1, lc: [1, .72, .38], path: [-1, -1, -1], arch: 0, irr: 0, sun: [1, 1, 1], sunI: 1, wx: 0, play: 0, beat: 0, lv: 0, bs: 0, spb: [0, 0, 0, 0], bt: 9}); gl.flush(); }
-  catch(e){ console.warn('[PlanèteDot] préparation du rendu', e); } PDWARM.ms = Math.round(performance.now() - t0); }
-function introTick(dt){ const I = INTRO; if (!I.on || !I.fx) return; introDraw(); const F = I.fx; fxBegin(F); const t = time;
+  catch(e){ console.warn('[PlanèteDot] préparation du rendu', e); }
+  try { if (pd96TunProg()){ gl.enable(gl.SCISSOR_TEST); gl.scissor(0, 0, 1, 1); pd96Tunnel(0, 0, 1, 1, 0); gl.disable(gl.SCISSOR_TEST); gl.flush(); } } catch(e){ gl.disable(gl.SCISSOR_TEST); }   // V9.6 : le tunnel est prêt avant le toucher
+  PDWARM.ms = Math.round(performance.now() - t0); }
+function introTick(dt){ const I = INTRO; if (!I.on || !I.fx) return; introDraw(dt); const F = I.fx; fxBegin(F); const t = time;
   if (I.ph === 'img' && t - I.t0 > 1.2){ pdWarm(); if (t - I.t0 > 2.4 && I.v && I.v.readyState >= 3) pdTxSoon(0); }
   if (I.ph === 'img'){ introPlaceImg(); const g = introGeo(), h = [(g.ccx + INTRO_HUB[0] * g.U) * F.dp, (g.ccy + INTRO_HUB[1] * g.U) * F.dp], u = t - I.t0;   // the first spark, before the image appears
     if (u < 1.1) fxFlare(F, h[0], h[1], Math.sin(Math.PI * clamp(u / 1.1, 0, 1)) * .7, Math.sin(Math.PI * clamp(u / 1.1, 0, 1)) * .9);
     return; }
   if (I.tap){ const a = 1 - (t - I.tap[2]) / .7; if (a > 0){ const c = F.c, r = (12 + (1 - a) * 90) * F.dp; c.strokeStyle = `rgba(170,215,255,${a * .7})`; c.lineWidth = 2 * F.dp * a; c.beginPath(); c.arc(I.tap[0] * F.dp, I.tap[1] * F.dp, r, 0, TAU); c.stroke(); } }
-  const K = I.K, g = introGeo(), P = introPose(t), hub = g2f(F, hubOf(P.cx, P.cy, P.S));
+  const K = I.K, g = introGeo(), P = introPose(t), hub = g2f(F, hubOf(P.cx, P.cy, P.S)), D0 = K + I.SP + I.DV, tun = clamp((t - D0) / Math.max(.3, (I.Fgo || I.Fcap + .28) - D0), 0, 1);
   if (t < K - .62){ introPlaceImg(); return; }
   // the scan: a line of light walks down the logo; above it, the image has become the object
   if (!I.scanOn){ I.scanOn = true; I.bg.style.opacity = 0; I.scan.style.opacity = 1; }
@@ -6407,13 +6517,22 @@ function introTick(dt){ const I = INTRO; if (!I.on || !I.fx) return; introDraw()
   // the beat: shockwave, flare, chromatic split
   if (t >= K && !I.kicked){ I.kicked = true; POST.flash = Math.max(POST.flash, .45); POST.ca = Math.max(POST.ca, 1.1); if (navigator.vibrate) try { navigator.vibrate([20, 30, 40]); } catch(e){} }
   if (t >= K){ const age = t - K; fxShock(F, hub[0], hub[1], age, 1); fxShock(F, hub[0], hub[1], age - .12, .5); fxFlare(F, hub[0], hub[1], Math.exp(-age * 3), Math.exp(-age * 2.5));
-    F.sv = lerp(F.sv, P.dv > 0 ? 2.2 * P.dv + .3 : .08, 1 - Math.exp(-dt * 3)); fxStars(F, hub[0], hub[1], F.sv, clamp(age * 1.5, 0, .8) * (1 - (I.flashed ? clamp((t - I.F) / .9, 0, 1) : 0)), dt, P.dv > 0 ? P.dv : 0); }
-  // the dive into the grooves of the disc
-  if (P.dv > 0 && !I.flashed){ fxGrooves(F, hub[0], hub[1], .35 + P.dv * 2.6, sstep(0, .25, P.dv), dt); fxStrands(F, hub[0], hub[1], sstep(.15, 1, P.dv), sstep(.1, .4, P.dv)); }
-  if (P.dv > .7 && !I.flashed) POST.flash = Math.max(POST.flash, (P.dv - .7) * 3);
-  if (t >= I.F && !I.flashed){ I.flashed = true; introLand(); }
+    F.sv = lerp(F.sv, P.dv > 0 ? 2.2 * P.dv + .3 + (t > D0 ? 1.1 : 0) : .08, 1 - Math.exp(-dt * 3)); fxStars(F, hub[0], hub[1], F.sv, clamp(age * 1.5, 0, .8) * (1 - (I.flashed ? clamp((t - I.F) / .9, 0, 1) : 0)), dt, P.dv > 0 ? P.dv : 0); }
+  // the dive into the grooves of the disc (V9.6 : elles s'effacent dans le tunnel, qui prend le relais)
+  if (P.dv > 0 && !I.flashed){ fxGrooves(F, hub[0], hub[1], .35 + P.dv * 2.6 + (t > D0 ? 1 : 0), sstep(0, .25, P.dv) * (1 - sstep(0, .45, t - D0)), dt); fxStrands(F, hub[0], hub[1], sstep(.15, 1, P.dv), sstep(.1, .4, P.dv) * (1 - sstep(0, .35, t - D0))); }
+  // V9.6 · on traverse le disque : un éclair léger à l'entrée du tunnel (au lieu du blanc qui montait jusqu'à l'arrivée)
+  if (P.dv > .6 && !I.flashed) POST.flash = Math.max(POST.flash, Math.sin(Math.PI * clamp((P.dv - .6) / .4, 0, 1)) * .3);
+  if (!I.flashed){
+    // les portails du tunnel : à chaque anneau franchi, l'image se dédouble en couleurs et un souffle passe
+    if (P.dv > .5){ const g = ((.545 + (I.z || 0)) / PD96_G + .5) % 1; if (I.gph >= 0 && g < I.gph){ POST.ca = Math.max(POST.ca, .85); POST.flash = Math.max(POST.flash, .07); pd96GateSnd(); } I.gph = g; }
+    if (!I.Fgo && t >= I.Fmin && (pd96P() >= .999 || t >= I.Fcap)) I.Fgo = t + .28;   // tout est prêt (ou 5 s sont passées) : le bout du tunnel s'ouvre
+    if (I.Fgo){ const k = clamp(1 - (I.Fgo - t) / .28, 0, 1); POST.flash = Math.max(POST.flash, k * k * .9); }
+    if (I.Fgo && t >= I.Fgo){ I.flashed = true; I.F = t; introLand(); } }
+  pd96Bar(t, dt);
   if (I.flashed && t > I.F + 1.2) introEnd(); }
-function introLand(){ const I = INTRO; POST.flash = 1.3; POST.ca = 1.2; const f = $('#flash'); f.style.opacity = .92; I.gl = false;
+function introLand(){ const I = INTRO; POST.flash = 1.3; POST.ca = 1.2; const f = $('#flash'); f.style.opacity = .92; I.gl = false; I.flashed = true;
+  if (PDTX.mipWait) try { pdTxFin(); } catch(e){ console.warn('[PlanèteDot] textures', e); }   // V9.6 : la fin des textures se fait sous le flash, invisible
+  introFlashSnd(); if (PDL6.el){ PDL6.v = 1; PDL6.el.style.setProperty('--p', '1'); PDL6.el.querySelector('b').textContent = '100 %'; PDL6.el.querySelector('span').textContent = 'Arrivée'; PDL6.el.classList.add('off'); }
   const logged = authUser && document.getElementById('authGate').hidden;
   if (logged){ FOV = 72 * Math.PI / 180; try { arrive(); } catch(e){ console.warn('Arrivée', e); } }
   else pdAfterLand();
@@ -6499,6 +6618,7 @@ function storyEnd(cancel){ const S = STORY; if (!S) return; STORY = null; try { 
       $('#stShare').onclick = async () => { pdCopyLink(S.info); try { if (navigator.canShare && navigator.canShare({files: [file]})){ await navigator.share({files: [file]}); return; } } catch(e){ if (e && e.name === 'AbortError') return; }
         $('#stDl').click(); toast('Vidéo enregistrée : ajoute-la à ta story depuis ta galerie', 5200); };
       $('#stTxt').onclick = shareText; $('#stWa').onclick = () => pdWaShare(isImg ? null : file, S.info); }); }
+const ICON_RX = '<svg viewBox="0 0 24 24"><circle cx="10.5" cy="13.5" r="7.5"/><path d="M7.6 15.6c1.6 1.8 4.2 1.8 5.8 0"/><path d="M8.1 11.7h.01M12.9 11.7h.01" stroke-width="2.5"/><path d="M19.5 2.5v5M17 5h5"/></svg>';   // V9.6 · réagir : un visage qui sourit et un plus
 const ICON_SHARE = '<svg viewBox="0 0 24 24"><path d="M12 15V4M7.5 8.5L12 4l4.5 4.5"/><path d="M5 12.5V19a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-6.5"/></svg>';
 
 /* ---------- SoundCloud: sounds and playlists from SoundCloud, inside your planets (Spotify, Apple Music… later, same place) ---------- */
@@ -7444,7 +7564,7 @@ function pdVisitPidV76(){ if (!readonly || !VIEW || !VIEW.planets) return null; 
    et entre dans l'instantané public de l'expéditeur (champ rx, 40 au plus) : chaque visiteur la voit poper sur la zone du titre, au moment du
    morceau où elle a été envoyée, avec des lumières de foule qui dansent sur le rythme. Les pops sont dessinés en WebGL juste après le
    post-traitement : ils sont dans les plans cinématiques et dans les vidéos partagées. Aucun changement de la base de données. */
-const PD9 = {rx: [], rxK: '', rxT: 0, pops: [], scr: new Map(), amb: 0, cur: -1, curK: '', g: null, bad: false, know: new Map(), inT: -1, cool: 0, hist: [], occ: [], fl: new Map(), cnt: null, cntL: null};
+const PD9 = {rx: [], rxK: '', rxT: 0, pops: [], scr: new Map(), amb: 0, cur: -1, curK: '', g: null, bad: false, know: new Map(), inT: -1, cool: 0, hist: [], occ: [], last: -9, lastE: null};
 const PD9_MAXI = 192, PD9_IN = new Float32Array(PD9_MAXI * 12), PD9_Q = [0, 0, 0];
 const pd9Key = (ti, ar) => String(ti || '').slice(0, 80) + '|' + String(ar || '').slice(0, 60);
 const pd9IsR = r => (PD9_RXM.get(r) || {}).k === 'r', pd9IsS = r => (PD9_RXM.get(r) || {}).k === 's';
@@ -7485,16 +7605,16 @@ function pd9Gate(o, p, z, r){ const now = Date.now(); if (now - PD9.cool < 2000)
   PD9.hist = PD9.hist.filter(t => now - t < 3600e3); if (PD9.hist.length >= 40) return 'Pause : 40 réactions par heure au plus';
   if (SYS && Array.isArray(SYS.rx) && SYS.rx.some(e => e.o === o && e.p === p && e.z === z && e.r === r && now - e.t < 600e3)) return 'Déjà envoyée ici : essaie une autre réaction';
   return ''; }
-async function pd9React(tg, r){
+async function pd9React(tg, r, o){
   if (!tg || !pd9IsR(r) || !tg.o) return false; const z = tg.t === 'track' ? String(tg.z || '') : '';
   const at = tg.t === 'track' && tg.live && isFinite(au.currentTime) ? Math.round(au.currentTime * 10) / 10 : -1;
-  if (guestMode || !authUser || !SYS){ pd9Pop({p: tg.p, z, r, mine: 1}); toast('Connecte-toi pour que ta réaction reste sur la planète'); return true; }
+  if (guestMode || !authUser || !SYS){ const fl = pd96Fly(r, o, tg.p, z); pd9Pop({p: tg.p, z, r, mine: 1, delay: fl, nc: fl > 0}); toast('Connecte-toi pour que ta réaction reste sur la planète'); return true; }
   if (tg.o === ME){ toast('Ce sont les autres voyageurs qui réagissent à ta musique ✦'); return false; }
   const why = pd9Gate(tg.o, tg.p || '', z, r); if (why){ toast(why); return false; }
   const now = Date.now(); PD9.cool = now; PD9.hist.push(now);
   const e = {o: tg.o, p: sid(tg.p, ''), z, r, t: now, at};
   SYS.rx = (Array.isArray(SYS.rx) ? SYS.rx : []).concat([e]).slice(-40); PD9.rxT = 0; save(); publishSoon();
-  pd9Pop({p: e.p, z, r, mine: 1});
+  { const fl = pd96Fly(r, o, e.p, z); pd9Pop({p: e.p, z, r, mine: 1, delay: fl, nc: fl > 0}); }
   try { window.dispatchEvent(new CustomEvent('pd:reaction', {detail: {planet: e.p, zone: z, id: r}})); } catch(_){}
   if (pdUuid(tg.o)) pushSignal({id: uid(), type: 'signal', to: tg.o, msg: '', v: 9, react: r, rt: now, at,
     on: {t: tg.t === 'track' ? 'track' : 'playlist', p: e.p, pn: String(tg.pn || '').slice(0, 40), z, ti: String(tg.ti || '').slice(0, 80), ar: String(tg.ar || '').slice(0, 60)}, fromName: SYS.user, fromSys: SYS.name, ts: now});
@@ -7515,7 +7635,8 @@ function pd9Grid(row){ const em = PD9_RX.filter(r => !r[1]), tx = PD9_RX.filter(
   const E = em.map((r, i) => `<button class="rx9b e" data-rx="${r[0]}" style="--k:${i}" aria-label="Réagir ${r[2]}"><span>${r[2]}</span></button>`).join(''), T = tx.map(r => `<button class="rx9b t" data-rx="${r[0]}"><span>${r[2]}</span>${esc(r[1])}</button>`).join('');
   return row ? `<div class="rx9row" role="group" aria-label="Réactions">${E}${T}</div>` : `<div class="rx9" role="group" aria-label="Réactions"><div class="rx9e">${E}</div><div class="rx9t">${T}</div></div>`; }
 function pd9Bind(root, tgf, onOk){ if (!root) return; root.addEventListener('click', async e => { const b = e.target.closest('[data-rx]'); if (!b || !root.contains(b)) return; const tg = tgf(); if (!tg){ toast('Choisis d’abord la playlist ou un titre'); return; }
-  b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); try { sfx('tick'); } catch(_){} if (await pd9React(tg, b.dataset.rx)){ b.classList.add('sent'); if (onOk) onOk(b); } }); }
+  b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); try { sfx('tick'); } catch(_){} try { if (navigator.vibrate) navigator.vibrate(10); } catch(_){}
+  if (await pd9React(tg, b.dataset.rx, b.getBoundingClientRect())){ b.classList.add('sent'); if (onOk) onOk(b); } }); }
 /* V9 · fenêtre de réactions ouverte par « ⋯ » (fiche d'une playlist, ses morceaux, lecteur, album) : sous le bouton s'il y a la place,
    sinon au-dessus ; un toucher ailleurs la ferme sans rien déclencher derrière ; une réaction envoyée la referme */
 var PD9M = null;
@@ -7523,21 +7644,41 @@ function pd9MenuClose(){ const M = PD9M; if (!M || !M.el || !M.btn) return; M.el
 // toucher hors du menu : il se ferme sans agir dessous (3D, boutons de la fiche) ; toucher un autre « ⋯ » ouvre directement le sien
 function pd9MenuOut(e){ const M = PD9M; if (!M.btn){ M.eat = 0; return; } if (M.el.contains(e.target) || M.btn.contains(e.target)) return;
   const k = e.target.closest && e.target.closest('.rx9k'); pd9MenuClose(); if (k) return; e.stopPropagation(); M.eat = performance.now(); }
-function pd9Menu(btn, label, tgf){ if (!btn) return; if (!PD9M){ PD9M = {el: null, btn: null, tg: null, eat: 0};
+const PD96_FAV = ['e4', 'e9', 'e6', 'e8', 'e1'];   // V9.6 · réactions rapides : 🔥 ❤️ 🙌 🪩 🕺, et « + » pour toutes les autres
+const pd96Fan = () => `<div class="rx96" role="group" aria-label="Réactions rapides">${PD96_FAV.map((k, i) => { const R = PD9_RXM.get(k); return `<button class="rx96b" data-rx="${k}" style="--k:${i}" aria-label="Réagir ${R.em}"><span>${R.em}</span></button>`; }).join('')}<button class="rx96b rx96m" data-more style="--k:5" aria-label="Toutes les réactions"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div>`;
+function pd9MenuPlace(M){ const btn = M.btn; if (!btn) return; M.el.style.maxHeight = '';
+  // V9 : sous le bouton si la place suffit, sinon au-dessus ; V9.6 : l'éventail se pose au-dessus, centré sur le bouton
+  const r = btn.getBoundingClientRect(), w = M.el.offsetWidth, vw = innerWidth, vh = innerHeight, roomB = vh - 12 - r.bottom - 8, roomA = r.top - 8 - 12;
+  let h = M.el.offsetHeight; const below = M.fan ? h > roomA && roomB >= h : h <= roomB || (h > roomA && roomB >= roomA), room = below ? roomB : roomA;
+  if (h > room){ M.el.style.maxHeight = Math.max(140, Math.floor(room)) + 'px'; h = M.el.offsetHeight; }
+  const left = clamp(M.fan ? r.left + r.width / 2 - w / 2 : r.right - w, 12, Math.max(12, vw - w - 12)), top = below ? r.bottom + 8 : Math.max(12, r.top - 8 - h);
+  M.el.style.left = Math.round(left) + 'px'; M.el.style.top = Math.round(top) + 'px'; M.el.style.setProperty('--ox', Math.round(r.left + r.width / 2 - left) + 'px'); M.el.style.setProperty('--oy', below ? '0px' : '100%'); }
+function pd9Menu(btn, label, tgf, fan){ if (!btn) return; if (!PD9M){ PD9M = {el: null, btn: null, tg: null, eat: 0, fan: false, lb: ''};
     document.addEventListener('pointerdown', pd9MenuOut, true);
     document.addEventListener('click', e => { if (PD9M.eat && performance.now() - PD9M.eat < 800){ PD9M.eat = 0; e.stopPropagation(); e.preventDefault(); } }, true);
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && PD9M.btn){ e.stopPropagation(); pd9MenuClose(); } }, true);
     addEventListener('resize', pd9MenuClose); sbody.addEventListener('scroll', pd9MenuClose, {passive: true}); }
   const M = PD9M; if (M.btn === btn){ pd9MenuClose(); return; } pd9MenuClose();
-  if (!M.el){ M.el = document.createElement('div'); M.el.id = 'rx9m'; M.el.setAttribute('role', 'dialog'); document.body.appendChild(M.el); pd9Bind(M.el, () => M.tg && M.tg(), () => setTimeout(pd9MenuClose, 650)); }
-  M.tg = tgf; M.el.setAttribute('aria-label', label); M.el.innerHTML = `<b>${esc(label)}</b>${pd9Grid()}`; M.el.style.maxHeight = '';
-  // sous le bouton si la place suffit, sinon au-dessus ; sur un écran trop court, le côté le plus grand et le menu défile
-  const r = btn.getBoundingClientRect(), w = M.el.offsetWidth, vw = innerWidth, vh = innerHeight, roomB = vh - 12 - r.bottom - 8, roomA = r.top - 8 - 12;
-  let h = M.el.offsetHeight; const below = h <= roomB || (h > roomA && roomB >= roomA), room = below ? roomB : roomA;
-  if (h > room){ M.el.style.maxHeight = Math.max(140, Math.floor(room)) + 'px'; h = M.el.offsetHeight; }
-  const left = clamp(r.right - w, 12, Math.max(12, vw - w - 12)), top = below ? r.bottom + 8 : Math.max(12, r.top - 8 - h);
-  M.el.style.left = Math.round(left) + 'px'; M.el.style.top = Math.round(top) + 'px'; M.el.style.setProperty('--ox', Math.round(r.left + r.width / 2 - left) + 'px'); M.el.style.setProperty('--oy', below ? '0px' : '100%');
-  M.btn = btn; btn.setAttribute('aria-expanded', 'true'); void M.el.offsetWidth; M.el.classList.add('on'); try { sfx('tick'); } catch(_){} }
+  if (!M.el){ M.el = document.createElement('div'); M.el.id = 'rx9m'; M.el.setAttribute('role', 'dialog'); document.body.appendChild(M.el); pd9Bind(M.el, () => M.tg && M.tg(), () => setTimeout(pd9MenuClose, 460));
+    M.el.addEventListener('click', e => { if (!e.target.closest('[data-more]') || !M.btn) return; M.fan = false; M.el.classList.remove('fan'); M.el.innerHTML = `<b>${esc(M.lb)}</b>${pd9Grid()}`; pd9MenuPlace(M); try { sfx('tick'); } catch(_){} }); }
+  M.tg = tgf; M.fan = !!fan; M.lb = label; M.el.setAttribute('aria-label', label); M.el.classList.toggle('fan', M.fan); M.el.innerHTML = M.fan ? pd96Fan() : `<b>${esc(label)}</b>${pd9Grid()}`;
+  M.btn = btn; pd9MenuPlace(M); btn.setAttribute('aria-expanded', 'true'); void M.el.offsetWidth; M.el.classList.add('on'); try { sfx('tick'); } catch(_){} }
+/* V9.6 · l'émoji choisi s'envole du bouton jusqu'à la zone jouée (courbe, traînée de lumière) ; le message 3D prend le relais à l'arrivée.
+   Si la planète n'est pas à l'écran (ou cachée par la fiche), il monte et s'efface. Renvoie la durée du vol en secondes. */
+function pd96ZoneXY(pid, z){ const S = PD9.scr.get(pid); if (!S || time - S.t > .25 || S.r < 9 * RS) return null; const x = z ? pd9Zone(S, z) : pd9LiveZ(S), cr = cv.getBoundingClientRect();
+  const d = x ? x.dir : pd9From(S, 0, .2); pd9At(S, d, PD9_Q); let px = PD9_Q[0], py = PD9_Q[1];
+  if (PD9_Q[2] < .14){ const nx = px - S.x, ny = py - S.y, l = Math.hypot(nx, ny) || 1; px = S.x + nx / l * S.r * .9; py = S.y + ny / l * S.r * .9; }
+  const X = cr.left + px * cr.width / W, Y = cr.top + py * cr.height / H, sh = document.getElementById('sheet'), top = sh && sheetOpen ? sh.getBoundingClientRect().top - 24 : innerHeight;
+  return X > 8 && X < innerWidth - 8 && Y > 8 && Y < top ? {x: X, y: Y} : null; }
+function pd96Fly(r, from, pid, z){ const R = PD9_RXM.get(r); if (!R || !from || !from.width || !document.body.animate) return 0;
+  try { const red = matchMedia('(prefers-reduced-motion: reduce)').matches; if (red) return 0; } catch(_){}
+  const x0 = from.left + from.width / 2, y0 = from.top + from.height / 2, to = pd96ZoneXY(pid, z), x1 = to ? to.x : x0 + (innerWidth / 2 - x0) * .5, y1 = to ? to.y : Math.max(40, y0 - innerHeight * .3);
+  const bx = (x0 + x1) / 2 + (x1 > x0 ? -1 : 1) * Math.min(90, Math.abs(y1 - y0) * .3), by = Math.min(y0, y1) - 40, dur = to ? 640 : 760, K = [];
+  for (let i = 0; i <= 8; i++){ const q = i / 8, m = 1 - q, x = m * m * x0 + 2 * m * q * bx + q * q * x1, y = m * m * y0 + 2 * m * q * by + q * q * y1, s = to ? 1 + .45 * Math.sin(Math.PI * Math.min(1, q * 1.4)) - .65 * q * q : 1 + .3 * q;
+    K.push({transform: `translate3d(${x.toFixed(1)}px,${y.toFixed(1)}px,0) translate(-50%,-50%) scale(${s.toFixed(3)})`, opacity: to ? (q > .9 ? (1 - q) * 10 : 1) : 1 - q * q}); }
+  [0, 1, 2, 3].forEach(j => { const el = document.createElement('div'); el.className = j ? 'rx96t' : 'rx96f'; if (!j) el.textContent = R.em; else el.style.setProperty('--s', String(1 - j * .22)); document.body.appendChild(el);
+    const a = el.animate(K, {duration: dur, delay: j * 45, easing: 'cubic-bezier(.45,.05,.7,1)', fill: 'both'}); a.onfinish = a.oncancel = () => el.remove(); setTimeout(() => el.remove(), dur + 600); });
+  return to ? dur / 1000 - .04 : 0; }
 // cible d'une réaction à un morceau listé : si c'est lui qu'on écoute, la réaction garde le moment du morceau
 function pd9TrackTg(o, pid, pn, ti, ar){ const z = pd9Key(ti, ar), pt = pd9PlayTarget(); return pt && pt.o === o && pt.z === z ? pt : {o, p: pid, pn, t: 'track', ti, ar: ar || '', z, live: false}; }
 function pd9Sheet(o, V, pre){ // réagir à la musique d'une galaxie : toute une playlist ou un seul titre ; ou lui faire écouter un de tes titres
@@ -7582,32 +7723,41 @@ function pd9InboxLine(x, when){ const tr = x.track ? ` · ${esc(x.track[0])} —
 /* ---------- pops WebGL : un atlas dessiné une fois (bulles + émojis), un seul dessin instancié après le post-traitement ---------- */
 const PD9_VS = `#version 300 es
 layout(location=0) in vec2 a; layout(location=1) in vec4 iP; layout(location=2) in vec4 iU; layout(location=3) in vec4 iA;
-uniform vec2 uRes; out vec2 vUv; out vec2 vQ; out vec4 vA;
+uniform vec2 uRes; out vec2 vUv; out vec2 vQ; out vec4 vA; out vec4 vC;
 void main(){ float c=cos(iA.z),s=sin(iA.z); vec2 q=a*iP.zw*.5; q=vec2(c*q.x-s*q.y,s*q.x+c*q.y); vec2 nd=(iP.xy+q)/uRes*2.-1.;
-  gl_Position=vec4(nd.x,-nd.y,0.,1.); vUv=mix(iU.xy,iU.zw,a*.5+.5); vQ=a; vA=iA; }`;
+  gl_Position=vec4(nd.x,-nd.y,0.,1.); vUv=mix(iU.xy,iU.zw,a*.5+.5); vQ=a; vA=iA; vC=iU; }`;
+/* V9.6 · messages de zone : carte de verre (atlas), halo, onde d'impact couchée sur le sol, traînée de comète ou faisceau, éclats doux.
+   Tout est en dégradés larges de plusieurs pixels : rien ne clignote ni ne pixellise. Pour les lumières, iU porte la couleur de la zone. */
 const PD9_FS = `#version 300 es
-precision mediump float; in vec2 vUv; in vec2 vQ; in vec4 vA; out vec4 o; uniform sampler2D uAt; uniform float uGA;
-void main(){ float k=vA.y,d=length(vQ);
-  if(k<.5){ o=texture(uAt,vUv)*(vA.x*uGA); return; }
-  vec3 c=mix(vec3(1.,.84,.58),vec3(.62,.86,1.),vA.w);
-  if(k<1.5){ float g=exp(-d*d*5.)*.5+smoothstep(.34,.0,d); o=vec4(c*g*vA.x*uGA,0.); return; }
-  float ring=smoothstep(.15,.0,abs(d-.78))*smoothstep(1.,.92,d); o=vec4(c*ring*vA.x*uGA,0.); }`;
+precision mediump float; in vec2 vUv; in vec2 vQ; in vec4 vA; in vec4 vC; out vec4 o; uniform sampler2D uAt; uniform float uGA;
+void main(){ float k=vA.y,d=length(vQ),A=vA.x*uGA;
+  if(k<.5){ o=texture(uAt,vUv)*A; return; }
+  vec3 c=vC.rgb;
+  if(k<1.5){ float g=exp(-d*d*4.)*.55+exp(-d*d*20.)*.65; o=vec4(c*g*A,0.); return; }
+  if(k<2.5){ float r=smoothstep(.22,0.,abs(d-.76))*smoothstep(1.,.9,d)+exp(-d*d*5.)*.08; o=vec4(c*r*A,0.); return; }
+  if(k<3.5){ float x=vQ.x*.5+.5,y=vQ.y;
+    if(vA.w<.5){ float wy=mix(.45,1.,x),a=exp(-y*y/(wy*wy)*4.)*pow(x,1.4)*smoothstep(1.,.84,x),h=exp(-(x-.84)*(x-.84)*70.-y*y*4.);
+      o=vec4((c*a*.85+mix(c,vec3(1.),.7)*h*1.25)*A,0.); return; }
+    float a=(exp(-y*y*8.)*.5+exp(-y*y*40.)*.55)*smoothstep(0.,.16,x)*smoothstep(1.,.5,x); o=vec4(c*a*A,0.); return; }
+  float g=exp(-d*d*6.)*smoothstep(1.,.7,d); o=vec4(mix(c,vec3(1.),.45)*g*A,0.); }`;
 function pd9Atlas(){ const S = 1024, c2 = document.createElement('canvas'); c2.width = c2.height = S; const c = c2.getContext('2d'), R = new Map();
   const F = '"Google Sans Flex","Google Sans",-apple-system,BlinkMacSystemFont,"SF Pro Text",Inter,system-ui,sans-serif', E = '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
   const rr = (x, y, w, h, r) => { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); };
+  // V9.6 · cartes de verre : fond sombre translucide, reflet en haut, liseré de lumière, émoji dans une bulle claire
+  const glass = (x, y, w, h, r) => { rr(x, y, w, h, r); const g = c.createLinearGradient(0, y, 0, y + h); g.addColorStop(0, 'rgba(42,54,100,.88)'); g.addColorStop(1, 'rgba(8,11,28,.88)'); c.fillStyle = g; c.fill();
+    c.save(); rr(x, y, w, h, r); c.clip(); const hl = c.createLinearGradient(0, y, 0, y + h * .56); hl.addColorStop(0, 'rgba(255,255,255,.2)'); hl.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = hl; c.fillRect(x, y, w, h * .56); c.restore();
+    rr(x + 1.5, y + 1.5, w - 3, h - 3, r - 1.5); const bd = c.createLinearGradient(0, y, 0, y + h); bd.addColorStop(0, 'rgba(255,255,255,.66)'); bd.addColorStop(.5, 'rgba(170,205,255,.24)'); bd.addColorStop(1, 'rgba(160,130,255,.42)'); c.lineWidth = 3; c.strokeStyle = bd; c.stroke(); };
   c.textBaseline = 'middle';
   PD9_RX.filter(r => r[1]).forEach((r, i) => { const x0 = (i % 2) * 512 + 8, y0 = Math.floor(i / 2) * 124 + 8, h = 100;
-    c.font = `700 38px ${F}`; const tw = Math.min(332, c.measureText(r[1]).width), w = Math.round(Math.min(496, 20 + 62 + 12 + tw + 28));
-    const g = c.createLinearGradient(0, y0, 0, y0 + h); g.addColorStop(0, 'rgba(34,44,84,.92)'); g.addColorStop(1, 'rgba(10,14,32,.92)');
-    rr(x0, y0, w, h, h / 2); c.fillStyle = g; c.fill(); c.lineWidth = 2.5; c.strokeStyle = 'rgba(190,215,255,.4)'; c.stroke();
-    c.textAlign = 'left'; c.font = `54px ${E}`; c.fillStyle = '#fff'; c.fillText(r[2], x0 + 20, y0 + h / 2 + 3);
-    c.font = `700 38px ${F}`; c.fillStyle = '#f4f7ff'; c.fillText(r[1], x0 + 20 + 62 + 12, y0 + h / 2 + 1, 332);
+    c.font = `700 38px ${F}`; const tw = Math.min(332, c.measureText(r[1]).width), w = Math.round(Math.min(496, 14 + 72 + 14 + tw + 30));
+    glass(x0, y0, w, h, h / 2); const bx = x0 + 14 + 36, by = y0 + h / 2, bg = c.createRadialGradient(bx, by, 4, bx, by, 36);
+    bg.addColorStop(0, 'rgba(255,255,255,.28)'); bg.addColorStop(1, 'rgba(255,255,255,.05)'); c.fillStyle = bg; c.beginPath(); c.arc(bx, by, 36, 0, TAU); c.fill();
+    c.textAlign = 'center'; c.font = `48px ${E}`; c.fillStyle = '#fff'; c.fillText(r[2], bx, by + 3);
+    c.textAlign = 'left'; c.font = `700 38px ${F}`; c.fillStyle = '#f6f8ff'; c.fillText(r[1], x0 + 14 + 72 + 14, by + 1, 332);
     R.set(r[0], {u0: x0 / S, v0: y0 / S, u1: (x0 + w) / S, v1: (y0 + h) / S, w, h}); });
   PD9_RX.filter(r => !r[1]).forEach((r, i) => { const x0 = (i % 8) * 128, y0 = 760 + Math.floor(i / 8) * 128;
-    const g = c.createRadialGradient(x0 + 64, y0 + 64, 40, x0 + 64, y0 + 64, 63); g.addColorStop(0, 'rgba(150,190,255,.28)'); g.addColorStop(1, 'rgba(150,190,255,0)'); c.fillStyle = g; c.fillRect(x0, y0, 128, 128);
-    c.beginPath(); c.arc(x0 + 64, y0 + 64, 50, 0, TAU); const gb = c.createLinearGradient(0, y0 + 14, 0, y0 + 114); gb.addColorStop(0, 'rgba(34,44,84,.78)'); gb.addColorStop(1, 'rgba(10,14,32,.78)'); c.fillStyle = gb; c.fill();
-    c.lineWidth = 2.5; c.strokeStyle = 'rgba(190,215,255,.42)'; c.stroke(); c.textAlign = 'center'; c.font = `64px ${E}`; c.fillStyle = '#fff'; c.fillText(r[2], x0 + 64, y0 + 68);
-    R.set(r[0], {u0: x0 / S, v0: y0 / S, u1: (x0 + 128) / S, v1: (y0 + 128) / S, w: 128, h: 128, em: 1}); });
+    glass(x0 + 12, y0 + 12, 104, 104, 52); c.textAlign = 'center'; c.font = `62px ${E}`; c.fillStyle = '#fff'; c.fillText(r[2], x0 + 64, y0 + 68);
+    R.set(r[0], {u0: (x0 + 8) / S, v0: (y0 + 8) / S, u1: (x0 + 120) / S, v1: (y0 + 120) / S, w: 112, h: 112, em: 1}); });
   c.textAlign = 'left'; return {c2, R}; }
 function pd9Gl(){ if (PD9.g || PD9.bad) return PD9.g;
   try { const P = compile(PD9_VS, PD9_FS), vao = gl.createVertexArray(); gl.bindVertexArray(vao);
@@ -7633,63 +7783,82 @@ function pd9Zone(S, z){ const cq = S.cq; if (!cq || !z) return null; let m = cq.
 function pd9Jit(d, k, a, b){ const t1 = norm(Math.abs(d[1]) < .9 ? cross(d, [0, 1, 0]) : cross(d, [1, 0, 0])), t2 = cross(d, t1);
   return norm([d[0] + (t1[0] * a + t2[0] * b) * k, d[1] + (t1[1] * a + t2[1] * b) * k, d[2] + (t1[2] * a + t2[2] * b) * k]); }
 const pd9Rad = x => Math.tan(Math.min(Math.acos(clamp(1 - 2 * (x.share || .02), -1, 1)), .9));
-function pd9Spots(x){ const k = pd9Rad(x) * .75, h = hashStr(x.id + '·'), out = [];
-  for (let j = 0; j < 14; j++){ const a = frc(h * 7.13 + j * .618) * TAU, r = Math.sqrt(frc(h * 3.7 + j * .377));
-    out.push({d: pd9Jit(x.dir, k, Math.cos(a) * r, Math.sin(a) * r), f: 1.4 + frc(h + j * .29) * 3.6, ph: j * 1.7, s: frc(h * 1.3 + j * .53), c: frc(h * 5 + j * .71) > .72 ? 1 : 0}); }
-  return out; }
 function pd9Hid(S, x, y){ for (const T of PD9.occ) if (T !== S && T.w < S.w - .01){ const dx = x - T.x, dy = y - T.y; if (dx * dx + dy * dy < T.r * T.r) return true; } return false; }
 function pd9Put(B, n, x, y, w, h, u0, v0, u1, v1, a, k, rot, g){ const o = n * 12; B[o] = x; B[o + 1] = y; B[o + 2] = w; B[o + 3] = h; B[o + 4] = u0; B[o + 5] = v0; B[o + 6] = u1; B[o + 7] = v1; B[o + 8] = a; B[o + 9] = k; B[o + 10] = rot; B[o + 11] = g; return n + 1; }
 const pd9Back = t => 1 + 2.7 * Math.pow(t - 1, 3) + 1.7 * Math.pow(t - 1, 2);
 function pd9Ping(){ if (!actx || !SND.bus || !SND.ui || STORY || document.hidden) return; try { const t = actx.currentTime + .01; tone(1175, t, .22, .009, 'sine'); tone(1568, t + .06, .26, .007, 'sine'); } catch(e){} }
+/* V9.6 · messages de zone : ils n'apparaissent que sur la zone jouée, dans les plans cinématiques comme en dehors. Une comète arrive de
+   l'espace et touche la zone (éclair, ondes couchées sur le sol, à la couleur de la zone), un faisceau de lumière monte et porte la carte
+   de verre de la réaction, qui flotte au rythme puis se dissout en éclats doux. Un message destiné à une autre zone attend (8 s au plus)
+   que sa zone soit jouée, sinon il ne s'affiche pas. */
+const PD96_TC = .55;
+function pd9Hue(x){ const h = x && x.hue != null ? x.hue : .58; return [0, 4, 2].map(o => clamp(Math.abs(((h * 6 + o) % 6) - 3) - 1, 0, 1) * .7 + .3); }
+function pd9LiveZ(S){ const cq = S && S.cq; if (!cq || !cq.items) return null; for (const x of cq.items) if (x.live) return x; return null; }
+function pd9Ready(P){ const S = PD9.scr.get(P.pid); if (!S || S.t !== time || S.r < 9 * RS) return null; const L = pd9LiveZ(S); return L && (!P.z || P.z === pd9ZKey(L)) ? S : null; }
 function pd9Pop(s){ if (!s || !VIEW || !Array.isArray(VIEW.planets) || !s.p) return; const p = VIEW.planets.find(x => x.id === s.p); if (!p) return;
-  PD9.pops.push({pid: p.id, z: s.z || '', r: s.r, t0: time + (s.delay || 0), dur: s.dur || (s.mine ? 3.9 : 3.3), seed: Math.random(), s2: Math.random(), big: s.mine ? 1.12 : 1, mine: !!s.mine, dir: null});
-  if (PD9.pops.length > 16) PD9.pops.splice(0, PD9.pops.length - 16); if (s.mine || s.live) pd9Ping(); }
-function pd9Dir(S, P){ if (P.dir) return P.dir; const x = pd9Zone(S, P.z); let d = null;
-  if (x){ d = pd9Jit(x.dir, pd9Rad(x) * .6, P.seed * 2 - 1, P.s2 * 2 - 1); if (pd9At(S, d, PD9_Q)[2] < .15) d = null; else PD9.fl.set(S.p.id + '|' + P.z, time); } // zone de dos : la réaction pope sur la face visible
-  if (!d){ const a = P.seed * TAU, rad = .2 + .45 * P.s2; d = pd9From(S, Math.cos(a) * rad, Math.sin(a) * rad * .8 + .08); }
-  P.dir = d; return d; }
+  PD9.pops.push({pid: p.id, z: s.z || '', r: s.r, due: time + (s.delay || 0), t0: -1, dur: s.dur || (s.mine ? 4.1 : 3.7), seed: Math.random(), s2: Math.random(), big: s.mine ? 1.12 : 1, ping: !!(s.mine || s.live), nc: !!s.nc, dir: null, col: null});
+  if (PD9.pops.length > 16) PD9.pops.splice(0, PD9.pops.length - 16); }
+function pd9Dir(S, P, L){ if (P.dir) return P.dir; const x = P.z ? pd9Zone(S, P.z) : L;
+  let d = x ? pd9Jit(x.dir, pd9Rad(x) * .45, P.seed * 2 - 1, P.s2 * 2 - 1) : pd9From(S, (P.seed - .5) * .6, .15);
+  if (pd9At(S, d, PD9_Q)[2] < .14){ const nx = PD9_Q[0] - S.x, ny = S.y - PD9_Q[1], l = Math.hypot(nx, ny) || 1; d = pd9From(S, nx / l * .9, ny / l * .9); }   // zone de dos : le message surgit sur l'horizon, du côté de la zone
+  P.dir = d; P.col = pd9Hue(x); return d; }
+const pd9Ease = u => 1 - Math.pow(1 - clamp(u, 0, 1), 3);
+function pd9Bez(a0, a1, b0, b1, c0, c1, q){ const m = 1 - q; PD9_B[0] = m * m * a0 + 2 * m * q * b0 + q * q * c0; PD9_B[1] = m * m * a1 + 2 * m * q * b1 + q * q * c1; return PD9_B; }
+const PD9_B = [0, 0];
+function pd9Pops(B, n){ const G = PD9.g; if (!G) return n; const keep = []; let act = 0; for (const P of PD9.pops) if (P.t0 >= 0 && time - P.t0 < P.dur) act++;
+  for (const P of PD9.pops){
+    if (P.t0 < 0){ if (time < P.due){ keep.push(P); continue; }
+      const S0 = act < 5 && time - PD9.last >= .4 ? pd9Ready(P) : null; if (!S0){ if (time - P.due < 8) keep.push(P); continue; }
+      P.t0 = time; PD9.last = time; act++; if (P.ping) pd9Ping(); }
+    const el = time - P.t0; if (el >= P.dur) continue; keep.push(P);
+    const S = PD9.scr.get(P.pid); if (!S || S.t !== time) continue;
+    pd9At(S, pd9Dir(S, P, pd9LiveZ(S)), PD9_Q); const f = PD9_Q[2], vis = sstep(-.02, .28, f) * S.a; if (vis < .01 || pd9Hid(S, PD9_Q[0], PD9_Q[1])) continue;
+    const R = G.R.get(P.r); if (!R || n > PD9_MAXI - 16) continue;
+    const ix = PD9_Q[0], iy = PD9_Q[1], C = P.col, cr = C[0], cg = C[1], cb = C[2], kS = clamp(S.r / (Math.min(W, H) * .3), .42, 1) * P.big, k1 = RS * kS, TC = P.nc ? 0 : PD96_TC, bt = 1 + .07 * beatLvl;
+    // 1 · la comète, depuis l'espace au-dessus de la zone, en courbe ; sa tête brille
+    if (el < TC){ const q = Math.pow(el / TC, 1.5), ox = ix - S.x, oy = iy - S.y, ux0 = ox * .7 + (P.seed - .5) * S.r * .8, uy0 = oy * .7 - S.r * .9, ul = Math.hypot(ux0, uy0) || 1, ux = ux0 / ul, uy = uy0 / ul;
+      const D = Math.max(S.r * 1.1, 120 * RS), sd = P.s2 > .5 ? 1 : -1, ax = ix + ux * D, ay = iy + uy * D, bx = ix + ux * D * .5 - uy * D * .35 * sd, by = iy + uy * D * .5 + ux * D * .35 * sd;
+      const h = pd9Bez(ax, ay, bx, by, ix, iy, q), hx = h[0], hy = h[1], t = pd9Bez(ax, ay, bx, by, ix, iy, Math.max(0, q - .38)), dx = hx - t[0], dy = hy - t[1], L = Math.hypot(dx, dy), th = Math.max(16 * k1, 10), a = Math.min(1, el / (TC * .2)) * vis;
+      n = pd9Put(B, n, (hx + t[0]) / 2, (hy + t[1]) / 2, L + th, th, cr, cg, cb, 1, a, 3, Math.atan2(dy, dx), 0);
+      n = pd9Put(B, n, hx, hy, 36 * k1 + 10, 36 * k1 + 10, cr, cg, cb, 1, a * .9, 1, 0, 0); continue; }
+    const e2 = el - TC, ang = Math.atan2(iy - S.y, ix - S.x), sq = Math.max(.3, f);
+    // 2 · l'impact : éclair et deux ondes couchées sur la surface, à la couleur de la zone
+    if (e2 < 1.1){ const fl = Math.pow(Math.max(0, 1 - e2 / .6), 2); if (fl > .01){ const fs = (36 + 54 * pd9Ease(e2 / .25)) * k1; n = pd9Put(B, n, ix, iy, fs, fs, cr, cg, cb, 1, fl * vis, 1, 0, 0); }
+      for (let j = 0; j < 2; j++){ const e = e2 - j * .14; if (e < 0 || e > .95) continue; const rs = (j ? 10 + 36 * pd9Ease(e / .95) : 14 + 58 * pd9Ease(e / .95)) * k1, a = Math.pow(1 - e / .95, 2) * (j ? .55 : .9) * vis;
+        n = pd9Put(B, n, ix, iy, rs * 2 * sq, rs * 2, cr, cg, cb, 1, a, 2, ang, 0); } }
+    // 3 · la carte de verre monte sur un faisceau, flotte au rythme, puis se dissout en éclats
+    const e3 = e2 - .06; if (e3 < 0) continue;
+    const fin = clamp(e3 / .2, 0, 1), fo = clamp((P.dur - el) / .55, 0, 1), ru = pd9Ease(e3 / .75), sc = (e3 < .45 ? .55 + .45 * pd9Back(e3 / .45) : 1) * bt * (1 + .08 * (1 - fo));
+    const h0 = (R.em ? 54 : 34) * k1, w0 = h0 * R.w / R.h, cx = ix + Math.sin(time * 1.1 + P.seed * 9) * 1.5 * k1, cy = iy - (42 + 22 * P.s2) * k1 * ru - h0 * .62 - 10 * k1 * (1 - fo) + Math.sin(time * 1.7 + P.seed * 6) * 2 * k1;
+    const al = fin * fo * vis, by2 = cy + h0 * .5 * sc, bl = Math.hypot(cx - ix, by2 - iy);
+    if (bl > 4){ const bw = Math.max(16 * k1, 10) * bt; n = pd9Put(B, n, (cx + ix) / 2, (by2 + iy) / 2, bl, bw, cr, cg, cb, 1, al * .7, 3, Math.atan2(by2 - iy, cx - ix), 1); }
+    n = pd9Put(B, n, cx, cy, w0 * 1.5 * sc + 20 * k1, h0 * 1.9 * sc + 20 * k1, cr, cg, cb, 1, al * .4, 1, 0, 0);
+    n = pd9Put(B, n, cx, cy, w0 * sc, h0 * sc, R.u0, R.v0, R.u1, R.v1, al, 0, Math.sin(time * 2.2 + P.seed * 9) * (R.em ? .06 : .025), 0);
+    if (fo < 1){ const q = 1 - fo, pa = Math.sin(Math.PI * q) * .7 * vis; for (let j = 0; j < 5; j++){ const a = P.seed * 40 + j * 2.39996, rr = .3 + .7 * frc(P.s2 * 13 + j * .37), sz = (11 + 6 * frc(P.seed * 7 + j * .61)) * k1 + 6;
+        n = pd9Put(B, n, cx + Math.cos(a) * w0 * .45 * rr + Math.cos(a) * 26 * k1 * q, cy + Math.sin(a) * h0 * .4 * rr - (18 + 22 * rr) * k1 * q, sz, sz, cr, cg, cb, 1, pa, 4, 0, 0); } } }
+  PD9.pops = keep; return n; }
 /* le titre en cours sur la galaxie regardée : ses réactions reviennent au moment du morceau où elles ont été envoyées */
 function pd9NowKey(){ if (au.paused || !Q.length || !VIEW) return null; const t = TRACKS.get(Q[qi]); if (!t) return null;
   const pid = VIEW === SYS ? playingPlanet() : (GD && VIEW === GD) ? (isAlbumTrack(Q[qi]) ? GD_PID : null) : readonly ? pdVisitPid() : null;
   return pid ? {pid, z: pd9Key(t.title, t.artist)} : null; }
-function pd9Tick(){ const L = pd9List(); if (PD9.cntL !== L){ PD9.cntL = L; PD9.cnt = new Map(); for (const e of L){ let m = PD9.cnt.get(e.p); if (!m) PD9.cnt.set(e.p, m = new Map()); m.set(e.z, (m.get(e.z) || 0) + 1); } }
-  if (PD9.fl.size > 120) PD9.fl.clear(); if (!L.length){ PD9.curK = ''; return; }
-  const k = pd9NowKey();
+function pd9Tick(){ const L = pd9List(); if (!L.length){ PD9.curK = ''; return; }
+  const k = pd9NowKey(), me = ME || 'me', nw = Date.now(), old = e => !(e.from === me && nw - e.t < 20000);   // V9.6 : ta réaction qui vient de s'envoler ne revient pas en double
   if (k){ const cur = au.currentTime || 0, kk = k.pid + '|' + k.z;
-    if (PD9.curK === kk && cur >= PD9.cur && cur - PD9.cur < 1.5){ let c = 0; for (const e of L) if (c < 3 && e.p === k.pid && e.z === k.z && e.at >= 0 && e.at > PD9.cur && e.at <= cur){ pd9Pop({p: e.p, z: e.z, r: e.r, delay: c * .35}); c++; } }
+    if (PD9.curK === kk && cur >= PD9.cur && cur - PD9.cur < 1.5){ let c = 0; for (const e of L) if (c < 3 && e.p === k.pid && e.z === k.z && e.at >= 0 && e.at > PD9.cur && e.at <= cur && old(e)){ pd9Pop({p: e.p, z: e.z, r: e.r, delay: c * .45}); c++; } }
     PD9.cur = cur; PD9.curK = kk; } else PD9.curK = '';
   if (!PD9.amb) PD9.amb = time + 2.5;
-  if (time >= PD9.amb){ const pool = [], back = []; for (const e of L){ const S = PD9.scr.get(e.p); if (!S || S.t !== time || S.r <= 14 * RS) continue; const x = e.z ? pd9Zone(S, e.z) : null; (x && pd9At(S, x.dir, PD9_Q)[2] < .2 ? back : pool).push(e); }
-    const src = pool.length ? pool : back; // d'abord les zones tournées vers la caméra
-    if (src.length) pd9Pop((e => ({p: e.p, z: e.z, r: e.r}))(src[Math.floor(Math.random() * src.length)]));
-    PD9.amb = time + (cine ? 2.8 : mode === 'planet' ? 4.2 : 7.5) * (.7 + Math.random() * .6) * (src.length > 8 ? .75 : src.length > 2 ? 1 : 1.35); } }
-/* lumières de foule : de petits points chauds sur les zones qui ont reçu des réactions, et sur la zone jouée ; ils dansent sur les temps forts */
-function pd9Lights(S, B, n){ const cq = S.cq; if (!cq || S.r < 18 * RS) return n; const cz = PD9.cnt && PD9.cnt.get(S.p.id), kR = clamp(S.r / (150 * RS), .55, 1.6), lv = isLive(S.p);
-  for (const x of cq.items){ const k = pd9ZKey(x), c = cz ? cz.get(k) || 0 : 0, live = lv && x.live ? 1 : 0, f0 = PD9.fl.get(S.p.id + '|' + k), boost = f0 != null && time - f0 < 1.6 ? 1 - (time - f0) / 1.6 : 0;
-    if (!c && !live && !boost) continue; const m = Math.min(14, Math.max(boost ? 6 : 0, (live ? 5 : 0) + (c ? Math.round(2 + 2.4 * Math.log2(1 + c)) : 0))), L = x._pd9L || (x._pd9L = pd9Spots(x));
-    for (let j = 0; j < m && n < PD9_MAXI - 40; j++){ const sp = L[j]; pd9At(S, sp.d, PD9_Q); const f = PD9_Q[2]; if (f < .06 || pd9Hid(S, PD9_Q[0], PD9_Q[1])) continue;
-      const tw = .55 + .45 * Math.sin(time * sp.f + sp.ph), bt = live ? .75 + 1.3 * beatLvl : .8, a = clamp(tw * bt * sstep(.06, .35, f) * S.a * (1 + 2 * boost), 0, 1.6);
-      const sz = (2.8 + 2 * sp.s) * RS * kR * (1 + .35 * (live ? beatLvl : 0) + .4 * boost), lift = (live ? beatLvl * 2.2 : 0) * RS * kR * sp.s + boost * 3 * RS * kR * sp.s;
-      n = pd9Put(B, n, PD9_Q[0], PD9_Q[1] - lift, sz * 2.4, sz * 2.4, 0, 0, 0, 0, a, 1, 0, sp.c); } }
-  return n; }
-function pd9Pops(B, n){ const G = PD9.g; if (!G) return n; const keep = [];
-  for (const P of PD9.pops){ const u = (time - P.t0) / P.dur; if (u >= 1) continue; if (u < 0){ keep.push(P); continue; } const S = PD9.scr.get(P.pid); if (!S || S.t !== time){ if (time - P.t0 < 6) keep.push(P); continue; } keep.push(P);
-    pd9At(S, pd9Dir(S, P), PD9_Q); const f = PD9_Q[2], vis = sstep(-.02, .28, f) * S.a; if (vis < .01 || pd9Hid(S, PD9_Q[0], PD9_Q[1])) continue;
-    const R = G.R.get(P.r); if (!R) continue; const kS = clamp(S.r / (Math.min(W, H) * .3), .42, 1) * P.big, live = isLive(S.p);
-    const ease = u < .14 ? pd9Back(u / .14) : 1, fade = (u < .1 ? u / .1 : 1) * (u > .8 ? 1 - (u - .8) / .2 : 1), h0 = (R.em ? 54 : 34) * RS * kS, w0 = h0 * R.w / R.h, beat = live ? 1 + .1 * beatLvl : 1;
-    const rise = (14 + 30 * P.s2) * RS * kS * Math.pow(Math.min(1, u * 1.25), .7), sway = Math.sin(time * (R.em ? 5.2 : 2.6) + P.seed * 9) * (R.em ? .16 : .045);
-    const el = u * P.dur; if (el < .9 && n < PD9_MAXI){ const q = el / .9, rs = (10 + 26 * q) * RS * kS; n = pd9Put(B, n, PD9_Q[0], PD9_Q[1], rs * 2, rs * 2 * Math.max(.35, f), 0, 0, 0, 0, (1 - q) * .9 * vis, 2, 0, 0); }
-    if (n < PD9_MAXI) n = pd9Put(B, n, PD9_Q[0] + Math.sin(time * 1.3 + P.seed * 7) * 3 * RS * kS, PD9_Q[1] - rise - h0 * .62 * ease, w0 * ease * beat, h0 * ease * beat, R.u0, R.v0, R.u1, R.v1, fade * vis, 0, sway, 0); }
-  PD9.pops = keep; return n; }
-/* V9 · plan « foule » : les réactions reçues par la planète popent ensemble, celles de la zone jouée d'abord (seulement de vraies réactions) */
-function pd9Burst(p){ try { if (!p) return; const L = pd9List().filter(e => e.p === p.id); if (!L.length) return; const lv = conquest(p).items.find(x => x.live), lk = lv ? pd9ZKey(lv) : null;
-  L.filter(e => e.z === lk).concat(L.filter(e => e.z !== lk)).slice(0, 6).forEach((e, i) => pd9Pop({p: e.p, z: e.z, r: e.r, delay: .3 + i * .45, dur: 3.6})); } catch(e){} }
+  if (time >= PD9.amb){ const live = new Map(); for (const S of PD9.occ){ const x = pd9LiveZ(S); if (x && S.r > 14 * RS) live.set(S.p.id, pd9ZKey(x)); }
+    const src = L.filter(e => live.has(e.p) && (!e.z || e.z === live.get(e.p)) && old(e));   // V9.6 : seulement les réactions de la partie jouée
+    if (src.length){ let e = src[Math.floor(Math.random() * src.length)]; if (src.length > 1 && e === PD9.lastE) e = src[(src.indexOf(e) + 1) % src.length]; PD9.lastE = e; pd9Pop({p: e.p, z: e.z, r: e.r}); }
+    PD9.amb = time + (cine ? 2.6 : mode === 'planet' ? 4 : 6.5) * (.75 + Math.random() * .5) * (src.length > 8 ? .8 : src.length > 2 ? 1 : 1.3); } }
+/* V9 · plan « foule » : les réactions reçues par la zone jouée popent ensemble (V9.6 : seulement celles de la partie jouée) */
+function pd9Burst(p){ try { if (!p) return; const lv = conquest(p).items.find(x => x.live); if (!lv) return; const lk = pd9ZKey(lv);
+  pd9List().filter(e => e.p === p.id && (e.z === lk || !e.z)).slice(-5).forEach((e, i) => pd9Pop({p: e.p, z: e.z, r: e.r, delay: .3 + i * .55})); } catch(e){} }
 function pd9Draw(){ try {
   if (!VIEW || PD9.bad || mode === 'splash' || mode === 'galaxy' || OUTRO || INTRO.on || PDART.on || document.hidden || (cine && cine.album) || (gl.isContextLost && gl.isContextLost())) return;
   const ga = cine && cine.dir ? clamp(1 - (cine.dir.fk || 0), 0, 1) : 1; if (ga < .02) return;
   PD9.occ.length = 0; PD9.scr.forEach(S => { if (S.t === time) PD9.occ.push(S); }); if (!PD9.occ.length) return;
-  pd9Tick(); let n = 0; for (const S of PD9.occ) n = pd9Lights(S, PD9_IN, n);
-  if (PD9.pops.length) pd9Gl(); n = pd9Pops(PD9_IN, n); if (!n) return; const G = pd9Gl(); if (!G) return;
+  pd9Tick(); if (PD9.pops.length) pd9Gl(); const n = pd9Pops(PD9_IN, 0); if (!n) return; const G = pd9Gl(); if (!G) return;
   gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.viewport(0, 0, W, H); gl.disable(gl.DEPTH_TEST); gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
   gl.useProgram(G.P.p); gl.uniform2f(G.P.u.uRes, W, H); gl.activeTexture(gl.TEXTURE15); gl.bindTexture(gl.TEXTURE_2D, G.tex); gl.uniform1i(G.P.u.uAt, 15); gl.uniform1f(G.P.u.uGA, ga); gl.activeTexture(gl.TEXTURE0);
   gl.bindVertexArray(G.vao); gl.bindBuffer(gl.ARRAY_BUFFER, G.ib); gl.bufferSubData(gl.ARRAY_BUFFER, 0, PD9_IN, 0, n * 12); gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, n);
