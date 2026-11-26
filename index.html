@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#010208">
 <title>planèteDot · ton univers musical</title>
-<meta name="pd-version" content="9.3">
+<meta name="pd-version" content="9.3.1">
 <meta name="description" content="PlanèteDot · l’album de GuillaumDot et ton univers musical en 3D : chaque planète est un morceau.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PlanèteDot">
@@ -1850,6 +1850,7 @@ float archLt=1.;
 /* gamma-correct Lambert with a little atmospheric wrap: bright day side, crisp terminator */
 float lam(float x){ float w=.1*uAtmo; return pow(clamp((x+w)/(1.+w),0.,1.),.72); }
 uniform vec4 uSp;
+uniform vec4 uPh; uniform vec2 uPh2;   // V9.3.1 : avance des ondes accumulée image par image (x anneaux, y et z houle, w fronts ; uPh2.x rafales, uPh2.y force du dernier coup de basse)
 float spB(float x){ x=fract(x)*4.; int i=int(floor(x)); float f=smoothstep(0.,1.,fract(x)); return mix(uSp[i],uSp[(i+1)%4],f); }
 /* waves leaving a played zone: irregular fronts whose height around the zone follows the spectrum like a circular analyser */
 float wvD=0., wvB=0.;   // V9.2 · ondes : distance irrégulière au bord de la zone (rad) et spectre à cet azimut, posées par wvAt
@@ -1860,10 +1861,10 @@ float wvAt(vec3 s,vec3 D,float T,out float sl,out float sw,out float q,out float
   float aw=ang+(irr-.5)*.32*(.4+bnd)+(n3(s*3.5+vec3(uT*.05))-.5)*.14;
   wvD=aw-a0; wvB=bnd;
   float kw=mix(3.6,6.,smoothstep(18.,70.,uR)); float dsp=1.-.22*q;
-  float p1=(aw-a0)*kw*dsp-uT*(1.15+uLv*.5+uBs*.8), p2=(aw-a0)*kw*1.9*dsp-uT*(1.7+uSp.z)+irr*3.;
+  float p1=(aw-a0)*kw*dsp-uPh.y, p2=(aw-a0)*kw*1.9*dsp-uPh.z+irr*3.;
   float A1=.5+bnd*.8+uBs*.6, A2=.12+uSp.z*.25+uSp.w*.15, tot=A1+A2, nrm=min(tot,1.6)/(1.6*tot);
   sl=(cos(p1)*A1+cos(p2)*A2)*nrm;
-  float ds=(aw-a0-uBt*.95)*mix(3.,5.,smoothstep(18.,70.,uR)); sw=exp(-ds*ds)*exp(-uBt*.9)*(.3+uBs*.8);
+  float ds=(aw-a0-uBt*.95)*mix(3.,5.,smoothstep(18.,70.,uR)); sw=exp(-ds*ds)*exp(-uBt*.9)*(.25+uBs*.45+uPh2.y*.7);
   return (sin(p1)*A1+sin(p2)*A2)*nrm; }
 /* V9 · souffles : les ondes ne déplacent plus la texture (fini les déformations). Leurs fronts, larges et doux, partent de la zone jouée
    et deviennent des souffles propres à chaque monde : nuages qui naissent, écume, éruptions, rafales, poussière, voiles lumineux */
@@ -1877,7 +1878,7 @@ vec3 brTx(vec3 p,vec3 s,float l,float lod){ vec3 w=pow(abs(s),vec3(4.)); w/=dot(
   if(w.x>.01) c+=textureLod(uBr,vec3(p.zy,l),lod).rgb*w.x; if(w.y>.01) c+=textureLod(uBr,vec3(p.xz,l),lod).rgb*w.y; if(w.z>.01) c+=textureLod(uBr,vec3(p.xy,l),lod).rgb*w.z; return c; }
 // le front révèle le motif par ses parties les plus claires d'abord : l'écume se forme, le givre pousse, la poussière se lève, puis tout se retire
 float brRev(float t,float b,float n){ float t0=mix(.92,.2,clamp(b,0.,1.))+(n-.5)*.18; return smoothstep(t0,t0+.28,t); }
-float brFront(float ang,float a0,float q,vec3 s){ float ph=(ang-a0)*2.3-uT*(.5+uLv*.3+uBs*.45)+(n3(s*2.1+vec3(uT*.035))-.5)*1.1;
+float brFront(float ang,float a0,float q,vec3 s){ float ph=(ang-a0)*2.3-uPh.w+(n3(s*2.1+vec3(uT*.035))-.5)*1.1;
   return pow(.5+.5*cos(ph*6.2832),4.)*smoothstep(0.,.04,q); }
 vec4 cloudWave(vec3 s){ vec4 r=vec4(0.); if(uPlay<=0.||uTkN<=0) return r;
   for(int i=0;i<16;i++){ if(i>=uTkN) break; float A=mod(uTkB[i].z,2.); if(A<=.004) continue; float sl,sw,q,az; float h=wvAt(s,uTk[i].xyz,uTk[i].w,sl,sw,q,az);
@@ -1889,7 +1890,7 @@ vec4 cloudWave(vec3 s){ vec4 r=vec4(0.); if(uPlay<=0.||uTkN<=0) return r;
 /* V9 · un souffle passe : chaque monde réagit à sa façon, en couleur et en lumière, sans jamais déplacer sa texture */
 void breathFx(vec3 s,vec3 sp,vec3 tv,float ang,float az,float bf,vec3 wc,float dif,float land,inout vec3 col,inout vec3 emi,inout float spec){
   float lt=.42+.58*dif, nt=1.-smoothstep(-.05,.3,dif); bool bt=uBreath.z>.5; float bk=min(1.,bf*2.);   // bt : textures Figma des souffles prêtes
-  float al=ang*4.2-uT*(1.05+uBs*.7), ac=az*46.;
+  float al=ang*4.2-uPh2.x, ac=az*46.;
   float gust=smoothstep(.5,.86,n3(vec3(al,ac,uT*.3)))*bf;
   if(uType==1||uType==11){ float wat=1.-land, foam;                              // océans : houle claire et écume ; terres : rafales dans la végétation
     if(bt){ vec3 fx=brTx(rotY(uT*.006)*s*6.+uSeed,s,0.,brL(6.)); float nn=n3(sp*4.+tv*uT*.25); foam=brRev(fx.g,bf*1.1,nn)*bk*wat; gust=max(gust*.5,brRev(fx.b,bf,nn)*bk); }
@@ -1972,7 +1973,7 @@ vec3 gasV83(vec3 S,vec3 wd,float dif,inout vec3 emi){
   for(int k=0;k<3;k++){ float I=gzI[k]; if(I<=.001) continue; vec2 d=q-gzC[k]; d.x=fract(d.x+.5)-.5; float cl=max(cos((gzC[k].y-.5)*3.1416),.2);
     vec2 m=vec2(d.x*6.2832*cl,d.y*3.1416*1.35)/gzR[k]; float r=length(m); if(r>1.3) continue; float Ik=min(I,1.);
     float sg=fract(uSeed*(5.1+float(k)*2.3))>.5?1.:-1.;
-    float arm=.5+.5*sin(atan(m.y,m.x)*2.-sg*log(r+.06)*5.5-sg*uT*(.5+.35*uBs*uPlay)*(.14/gzR[k]));
+    float arm=.5+.5*sin(atan(m.y,m.x)*2.-sg*log(r+.06)*5.5-sg*(uT*.5*(.14/gzR[k])+uBs*uPlay*.3));
     float hur=smoothstep(3.5,4.5,st), sup=k==0?smoothstep(4.5,5.5,st):0.;
     vec3 sc=mix(mix(A,vec3(1.,.98,.95),.6),mix(B,vec3(.95,.42,.22),.4),max(hur*.65,sup));
     c=mix(c,sc*(.8+.4*x)*(.84+.32*arm),smoothstep(1.08,.55,r)*Ik*(.55+.15*sup));
@@ -1980,7 +1981,7 @@ vec3 gasV83(vec3 S,vec3 wd,float dif,inout vec3 emi){
     c*=1.-smoothstep(.22,.05,r)*Ik*hur*.45;
     gzK=max(gzK,exp(-r*r*1.6)*Ik); }
   float veil=smoothstep(.4,1.4,st)*(.6+.4*fract(uSeed*5.7))*uQual*smoothstep(8.,20.,uR)*.34;
-  if(veil>.01){ float cv=textureLod(uTx,vec3(q.x*2.+uT*.0018*(1.+.6*uPlay*uBs),q.y*7.,7.),lod+.4).r; c=mix(c,mix(A,vec3(1.),.75),smoothstep(.55,.85,cv)*veil); }
+  if(veil>.01){ float cv=textureLod(uTx,vec3(q.x*2.+uT*.0018+uPlay*uBs*.004,q.y*7.,7.),lod+.4).r; c=mix(c,mix(A,vec3(1.),.75),smoothstep(.55,.85,cv)*veil); }
   c=mix(c,c*.72+B*.08+vec3(.01,.02,.05),smoothstep(.62,.97,abs(S.y))*.55);
   if(fract(uSeed*.37)>.5&&S.y>0.){ float an=atan(S.z,S.x)+uT*.01; float hx=.42/cos(mod(an,1.0472)-.5236); c=mix(c,c*.6+B*.1,(1.-smoothstep(0.,.02,abs(length(S.xz)-hx*.5)))*.6); }
   float nt=pow(clamp(1.-dif*1.5,0.,1.),2.);
@@ -2317,9 +2318,9 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
     { float ang=acos(clamp(dot(s,lvD[j]),-1.,1.)), a0=acos(clamp(lvT[j],-1.,1.));
       /* V9.2 · ondes : des anneaux de lumière partent de la zone jouée, au rythme de la musique, plus forts là où le spectre monte.
          Lumière seulement (ni creux ni relief : la texture ne bouge pas) ; chaque monde y réagit à sa façon, sur la crête des anneaux seulement */
-      float rph=mix(ang-a0,wvD,.45)*2.1-uT*(.5+uLv*.22+uBs*.35), rc=.5+.5*cos(rph*6.2832), r2=rc*rc, r4=r2*r2, cr=r4*r4*r2;   // crête fine (rc^10)
+      float rph=mix(ang-a0,wvD,.45)*2.1-uPh.x, rc=.5+.5*cos(rph*6.2832), r2=rc*rc, r4=r2*r2, cr=r4*r4*r2;   // crête fine (rc^10)
       float aa=smoothstep(.18,.55,fwidth(rph)), rg=mix(cr+r4*.3,.15,aa);   // halo doux ; anneaux trop serrés à l'écran : une lueur égale au lieu d'un scintillement
-      float e0=(.3+uLv*.6+uBs*.85+uBeat*.3)*(.55+.75*wvB)*env*A*(1.-.3*q), rl=(rg*e0+sw2*.85)*uBreath.x; vec3 rcl=mix(wc,vec3(1.),.3);
+      float e0=(.3+uLv*.3+uBs*.75+uBeat*1.2)*(.6+.6*wvB)*env*A*(1.-.3*q), rl=(rg*e0+sw2*.85)*uBreath.x; vec3 rcl=mix(wc,vec3(1.),.3);
       /* V9.3 · ondes réelles : l'anneau soulève la surface (crête pointue, creux plat) ; le soleil éclaire un versant et laisse l'autre dans l'ombre,
          l'eau renvoie des reflets sur les crêtes ; la lueur ne reste que du côté nuit, pour qu'on les voie encore dans le noir */
       float x6=rph*6.2832, cx=cos(x6), sx=sin(x6), pk=exp((cx-1.)*2.4), en2=exp((cx-1.)*.9);   // crête principale et petites rides qui l'accompagnent
@@ -2586,6 +2587,7 @@ float archLt=1.;
 /* gamma-correct Lambert with a little atmospheric wrap: bright day side, crisp terminator */
 float lam(float x){ float w=.1*uAtmo; return pow(clamp((x+w)/(1.+w),0.,1.),.72); }
 uniform vec4 uSp;
+uniform vec4 uPh; uniform vec2 uPh2;   // V9.3.1 : avance des ondes accumulée image par image (x anneaux, y et z houle, w fronts ; uPh2.x rafales, uPh2.y force du dernier coup de basse)
 float spB(float x){ x=fract(x)*4.; int i=int(floor(x)); float f=smoothstep(0.,1.,fract(x)); return mix(uSp[i],uSp[(i+1)%4],f); }
 /* waves leaving a played zone: irregular fronts whose height around the zone follows the spectrum like a circular analyser */
 float wvD=0., wvB=0.;   // V9.2 · ondes : distance irrégulière au bord de la zone (rad) et spectre à cet azimut, posées par wvAt
@@ -2596,10 +2598,10 @@ float wvAt(vec3 s,vec3 D,float T,out float sl,out float sw,out float q,out float
   float aw=ang+(irr-.5)*.32*(.4+bnd)+(n3(s*3.5+vec3(uT*.05))-.5)*.14;
   wvD=aw-a0; wvB=bnd;
   float kw=mix(3.6,6.,smoothstep(18.,70.,uR)); float dsp=1.-.22*q;
-  float p1=(aw-a0)*kw*dsp-uT*(1.15+uLv*.5+uBs*.8), p2=(aw-a0)*kw*1.9*dsp-uT*(1.7+uSp.z)+irr*3.;
+  float p1=(aw-a0)*kw*dsp-uPh.y, p2=(aw-a0)*kw*1.9*dsp-uPh.z+irr*3.;
   float A1=.5+bnd*.8+uBs*.6, A2=.12+uSp.z*.25+uSp.w*.15, tot=A1+A2, nrm=min(tot,1.6)/(1.6*tot);
   sl=(cos(p1)*A1+cos(p2)*A2)*nrm;
-  float ds=(aw-a0-uBt*.95)*mix(3.,5.,smoothstep(18.,70.,uR)); sw=exp(-ds*ds)*exp(-uBt*.9)*(.3+uBs*.8);
+  float ds=(aw-a0-uBt*.95)*mix(3.,5.,smoothstep(18.,70.,uR)); sw=exp(-ds*ds)*exp(-uBt*.9)*(.25+uBs*.45+uPh2.y*.7);
   return (sin(p1)*A1+sin(p2)*A2)*nrm; }
 /* clouds outside the played zone ride the waves and are swept by the big fronts */
 float wvG=0.;
@@ -2852,11 +2854,11 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){
     float env=exp(-q*2.6)*(1.-smoothstep(.7,1.,q))*smoothstep(0.,.05,q)*out0; float sw2=swv*A*out0*exp(-q*2.2);
     vec3 wc=mix(C,.5+.5*cos(6.2832*(az01+uT*.02+vec3(0.,.33,.67))),.15);
     { float ang=acos(clamp(dot(s,lvD[j]),-1.,1.)), a0=acos(clamp(lvT[j],-1.,1.));   /* V9.2 · les mêmes anneaux de lumière */
-      float rph=mix(ang-a0,wvD,.45)*2.1-uT*(.5+uLv*.22+uBs*.35), rc=.5+.5*cos(rph*6.2832), r2=rc*rc, r4=r2*r2, cr=r4*r4*r2;
-      float rg=mix(cr+r4*.3,.15,smoothstep(.18,.55,fwidth(rph))), rl=rg*(.3+uLv*.6+uBs*.85+uBeat*.3)*(.55+.75*wvB)*env*A*(1.-.3*q)+sw2*.85; vec3 rcl=mix(wc,vec3(1.),.3);
+      float rph=mix(ang-a0,wvD,.45)*2.1-uPh.x, rc=.5+.5*cos(rph*6.2832), r2=rc*rc, r4=r2*r2, cr=r4*r4*r2;
+      float rg=mix(cr+r4*.3,.15,smoothstep(.18,.55,fwidth(rph))), rl=rg*(.3+uLv*.3+uBs*.75+uBeat*1.2)*(.6+.6*wvB)*env*A*(1.-.3*q)+sw2*.85; vec3 rcl=mix(wc,vec3(1.),.3);
       /* V9.3 · ondes réelles : l'anneau soulève la surface (crête pointue, creux plat) ; le soleil éclaire un versant et laisse l'autre dans l'ombre,
          l'eau renvoie des reflets sur les crêtes ; la lueur ne reste que du côté nuit, pour qu'on les voie encore dans le noir */
-      float aa=smoothstep(.18,.55,fwidth(rph)), e0=(.3+uLv*.6+uBs*.85+uBeat*.3)*(.55+.75*wvB)*env*A*(1.-.3*q);
+      float aa=smoothstep(.18,.55,fwidth(rph)), e0=(.3+uLv*.3+uBs*.75+uBeat*1.2)*(.6+.6*wvB)*env*A*(1.-.3*q);
       float x6=rph*6.2832, cx=cos(x6), sx=sin(x6), pk=exp((cx-1.)*2.4), en2=exp((cx-1.)*.9);
       float tl2=(-2.4*sx*pk+.3*(3.*cos(x6*3.)-.9*sx*sin(x6*3.))*en2)*(1.-aa)*min(e0,1.4)*.5;
       vec3 rdv=normalize(s-lvD[j]*dot(s,lvD[j])+1e-5)*RM; wvN-=rdv*tl2; n=normalize(n-rdv*tl2); ndl=dot(n,L); dif=lam(ndl)*shd;
@@ -3321,7 +3323,7 @@ precision highp float; in vec2 vUv; out vec4 o; uniform sampler2D uS,uB1,uB2,uB3
 float hh(vec2 p){ return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453); }
 /* V8.3 · onde de choc : au passage d'un battement fort, l'espace autour de la planète écoutée se tord */
 float pdSkL=0.;
-vec2 pdSk(vec2 u,vec4 s){ if(s.w<=.001) return vec2(0.); float ar=uRes.x/uRes.y; vec2 d=(u-s.xy)*vec2(ar,1.); float l=length(d); float x=(l-s.z)/(.05+s.z*.12); float w=exp(-x*x); pdSkL+=w*s.w; return d/max(l,1e-4)*(-x*w)*s.w*.026*vec2(1./ar,1.); }
+vec2 pdSk(vec2 u,vec4 s){ if(s.w<=.001) return vec2(0.); float ar=uRes.x/uRes.y; vec2 d=(u-s.xy)*vec2(ar,1.); float l=length(d); float x=(l-s.z)/(.05+s.z*.12); float w=exp(-x*x); pdSkL+=w*s.w; return d/max(l,1e-4)*(-x*w)*s.w*.019*vec2(1./ar,1.); }
 vec2 vUw;
 void main(){ vUw=vUv+pdSk(vUv,uShk)+pdSk(vUv,uShk2);
 #define vUv vUw
@@ -3341,7 +3343,7 @@ void main(){ vUw=vUv+pdSk(vUv,uShk)+pdSk(vUv,uShk2);
   c=mix(vec3(l),c,1.07);
   c=c/(1.+c*.1)*1.1;
   c*=1.-uVig*smoothstep(.1,.8,r2*1.7); c*=1.-uGrain;
-  c+=vec3(.86,.93,1.)*uFlash; c+=vec3(.55,.75,1.)*min(pdSkL,1.)*.07;
+  c+=vec3(.86,.93,1.)*uFlash; c+=vec3(.55,.75,1.)*min(pdSkL,1.)*.035;
   c=mix(c,1.-.14*exp(-(c-.86)/.14),step(.86,c));
   c+=(hh(gl_FragCoord.xy)+hh(gl_FragCoord.xy+vec2(.37,.71))-1.)/255.;
   o=vec4(clamp(c,0.,1.),1.); }`), 'Finition V8.0') || compile(FSQ, `#version 300 es
@@ -3583,7 +3585,7 @@ function drawBody(o){
   gl.uniform3fv(u.uRingC, o.rc || [1,1,1]); gl.uniform3fv(u.uL, fr ? pdInF(fr, o.L || [0,0,1], PDB_L, 0) : (o.L || [0,0,1])); gl.uniform1f(u.uAudio, o.audio || 0); gl.uniform1f(u.uAlpha, o.alpha ?? 1); gl.uniform1f(u.uClouds, o.clouds || 0);
   gl.uniform1f(u.uMap, o.map || 0); gl.uniform1f(u.uHi, o.hi || 0); gl.uniform1f(u.uStage, o.stage || 0); gl.uniform3fv(u.uLC, o.lc || LIGHTS[0]); gl.uniform3fv(u.uPath, o.path || [-1, -1, -1]);
   gl.uniform1i(u.uTerN, o.terN || 0); gl.uniform1i(u.uSel, o.sel ?? -1);
-  gl.uniform1f(u.uPlay, o.play || 0); gl.uniform1f(u.uBeat, o.beat || 0); gl.uniform1f(u.uLv, o.lv || 0); gl.uniform1f(u.uBs, o.bs || 0); if (u.uSp) gl.uniform4fv(u.uSp, o.spb || [0, 0, 0, 0]); gl.uniform1f(u.uBt, o.bt ?? 9); gl.uniform1f(u.uSunI, o.sunI ?? 1); gl.uniform3fv(u.uSun, o.sun || [1, 1, 1]); gl.uniform1f(u.uIrr, o.irr || 0);
+  gl.uniform1f(u.uPlay, o.play || 0); gl.uniform1f(u.uBeat, o.beat || 0); gl.uniform1f(u.uLv, o.lv || 0); gl.uniform1f(u.uBs, o.bs || 0); if (u.uSp) gl.uniform4fv(u.uSp, o.spb || [0, 0, 0, 0]); gl.uniform1f(u.uBt, o.bt ?? 9); if (u.uPh){ gl.uniform4f(u.uPh, PDPH.r, PDPH.w1, PDPH.w2, PDPH.b); if (u.uPh2) gl.uniform2f(u.uPh2, PDPH.a, PDK.s); } gl.uniform1f(u.uSunI, o.sunI ?? 1); gl.uniform3fv(u.uSun, o.sun || [1, 1, 1]); gl.uniform1f(u.uIrr, o.irr || 0);
   if (o.terN){ gl.uniform4fv(u.uTer, o.ter); gl.uniform4fv(u.uTerB, o.terB); }
   const vwU = o.uq ? pdVWq(o.uq, fr ? PDB_VW : (o.vw || VWM)) : (fr ? PDB_VW : (o.vw || VWM)); gl.uniformMatrix3fv(u.uVW, false, vwU); if (u.uBreath) gl.uniform4f(u.uBreath, PDBR.k, 0, PDBR.tx * PDTX.on, 0); if (o.pd9) pd9Seen(o, vwU); gl.uniform1i(u.uOccN, o.occN || 0); if (o.occN){ OCC12.fill(0); for (let i = 0; i < 12 && i < o.occ.length; i++) OCC12[i] = o.occ[i]; if (fr) for (let k = 0; k < 12; k += 4) pdInF(fr, OCC12, OCC12, k); gl.uniform4fv(u.uOcc, OCC12); }
   gl.uniform1f(u.uArch, o.arch || 0); gl.uniform1f(u.uQual, QUAL); gl.uniform1f(u.uEvo, o.evo || 0); if (o.evo) gl.uniform3fv(u.uEvoD, o.evoD); gl.uniform1f(u.uWx, o.wx || 0); gl.uniform1f(u.uFlash, o.flash || 0);
@@ -3655,7 +3657,7 @@ function planetBody0(p, pos, pr, r, lvl, extra){ const cq0 = conquest(p), lm0 = 
     c1: hsl(...p.c1), c2: hsl(...p.c2), at: hsl(p.atH, .85, .62), atmo: p.atmo, seed: p.seed, ang: p._ang || 0, tilt: p.tilt,
     roll, ringS, rk: p.ring ? [1.32, p.ring === 2 ? 2.4 : 1.8] : null, rc: hsl(p.ringH, .45, .72), L, audio: 0, clouds: p.clouds,
     stage: stageF(p), lc: LIGHTS[Math.max(0, pathOf(p)[0])], path: pathOf(p), alpha: starIgnite, reach,
-    play: lm0, beat: lv0 ? beatLvl : 0, lv: lv0 ? audioLvl : 0, bs: lv0 ? bassLvl : 0, spb: lv0 ? SPB : null, bt: lv0 ? time - beatT : 9, wx: stormLvl(p), flash: p._flash || 0, cq: cq0, pd9: p, uq: p._q || null, sun: VIEW ? starCol(VIEW).map(v => .5 + v * .45) : [1, 1, 1], sunI: clamp(1.35 / Math.sqrt(Math.hypot(pos[0], pos[2]) / 3.4 + .55), .6, 1.05), irr: p.type === 10 ? .02 + .04 * (Math.abs(p.seed * 5.13) % 1) : 0}, extra || {});
+    play: lm0, beat: lv0 ? beatLvl : 0, lv: lv0 ? audioLvl : 0, bs: lv0 ? bassLvl : 0, spb: lv0 ? PDSPW : null, bt: lv0 ? time - beatT : 9, wx: stormLvl(p), flash: p._flash || 0, cq: cq0, pd9: p, uq: p._q || null, sun: VIEW ? starCol(VIEW).map(v => .5 + v * .45) : [1, 1, 1], sunI: clamp(1.35 / Math.sqrt(Math.hypot(pos[0], pos[2]) / 3.4 + .55), .6, 1.05), irr: p.type === 10 ? .02 + .04 * (Math.abs(p.seed * 5.13) % 1) : 0}, extra || {});
 }
 
 /* ================= labels ================= */
@@ -4479,7 +4481,7 @@ function frame(now, once){
   if (!running && !once) return;
   if (!once){ const iv = 1000 / pdCap(); if (now - lastDraw < iv - 3){ pdQueueFrame(); return; } lastDraw = now - lastDraw < iv * 1.5 ? lastDraw + iv : now; } else lastDraw = now; SHOT_PT = null; ambTick(Math.min(.05, (now - last) / 1000));
   const rawDt = Math.min(.25, (now - last) / 1000); const dt = Math.min(.05, rawDt); last = now; time = now / 1000 - T0;
-  FDT = rawDt; perf(dt); readAudio(dt); scLevels(); listenTick(dt); ambUpdate(dt); radioSpatial(dt); POST.begin();
+  FDT = rawDt; perf(dt); readAudio(dt); scLevels(); pdPhTick(dt); listenTick(dt); ambUpdate(dt); radioSpatial(dt); POST.begin();
   if (mode !== 'splash' && !cine) FOV = lerp(FOV, FOV0, 1 - Math.exp(-dt * 2.2));
   POST.flash = Math.max(0, POST.flash - dt * 3); POST.shaft = lerp(POST.shaft, POST.shaftT, 1 - Math.exp(-dt * 5)); POST.shaftT = 0; POST.zb = mode === 'splash' || cine ? 0 : speedFx() * 1.1; POST.zc[0] = POST.zc[1] = .5; POST.mb[0] = POST.mb[1] = 0; POST.ca = POST.ca < .003 ? 0 : lerp(POST.ca, 0, 1 - Math.exp(-dt * 3)); POST.bloom = lerp(POST.bloom, (cine ? .5 + beatLvl * .25 : .38) * (1 + 1.1 * (1 - ECLs)), 1 - Math.exp(-dt * 6)); if (mode !== 'system') ECL = 1; ECLs = lerp(ECLs, ECL, 1 - Math.exp(-dt * 4));
   if (ECL < .45 && !eclOn){ eclOn = true; POST.flash = Math.max(POST.flash, .1); if (actx && SND.bus && SND.amb){ const t = actx.currentTime; tone(58, t, 3.2, .06, 'sine', true, 44); swell(t, 1.6, .02, 900, 200); } }
@@ -5622,7 +5624,10 @@ document.addEventListener('visibilitychange', () => { PDA.setHidden(document.hid
 addEventListener('pageshow', () => { if (!document.hidden) PDA.setHidden(false); });
 /* music → waves: on iPhone the native player cannot feed an analyser, so each track's spectrum is computed once,
    in the background, and replayed in sync with the music (same values as AnalyserNode.getByteFrequencyData) */
-const SPEC = {id: null, data: null, frames: 0, fps: 40, busy: null, live: false, sm: new Float32Array(128)};
+const SPEC = {id: null, data: null, frames: 0, fps: 40, busy: null, live: false, sm: new Float32Array(128), kick: null, bass: null};
+/* V9.3.1 · impulsions : les battements viennent des basses (grosse caisse, 808), repérées une fois sur tout le morceau, et plus des charleys ni des caisses claires.
+   s : force du dernier coup, a : montée en cours (35 ms au lieu d'un éclair d'une seule image), t : heure du dernier coup, f : dernière image du morceau lue */
+const PDK = {f: -1, t: -9, a: 0, s: .7};
 function specLoad(t){
   if (!t || !t.blob || SPEC.id === t.id || SPEC.busy === t.id || t.blob.size > 30e6 || au.duration > 900) return;
   const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext; if (!OAC) return; SPEC.busy = t.id;
@@ -5630,16 +5635,34 @@ function specLoad(t){
     const ab = await t.blob.arrayBuffer();
     const buf = await new Promise((ok, ko) => { const oc = new OAC(1, 1, 22050); const r = oc.decodeAudioData(ab, ok, ko); if (r && r.then) r.then(ok, ko); });
     const sr = buf.sampleRate, A = buf.getChannelData(0), B = buf.numberOfChannels > 1 ? buf.getChannelData(1) : null, N = 256, hop = sr / SPEC.fps, nF = Math.max(0, Math.floor((buf.length - N) / hop)), out = new Uint8Array(nF * 128);
+    const bd = new Float32Array(nF), la = Math.exp(-TAU * 150 / sr); let y1 = 0, y2 = 0;   // V9.3.1 : niveau des basses (sous 150 Hz) image par image
     const win = new Float32Array(N); for (let i = 0; i < N; i++) win[i] = .42 - .5 * Math.cos(TAU * i / N) + .08 * Math.cos(2 * TAU * i / N);
     const re = new Float32Array(N), im = new Float32Array(N), bw = sr / N;
     for (let f0 = 0; f0 < nF; f0 += 300){ const f1 = Math.min(nF, f0 + 300);
-      for (let f = f0; f < f1; f++){ const o = Math.floor(f * hop); for (let i = 0; i < N; i++){ re[i] = (B ? (A[o + i] + B[o + i]) * .5 : A[o + i]) * win[i]; im[i] = 0; } fft(re, im);
+      for (let f = f0; f < f1; f++){ const o = Math.floor(f * hop);
+        { const o1 = Math.min(buf.length, Math.floor((f + 1) * hop)); let ss = 0; for (let i = o; i < o1; i++){ y1 = la * y1 + (1 - la) * (B ? (A[i] + B[i]) * .5 : A[i]); y2 = la * y2 + (1 - la) * y1; ss += y2 * y2; } bd[f] = 10 * Math.log10(ss / Math.max(1, o1 - o) + 1e-12); }
+        for (let i = 0; i < N; i++){ re[i] = (B ? (A[o + i] + B[o + i]) * .5 : A[o + i]) * win[i]; im[i] = 0; } fft(re, im);
         for (let k = 1; k < 128; k++){ const x = k * 93.75 / bw, j = Math.floor(x), u = x - j; if (j + 1 >= N / 2) continue; const m0 = Math.hypot(re[j], im[j]), m1 = Math.hypot(re[j + 1], im[j + 1]);
           out[f * 128 + k] = clamp(Math.round((20 * Math.log10((m0 + (m1 - m0) * u) / N + 1e-9) + 100) / 70 * 255), 0, 255); } }
       await new Promise(r => setTimeout(r, 0)); if (Q[qi] !== t.id) break; }
-    if (Q[qi] === t.id){ SPEC.id = t.id; SPEC.data = out; SPEC.frames = nF; SPEC.sm.fill(0); }
+    if (Q[qi] === t.id){ const km = pdKickMap(bd, SPEC.fps); SPEC.id = t.id; SPEC.data = out; SPEC.frames = nF; SPEC.kick = km.kick; SPEC.bass = km.bass; SPEC.sm.fill(0); PDK.f = -1; }
   } catch(e){ console.warn('Spectre musical indisponible', e); } SPEC.busy = null; })();
 }
+/* V9.3.1 · carte des grosses caisses : montée brusque du niveau sous 150 Hz (plus de 3,5 dB en 50 ms et au moins deux fois la montée moyenne
+   des 2 s autour), sur un passage assez fort, au plus une toutes les 250 ms. Niveau des basses ramené à l'échelle du morceau (0 à 1) */
+function pdKickMap(d, fps){ const n = d.length, kick = new Uint8Array(n), bass = new Uint8Array(n), rise = new Float32Array(n), cs = new Float64Array(n + 1), W = Math.round(fps), ref = Math.round(fps * .25);
+  for (let f = 2; f < n; f++) rise[f] = Math.max(0, d[f] - Math.min(d[f - 1], d[f - 2]));
+  for (let f = 0; f < n; f++) cs[f + 1] = cs[f] + rise[f];
+  let last = -99;
+  for (let f = 2; f < n - 1; f++){ const r = rise[f]; if (r < 3.5 || r < rise[f - 1] || r < rise[f + 1]) continue;
+    const a0 = Math.max(0, f - W), a1 = Math.min(n, f + W + 1), thr = Math.max(3.5, (cs[a1] - cs[a0]) / (a1 - a0) * 2); if (r <= thr) continue;
+    let lm = -300; for (let i = Math.max(0, f - W); i < Math.min(n, f + W + 1); i++) if (d[i] > lm) lm = d[i]; if (d[f] < lm - 14) continue;
+    const v = Math.round(Math.min(1, .5 + (r - thr) / (thr * 2)) * 255);
+    if (f - last < ref){ if (v > kick[last]) kick[last] = 0; else continue; }
+    kick[f] = v; last = f; }
+  if (n){ const srt = Float32Array.from(d).sort(), p20 = srt[Math.floor(n * .2)], p98 = srt[Math.min(n - 1, Math.floor(n * .98))], rg = Math.max(6, p98 - p20);
+    for (let f = 0; f < n; f++) bass[f] = Math.round(clamp((d[f] - p20) / rg, 0, 1) * 255); }
+  return {kick, bass}; }
 function specFill(){
   if (!SPEC.data || SPEC.id !== Q[qi]) return false; const x = au.currentTime * SPEC.fps, f = Math.floor(x); if (f < 0 || f >= SPEC.frames - 1) return false;
   const u = x - f, a = f * 128, b = a + 128;
@@ -5648,14 +5671,30 @@ function specFill(){
   fbuf.fill(0, 128); return true; }
 au.addEventListener('playing', () => { try { const t = TRACKS.get(Q[qi]); if (t) specLoad(t); } catch(e){} });
 let feat = {e: 0, b: 0, l: 0, n: 0, k: 0}, onsetAcc = 0, beatLvl = 0, fluxAvg = 0, beatT = -9, bassLvl = 0, bassAvg = .2; const SPB = [0, 0, 0, 0], SPA = [.2, .2, .2, .2];
+function pdKickRead(dt, flux){ const S = SPEC, x = au.currentTime * S.fps, f = Math.floor(x), u = x - f, f1 = Math.min(f + 1, S.frames - 1);
+  const b = (S.bass[f] * (1 - u) + S.bass[f1] * u) / 255; bassLvl = b > bassLvl ? lerp(bassLvl, b, .6) : Math.max(b, bassLvl * Math.exp(-dt * 6));
+  if (f > PDK.f && f - PDK.f <= 12) for (let i = PDK.f + 1; i <= f; i++){ const k = S.kick[i]; if (k){ PDK.t = beatT = time; PDK.s = k / 255; PDK.a = Math.max(PDK.a, PDK.s); } }
+  PDK.f = f;
+  // morceau sans grosse caisse, ou passage calme : les autres attaques gardent un battement léger, au plus deux à trois par seconde
+  if (time - PDK.t > 2.5 && flux > fluxAvg * 1.6 && flux > 4 && time - beatT > .4 && !S.kick.subarray(f + 1, f + 7).some(k => k)){ beatT = time; PDK.s = .5; PDK.a = Math.max(PDK.a, .5); }
+  if (PDK.a > 0){ beatLvl = Math.min(PDK.a, beatLvl + dt * 28); if (beatLvl >= PDK.a - .001) PDK.a = 0; } }
+/* V9.3.1 · ondes sans à-coups : leur avance s'accumule image par image. Avant, temps × vitesse : chaque variation des basses faisait sauter
+   tous les anneaux d'un coup, d'autant plus fort que l'appli était ouverte depuis longtemps. Chaque coup de basse les pousse maintenant vers l'extérieur */
+const PDPH = {r: 0, w1: 0, w2: 0, b: 0, a: 0}, PDSPW = new Float32Array(4);
+function pdPhTick(dt){ const lv = audioLvl, bs = bassLvl, kk = beatLvl;
+  PDPH.r = (PDPH.r + dt * (.5 + lv * .16 + bs * .3 + kk * 2.2)) % 1; PDPH.w1 = (PDPH.w1 + dt * (1.15 + lv * .4 + bs * .7 + kk * 4)) % TAU;
+  PDPH.w2 = (PDPH.w2 + dt * (1.7 + SPB[2] * .4)) % TAU; PDPH.b = (PDPH.b + dt * (.5 + lv * .25 + bs * .4 + kk * 1.8)) % 1; PDPH.a += dt * (1.05 + bs * .7 + kk * 2);
+  PDSPW[0] = SPB[0]; PDSPW[1] = SPB[1] * .7; PDSPW[2] = SPB[2] * .45; PDSPW[3] = SPB[3] * .3; }   // les ondes écoutent d'abord les basses, beaucoup moins les aigus
 function readAudio(dt){ let v = 0;
   SPEC.live = !au.paused && specFill();
   if (SPEC.live){ const N = fbuf.length; let s = 0, tot = 0, cen = 0, low = 0, flux = 0;
     for (let i = 1; i < N; i++){ const x = fbuf[i] / 255; tot += x; cen += x * i; if (i < 10) low += x; const d = x - prevSpec[i]; if (d > 0) flux += d; prevSpec[i] = x; }
     for (let i = 1; i < 10; i++) s += fbuf[i]; v = Math.pow(s / (9 * 255), 1.6);
     { const rg = [[1, 4], [4, 13], [13, 40], [40, 120]]; for (let k = 0; k < 4; k++){ let a = 0; for (let i = rg[k][0]; i < rg[k][1]; i++) a += fbuf[i]; a /= (rg[k][1] - rg[k][0]) * 255; SPA[k] = lerp(SPA[k], a, .03); const v2 = clamp((a - SPA[k] * .7) * 3, 0, 1); SPB[k] = v2 > SPB[k] ? lerp(SPB[k], v2, .5) : SPB[k] * Math.exp(-dt * 3.5); } }
-    { const bb = (fbuf[1] + fbuf[2] + fbuf[3]) / 765; bassAvg = lerp(bassAvg, bb, .02); const bv = clamp((bb - bassAvg * .75) * 3.2, 0, 1); bassLvl = bv > bassLvl ? lerp(bassLvl, bv, .7) : bassLvl * Math.exp(-dt * 5); }
-    if (flux > fluxAvg * 1.6 && flux > 4){ if (beatLvl < .5) beatT = time; beatLvl = 1; } fluxAvg = lerp(fluxAvg, flux, .08);
+    if (SPEC.bass && SPEC.kick) pdKickRead(dt, flux);   // V9.3.1 : basses et battements tirés des basses du morceau
+    else { { const bb = (fbuf[1] + fbuf[2] + fbuf[3]) / 765; bassAvg = lerp(bassAvg, bb, .02); const bv = clamp((bb - bassAvg * .75) * 3.2, 0, 1); bassLvl = bv > bassLvl ? lerp(bassLvl, bv, .7) : bassLvl * Math.exp(-dt * 5); }
+      if (flux > fluxAvg * 1.6 && flux > 4){ if (beatLvl < .5) beatT = time; beatLvl = 1; } }
+    fluxAvg = lerp(fluxAvg, flux, .08);
     if (tot > 1){ feat.e += tot / N; feat.b += clamp(cen / tot / (N * .35), 0, 1); feat.l += low / tot * 4; onsetAcc += flux > 6 ? 1 : 0; feat.k++; } }
   if (!SPEC.live){ bassLvl *= Math.exp(-dt * 5); for (let k = 0; k < 4; k++) SPB[k] *= Math.exp(-dt * 3); } audioLvl = v > audioLvl ? lerp(audioLvl, v, .6) : audioLvl * Math.exp(-dt * 4); beatLvl *= Math.exp(-dt * 7);
   if (!SPEC.live && !au.paused && Q.length && !(SCP && SCP.playing)) pdSynthLevels(dt); }
@@ -7113,7 +7152,7 @@ function pdShkTick(){ const S = PDSHK; S.u0.fill(0); S.u1.fill(0); if (!POST.on)
   const scOn = !!(SCP && SCP.playing && au.paused), on = (!au.paused && Q.length) || scOn, sp = SHOT_PT;
   const zoomOk = !cine || !cine.dir || PDZOOM.includes(cine.shot);
   if (on && sp && zoomOk && time - (sp.t || 0) < .3 && beatT !== S.bt && time - beatT < .08){ S.bt = beatT;
-    const k = clamp(.3 + bassLvl * .9 + beatLvl * .2, 0, 1.25); if (k > .6 || (S.n++ & 1) === 0) S.a.push({x: sp.x / W, y: 1 - sp.y / H, r0: sp.r / H, t0: time, k}); }
+    const k = clamp(.25 + bassLvl * .3 + PDK.s * .55, 0, 1.1); if (PDK.s >= .7 || (S.n++ & 1) === 0) S.a.push({x: sp.x / W, y: 1 - sp.y / H, r0: sp.r / H, t0: time, k}); }
   S.a = S.a.filter(o => time - o.t0 < 1.5); if (S.a.length > 2) S.a.splice(0, S.a.length - 2);
   S.a.forEach((o, i) => { const age = time - o.t0, u = i === S.a.length - 1 ? S.u0 : S.u1; u[0] = o.x; u[1] = o.y; u[2] = o.r0 + age * .6; u[3] = o.k * Math.exp(-age * 2.1) * (1 - age / 1.5); }); }
 
