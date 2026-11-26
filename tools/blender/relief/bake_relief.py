@@ -48,7 +48,10 @@ if a.npz:
     ob = grid_object(h.astype(np.float32), cols); hmax = float(h.max())
 else:
     bpy.ops.import_scene.gltf(filepath=a.glb)   # glTF +Y haut -> Blender +Z haut
-    hmax = max(max(v.co.z for v in o.data.vertices) for o in sc.objects if o.type == 'MESH')
+    ms = [o for o in sc.objects if o.type == 'MESH']; ob = max(ms, key=lambda o: len(o.data.vertices))   # garder le LOD le plus fin
+    for o in ms:
+        if o is not ob: bpy.data.objects.remove(o, do_unlink=True)
+    bpy.context.view_layer.update(); hmax = max((ob.matrix_world @ v.co).z for v in ob.data.vertices)
 
 cam = bpy.data.cameras.new('cam'); cam.type = 'ORTHO'; cam.ortho_scale = 2.5; cam.clip_end = 50
 co = bpy.data.objects.new('cam', cam); co.location = (0, 0, 10); sc.collection.objects.link(co); sc.camera = co
@@ -57,7 +60,7 @@ bg = w.node_tree.nodes.get('Background')
 if bg: bg.inputs[1].default_value = 0.
 sc.render.engine = 'CYCLES'; sc.cycles.device = 'CPU'; sc.cycles.use_denoising = False
 sc.render.resolution_x = sc.render.resolution_y = a.size; sc.render.resolution_percentage = 100
-sc.cycles.filter_width = 1.0; sc.render.film_transparent = False
+sc.cycles.filter_width = 1.0; sc.render.film_transparent = True   # alpha = 0 là où il n'y a pas de relief
 sc.view_settings.view_transform = 'Standard'; sc.view_settings.look = 'None'
 sc.render.image_settings.file_format = 'OPEN_EXR'; sc.render.image_settings.color_depth = '32'
 
@@ -78,7 +81,9 @@ def b_ao(nt, dst):
     o = nt.nodes.new('ShaderNodeAmbientOcclusion'); o.samples = 16; o.inputs['Distance'].default_value = a.ao_dist
     nt.links.new(o.outputs['AO'], dst)
 def b_mask(nt, dst):
-    c = nt.nodes.new('ShaderNodeVertexColor'); c.layer_name = 'mask'; nt.links.new(c.outputs['Color'], dst)
+    c = nt.nodes.new('ShaderNodeVertexColor'); nt.links.new(c.outputs['Color'], dst)
+    ca = [o.data.color_attributes for o in sc.objects if o.type == 'MESH' and len(o.data.color_attributes)]
+    c.layer_name = 'mask' if any('mask' in x for x in ca) else (ca[0][0].name if ca else '')   # glTF : COLOR_0 s'appelle « Color »
 
 def render(mat, samples, tag):
     sc.view_layers[0].material_override = mat; sc.cycles.samples = samples
@@ -89,15 +94,17 @@ def render(mat, samples, tag):
     print(f'  passe {tag} : {time.time() - t0:.1f} s', flush=True)
     return px.reshape(a.size, a.size, 4)   # ligne 0 = bas
 
-H = render(emit_mat('h', b_height), 4, 'h')[..., 0]
+HP = render(emit_mat('h', b_height), 4, 'h'); H = HP[..., 0]; COV = np.clip(HP[..., 3], 0, 1)   # couverture du relief
 NRM = render(emit_mat('n', b_normal), 4, 'n')[..., :3]
 AO = render(emit_mat('ao', b_ao), a.ao_samples, 'ao')[..., 0]
-MK = render(emit_mat('m', b_mask), 4, 'm')[..., :3] if a.npz else np.zeros((a.size, a.size, 3), np.float32)
+MK = render(emit_mat('m', b_mask), 4, 'm')[..., :3]
 
 def blur(x, it=1):
     for _ in range(it): x = (4 * x + np.roll(x, 1, 0) + np.roll(x, -1, 0) + np.roll(x, 1, 1) + np.roll(x, -1, 1)) / 8
     return x
 AO = blur(AO, 1)
+# hors du relief : sol plat, rien d'occulté, pas de masque
+NRM = NRM * COV[..., None] + np.array([.5, .5, 1.]) * (1 - COV[..., None]); AO = AO * COV + (1 - COV); MK = MK * COV[..., None]; H = H * COV
 
 def save_rgb(arr, path):
     """arr : (S, S, 3) dans 0..1, ligne 0 = bas ; écrit un PNG RGB 8 bits sans conversion de couleur."""
