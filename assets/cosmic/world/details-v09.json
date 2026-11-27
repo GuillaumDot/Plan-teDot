@@ -1,0 +1,7298 @@
+[
+  {
+    "id": "hydrologie:delta:0",
+    "family": "hydrologie",
+    "model": "delta",
+    "variant": 0,
+    "scale": 0.739,
+    "roughness": 0.683,
+    "detail": 0.708,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:delta:1",
+    "family": "hydrologie",
+    "model": "delta",
+    "variant": 1,
+    "scale": 1.281,
+    "roughness": 0.855,
+    "detail": 0.473,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:delta:2",
+    "family": "hydrologie",
+    "model": "delta",
+    "variant": 2,
+    "scale": 0.657,
+    "roughness": 0.784,
+    "detail": 0.626,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:delta:3",
+    "family": "hydrologie",
+    "model": "delta",
+    "variant": 3,
+    "scale": 0.867,
+    "roughness": 0.445,
+    "detail": 0.43,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:delta:4",
+    "family": "hydrologie",
+    "model": "delta",
+    "variant": 4,
+    "scale": 1.317,
+    "roughness": 0.618,
+    "detail": 0.645,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:delta:5",
+    "family": "hydrologie",
+    "model": "delta",
+    "variant": 5,
+    "scale": 1.02,
+    "roughness": 0.697,
+    "detail": 0.433,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:delta:6",
+    "family": "hydrologie",
+    "model": "delta",
+    "variant": 6,
+    "scale": 1.012,
+    "roughness": 0.834,
+    "detail": 0.655,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:delta:7",
+    "family": "hydrologie",
+    "model": "delta",
+    "variant": 7,
+    "scale": 1.19,
+    "roughness": 0.372,
+    "detail": 0.902,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:méandre:0",
+    "family": "hydrologie",
+    "model": "méandre",
+    "variant": 0,
+    "scale": 1.122,
+    "roughness": 0.838,
+    "detail": 0.458,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:méandre:1",
+    "family": "hydrologie",
+    "model": "méandre",
+    "variant": 1,
+    "scale": 1.264,
+    "roughness": 0.448,
+    "detail": 0.761,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:méandre:2",
+    "family": "hydrologie",
+    "model": "méandre",
+    "variant": 2,
+    "scale": 1.115,
+    "roughness": 0.207,
+    "detail": 0.348,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:méandre:3",
+    "family": "hydrologie",
+    "model": "méandre",
+    "variant": 3,
+    "scale": 1.171,
+    "roughness": 0.544,
+    "detail": 0.392,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:méandre:4",
+    "family": "hydrologie",
+    "model": "méandre",
+    "variant": 4,
+    "scale": 0.791,
+    "roughness": 0.269,
+    "detail": 0.485,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:méandre:5",
+    "family": "hydrologie",
+    "model": "méandre",
+    "variant": 5,
+    "scale": 1.332,
+    "roughness": 0.388,
+    "detail": 0.712,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:méandre:6",
+    "family": "hydrologie",
+    "model": "méandre",
+    "variant": 6,
+    "scale": 0.804,
+    "roughness": 0.604,
+    "detail": 0.76,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:méandre:7",
+    "family": "hydrologie",
+    "model": "méandre",
+    "variant": 7,
+    "scale": 1.178,
+    "roughness": 0.808,
+    "detail": 0.723,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:cascade:0",
+    "family": "hydrologie",
+    "model": "cascade",
+    "variant": 0,
+    "scale": 1.112,
+    "roughness": 0.727,
+    "detail": 0.845,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:cascade:1",
+    "family": "hydrologie",
+    "model": "cascade",
+    "variant": 1,
+    "scale": 1.07,
+    "roughness": 0.741,
+    "detail": 0.496,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:cascade:2",
+    "family": "hydrologie",
+    "model": "cascade",
+    "variant": 2,
+    "scale": 0.82,
+    "roughness": 0.215,
+    "detail": 0.933,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:cascade:3",
+    "family": "hydrologie",
+    "model": "cascade",
+    "variant": 3,
+    "scale": 0.985,
+    "roughness": 0.557,
+    "detail": 0.393,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:cascade:4",
+    "family": "hydrologie",
+    "model": "cascade",
+    "variant": 4,
+    "scale": 0.842,
+    "roughness": 0.793,
+    "detail": 0.653,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:cascade:5",
+    "family": "hydrologie",
+    "model": "cascade",
+    "variant": 5,
+    "scale": 0.827,
+    "roughness": 0.809,
+    "detail": 0.973,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:cascade:6",
+    "family": "hydrologie",
+    "model": "cascade",
+    "variant": 6,
+    "scale": 0.722,
+    "roughness": 0.616,
+    "detail": 0.448,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:cascade:7",
+    "family": "hydrologie",
+    "model": "cascade",
+    "variant": 7,
+    "scale": 0.816,
+    "roughness": 0.5,
+    "detail": 0.484,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:lac glaciaire:0",
+    "family": "hydrologie",
+    "model": "lac glaciaire",
+    "variant": 0,
+    "scale": 0.665,
+    "roughness": 0.452,
+    "detail": 0.925,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:lac glaciaire:1",
+    "family": "hydrologie",
+    "model": "lac glaciaire",
+    "variant": 1,
+    "scale": 1.131,
+    "roughness": 0.783,
+    "detail": 0.693,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:lac glaciaire:2",
+    "family": "hydrologie",
+    "model": "lac glaciaire",
+    "variant": 2,
+    "scale": 1.075,
+    "roughness": 0.625,
+    "detail": 0.567,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:lac glaciaire:3",
+    "family": "hydrologie",
+    "model": "lac glaciaire",
+    "variant": 3,
+    "scale": 0.784,
+    "roughness": 0.817,
+    "detail": 0.644,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:lac glaciaire:4",
+    "family": "hydrologie",
+    "model": "lac glaciaire",
+    "variant": 4,
+    "scale": 1.068,
+    "roughness": 0.265,
+    "detail": 0.817,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:lac glaciaire:5",
+    "family": "hydrologie",
+    "model": "lac glaciaire",
+    "variant": 5,
+    "scale": 1.272,
+    "roughness": 0.859,
+    "detail": 0.853,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:lac glaciaire:6",
+    "family": "hydrologie",
+    "model": "lac glaciaire",
+    "variant": 6,
+    "scale": 1.295,
+    "roughness": 0.755,
+    "detail": 0.538,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:lac glaciaire:7",
+    "family": "hydrologie",
+    "model": "lac glaciaire",
+    "variant": 7,
+    "scale": 1.062,
+    "roughness": 0.478,
+    "detail": 0.686,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:marais:0",
+    "family": "hydrologie",
+    "model": "marais",
+    "variant": 0,
+    "scale": 0.935,
+    "roughness": 0.375,
+    "detail": 0.924,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:marais:1",
+    "family": "hydrologie",
+    "model": "marais",
+    "variant": 1,
+    "scale": 1.013,
+    "roughness": 0.315,
+    "detail": 0.602,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:marais:2",
+    "family": "hydrologie",
+    "model": "marais",
+    "variant": 2,
+    "scale": 1.156,
+    "roughness": 0.696,
+    "detail": 0.686,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:marais:3",
+    "family": "hydrologie",
+    "model": "marais",
+    "variant": 3,
+    "scale": 1.024,
+    "roughness": 0.778,
+    "detail": 0.819,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:marais:4",
+    "family": "hydrologie",
+    "model": "marais",
+    "variant": 4,
+    "scale": 0.746,
+    "roughness": 0.39,
+    "detail": 0.721,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:marais:5",
+    "family": "hydrologie",
+    "model": "marais",
+    "variant": 5,
+    "scale": 0.73,
+    "roughness": 0.79,
+    "detail": 0.465,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:marais:6",
+    "family": "hydrologie",
+    "model": "marais",
+    "variant": 6,
+    "scale": 1.075,
+    "roughness": 0.884,
+    "detail": 0.718,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:marais:7",
+    "family": "hydrologie",
+    "model": "marais",
+    "variant": 7,
+    "scale": 1.246,
+    "roughness": 0.528,
+    "detail": 0.433,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:estuaire:0",
+    "family": "hydrologie",
+    "model": "estuaire",
+    "variant": 0,
+    "scale": 1.095,
+    "roughness": 0.203,
+    "detail": 0.551,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:estuaire:1",
+    "family": "hydrologie",
+    "model": "estuaire",
+    "variant": 1,
+    "scale": 1.219,
+    "roughness": 0.314,
+    "detail": 0.875,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:estuaire:2",
+    "family": "hydrologie",
+    "model": "estuaire",
+    "variant": 2,
+    "scale": 1.221,
+    "roughness": 0.75,
+    "detail": 0.977,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:estuaire:3",
+    "family": "hydrologie",
+    "model": "estuaire",
+    "variant": 3,
+    "scale": 1.154,
+    "roughness": 0.883,
+    "detail": 0.476,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:estuaire:4",
+    "family": "hydrologie",
+    "model": "estuaire",
+    "variant": 4,
+    "scale": 0.774,
+    "roughness": 0.559,
+    "detail": 0.371,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:estuaire:5",
+    "family": "hydrologie",
+    "model": "estuaire",
+    "variant": 5,
+    "scale": 1.2,
+    "roughness": 0.205,
+    "detail": 0.918,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:estuaire:6",
+    "family": "hydrologie",
+    "model": "estuaire",
+    "variant": 6,
+    "scale": 0.683,
+    "roughness": 0.831,
+    "detail": 0.473,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "hydrologie:estuaire:7",
+    "family": "hydrologie",
+    "model": "estuaire",
+    "variant": 7,
+    "scale": 0.891,
+    "roughness": 0.465,
+    "detail": 0.385,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:éboulis:0",
+    "family": "géologie",
+    "model": "éboulis",
+    "variant": 0,
+    "scale": 1.193,
+    "roughness": 0.889,
+    "detail": 0.883,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:éboulis:1",
+    "family": "géologie",
+    "model": "éboulis",
+    "variant": 1,
+    "scale": 0.875,
+    "roughness": 0.682,
+    "detail": 0.734,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:éboulis:2",
+    "family": "géologie",
+    "model": "éboulis",
+    "variant": 2,
+    "scale": 1.202,
+    "roughness": 0.84,
+    "detail": 0.439,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:éboulis:3",
+    "family": "géologie",
+    "model": "éboulis",
+    "variant": 3,
+    "scale": 0.944,
+    "roughness": 0.669,
+    "detail": 0.935,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:éboulis:4",
+    "family": "géologie",
+    "model": "éboulis",
+    "variant": 4,
+    "scale": 0.695,
+    "roughness": 0.56,
+    "detail": 0.864,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:éboulis:5",
+    "family": "géologie",
+    "model": "éboulis",
+    "variant": 5,
+    "scale": 0.679,
+    "roughness": 0.378,
+    "detail": 0.416,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:éboulis:6",
+    "family": "géologie",
+    "model": "éboulis",
+    "variant": 6,
+    "scale": 0.668,
+    "roughness": 0.575,
+    "detail": 0.689,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:éboulis:7",
+    "family": "géologie",
+    "model": "éboulis",
+    "variant": 7,
+    "scale": 1.114,
+    "roughness": 0.716,
+    "detail": 0.395,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:strates:0",
+    "family": "géologie",
+    "model": "strates",
+    "variant": 0,
+    "scale": 0.925,
+    "roughness": 0.202,
+    "detail": 0.417,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:strates:1",
+    "family": "géologie",
+    "model": "strates",
+    "variant": 1,
+    "scale": 1.218,
+    "roughness": 0.63,
+    "detail": 0.834,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:strates:2",
+    "family": "géologie",
+    "model": "strates",
+    "variant": 2,
+    "scale": 0.66,
+    "roughness": 0.33,
+    "detail": 0.894,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:strates:3",
+    "family": "géologie",
+    "model": "strates",
+    "variant": 3,
+    "scale": 0.898,
+    "roughness": 0.829,
+    "detail": 0.946,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:strates:4",
+    "family": "géologie",
+    "model": "strates",
+    "variant": 4,
+    "scale": 1.044,
+    "roughness": 0.572,
+    "detail": 0.412,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:strates:5",
+    "family": "géologie",
+    "model": "strates",
+    "variant": 5,
+    "scale": 0.689,
+    "roughness": 0.324,
+    "detail": 0.388,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:strates:6",
+    "family": "géologie",
+    "model": "strates",
+    "variant": 6,
+    "scale": 0.93,
+    "roughness": 0.299,
+    "detail": 0.816,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:strates:7",
+    "family": "géologie",
+    "model": "strates",
+    "variant": 7,
+    "scale": 0.971,
+    "roughness": 0.642,
+    "detail": 0.778,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:karst:0",
+    "family": "géologie",
+    "model": "karst",
+    "variant": 0,
+    "scale": 1.015,
+    "roughness": 0.242,
+    "detail": 0.855,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:karst:1",
+    "family": "géologie",
+    "model": "karst",
+    "variant": 1,
+    "scale": 0.738,
+    "roughness": 0.726,
+    "detail": 0.54,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:karst:2",
+    "family": "géologie",
+    "model": "karst",
+    "variant": 2,
+    "scale": 1.263,
+    "roughness": 0.346,
+    "detail": 0.674,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:karst:3",
+    "family": "géologie",
+    "model": "karst",
+    "variant": 3,
+    "scale": 1.219,
+    "roughness": 0.577,
+    "detail": 0.744,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:karst:4",
+    "family": "géologie",
+    "model": "karst",
+    "variant": 4,
+    "scale": 0.974,
+    "roughness": 0.75,
+    "detail": 0.959,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:karst:5",
+    "family": "géologie",
+    "model": "karst",
+    "variant": 5,
+    "scale": 1.143,
+    "roughness": 0.321,
+    "detail": 0.408,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:karst:6",
+    "family": "géologie",
+    "model": "karst",
+    "variant": 6,
+    "scale": 1.129,
+    "roughness": 0.832,
+    "detail": 0.775,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:karst:7",
+    "family": "géologie",
+    "model": "karst",
+    "variant": 7,
+    "scale": 1.137,
+    "roughness": 0.729,
+    "detail": 0.752,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:moraine:0",
+    "family": "géologie",
+    "model": "moraine",
+    "variant": 0,
+    "scale": 0.761,
+    "roughness": 0.459,
+    "detail": 0.325,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:moraine:1",
+    "family": "géologie",
+    "model": "moraine",
+    "variant": 1,
+    "scale": 0.872,
+    "roughness": 0.487,
+    "detail": 0.431,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:moraine:2",
+    "family": "géologie",
+    "model": "moraine",
+    "variant": 2,
+    "scale": 0.906,
+    "roughness": 0.415,
+    "detail": 0.376,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:moraine:3",
+    "family": "géologie",
+    "model": "moraine",
+    "variant": 3,
+    "scale": 0.957,
+    "roughness": 0.376,
+    "detail": 0.602,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:moraine:4",
+    "family": "géologie",
+    "model": "moraine",
+    "variant": 4,
+    "scale": 0.663,
+    "roughness": 0.368,
+    "detail": 0.408,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:moraine:5",
+    "family": "géologie",
+    "model": "moraine",
+    "variant": 5,
+    "scale": 1.039,
+    "roughness": 0.575,
+    "detail": 0.616,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:moraine:6",
+    "family": "géologie",
+    "model": "moraine",
+    "variant": 6,
+    "scale": 0.695,
+    "roughness": 0.586,
+    "detail": 0.552,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:moraine:7",
+    "family": "géologie",
+    "model": "moraine",
+    "variant": 7,
+    "scale": 1.126,
+    "roughness": 0.583,
+    "detail": 0.367,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:faille:0",
+    "family": "géologie",
+    "model": "faille",
+    "variant": 0,
+    "scale": 0.787,
+    "roughness": 0.895,
+    "detail": 0.302,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:faille:1",
+    "family": "géologie",
+    "model": "faille",
+    "variant": 1,
+    "scale": 1.095,
+    "roughness": 0.431,
+    "detail": 0.998,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:faille:2",
+    "family": "géologie",
+    "model": "faille",
+    "variant": 2,
+    "scale": 1.052,
+    "roughness": 0.2,
+    "detail": 0.515,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:faille:3",
+    "family": "géologie",
+    "model": "faille",
+    "variant": 3,
+    "scale": 1.028,
+    "roughness": 0.534,
+    "detail": 0.332,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:faille:4",
+    "family": "géologie",
+    "model": "faille",
+    "variant": 4,
+    "scale": 1.339,
+    "roughness": 0.803,
+    "detail": 0.51,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:faille:5",
+    "family": "géologie",
+    "model": "faille",
+    "variant": 5,
+    "scale": 1.259,
+    "roughness": 0.359,
+    "detail": 0.382,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:faille:6",
+    "family": "géologie",
+    "model": "faille",
+    "variant": 6,
+    "scale": 1.193,
+    "roughness": 0.47,
+    "detail": 0.35,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:faille:7",
+    "family": "géologie",
+    "model": "faille",
+    "variant": 7,
+    "scale": 0.842,
+    "roughness": 0.734,
+    "detail": 0.447,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:dunes longitudinales:0",
+    "family": "géologie",
+    "model": "dunes longitudinales",
+    "variant": 0,
+    "scale": 0.855,
+    "roughness": 0.409,
+    "detail": 0.393,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:dunes longitudinales:1",
+    "family": "géologie",
+    "model": "dunes longitudinales",
+    "variant": 1,
+    "scale": 0.781,
+    "roughness": 0.256,
+    "detail": 0.483,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:dunes longitudinales:2",
+    "family": "géologie",
+    "model": "dunes longitudinales",
+    "variant": 2,
+    "scale": 0.676,
+    "roughness": 0.306,
+    "detail": 0.99,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:dunes longitudinales:3",
+    "family": "géologie",
+    "model": "dunes longitudinales",
+    "variant": 3,
+    "scale": 1.181,
+    "roughness": 0.322,
+    "detail": 0.709,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:dunes longitudinales:4",
+    "family": "géologie",
+    "model": "dunes longitudinales",
+    "variant": 4,
+    "scale": 1.219,
+    "roughness": 0.555,
+    "detail": 0.759,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:dunes longitudinales:5",
+    "family": "géologie",
+    "model": "dunes longitudinales",
+    "variant": 5,
+    "scale": 1.286,
+    "roughness": 0.367,
+    "detail": 0.954,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:dunes longitudinales:6",
+    "family": "géologie",
+    "model": "dunes longitudinales",
+    "variant": 6,
+    "scale": 1.118,
+    "roughness": 0.252,
+    "detail": 0.419,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "géologie:dunes longitudinales:7",
+    "family": "géologie",
+    "model": "dunes longitudinales",
+    "variant": 7,
+    "scale": 1.021,
+    "roughness": 0.711,
+    "detail": 0.783,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:récif:0",
+    "family": "littoral",
+    "model": "récif",
+    "variant": 0,
+    "scale": 0.78,
+    "roughness": 0.541,
+    "detail": 0.512,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:récif:1",
+    "family": "littoral",
+    "model": "récif",
+    "variant": 1,
+    "scale": 0.915,
+    "roughness": 0.734,
+    "detail": 0.318,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:récif:2",
+    "family": "littoral",
+    "model": "récif",
+    "variant": 2,
+    "scale": 0.716,
+    "roughness": 0.544,
+    "detail": 0.601,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:récif:3",
+    "family": "littoral",
+    "model": "récif",
+    "variant": 3,
+    "scale": 0.944,
+    "roughness": 0.333,
+    "detail": 0.569,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:récif:4",
+    "family": "littoral",
+    "model": "récif",
+    "variant": 4,
+    "scale": 1.23,
+    "roughness": 0.385,
+    "detail": 0.744,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:récif:5",
+    "family": "littoral",
+    "model": "récif",
+    "variant": 5,
+    "scale": 0.78,
+    "roughness": 0.662,
+    "detail": 0.992,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:récif:6",
+    "family": "littoral",
+    "model": "récif",
+    "variant": 6,
+    "scale": 1.157,
+    "roughness": 0.51,
+    "detail": 0.443,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:récif:7",
+    "family": "littoral",
+    "model": "récif",
+    "variant": 7,
+    "scale": 0.752,
+    "roughness": 0.73,
+    "detail": 0.694,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:plage:0",
+    "family": "littoral",
+    "model": "plage",
+    "variant": 0,
+    "scale": 0.652,
+    "roughness": 0.385,
+    "detail": 0.832,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:plage:1",
+    "family": "littoral",
+    "model": "plage",
+    "variant": 1,
+    "scale": 0.665,
+    "roughness": 0.274,
+    "detail": 0.425,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:plage:2",
+    "family": "littoral",
+    "model": "plage",
+    "variant": 2,
+    "scale": 0.658,
+    "roughness": 0.458,
+    "detail": 0.973,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:plage:3",
+    "family": "littoral",
+    "model": "plage",
+    "variant": 3,
+    "scale": 1.088,
+    "roughness": 0.598,
+    "detail": 0.463,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:plage:4",
+    "family": "littoral",
+    "model": "plage",
+    "variant": 4,
+    "scale": 1.187,
+    "roughness": 0.317,
+    "detail": 0.952,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:plage:5",
+    "family": "littoral",
+    "model": "plage",
+    "variant": 5,
+    "scale": 1.057,
+    "roughness": 0.419,
+    "detail": 0.952,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:plage:6",
+    "family": "littoral",
+    "model": "plage",
+    "variant": 6,
+    "scale": 1.231,
+    "roughness": 0.213,
+    "detail": 0.536,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:plage:7",
+    "family": "littoral",
+    "model": "plage",
+    "variant": 7,
+    "scale": 0.77,
+    "roughness": 0.366,
+    "detail": 0.333,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:falaise:0",
+    "family": "littoral",
+    "model": "falaise",
+    "variant": 0,
+    "scale": 1.264,
+    "roughness": 0.364,
+    "detail": 0.406,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:falaise:1",
+    "family": "littoral",
+    "model": "falaise",
+    "variant": 1,
+    "scale": 1.108,
+    "roughness": 0.605,
+    "detail": 0.358,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:falaise:2",
+    "family": "littoral",
+    "model": "falaise",
+    "variant": 2,
+    "scale": 1.125,
+    "roughness": 0.253,
+    "detail": 0.423,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:falaise:3",
+    "family": "littoral",
+    "model": "falaise",
+    "variant": 3,
+    "scale": 0.851,
+    "roughness": 0.545,
+    "detail": 0.496,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:falaise:4",
+    "family": "littoral",
+    "model": "falaise",
+    "variant": 4,
+    "scale": 1.204,
+    "roughness": 0.731,
+    "detail": 0.744,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:falaise:5",
+    "family": "littoral",
+    "model": "falaise",
+    "variant": 5,
+    "scale": 0.699,
+    "roughness": 0.708,
+    "detail": 0.815,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:falaise:6",
+    "family": "littoral",
+    "model": "falaise",
+    "variant": 6,
+    "scale": 1.056,
+    "roughness": 0.608,
+    "detail": 0.471,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:falaise:7",
+    "family": "littoral",
+    "model": "falaise",
+    "variant": 7,
+    "scale": 1.113,
+    "roughness": 0.522,
+    "detail": 0.604,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:cordon littoral:0",
+    "family": "littoral",
+    "model": "cordon littoral",
+    "variant": 0,
+    "scale": 1.133,
+    "roughness": 0.231,
+    "detail": 0.893,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:cordon littoral:1",
+    "family": "littoral",
+    "model": "cordon littoral",
+    "variant": 1,
+    "scale": 0.822,
+    "roughness": 0.597,
+    "detail": 0.489,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:cordon littoral:2",
+    "family": "littoral",
+    "model": "cordon littoral",
+    "variant": 2,
+    "scale": 1.312,
+    "roughness": 0.851,
+    "detail": 0.641,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:cordon littoral:3",
+    "family": "littoral",
+    "model": "cordon littoral",
+    "variant": 3,
+    "scale": 0.937,
+    "roughness": 0.776,
+    "detail": 0.536,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:cordon littoral:4",
+    "family": "littoral",
+    "model": "cordon littoral",
+    "variant": 4,
+    "scale": 1.195,
+    "roughness": 0.236,
+    "detail": 0.945,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:cordon littoral:5",
+    "family": "littoral",
+    "model": "cordon littoral",
+    "variant": 5,
+    "scale": 1.315,
+    "roughness": 0.493,
+    "detail": 0.467,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:cordon littoral:6",
+    "family": "littoral",
+    "model": "cordon littoral",
+    "variant": 6,
+    "scale": 1.013,
+    "roughness": 0.866,
+    "detail": 0.594,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:cordon littoral:7",
+    "family": "littoral",
+    "model": "cordon littoral",
+    "variant": 7,
+    "scale": 0.845,
+    "roughness": 0.74,
+    "detail": 0.624,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:mangrove:0",
+    "family": "littoral",
+    "model": "mangrove",
+    "variant": 0,
+    "scale": 1.218,
+    "roughness": 0.573,
+    "detail": 0.71,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:mangrove:1",
+    "family": "littoral",
+    "model": "mangrove",
+    "variant": 1,
+    "scale": 0.709,
+    "roughness": 0.266,
+    "detail": 0.843,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:mangrove:2",
+    "family": "littoral",
+    "model": "mangrove",
+    "variant": 2,
+    "scale": 1.312,
+    "roughness": 0.851,
+    "detail": 0.417,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:mangrove:3",
+    "family": "littoral",
+    "model": "mangrove",
+    "variant": 3,
+    "scale": 0.803,
+    "roughness": 0.524,
+    "detail": 0.42,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:mangrove:4",
+    "family": "littoral",
+    "model": "mangrove",
+    "variant": 4,
+    "scale": 1.214,
+    "roughness": 0.709,
+    "detail": 1.0,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:mangrove:5",
+    "family": "littoral",
+    "model": "mangrove",
+    "variant": 5,
+    "scale": 1.153,
+    "roughness": 0.307,
+    "detail": 0.574,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:mangrove:6",
+    "family": "littoral",
+    "model": "mangrove",
+    "variant": 6,
+    "scale": 0.784,
+    "roughness": 0.416,
+    "detail": 0.403,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:mangrove:7",
+    "family": "littoral",
+    "model": "mangrove",
+    "variant": 7,
+    "scale": 0.825,
+    "roughness": 0.534,
+    "detail": 0.378,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:estran:0",
+    "family": "littoral",
+    "model": "estran",
+    "variant": 0,
+    "scale": 1.001,
+    "roughness": 0.662,
+    "detail": 0.34,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:estran:1",
+    "family": "littoral",
+    "model": "estran",
+    "variant": 1,
+    "scale": 1.257,
+    "roughness": 0.485,
+    "detail": 0.636,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:estran:2",
+    "family": "littoral",
+    "model": "estran",
+    "variant": 2,
+    "scale": 0.746,
+    "roughness": 0.892,
+    "detail": 0.989,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:estran:3",
+    "family": "littoral",
+    "model": "estran",
+    "variant": 3,
+    "scale": 0.985,
+    "roughness": 0.62,
+    "detail": 0.52,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:estran:4",
+    "family": "littoral",
+    "model": "estran",
+    "variant": 4,
+    "scale": 0.802,
+    "roughness": 0.728,
+    "detail": 0.978,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:estran:5",
+    "family": "littoral",
+    "model": "estran",
+    "variant": 5,
+    "scale": 1.147,
+    "roughness": 0.882,
+    "detail": 0.891,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:estran:6",
+    "family": "littoral",
+    "model": "estran",
+    "variant": 6,
+    "scale": 1.269,
+    "roughness": 0.216,
+    "detail": 0.855,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "littoral:estran:7",
+    "family": "littoral",
+    "model": "estran",
+    "variant": 7,
+    "scale": 0.872,
+    "roughness": 0.328,
+    "detail": 0.407,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:lisière:0",
+    "family": "écologie",
+    "model": "lisière",
+    "variant": 0,
+    "scale": 0.892,
+    "roughness": 0.819,
+    "detail": 0.926,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:lisière:1",
+    "family": "écologie",
+    "model": "lisière",
+    "variant": 1,
+    "scale": 1.177,
+    "roughness": 0.206,
+    "detail": 0.602,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:lisière:2",
+    "family": "écologie",
+    "model": "lisière",
+    "variant": 2,
+    "scale": 0.734,
+    "roughness": 0.749,
+    "detail": 0.726,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:lisière:3",
+    "family": "écologie",
+    "model": "lisière",
+    "variant": 3,
+    "scale": 1.117,
+    "roughness": 0.291,
+    "detail": 0.927,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:lisière:4",
+    "family": "écologie",
+    "model": "lisière",
+    "variant": 4,
+    "scale": 1.036,
+    "roughness": 0.643,
+    "detail": 0.956,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:lisière:5",
+    "family": "écologie",
+    "model": "lisière",
+    "variant": 5,
+    "scale": 1.24,
+    "roughness": 0.656,
+    "detail": 0.558,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:lisière:6",
+    "family": "écologie",
+    "model": "lisière",
+    "variant": 6,
+    "scale": 1.317,
+    "roughness": 0.552,
+    "detail": 0.313,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:lisière:7",
+    "family": "écologie",
+    "model": "lisière",
+    "variant": 7,
+    "scale": 1.068,
+    "roughness": 0.527,
+    "detail": 0.985,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:canopée:0",
+    "family": "écologie",
+    "model": "canopée",
+    "variant": 0,
+    "scale": 0.669,
+    "roughness": 0.336,
+    "detail": 0.93,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:canopée:1",
+    "family": "écologie",
+    "model": "canopée",
+    "variant": 1,
+    "scale": 0.723,
+    "roughness": 0.565,
+    "detail": 0.594,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:canopée:2",
+    "family": "écologie",
+    "model": "canopée",
+    "variant": 2,
+    "scale": 0.819,
+    "roughness": 0.606,
+    "detail": 0.666,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:canopée:3",
+    "family": "écologie",
+    "model": "canopée",
+    "variant": 3,
+    "scale": 0.821,
+    "roughness": 0.536,
+    "detail": 0.353,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:canopée:4",
+    "family": "écologie",
+    "model": "canopée",
+    "variant": 4,
+    "scale": 0.977,
+    "roughness": 0.802,
+    "detail": 0.728,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:canopée:5",
+    "family": "écologie",
+    "model": "canopée",
+    "variant": 5,
+    "scale": 1.333,
+    "roughness": 0.313,
+    "detail": 0.659,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:canopée:6",
+    "family": "écologie",
+    "model": "canopée",
+    "variant": 6,
+    "scale": 1.069,
+    "roughness": 0.849,
+    "detail": 0.381,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:canopée:7",
+    "family": "écologie",
+    "model": "canopée",
+    "variant": 7,
+    "scale": 1.156,
+    "roughness": 0.438,
+    "detail": 0.692,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:clairière:0",
+    "family": "écologie",
+    "model": "clairière",
+    "variant": 0,
+    "scale": 1.013,
+    "roughness": 0.81,
+    "detail": 0.928,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:clairière:1",
+    "family": "écologie",
+    "model": "clairière",
+    "variant": 1,
+    "scale": 0.698,
+    "roughness": 0.287,
+    "detail": 0.701,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:clairière:2",
+    "family": "écologie",
+    "model": "clairière",
+    "variant": 2,
+    "scale": 1.296,
+    "roughness": 0.336,
+    "detail": 0.376,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:clairière:3",
+    "family": "écologie",
+    "model": "clairière",
+    "variant": 3,
+    "scale": 0.778,
+    "roughness": 0.714,
+    "detail": 0.61,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:clairière:4",
+    "family": "écologie",
+    "model": "clairière",
+    "variant": 4,
+    "scale": 0.879,
+    "roughness": 0.242,
+    "detail": 0.869,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:clairière:5",
+    "family": "écologie",
+    "model": "clairière",
+    "variant": 5,
+    "scale": 1.039,
+    "roughness": 0.343,
+    "detail": 0.486,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:clairière:6",
+    "family": "écologie",
+    "model": "clairière",
+    "variant": 6,
+    "scale": 1.04,
+    "roughness": 0.341,
+    "detail": 0.832,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:clairière:7",
+    "family": "écologie",
+    "model": "clairière",
+    "variant": 7,
+    "scale": 0.783,
+    "roughness": 0.303,
+    "detail": 0.713,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:steppe:0",
+    "family": "écologie",
+    "model": "steppe",
+    "variant": 0,
+    "scale": 0.671,
+    "roughness": 0.585,
+    "detail": 0.571,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:steppe:1",
+    "family": "écologie",
+    "model": "steppe",
+    "variant": 1,
+    "scale": 1.044,
+    "roughness": 0.803,
+    "detail": 0.645,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:steppe:2",
+    "family": "écologie",
+    "model": "steppe",
+    "variant": 2,
+    "scale": 1.026,
+    "roughness": 0.653,
+    "detail": 0.868,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:steppe:3",
+    "family": "écologie",
+    "model": "steppe",
+    "variant": 3,
+    "scale": 0.969,
+    "roughness": 0.753,
+    "detail": 0.364,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:steppe:4",
+    "family": "écologie",
+    "model": "steppe",
+    "variant": 4,
+    "scale": 1.012,
+    "roughness": 0.659,
+    "detail": 0.307,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:steppe:5",
+    "family": "écologie",
+    "model": "steppe",
+    "variant": 5,
+    "scale": 0.797,
+    "roughness": 0.371,
+    "detail": 0.334,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:steppe:6",
+    "family": "écologie",
+    "model": "steppe",
+    "variant": 6,
+    "scale": 1.163,
+    "roughness": 0.481,
+    "detail": 0.772,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:steppe:7",
+    "family": "écologie",
+    "model": "steppe",
+    "variant": 7,
+    "scale": 0.862,
+    "roughness": 0.74,
+    "detail": 0.714,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:toundra:0",
+    "family": "écologie",
+    "model": "toundra",
+    "variant": 0,
+    "scale": 0.83,
+    "roughness": 0.589,
+    "detail": 0.405,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:toundra:1",
+    "family": "écologie",
+    "model": "toundra",
+    "variant": 1,
+    "scale": 1.219,
+    "roughness": 0.611,
+    "detail": 0.819,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:toundra:2",
+    "family": "écologie",
+    "model": "toundra",
+    "variant": 2,
+    "scale": 0.893,
+    "roughness": 0.648,
+    "detail": 0.887,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:toundra:3",
+    "family": "écologie",
+    "model": "toundra",
+    "variant": 3,
+    "scale": 0.67,
+    "roughness": 0.595,
+    "detail": 0.893,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:toundra:4",
+    "family": "écologie",
+    "model": "toundra",
+    "variant": 4,
+    "scale": 1.001,
+    "roughness": 0.45,
+    "detail": 0.894,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:toundra:5",
+    "family": "écologie",
+    "model": "toundra",
+    "variant": 5,
+    "scale": 1.336,
+    "roughness": 0.668,
+    "detail": 0.896,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:toundra:6",
+    "family": "écologie",
+    "model": "toundra",
+    "variant": 6,
+    "scale": 0.746,
+    "roughness": 0.511,
+    "detail": 0.815,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:toundra:7",
+    "family": "écologie",
+    "model": "toundra",
+    "variant": 7,
+    "scale": 0.929,
+    "roughness": 0.501,
+    "detail": 0.684,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:ripisylve:0",
+    "family": "écologie",
+    "model": "ripisylve",
+    "variant": 0,
+    "scale": 1.088,
+    "roughness": 0.528,
+    "detail": 0.488,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:ripisylve:1",
+    "family": "écologie",
+    "model": "ripisylve",
+    "variant": 1,
+    "scale": 0.781,
+    "roughness": 0.815,
+    "detail": 0.639,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:ripisylve:2",
+    "family": "écologie",
+    "model": "ripisylve",
+    "variant": 2,
+    "scale": 1.313,
+    "roughness": 0.43,
+    "detail": 0.803,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:ripisylve:3",
+    "family": "écologie",
+    "model": "ripisylve",
+    "variant": 3,
+    "scale": 0.857,
+    "roughness": 0.618,
+    "detail": 0.867,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:ripisylve:4",
+    "family": "écologie",
+    "model": "ripisylve",
+    "variant": 4,
+    "scale": 0.691,
+    "roughness": 0.6,
+    "detail": 0.392,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:ripisylve:5",
+    "family": "écologie",
+    "model": "ripisylve",
+    "variant": 5,
+    "scale": 1.001,
+    "roughness": 0.46,
+    "detail": 0.483,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:ripisylve:6",
+    "family": "écologie",
+    "model": "ripisylve",
+    "variant": 6,
+    "scale": 1.313,
+    "roughness": 0.361,
+    "detail": 0.612,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "écologie:ripisylve:7",
+    "family": "écologie",
+    "model": "ripisylve",
+    "variant": 7,
+    "scale": 1.115,
+    "roughness": 0.535,
+    "detail": 0.306,
+    "slopeMax": 1,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:port:0",
+    "family": "urbanisme",
+    "model": "port",
+    "variant": 0,
+    "scale": 0.718,
+    "roughness": 0.858,
+    "detail": 0.893,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:port:1",
+    "family": "urbanisme",
+    "model": "port",
+    "variant": 1,
+    "scale": 0.728,
+    "roughness": 0.682,
+    "detail": 0.639,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:port:2",
+    "family": "urbanisme",
+    "model": "port",
+    "variant": 2,
+    "scale": 0.91,
+    "roughness": 0.282,
+    "detail": 0.592,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:port:3",
+    "family": "urbanisme",
+    "model": "port",
+    "variant": 3,
+    "scale": 1.307,
+    "roughness": 0.387,
+    "detail": 0.398,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:port:4",
+    "family": "urbanisme",
+    "model": "port",
+    "variant": 4,
+    "scale": 1.049,
+    "roughness": 0.538,
+    "detail": 0.866,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:port:5",
+    "family": "urbanisme",
+    "model": "port",
+    "variant": 5,
+    "scale": 1.312,
+    "roughness": 0.542,
+    "detail": 0.92,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:port:6",
+    "family": "urbanisme",
+    "model": "port",
+    "variant": 6,
+    "scale": 0.797,
+    "roughness": 0.47,
+    "detail": 0.817,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:port:7",
+    "family": "urbanisme",
+    "model": "port",
+    "variant": 7,
+    "scale": 0.992,
+    "roughness": 0.466,
+    "detail": 0.606,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:pont:0",
+    "family": "urbanisme",
+    "model": "pont",
+    "variant": 0,
+    "scale": 0.797,
+    "roughness": 0.48,
+    "detail": 0.621,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:pont:1",
+    "family": "urbanisme",
+    "model": "pont",
+    "variant": 1,
+    "scale": 1.053,
+    "roughness": 0.723,
+    "detail": 0.848,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:pont:2",
+    "family": "urbanisme",
+    "model": "pont",
+    "variant": 2,
+    "scale": 1.325,
+    "roughness": 0.846,
+    "detail": 0.385,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:pont:3",
+    "family": "urbanisme",
+    "model": "pont",
+    "variant": 3,
+    "scale": 0.719,
+    "roughness": 0.479,
+    "detail": 0.881,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:pont:4",
+    "family": "urbanisme",
+    "model": "pont",
+    "variant": 4,
+    "scale": 0.91,
+    "roughness": 0.672,
+    "detail": 0.717,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:pont:5",
+    "family": "urbanisme",
+    "model": "pont",
+    "variant": 5,
+    "scale": 0.679,
+    "roughness": 0.358,
+    "detail": 0.827,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:pont:6",
+    "family": "urbanisme",
+    "model": "pont",
+    "variant": 6,
+    "scale": 1.169,
+    "roughness": 0.572,
+    "detail": 0.866,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:pont:7",
+    "family": "urbanisme",
+    "model": "pont",
+    "variant": 7,
+    "scale": 0.727,
+    "roughness": 0.425,
+    "detail": 0.33,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:terrasses:0",
+    "family": "urbanisme",
+    "model": "terrasses",
+    "variant": 0,
+    "scale": 0.896,
+    "roughness": 0.654,
+    "detail": 0.391,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:terrasses:1",
+    "family": "urbanisme",
+    "model": "terrasses",
+    "variant": 1,
+    "scale": 0.723,
+    "roughness": 0.795,
+    "detail": 0.822,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:terrasses:2",
+    "family": "urbanisme",
+    "model": "terrasses",
+    "variant": 2,
+    "scale": 1.031,
+    "roughness": 0.888,
+    "detail": 0.481,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:terrasses:3",
+    "family": "urbanisme",
+    "model": "terrasses",
+    "variant": 3,
+    "scale": 1.138,
+    "roughness": 0.363,
+    "detail": 0.314,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:terrasses:4",
+    "family": "urbanisme",
+    "model": "terrasses",
+    "variant": 4,
+    "scale": 1.245,
+    "roughness": 0.48,
+    "detail": 0.888,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:terrasses:5",
+    "family": "urbanisme",
+    "model": "terrasses",
+    "variant": 5,
+    "scale": 1.081,
+    "roughness": 0.571,
+    "detail": 0.431,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:terrasses:6",
+    "family": "urbanisme",
+    "model": "terrasses",
+    "variant": 6,
+    "scale": 1.018,
+    "roughness": 0.546,
+    "detail": 0.379,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:terrasses:7",
+    "family": "urbanisme",
+    "model": "terrasses",
+    "variant": 7,
+    "scale": 0.997,
+    "roughness": 0.759,
+    "detail": 0.358,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:quartier historique:0",
+    "family": "urbanisme",
+    "model": "quartier historique",
+    "variant": 0,
+    "scale": 1.261,
+    "roughness": 0.626,
+    "detail": 0.686,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:quartier historique:1",
+    "family": "urbanisme",
+    "model": "quartier historique",
+    "variant": 1,
+    "scale": 0.892,
+    "roughness": 0.552,
+    "detail": 0.438,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:quartier historique:2",
+    "family": "urbanisme",
+    "model": "quartier historique",
+    "variant": 2,
+    "scale": 0.712,
+    "roughness": 0.464,
+    "detail": 0.965,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:quartier historique:3",
+    "family": "urbanisme",
+    "model": "quartier historique",
+    "variant": 3,
+    "scale": 0.764,
+    "roughness": 0.268,
+    "detail": 0.875,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:quartier historique:4",
+    "family": "urbanisme",
+    "model": "quartier historique",
+    "variant": 4,
+    "scale": 1.058,
+    "roughness": 0.379,
+    "detail": 0.406,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:quartier historique:5",
+    "family": "urbanisme",
+    "model": "quartier historique",
+    "variant": 5,
+    "scale": 1.055,
+    "roughness": 0.549,
+    "detail": 0.414,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:quartier historique:6",
+    "family": "urbanisme",
+    "model": "quartier historique",
+    "variant": 6,
+    "scale": 1.009,
+    "roughness": 0.278,
+    "detail": 0.32,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:quartier historique:7",
+    "family": "urbanisme",
+    "model": "quartier historique",
+    "variant": 7,
+    "scale": 1.292,
+    "roughness": 0.794,
+    "detail": 0.402,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:gare:0",
+    "family": "urbanisme",
+    "model": "gare",
+    "variant": 0,
+    "scale": 1.293,
+    "roughness": 0.894,
+    "detail": 0.967,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:gare:1",
+    "family": "urbanisme",
+    "model": "gare",
+    "variant": 1,
+    "scale": 0.981,
+    "roughness": 0.636,
+    "detail": 0.484,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:gare:2",
+    "family": "urbanisme",
+    "model": "gare",
+    "variant": 2,
+    "scale": 1.114,
+    "roughness": 0.562,
+    "detail": 0.991,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:gare:3",
+    "family": "urbanisme",
+    "model": "gare",
+    "variant": 3,
+    "scale": 1.057,
+    "roughness": 0.238,
+    "detail": 0.846,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:gare:4",
+    "family": "urbanisme",
+    "model": "gare",
+    "variant": 4,
+    "scale": 1.079,
+    "roughness": 0.36,
+    "detail": 0.487,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:gare:5",
+    "family": "urbanisme",
+    "model": "gare",
+    "variant": 5,
+    "scale": 1.268,
+    "roughness": 0.54,
+    "detail": 0.367,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:gare:6",
+    "family": "urbanisme",
+    "model": "gare",
+    "variant": 6,
+    "scale": 1.052,
+    "roughness": 0.308,
+    "detail": 0.547,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:gare:7",
+    "family": "urbanisme",
+    "model": "gare",
+    "variant": 7,
+    "scale": 1.052,
+    "roughness": 0.505,
+    "detail": 0.548,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:parc:0",
+    "family": "urbanisme",
+    "model": "parc",
+    "variant": 0,
+    "scale": 1.04,
+    "roughness": 0.848,
+    "detail": 0.491,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:parc:1",
+    "family": "urbanisme",
+    "model": "parc",
+    "variant": 1,
+    "scale": 0.818,
+    "roughness": 0.869,
+    "detail": 0.75,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:parc:2",
+    "family": "urbanisme",
+    "model": "parc",
+    "variant": 2,
+    "scale": 1.005,
+    "roughness": 0.704,
+    "detail": 0.301,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:parc:3",
+    "family": "urbanisme",
+    "model": "parc",
+    "variant": 3,
+    "scale": 0.703,
+    "roughness": 0.579,
+    "detail": 0.797,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:parc:4",
+    "family": "urbanisme",
+    "model": "parc",
+    "variant": 4,
+    "scale": 0.887,
+    "roughness": 0.671,
+    "detail": 0.319,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:parc:5",
+    "family": "urbanisme",
+    "model": "parc",
+    "variant": 5,
+    "scale": 0.96,
+    "roughness": 0.695,
+    "detail": 0.809,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:parc:6",
+    "family": "urbanisme",
+    "model": "parc",
+    "variant": 6,
+    "scale": 1.079,
+    "roughness": 0.472,
+    "detail": 0.311,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "urbanisme:parc:7",
+    "family": "urbanisme",
+    "model": "parc",
+    "variant": 7,
+    "scale": 1.173,
+    "roughness": 0.703,
+    "detail": 0.479,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:route en lacets:0",
+    "family": "infrastructure",
+    "model": "route en lacets",
+    "variant": 0,
+    "scale": 1.06,
+    "roughness": 0.838,
+    "detail": 0.924,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:route en lacets:1",
+    "family": "infrastructure",
+    "model": "route en lacets",
+    "variant": 1,
+    "scale": 1.255,
+    "roughness": 0.718,
+    "detail": 0.446,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:route en lacets:2",
+    "family": "infrastructure",
+    "model": "route en lacets",
+    "variant": 2,
+    "scale": 1.346,
+    "roughness": 0.699,
+    "detail": 0.551,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:route en lacets:3",
+    "family": "infrastructure",
+    "model": "route en lacets",
+    "variant": 3,
+    "scale": 1.027,
+    "roughness": 0.297,
+    "detail": 0.62,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:route en lacets:4",
+    "family": "infrastructure",
+    "model": "route en lacets",
+    "variant": 4,
+    "scale": 0.859,
+    "roughness": 0.655,
+    "detail": 0.911,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:route en lacets:5",
+    "family": "infrastructure",
+    "model": "route en lacets",
+    "variant": 5,
+    "scale": 1.126,
+    "roughness": 0.639,
+    "detail": 0.313,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:route en lacets:6",
+    "family": "infrastructure",
+    "model": "route en lacets",
+    "variant": 6,
+    "scale": 1.239,
+    "roughness": 0.668,
+    "detail": 0.818,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:route en lacets:7",
+    "family": "infrastructure",
+    "model": "route en lacets",
+    "variant": 7,
+    "scale": 0.995,
+    "roughness": 0.708,
+    "detail": 0.344,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:tunnel:0",
+    "family": "infrastructure",
+    "model": "tunnel",
+    "variant": 0,
+    "scale": 1.246,
+    "roughness": 0.231,
+    "detail": 0.963,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:tunnel:1",
+    "family": "infrastructure",
+    "model": "tunnel",
+    "variant": 1,
+    "scale": 1.331,
+    "roughness": 0.805,
+    "detail": 0.318,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:tunnel:2",
+    "family": "infrastructure",
+    "model": "tunnel",
+    "variant": 2,
+    "scale": 1.082,
+    "roughness": 0.646,
+    "detail": 0.974,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:tunnel:3",
+    "family": "infrastructure",
+    "model": "tunnel",
+    "variant": 3,
+    "scale": 1.13,
+    "roughness": 0.358,
+    "detail": 0.951,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:tunnel:4",
+    "family": "infrastructure",
+    "model": "tunnel",
+    "variant": 4,
+    "scale": 0.896,
+    "roughness": 0.623,
+    "detail": 0.396,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:tunnel:5",
+    "family": "infrastructure",
+    "model": "tunnel",
+    "variant": 5,
+    "scale": 0.685,
+    "roughness": 0.84,
+    "detail": 0.724,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:tunnel:6",
+    "family": "infrastructure",
+    "model": "tunnel",
+    "variant": 6,
+    "scale": 1.252,
+    "roughness": 0.636,
+    "detail": 0.816,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:tunnel:7",
+    "family": "infrastructure",
+    "model": "tunnel",
+    "variant": 7,
+    "scale": 1.324,
+    "roughness": 0.22,
+    "detail": 0.72,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:barrage:0",
+    "family": "infrastructure",
+    "model": "barrage",
+    "variant": 0,
+    "scale": 1.128,
+    "roughness": 0.709,
+    "detail": 0.929,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:barrage:1",
+    "family": "infrastructure",
+    "model": "barrage",
+    "variant": 1,
+    "scale": 0.842,
+    "roughness": 0.693,
+    "detail": 0.953,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:barrage:2",
+    "family": "infrastructure",
+    "model": "barrage",
+    "variant": 2,
+    "scale": 0.739,
+    "roughness": 0.393,
+    "detail": 0.39,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:barrage:3",
+    "family": "infrastructure",
+    "model": "barrage",
+    "variant": 3,
+    "scale": 1.279,
+    "roughness": 0.84,
+    "detail": 0.649,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:barrage:4",
+    "family": "infrastructure",
+    "model": "barrage",
+    "variant": 4,
+    "scale": 0.967,
+    "roughness": 0.326,
+    "detail": 0.801,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:barrage:5",
+    "family": "infrastructure",
+    "model": "barrage",
+    "variant": 5,
+    "scale": 1.089,
+    "roughness": 0.526,
+    "detail": 0.864,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:barrage:6",
+    "family": "infrastructure",
+    "model": "barrage",
+    "variant": 6,
+    "scale": 1.129,
+    "roughness": 0.397,
+    "detail": 0.954,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:barrage:7",
+    "family": "infrastructure",
+    "model": "barrage",
+    "variant": 7,
+    "scale": 0.695,
+    "roughness": 0.779,
+    "detail": 0.966,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:aqueduc:0",
+    "family": "infrastructure",
+    "model": "aqueduc",
+    "variant": 0,
+    "scale": 0.786,
+    "roughness": 0.391,
+    "detail": 0.997,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:aqueduc:1",
+    "family": "infrastructure",
+    "model": "aqueduc",
+    "variant": 1,
+    "scale": 1.022,
+    "roughness": 0.572,
+    "detail": 0.683,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:aqueduc:2",
+    "family": "infrastructure",
+    "model": "aqueduc",
+    "variant": 2,
+    "scale": 1.253,
+    "roughness": 0.405,
+    "detail": 0.323,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:aqueduc:3",
+    "family": "infrastructure",
+    "model": "aqueduc",
+    "variant": 3,
+    "scale": 1.078,
+    "roughness": 0.468,
+    "detail": 0.571,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:aqueduc:4",
+    "family": "infrastructure",
+    "model": "aqueduc",
+    "variant": 4,
+    "scale": 1.187,
+    "roughness": 0.565,
+    "detail": 0.995,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:aqueduc:5",
+    "family": "infrastructure",
+    "model": "aqueduc",
+    "variant": 5,
+    "scale": 0.768,
+    "roughness": 0.814,
+    "detail": 0.324,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:aqueduc:6",
+    "family": "infrastructure",
+    "model": "aqueduc",
+    "variant": 6,
+    "scale": 1.005,
+    "roughness": 0.645,
+    "detail": 0.78,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:aqueduc:7",
+    "family": "infrastructure",
+    "model": "aqueduc",
+    "variant": 7,
+    "scale": 0.957,
+    "roughness": 0.768,
+    "detail": 0.854,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:éoliennes:0",
+    "family": "infrastructure",
+    "model": "éoliennes",
+    "variant": 0,
+    "scale": 1.199,
+    "roughness": 0.262,
+    "detail": 0.654,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:éoliennes:1",
+    "family": "infrastructure",
+    "model": "éoliennes",
+    "variant": 1,
+    "scale": 0.746,
+    "roughness": 0.575,
+    "detail": 0.758,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:éoliennes:2",
+    "family": "infrastructure",
+    "model": "éoliennes",
+    "variant": 2,
+    "scale": 0.688,
+    "roughness": 0.559,
+    "detail": 0.545,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:éoliennes:3",
+    "family": "infrastructure",
+    "model": "éoliennes",
+    "variant": 3,
+    "scale": 1.195,
+    "roughness": 0.341,
+    "detail": 0.931,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:éoliennes:4",
+    "family": "infrastructure",
+    "model": "éoliennes",
+    "variant": 4,
+    "scale": 0.992,
+    "roughness": 0.339,
+    "detail": 0.596,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:éoliennes:5",
+    "family": "infrastructure",
+    "model": "éoliennes",
+    "variant": 5,
+    "scale": 1.213,
+    "roughness": 0.362,
+    "detail": 0.333,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:éoliennes:6",
+    "family": "infrastructure",
+    "model": "éoliennes",
+    "variant": 6,
+    "scale": 0.755,
+    "roughness": 0.297,
+    "detail": 0.638,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:éoliennes:7",
+    "family": "infrastructure",
+    "model": "éoliennes",
+    "variant": 7,
+    "scale": 0.848,
+    "roughness": 0.386,
+    "detail": 0.46,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:réseau ferroviaire:0",
+    "family": "infrastructure",
+    "model": "réseau ferroviaire",
+    "variant": 0,
+    "scale": 1.349,
+    "roughness": 0.433,
+    "detail": 0.834,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:réseau ferroviaire:1",
+    "family": "infrastructure",
+    "model": "réseau ferroviaire",
+    "variant": 1,
+    "scale": 1.1,
+    "roughness": 0.787,
+    "detail": 0.608,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:réseau ferroviaire:2",
+    "family": "infrastructure",
+    "model": "réseau ferroviaire",
+    "variant": 2,
+    "scale": 0.979,
+    "roughness": 0.258,
+    "detail": 0.738,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:réseau ferroviaire:3",
+    "family": "infrastructure",
+    "model": "réseau ferroviaire",
+    "variant": 3,
+    "scale": 1.085,
+    "roughness": 0.349,
+    "detail": 0.396,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:réseau ferroviaire:4",
+    "family": "infrastructure",
+    "model": "réseau ferroviaire",
+    "variant": 4,
+    "scale": 1.146,
+    "roughness": 0.438,
+    "detail": 0.753,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:réseau ferroviaire:5",
+    "family": "infrastructure",
+    "model": "réseau ferroviaire",
+    "variant": 5,
+    "scale": 1.214,
+    "roughness": 0.747,
+    "detail": 0.388,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:réseau ferroviaire:6",
+    "family": "infrastructure",
+    "model": "réseau ferroviaire",
+    "variant": 6,
+    "scale": 0.914,
+    "roughness": 0.806,
+    "detail": 0.904,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "infrastructure:réseau ferroviaire:7",
+    "family": "infrastructure",
+    "model": "réseau ferroviaire",
+    "variant": 7,
+    "scale": 1.324,
+    "roughness": 0.719,
+    "detail": 0.672,
+    "slopeMax": 0.35,
+    "anchor": "terrain",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:aurore:0",
+    "family": "atmosphère",
+    "model": "aurore",
+    "variant": 0,
+    "scale": 1.099,
+    "roughness": 0.428,
+    "detail": 0.665,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:aurore:1",
+    "family": "atmosphère",
+    "model": "aurore",
+    "variant": 1,
+    "scale": 1.202,
+    "roughness": 0.703,
+    "detail": 0.557,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:aurore:2",
+    "family": "atmosphère",
+    "model": "aurore",
+    "variant": 2,
+    "scale": 1.129,
+    "roughness": 0.381,
+    "detail": 0.722,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:aurore:3",
+    "family": "atmosphère",
+    "model": "aurore",
+    "variant": 3,
+    "scale": 1.056,
+    "roughness": 0.819,
+    "detail": 0.849,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:aurore:4",
+    "family": "atmosphère",
+    "model": "aurore",
+    "variant": 4,
+    "scale": 1.008,
+    "roughness": 0.638,
+    "detail": 0.849,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:aurore:5",
+    "family": "atmosphère",
+    "model": "aurore",
+    "variant": 5,
+    "scale": 0.942,
+    "roughness": 0.208,
+    "detail": 0.968,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:aurore:6",
+    "family": "atmosphère",
+    "model": "aurore",
+    "variant": 6,
+    "scale": 1.341,
+    "roughness": 0.63,
+    "detail": 0.321,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:aurore:7",
+    "family": "atmosphère",
+    "model": "aurore",
+    "variant": 7,
+    "scale": 1.289,
+    "roughness": 0.536,
+    "detail": 0.896,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:halo:0",
+    "family": "atmosphère",
+    "model": "halo",
+    "variant": 0,
+    "scale": 1.288,
+    "roughness": 0.516,
+    "detail": 0.956,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:halo:1",
+    "family": "atmosphère",
+    "model": "halo",
+    "variant": 1,
+    "scale": 0.983,
+    "roughness": 0.83,
+    "detail": 0.49,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:halo:2",
+    "family": "atmosphère",
+    "model": "halo",
+    "variant": 2,
+    "scale": 0.775,
+    "roughness": 0.498,
+    "detail": 0.995,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:halo:3",
+    "family": "atmosphère",
+    "model": "halo",
+    "variant": 3,
+    "scale": 0.956,
+    "roughness": 0.762,
+    "detail": 0.462,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:halo:4",
+    "family": "atmosphère",
+    "model": "halo",
+    "variant": 4,
+    "scale": 1.089,
+    "roughness": 0.7,
+    "detail": 0.411,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:halo:5",
+    "family": "atmosphère",
+    "model": "halo",
+    "variant": 5,
+    "scale": 0.876,
+    "roughness": 0.357,
+    "detail": 0.515,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:halo:6",
+    "family": "atmosphère",
+    "model": "halo",
+    "variant": 6,
+    "scale": 0.927,
+    "roughness": 0.835,
+    "detail": 0.784,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:halo:7",
+    "family": "atmosphère",
+    "model": "halo",
+    "variant": 7,
+    "scale": 0.689,
+    "roughness": 0.729,
+    "detail": 0.665,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:brume de vallée:0",
+    "family": "atmosphère",
+    "model": "brume de vallée",
+    "variant": 0,
+    "scale": 0.716,
+    "roughness": 0.436,
+    "detail": 0.8,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:brume de vallée:1",
+    "family": "atmosphère",
+    "model": "brume de vallée",
+    "variant": 1,
+    "scale": 0.805,
+    "roughness": 0.588,
+    "detail": 0.936,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:brume de vallée:2",
+    "family": "atmosphère",
+    "model": "brume de vallée",
+    "variant": 2,
+    "scale": 1.153,
+    "roughness": 0.834,
+    "detail": 0.979,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:brume de vallée:3",
+    "family": "atmosphère",
+    "model": "brume de vallée",
+    "variant": 3,
+    "scale": 1.17,
+    "roughness": 0.47,
+    "detail": 0.632,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:brume de vallée:4",
+    "family": "atmosphère",
+    "model": "brume de vallée",
+    "variant": 4,
+    "scale": 1.256,
+    "roughness": 0.27,
+    "detail": 0.878,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:brume de vallée:5",
+    "family": "atmosphère",
+    "model": "brume de vallée",
+    "variant": 5,
+    "scale": 1.321,
+    "roughness": 0.815,
+    "detail": 0.635,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:brume de vallée:6",
+    "family": "atmosphère",
+    "model": "brume de vallée",
+    "variant": 6,
+    "scale": 0.993,
+    "roughness": 0.319,
+    "detail": 0.438,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:brume de vallée:7",
+    "family": "atmosphère",
+    "model": "brume de vallée",
+    "variant": 7,
+    "scale": 1.132,
+    "roughness": 0.597,
+    "detail": 0.759,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:nuage orographique:0",
+    "family": "atmosphère",
+    "model": "nuage orographique",
+    "variant": 0,
+    "scale": 0.999,
+    "roughness": 0.493,
+    "detail": 0.901,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:nuage orographique:1",
+    "family": "atmosphère",
+    "model": "nuage orographique",
+    "variant": 1,
+    "scale": 0.999,
+    "roughness": 0.273,
+    "detail": 0.756,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:nuage orographique:2",
+    "family": "atmosphère",
+    "model": "nuage orographique",
+    "variant": 2,
+    "scale": 1.149,
+    "roughness": 0.317,
+    "detail": 0.314,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:nuage orographique:3",
+    "family": "atmosphère",
+    "model": "nuage orographique",
+    "variant": 3,
+    "scale": 0.848,
+    "roughness": 0.203,
+    "detail": 0.526,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:nuage orographique:4",
+    "family": "atmosphère",
+    "model": "nuage orographique",
+    "variant": 4,
+    "scale": 0.956,
+    "roughness": 0.878,
+    "detail": 0.864,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:nuage orographique:5",
+    "family": "atmosphère",
+    "model": "nuage orographique",
+    "variant": 5,
+    "scale": 0.9,
+    "roughness": 0.642,
+    "detail": 0.845,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:nuage orographique:6",
+    "family": "atmosphère",
+    "model": "nuage orographique",
+    "variant": 6,
+    "scale": 0.875,
+    "roughness": 0.394,
+    "detail": 0.494,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:nuage orographique:7",
+    "family": "atmosphère",
+    "model": "nuage orographique",
+    "variant": 7,
+    "scale": 1.344,
+    "roughness": 0.322,
+    "detail": 0.354,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:front froid:0",
+    "family": "atmosphère",
+    "model": "front froid",
+    "variant": 0,
+    "scale": 0.754,
+    "roughness": 0.737,
+    "detail": 0.309,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:front froid:1",
+    "family": "atmosphère",
+    "model": "front froid",
+    "variant": 1,
+    "scale": 0.917,
+    "roughness": 0.858,
+    "detail": 0.342,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:front froid:2",
+    "family": "atmosphère",
+    "model": "front froid",
+    "variant": 2,
+    "scale": 1.338,
+    "roughness": 0.531,
+    "detail": 0.339,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:front froid:3",
+    "family": "atmosphère",
+    "model": "front froid",
+    "variant": 3,
+    "scale": 1.07,
+    "roughness": 0.62,
+    "detail": 0.558,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:front froid:4",
+    "family": "atmosphère",
+    "model": "front froid",
+    "variant": 4,
+    "scale": 0.683,
+    "roughness": 0.89,
+    "detail": 0.899,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:front froid:5",
+    "family": "atmosphère",
+    "model": "front froid",
+    "variant": 5,
+    "scale": 1.142,
+    "roughness": 0.711,
+    "detail": 0.588,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:front froid:6",
+    "family": "atmosphère",
+    "model": "front froid",
+    "variant": 6,
+    "scale": 1.339,
+    "roughness": 0.842,
+    "detail": 0.408,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:front froid:7",
+    "family": "atmosphère",
+    "model": "front froid",
+    "variant": 7,
+    "scale": 0.861,
+    "roughness": 0.616,
+    "detail": 0.423,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:virga:0",
+    "family": "atmosphère",
+    "model": "virga",
+    "variant": 0,
+    "scale": 0.746,
+    "roughness": 0.338,
+    "detail": 0.896,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:virga:1",
+    "family": "atmosphère",
+    "model": "virga",
+    "variant": 1,
+    "scale": 1.221,
+    "roughness": 0.822,
+    "detail": 0.949,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:virga:2",
+    "family": "atmosphère",
+    "model": "virga",
+    "variant": 2,
+    "scale": 1.31,
+    "roughness": 0.494,
+    "detail": 0.362,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:virga:3",
+    "family": "atmosphère",
+    "model": "virga",
+    "variant": 3,
+    "scale": 1.244,
+    "roughness": 0.219,
+    "detail": 0.756,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:virga:4",
+    "family": "atmosphère",
+    "model": "virga",
+    "variant": 4,
+    "scale": 0.768,
+    "roughness": 0.787,
+    "detail": 0.967,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:virga:5",
+    "family": "atmosphère",
+    "model": "virga",
+    "variant": 5,
+    "scale": 0.833,
+    "roughness": 0.82,
+    "detail": 0.789,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:virga:6",
+    "family": "atmosphère",
+    "model": "virga",
+    "variant": 6,
+    "scale": 1.129,
+    "roughness": 0.716,
+    "detail": 0.877,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "atmosphère:virga:7",
+    "family": "atmosphère",
+    "model": "virga",
+    "variant": 7,
+    "scale": 0.684,
+    "roughness": 0.308,
+    "detail": 0.661,
+    "slopeMax": 1,
+    "anchor": "atmosphere",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:anneau poussiéreux:0",
+    "family": "espace",
+    "model": "anneau poussiéreux",
+    "variant": 0,
+    "scale": 1.112,
+    "roughness": 0.463,
+    "detail": 0.809,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:anneau poussiéreux:1",
+    "family": "espace",
+    "model": "anneau poussiéreux",
+    "variant": 1,
+    "scale": 1.017,
+    "roughness": 0.603,
+    "detail": 0.594,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:anneau poussiéreux:2",
+    "family": "espace",
+    "model": "anneau poussiéreux",
+    "variant": 2,
+    "scale": 1.256,
+    "roughness": 0.758,
+    "detail": 0.897,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:anneau poussiéreux:3",
+    "family": "espace",
+    "model": "anneau poussiéreux",
+    "variant": 3,
+    "scale": 1.232,
+    "roughness": 0.709,
+    "detail": 0.389,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:anneau poussiéreux:4",
+    "family": "espace",
+    "model": "anneau poussiéreux",
+    "variant": 4,
+    "scale": 0.752,
+    "roughness": 0.584,
+    "detail": 0.354,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:anneau poussiéreux:5",
+    "family": "espace",
+    "model": "anneau poussiéreux",
+    "variant": 5,
+    "scale": 0.733,
+    "roughness": 0.723,
+    "detail": 0.88,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:anneau poussiéreux:6",
+    "family": "espace",
+    "model": "anneau poussiéreux",
+    "variant": 6,
+    "scale": 1.299,
+    "roughness": 0.299,
+    "detail": 0.391,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:anneau poussiéreux:7",
+    "family": "espace",
+    "model": "anneau poussiéreux",
+    "variant": 7,
+    "scale": 0.913,
+    "roughness": 0.644,
+    "detail": 0.94,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:queue cométaire:0",
+    "family": "espace",
+    "model": "queue cométaire",
+    "variant": 0,
+    "scale": 1.041,
+    "roughness": 0.299,
+    "detail": 0.541,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:queue cométaire:1",
+    "family": "espace",
+    "model": "queue cométaire",
+    "variant": 1,
+    "scale": 0.842,
+    "roughness": 0.416,
+    "detail": 0.346,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:queue cométaire:2",
+    "family": "espace",
+    "model": "queue cométaire",
+    "variant": 2,
+    "scale": 0.888,
+    "roughness": 0.503,
+    "detail": 0.504,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:queue cométaire:3",
+    "family": "espace",
+    "model": "queue cométaire",
+    "variant": 3,
+    "scale": 1.227,
+    "roughness": 0.321,
+    "detail": 0.92,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:queue cométaire:4",
+    "family": "espace",
+    "model": "queue cométaire",
+    "variant": 4,
+    "scale": 1.288,
+    "roughness": 0.569,
+    "detail": 0.453,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:queue cométaire:5",
+    "family": "espace",
+    "model": "queue cométaire",
+    "variant": 5,
+    "scale": 0.742,
+    "roughness": 0.695,
+    "detail": 0.968,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:queue cométaire:6",
+    "family": "espace",
+    "model": "queue cométaire",
+    "variant": 6,
+    "scale": 0.892,
+    "roughness": 0.477,
+    "detail": 0.693,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:queue cométaire:7",
+    "family": "espace",
+    "model": "queue cométaire",
+    "variant": 7,
+    "scale": 1.285,
+    "roughness": 0.516,
+    "detail": 0.387,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:arc magnétique:0",
+    "family": "espace",
+    "model": "arc magnétique",
+    "variant": 0,
+    "scale": 1.02,
+    "roughness": 0.495,
+    "detail": 0.818,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:arc magnétique:1",
+    "family": "espace",
+    "model": "arc magnétique",
+    "variant": 1,
+    "scale": 0.821,
+    "roughness": 0.847,
+    "detail": 0.529,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:arc magnétique:2",
+    "family": "espace",
+    "model": "arc magnétique",
+    "variant": 2,
+    "scale": 1.226,
+    "roughness": 0.285,
+    "detail": 0.306,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:arc magnétique:3",
+    "family": "espace",
+    "model": "arc magnétique",
+    "variant": 3,
+    "scale": 1.043,
+    "roughness": 0.682,
+    "detail": 0.461,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:arc magnétique:4",
+    "family": "espace",
+    "model": "arc magnétique",
+    "variant": 4,
+    "scale": 1.02,
+    "roughness": 0.495,
+    "detail": 0.504,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:arc magnétique:5",
+    "family": "espace",
+    "model": "arc magnétique",
+    "variant": 5,
+    "scale": 0.831,
+    "roughness": 0.834,
+    "detail": 0.668,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:arc magnétique:6",
+    "family": "espace",
+    "model": "arc magnétique",
+    "variant": 6,
+    "scale": 1.107,
+    "roughness": 0.615,
+    "detail": 0.331,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:arc magnétique:7",
+    "family": "espace",
+    "model": "arc magnétique",
+    "variant": 7,
+    "scale": 0.759,
+    "roughness": 0.341,
+    "detail": 0.965,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:ombre de lune:0",
+    "family": "espace",
+    "model": "ombre de lune",
+    "variant": 0,
+    "scale": 0.801,
+    "roughness": 0.539,
+    "detail": 0.412,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:ombre de lune:1",
+    "family": "espace",
+    "model": "ombre de lune",
+    "variant": 1,
+    "scale": 1.229,
+    "roughness": 0.858,
+    "detail": 0.303,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:ombre de lune:2",
+    "family": "espace",
+    "model": "ombre de lune",
+    "variant": 2,
+    "scale": 0.911,
+    "roughness": 0.785,
+    "detail": 0.498,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:ombre de lune:3",
+    "family": "espace",
+    "model": "ombre de lune",
+    "variant": 3,
+    "scale": 0.655,
+    "roughness": 0.535,
+    "detail": 0.312,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:ombre de lune:4",
+    "family": "espace",
+    "model": "ombre de lune",
+    "variant": 4,
+    "scale": 1.149,
+    "roughness": 0.76,
+    "detail": 0.343,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:ombre de lune:5",
+    "family": "espace",
+    "model": "ombre de lune",
+    "variant": 5,
+    "scale": 0.842,
+    "roughness": 0.282,
+    "detail": 0.576,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:ombre de lune:6",
+    "family": "espace",
+    "model": "ombre de lune",
+    "variant": 6,
+    "scale": 1.217,
+    "roughness": 0.732,
+    "detail": 0.89,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:ombre de lune:7",
+    "family": "espace",
+    "model": "ombre de lune",
+    "variant": 7,
+    "scale": 0.791,
+    "roughness": 0.64,
+    "detail": 0.507,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:poussière orbitale:0",
+    "family": "espace",
+    "model": "poussière orbitale",
+    "variant": 0,
+    "scale": 0.844,
+    "roughness": 0.793,
+    "detail": 0.999,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:poussière orbitale:1",
+    "family": "espace",
+    "model": "poussière orbitale",
+    "variant": 1,
+    "scale": 1.124,
+    "roughness": 0.379,
+    "detail": 0.413,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:poussière orbitale:2",
+    "family": "espace",
+    "model": "poussière orbitale",
+    "variant": 2,
+    "scale": 1.182,
+    "roughness": 0.879,
+    "detail": 0.696,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:poussière orbitale:3",
+    "family": "espace",
+    "model": "poussière orbitale",
+    "variant": 3,
+    "scale": 0.668,
+    "roughness": 0.332,
+    "detail": 0.903,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:poussière orbitale:4",
+    "family": "espace",
+    "model": "poussière orbitale",
+    "variant": 4,
+    "scale": 0.683,
+    "roughness": 0.36,
+    "detail": 0.332,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:poussière orbitale:5",
+    "family": "espace",
+    "model": "poussière orbitale",
+    "variant": 5,
+    "scale": 0.957,
+    "roughness": 0.765,
+    "detail": 0.674,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:poussière orbitale:6",
+    "family": "espace",
+    "model": "poussière orbitale",
+    "variant": 6,
+    "scale": 0.947,
+    "roughness": 0.534,
+    "detail": 0.804,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:poussière orbitale:7",
+    "family": "espace",
+    "model": "poussière orbitale",
+    "variant": 7,
+    "scale": 0.738,
+    "roughness": 0.754,
+    "detail": 0.884,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:protubérance:0",
+    "family": "espace",
+    "model": "protubérance",
+    "variant": 0,
+    "scale": 1.185,
+    "roughness": 0.329,
+    "detail": 0.778,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:protubérance:1",
+    "family": "espace",
+    "model": "protubérance",
+    "variant": 1,
+    "scale": 0.814,
+    "roughness": 0.82,
+    "detail": 0.795,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:protubérance:2",
+    "family": "espace",
+    "model": "protubérance",
+    "variant": 2,
+    "scale": 1.063,
+    "roughness": 0.827,
+    "detail": 0.375,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:protubérance:3",
+    "family": "espace",
+    "model": "protubérance",
+    "variant": 3,
+    "scale": 0.922,
+    "roughness": 0.638,
+    "detail": 0.45,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:protubérance:4",
+    "family": "espace",
+    "model": "protubérance",
+    "variant": 4,
+    "scale": 1.285,
+    "roughness": 0.416,
+    "detail": 0.516,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:protubérance:5",
+    "family": "espace",
+    "model": "protubérance",
+    "variant": 5,
+    "scale": 1.228,
+    "roughness": 0.259,
+    "detail": 0.301,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:protubérance:6",
+    "family": "espace",
+    "model": "protubérance",
+    "variant": 6,
+    "scale": 0.916,
+    "roughness": 0.39,
+    "detail": 0.439,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  },
+  {
+    "id": "espace:protubérance:7",
+    "family": "espace",
+    "model": "protubérance",
+    "variant": 7,
+    "scale": 1.118,
+    "roughness": 0.716,
+    "detail": 0.777,
+    "slopeMax": 1,
+    "anchor": "orbit",
+    "stages": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "status": "proposal"
+  }
+]

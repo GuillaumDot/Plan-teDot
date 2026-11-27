@@ -1,0 +1,25 @@
+{
+  "size": 128,
+  "colorSpace": {
+    "albedo": "sRGB",
+    "normal": "linear",
+    "roughness": "linear",
+    "height": "linear"
+  },
+  "materials": [
+    "basalt",
+    "granite",
+    "sand",
+    "snow",
+    "grass",
+    "brick",
+    "concrete",
+    "slate",
+    "asphalt",
+    "metal",
+    "lava",
+    "ice"
+  ],
+  "normalConvention": "OpenGL +Y",
+  "usage": "optional reference tiles; not wired to native texture bins"
+}

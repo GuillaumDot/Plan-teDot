@@ -1,0 +1,41 @@
+[
+  {
+    "id": "hiphop",
+    "message": "Ça me fait danser !",
+    "atlas": "assets/hiphop-atlas.png",
+    "gif": "assets/hiphop.gif",
+    "webp": "assets/hiphop.webp",
+    "poster": "assets/hiphop.png",
+    "frames": 16,
+    "fps": 10,
+    "columns": 4,
+    "rows": 4,
+    "cell": 192
+  },
+  {
+    "id": "salsa",
+    "message": "Quel rythme !",
+    "atlas": "assets/salsa-atlas.png",
+    "gif": "assets/salsa.gif",
+    "webp": "assets/salsa.webp",
+    "poster": "assets/salsa.png",
+    "frames": 16,
+    "fps": 10,
+    "columns": 4,
+    "rows": 4,
+    "cell": 192
+  },
+  {
+    "id": "groove",
+    "message": "Quel groove !",
+    "atlas": "assets/groove-atlas.png",
+    "gif": "assets/groove.gif",
+    "webp": "assets/groove.webp",
+    "poster": "assets/groove.png",
+    "frames": 16,
+    "fps": 10,
+    "columns": 4,
+    "rows": 4,
+    "cell": 192
+  }
+]

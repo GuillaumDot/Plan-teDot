@@ -1,0 +1,362 @@
+[
+  {
+    "district": 1,
+    "name": "maison pierre",
+    "variant": 0,
+    "footprint": [
+      0.68,
+      0.88
+    ],
+    "heightMultiplier": 0.78,
+    "roof": "flat",
+    "status": "design parameters; complex roof geometry requires shared intersection implementation"
+  },
+  {
+    "district": 1,
+    "name": "chalet",
+    "variant": 1,
+    "footprint": [
+      0.725,
+      0.845
+    ],
+    "heightMultiplier": 0.824,
+    "roof": "gable",
+    "status": "design parameters; complex roof geometry requires shared intersection implementation"
+  },
+  {
+    "district": 1,
+    "name": "villa",
+    "variant": 2,
+    "footprint": [
+      0.77,
+      0.81
+    ],
+    "heightMultiplier": 0.868,
+    "roof": "hip",
+    "status": "design parameters; complex roof geometry requires shared intersection implementation"
+  },
+  {
+    "district": 1,
+    "name": "maison mitoyenne",
+    "variant": 3,
+    "footprint": [
+      0.815,
+      0.775
+    ],
+    "heightMultiplier": 0.912,
+    "roof": "shed",
+    "status": "design parameters; complex roof geometry requires shared intersection implementation"
+  },
+  {
+    "district": 1,
+    "name": "longère",
+    "variant": 4,
+    "footprint": [
+      0.86,
+      0.74
+    ],
+    "heightMultiplier": 0.956,
+    "roof": "stepped",
+    "status": "design parameters; complex roof geometry requires shared intersection implementation"
+  },
+  {
+    "district": 1,
+    "name": "maison patio",
+    "variant": 5,
+    "footprint": [
+      0.905,
+      0.705
+    ],
+    "heightMultiplier": 1.0,
+    "roof": "flat",
+    "status": "design parameters; complex roof geometry requires shared intersection implementation"
+  },
+  {
+    "district": 2,
+    "name": "immeuble brique",
+    "variant": 0,
+    "footprint": [
+      0.68,
+      0.88
+    ],
+    "heightMultiplier": 0.78,
+    "roof": "flat",
+    "status": "design parameters; complex roof geometry requires shared intersection implementation"
+  },
+  {
+    "district": 2,
+    "name": "résidence balcon",
+    "variant": 1,
+    "footprint": [
+      0.725,
+      0.845
+    ],
+    "heightMultiplier": 0.824,
+    "roof": "gable",
+    "status": "design parameters; complex roof geometry requires shared intersection implementation"
+  },
+  {
+    "district": 2,
+    "name": "bloc cour",
+    "variant": 2,
+    "footprint": [
+      0.77,
+      0.81
+    ],
+    "heightMultiplier": 0.868,
+    "roof": "hip",
+    "status": "design parameters; complex roof geometry requires shared intersection implementation"
+  },
+  {
+    "district": 2,
+    "name": "immeuble art déco",
+    "variant": 3,
+    "footprint": [
+      0.815,
+      0.775
+    ],
+    "heightMultiplier": 0.912,
+    "roof": "shed",
+    "status": "design parameters; complex roof geometry requires shared intersection implementation"
+  },
+  {
+    "district": 2,
+    "name": "terrasse étagée",
+    "variant": 4,
+    "footprint": [
+      0.86,
+      0.74
+    ],
+    "heightMultiplier": 0.956,
+    "roof": "stepped",
+    "status": "design parameters; complex roof geometry requires shared intersection implementation"
+  },
+  {
+    "district": 2,
+    "name": "commerce mixte",
+    "variant": 5,
+    "footprint": [
+      0.905,
+      0.705
+    ],
+    "heightMultiplier": 1.0,
+    "roof": "flat",
+    "status": "design parameters; complex roof geometry requires shared intersection implementation"
+  },
+  {
+    "district": 3,
+    "name": "tour verre",
+    "variant": 0,
+    "footprint": [
+      0.68,
+      0.88
+    ],
+    "heightMultiplier": 0.78,
+    "roof": "flat",
+    "status": "design parameters; complex roof geometry requires shared intersection implementation"
+  },
+  {
+    "district": 3,
+    "name": "tour effilée",
+    "variant": 1,
+    "footprint": [
+      0.725,
+      0.845
+    ],
+    "heightMultiplier": 0.824,
+    "roof": "gable",
+    "status": "design parameters; complex roof geometry requires shared intersection implementation"
+  },
+  {
+    "district": 3,
+    "name": "tour à retraits",
+    "variant": 2,
+    "footprint": [
+      0.77,
+      0.81
+    ],
+    "heightMultiplier": 0.868,
+    "roof": "hip",
+    "status": "design parameters; complex roof geometry requires shared intersection implementation"
+  },
+  {
+    "district": 3,
+    "name": "tour jumelle",
+    "variant": 3,
+    "footprint": [
+      0.815,
+      0.775
+    ],
+    "heightMultiplier": 0.912,
+    "roof": "shed",
+    "status": "design parameters; complex roof geometry requires shared intersection implementation"
+  },
+  {
+    "district": 3,
+    "name": "tour cylindrique",
+    "variant": 4,
+    "footprint": [
+      0.86,
+      0.74
+    ],
+    "heightMultiplier": 0.956,
+    "roof": "stepped",
+    "status": "design parameters; complex roof geometry requires shared intersection implementation"
+  },
+  {
+    "district": 3,
+    "name": "tour couronne",
+    "variant": 5,
+    "footprint": [
+      0.905,
+      0.705
+    ],
+    "heightMultiplier": 1.0,
+    "roof": "flat",
+    "status": "design parameters; complex roof geometry requires shared intersection implementation"
+  },
+  {
+    "district": 5,
+    "name": "hangar",
+    "variant": 0,
+    "footprint": [
+      0.68,
+      0.88
+    ],
+    "heightMultiplier": 0.78,
+    "roof": "flat",
+    "status": "design parameters; complex roof geometry requires shared intersection implementation"
+  },
+  {
+    "district": 5,
+    "name": "usine sheds",
+    "variant": 1,
+    "footprint": [
+      0.725,
+      0.845
+    ],
+    "heightMultiplier": 0.824,
+    "roof": "gable",
+    "status": "design parameters; complex roof geometry requires shared intersection implementation"
+  },
+  {
+    "district": 5,
+    "name": "entrepôt",
+    "variant": 2,
+    "footprint": [
+      0.77,
+      0.81
+    ],
+    "heightMultiplier": 0.868,
+    "roof": "hip",
+    "status": "design parameters; complex roof geometry requires shared intersection implementation"
+  },
+  {
+    "district": 5,
+    "name": "centrale",
+    "variant": 3,
+    "footprint": [
+      0.815,
+      0.775
+    ],
+    "heightMultiplier": 0.912,
+    "roof": "shed",
+    "status": "design parameters; complex roof geometry requires shared intersection implementation"
+  },
+  {
+    "district": 5,
+    "name": "atelier",
+    "variant": 4,
+    "footprint": [
+      0.86,
+      0.74
+    ],
+    "heightMultiplier": 0.956,
+    "roof": "stepped",
+    "status": "design parameters; complex roof geometry requires shared intersection implementation"
+  },
+  {
+    "district": 5,
+    "name": "silo",
+    "variant": 5,
+    "footprint": [
+      0.905,
+      0.705
+    ],
+    "heightMultiplier": 1.0,
+    "roof": "flat",
+    "status": "design parameters; complex roof geometry requires shared intersection implementation"
+  },
+  {
+    "district": 6,
+    "name": "grange",
+    "variant": 0,
+    "footprint": [
+      0.68,
+      0.88
+    ],
+    "heightMultiplier": 0.78,
+    "roof": "flat",
+    "status": "design parameters; complex roof geometry requires shared intersection implementation"
+  },
+  {
+    "district": 6,
+    "name": "ferme cour",
+    "variant": 1,
+    "footprint": [
+      0.725,
+      0.845
+    ],
+    "heightMultiplier": 0.824,
+    "roof": "gable",
+    "status": "design parameters; complex roof geometry requires shared intersection implementation"
+  },
+  {
+    "district": 6,
+    "name": "serre",
+    "variant": 2,
+    "footprint": [
+      0.77,
+      0.81
+    ],
+    "heightMultiplier": 0.868,
+    "roof": "hip",
+    "status": "design parameters; complex roof geometry requires shared intersection implementation"
+  },
+  {
+    "district": 6,
+    "name": "étable",
+    "variant": 3,
+    "footprint": [
+      0.815,
+      0.775
+    ],
+    "heightMultiplier": 0.912,
+    "roof": "shed",
+    "status": "design parameters; complex roof geometry requires shared intersection implementation"
+  },
+  {
+    "district": 6,
+    "name": "ferme viticole",
+    "variant": 4,
+    "footprint": [
+      0.86,
+      0.74
+    ],
+    "heightMultiplier": 0.956,
+    "roof": "stepped",
+    "status": "design parameters; complex roof geometry requires shared intersection implementation"
+  },
+  {
+    "district": 6,
+    "name": "moulin",
+    "variant": 5,
+    "footprint": [
+      0.905,
+      0.705
+    ],
+    "heightMultiplier": 1.0,
+    "roof": "flat",
+    "status": "design parameters; complex roof geometry requires shared intersection implementation"
+  }
+]

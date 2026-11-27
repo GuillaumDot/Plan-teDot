@@ -1,0 +1,3851 @@
+{
+  "models": [
+    {
+      "path": "world/expansion-v14/models/bridge-01.glb",
+      "triangles": 60,
+      "bytes": 17112,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/bridge-02.glb",
+      "triangles": 60,
+      "bytes": 17136,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/bridge-03.glb",
+      "triangles": 60,
+      "bytes": 17096,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/bridge-04.glb",
+      "triangles": 60,
+      "bytes": 17136,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/bridge-05.glb",
+      "triangles": 60,
+      "bytes": 17088,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/bridge-06.glb",
+      "triangles": 60,
+      "bytes": 17024,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/bridge-07.glb",
+      "triangles": 60,
+      "bytes": 17088,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/bridge-08.glb",
+      "triangles": 60,
+      "bytes": 17136,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/broadleaf-01.glb",
+      "triangles": 280,
+      "bytes": 54440,
+      "images": [
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/broadleaf-02.glb",
+      "triangles": 280,
+      "bytes": 54404,
+      "images": [
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/broadleaf-03.glb",
+      "triangles": 280,
+      "bytes": 54444,
+      "images": [
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/broadleaf-04.glb",
+      "triangles": 280,
+      "bytes": 54444,
+      "images": [
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/broadleaf-05.glb",
+      "triangles": 280,
+      "bytes": 54440,
+      "images": [
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/broadleaf-06.glb",
+      "triangles": 280,
+      "bytes": 54388,
+      "images": [
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/broadleaf-07.glb",
+      "triangles": 280,
+      "bytes": 54420,
+      "images": [
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/broadleaf-08.glb",
+      "triangles": 280,
+      "bytes": 54424,
+      "images": [
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/cactus-01.glb",
+      "triangles": 132,
+      "bytes": 37568,
+      "images": [
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/cactus-02.glb",
+      "triangles": 132,
+      "bytes": 37556,
+      "images": [
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/cactus-03.glb",
+      "triangles": 132,
+      "bytes": 37568,
+      "images": [
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/cactus-04.glb",
+      "triangles": 132,
+      "bytes": 37568,
+      "images": [
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/cactus-05.glb",
+      "triangles": 132,
+      "bytes": 37568,
+      "images": [
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/cactus-06.glb",
+      "triangles": 132,
+      "bytes": 37540,
+      "images": [
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/cactus-07.glb",
+      "triangles": 132,
+      "bytes": 37540,
+      "images": [
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/cactus-08.glb",
+      "triangles": 132,
+      "bytes": 37568,
+      "images": [
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/cargo_ship-01.glb",
+      "triangles": 184,
+      "bytes": 41380,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/cargo_ship-02.glb",
+      "triangles": 184,
+      "bytes": 41384,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/cargo_ship-03.glb",
+      "triangles": 184,
+      "bytes": 41384,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/cargo_ship-04.glb",
+      "triangles": 184,
+      "bytes": 41396,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/cargo_ship-05.glb",
+      "triangles": 184,
+      "bytes": 41380,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/cargo_ship-06.glb",
+      "triangles": 184,
+      "bytes": 41356,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/cargo_ship-07.glb",
+      "triangles": 184,
+      "bytes": 41380,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/cargo_ship-08.glb",
+      "triangles": 184,
+      "bytes": 41396,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/greenhouse-01.glb",
+      "triangles": 332,
+      "bytes": 44752,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/greenhouse-02.glb",
+      "triangles": 332,
+      "bytes": 44752,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/greenhouse-03.glb",
+      "triangles": 332,
+      "bytes": 44736,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/greenhouse-04.glb",
+      "triangles": 332,
+      "bytes": 44740,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/greenhouse-05.glb",
+      "triangles": 332,
+      "bytes": 44752,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/greenhouse-06.glb",
+      "triangles": 332,
+      "bytes": 44748,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/greenhouse-07.glb",
+      "triangles": 332,
+      "bytes": 44740,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/greenhouse-08.glb",
+      "triangles": 332,
+      "bytes": 44764,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/harbor_crane-01.glb",
+      "triangles": 64,
+      "bytes": 19844,
+      "images": [
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/harbor_crane-02.glb",
+      "triangles": 64,
+      "bytes": 19856,
+      "images": [
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/harbor_crane-03.glb",
+      "triangles": 64,
+      "bytes": 19844,
+      "images": [
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/harbor_crane-04.glb",
+      "triangles": 64,
+      "bytes": 19856,
+      "images": [
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/harbor_crane-05.glb",
+      "triangles": 64,
+      "bytes": 19840,
+      "images": [
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/harbor_crane-06.glb",
+      "triangles": 64,
+      "bytes": 19832,
+      "images": [
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/harbor_crane-07.glb",
+      "triangles": 64,
+      "bytes": 19840,
+      "images": [
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/harbor_crane-08.glb",
+      "triangles": 64,
+      "bytes": 19856,
+      "images": [
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/ice_spire-01.glb",
+      "triangles": 90,
+      "bytes": 25084,
+      "images": [
+        "eff9fecad4099a317de65d41cfb91af999e6e54fd23fb328665b6f6c0bd6562d"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/ice_spire-02.glb",
+      "triangles": 90,
+      "bytes": 25076,
+      "images": [
+        "eff9fecad4099a317de65d41cfb91af999e6e54fd23fb328665b6f6c0bd6562d"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/ice_spire-03.glb",
+      "triangles": 90,
+      "bytes": 25076,
+      "images": [
+        "eff9fecad4099a317de65d41cfb91af999e6e54fd23fb328665b6f6c0bd6562d"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/ice_spire-04.glb",
+      "triangles": 90,
+      "bytes": 25076,
+      "images": [
+        "eff9fecad4099a317de65d41cfb91af999e6e54fd23fb328665b6f6c0bd6562d"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/ice_spire-05.glb",
+      "triangles": 90,
+      "bytes": 25072,
+      "images": [
+        "eff9fecad4099a317de65d41cfb91af999e6e54fd23fb328665b6f6c0bd6562d"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/ice_spire-06.glb",
+      "triangles": 90,
+      "bytes": 25072,
+      "images": [
+        "eff9fecad4099a317de65d41cfb91af999e6e54fd23fb328665b6f6c0bd6562d"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/ice_spire-07.glb",
+      "triangles": 90,
+      "bytes": 25076,
+      "images": [
+        "eff9fecad4099a317de65d41cfb91af999e6e54fd23fb328665b6f6c0bd6562d"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/ice_spire-08.glb",
+      "triangles": 90,
+      "bytes": 25076,
+      "images": [
+        "eff9fecad4099a317de65d41cfb91af999e6e54fd23fb328665b6f6c0bd6562d"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/launch_pad-01.glb",
+      "triangles": 66,
+      "bytes": 17796,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/launch_pad-02.glb",
+      "triangles": 66,
+      "bytes": 17772,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/launch_pad-03.glb",
+      "triangles": 66,
+      "bytes": 17800,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/launch_pad-04.glb",
+      "triangles": 66,
+      "bytes": 17796,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/launch_pad-05.glb",
+      "triangles": 66,
+      "bytes": 17824,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/launch_pad-06.glb",
+      "triangles": 66,
+      "bytes": 17796,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/launch_pad-07.glb",
+      "triangles": 66,
+      "bytes": 17772,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/launch_pad-08.glb",
+      "triangles": 66,
+      "bytes": 17816,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/lighthouse-01.glb",
+      "triangles": 98,
+      "bytes": 32240,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/lighthouse-02.glb",
+      "triangles": 98,
+      "bytes": 32256,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/lighthouse-03.glb",
+      "triangles": 98,
+      "bytes": 32240,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/lighthouse-04.glb",
+      "triangles": 98,
+      "bytes": 32256,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/lighthouse-05.glb",
+      "triangles": 98,
+      "bytes": 32240,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/lighthouse-06.glb",
+      "triangles": 98,
+      "bytes": 32232,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/lighthouse-07.glb",
+      "triangles": 98,
+      "bytes": 32244,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/lighthouse-08.glb",
+      "triangles": 98,
+      "bytes": 32256,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/market-01.glb",
+      "triangles": 60,
+      "bytes": 25724,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/market-02.glb",
+      "triangles": 60,
+      "bytes": 25712,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/market-03.glb",
+      "triangles": 60,
+      "bytes": 25716,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/market-04.glb",
+      "triangles": 60,
+      "bytes": 25716,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/market-05.glb",
+      "triangles": 60,
+      "bytes": 25748,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/market-06.glb",
+      "triangles": 60,
+      "bytes": 25724,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/market-07.glb",
+      "triangles": 60,
+      "bytes": 25708,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/market-08.glb",
+      "triangles": 60,
+      "bytes": 25736,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/monument-01.glb",
+      "triangles": 66,
+      "bytes": 26432,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/monument-02.glb",
+      "triangles": 66,
+      "bytes": 26412,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/monument-03.glb",
+      "triangles": 66,
+      "bytes": 26436,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/monument-04.glb",
+      "triangles": 66,
+      "bytes": 26436,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/monument-05.glb",
+      "triangles": 66,
+      "bytes": 26460,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/monument-06.glb",
+      "triangles": 66,
+      "bytes": 26432,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/monument-07.glb",
+      "triangles": 66,
+      "bytes": 26408,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/monument-08.glb",
+      "triangles": 66,
+      "bytes": 26456,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/observatory-01.glb",
+      "triangles": 332,
+      "bytes": 53388,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/observatory-02.glb",
+      "triangles": 332,
+      "bytes": 53388,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/observatory-03.glb",
+      "triangles": 332,
+      "bytes": 53372,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/observatory-04.glb",
+      "triangles": 332,
+      "bytes": 53376,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/observatory-05.glb",
+      "triangles": 332,
+      "bytes": 53388,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/observatory-06.glb",
+      "triangles": 332,
+      "bytes": 53384,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/observatory-07.glb",
+      "triangles": 332,
+      "bytes": 53376,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/observatory-08.glb",
+      "triangles": 332,
+      "bytes": 53400,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/pine-01.glb",
+      "triangles": 94,
+      "bytes": 33120,
+      "images": [
+        "97cdbf1c0cf7a7ad3cf40be2d36ad8a723f475d3fc0733c37e6ddcc2c6e6a5ea",
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/pine-02.glb",
+      "triangles": 94,
+      "bytes": 33120,
+      "images": [
+        "97cdbf1c0cf7a7ad3cf40be2d36ad8a723f475d3fc0733c37e6ddcc2c6e6a5ea",
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/pine-03.glb",
+      "triangles": 94,
+      "bytes": 33120,
+      "images": [
+        "97cdbf1c0cf7a7ad3cf40be2d36ad8a723f475d3fc0733c37e6ddcc2c6e6a5ea",
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/pine-04.glb",
+      "triangles": 94,
+      "bytes": 33120,
+      "images": [
+        "97cdbf1c0cf7a7ad3cf40be2d36ad8a723f475d3fc0733c37e6ddcc2c6e6a5ea",
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/pine-05.glb",
+      "triangles": 94,
+      "bytes": 33120,
+      "images": [
+        "97cdbf1c0cf7a7ad3cf40be2d36ad8a723f475d3fc0733c37e6ddcc2c6e6a5ea",
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/pine-06.glb",
+      "triangles": 94,
+      "bytes": 33108,
+      "images": [
+        "97cdbf1c0cf7a7ad3cf40be2d36ad8a723f475d3fc0733c37e6ddcc2c6e6a5ea",
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/pine-07.glb",
+      "triangles": 94,
+      "bytes": 33108,
+      "images": [
+        "97cdbf1c0cf7a7ad3cf40be2d36ad8a723f475d3fc0733c37e6ddcc2c6e6a5ea",
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/pine-08.glb",
+      "triangles": 94,
+      "bytes": 33120,
+      "images": [
+        "97cdbf1c0cf7a7ad3cf40be2d36ad8a723f475d3fc0733c37e6ddcc2c6e6a5ea",
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/rail_station-01.glb",
+      "triangles": 60,
+      "bytes": 25724,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/rail_station-02.glb",
+      "triangles": 60,
+      "bytes": 25712,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/rail_station-03.glb",
+      "triangles": 60,
+      "bytes": 25716,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/rail_station-04.glb",
+      "triangles": 60,
+      "bytes": 25716,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/rail_station-05.glb",
+      "triangles": 60,
+      "bytes": 25748,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/rail_station-06.glb",
+      "triangles": 60,
+      "bytes": 25724,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/rail_station-07.glb",
+      "triangles": 60,
+      "bytes": 25708,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/rail_station-08.glb",
+      "triangles": 60,
+      "bytes": 25736,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/road_vehicle-01.glb",
+      "triangles": 184,
+      "bytes": 41380,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/road_vehicle-02.glb",
+      "triangles": 184,
+      "bytes": 41384,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/road_vehicle-03.glb",
+      "triangles": 184,
+      "bytes": 41384,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/road_vehicle-04.glb",
+      "triangles": 184,
+      "bytes": 41396,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/road_vehicle-05.glb",
+      "triangles": 184,
+      "bytes": 41380,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/road_vehicle-06.glb",
+      "triangles": 184,
+      "bytes": 41356,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/road_vehicle-07.glb",
+      "triangles": 184,
+      "bytes": 41380,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/road_vehicle-08.glb",
+      "triangles": 184,
+      "bytes": 41396,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/rock_arch-01.glb",
+      "triangles": 720,
+      "bytes": 101588,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/rock_arch-02.glb",
+      "triangles": 720,
+      "bytes": 101516,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/rock_arch-03.glb",
+      "triangles": 720,
+      "bytes": 101612,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/rock_arch-04.glb",
+      "triangles": 720,
+      "bytes": 101604,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/rock_arch-05.glb",
+      "triangles": 720,
+      "bytes": 101376,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/rock_arch-06.glb",
+      "triangles": 720,
+      "bytes": 101496,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/rock_arch-07.glb",
+      "triangles": 720,
+      "bytes": 101588,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/rock_arch-08.glb",
+      "triangles": 720,
+      "bytes": 101588,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/satellite_dish-01.glb",
+      "triangles": 98,
+      "bytes": 19280,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/satellite_dish-02.glb",
+      "triangles": 98,
+      "bytes": 19284,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/satellite_dish-03.glb",
+      "triangles": 98,
+      "bytes": 19268,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/satellite_dish-04.glb",
+      "triangles": 98,
+      "bytes": 19284,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/satellite_dish-05.glb",
+      "triangles": 98,
+      "bytes": 19268,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/satellite_dish-06.glb",
+      "triangles": 98,
+      "bytes": 19256,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/satellite_dish-07.glb",
+      "triangles": 98,
+      "bytes": 19268,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/satellite_dish-08.glb",
+      "triangles": 98,
+      "bytes": 19280,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/solar_array-01.glb",
+      "triangles": 72,
+      "bytes": 19460,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/solar_array-02.glb",
+      "triangles": 72,
+      "bytes": 19460,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/solar_array-03.glb",
+      "triangles": 72,
+      "bytes": 19460,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/solar_array-04.glb",
+      "triangles": 72,
+      "bytes": 19460,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/solar_array-05.glb",
+      "triangles": 72,
+      "bytes": 19460,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/solar_array-06.glb",
+      "triangles": 72,
+      "bytes": 19460,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/solar_array-07.glb",
+      "triangles": 72,
+      "bytes": 19460,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/solar_array-08.glb",
+      "triangles": 72,
+      "bytes": 19460,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/space_beacon-01.glb",
+      "triangles": 98,
+      "bytes": 23772,
+      "images": [
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/space_beacon-02.glb",
+      "triangles": 98,
+      "bytes": 23788,
+      "images": [
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/space_beacon-03.glb",
+      "triangles": 98,
+      "bytes": 23772,
+      "images": [
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/space_beacon-04.glb",
+      "triangles": 98,
+      "bytes": 23788,
+      "images": [
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/space_beacon-05.glb",
+      "triangles": 98,
+      "bytes": 23772,
+      "images": [
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/space_beacon-06.glb",
+      "triangles": 98,
+      "bytes": 23764,
+      "images": [
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/space_beacon-07.glb",
+      "triangles": 98,
+      "bytes": 23776,
+      "images": [
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/space_beacon-08.glb",
+      "triangles": 98,
+      "bytes": 23788,
+      "images": [
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/stadium-01.glb",
+      "triangles": 332,
+      "bytes": 44752,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/stadium-02.glb",
+      "triangles": 332,
+      "bytes": 44752,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/stadium-03.glb",
+      "triangles": 332,
+      "bytes": 44736,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/stadium-04.glb",
+      "triangles": 332,
+      "bytes": 44740,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/stadium-05.glb",
+      "triangles": 332,
+      "bytes": 44752,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/stadium-06.glb",
+      "triangles": 332,
+      "bytes": 44748,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/stadium-07.glb",
+      "triangles": 332,
+      "bytes": 44740,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/stadium-08.glb",
+      "triangles": 332,
+      "bytes": 44764,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/train-01.glb",
+      "triangles": 184,
+      "bytes": 45716,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/train-02.glb",
+      "triangles": 184,
+      "bytes": 45720,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/train-03.glb",
+      "triangles": 184,
+      "bytes": 45720,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/train-04.glb",
+      "triangles": 184,
+      "bytes": 45732,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/train-05.glb",
+      "triangles": 184,
+      "bytes": 45716,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/train-06.glb",
+      "triangles": 184,
+      "bytes": 45692,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/train-07.glb",
+      "triangles": 184,
+      "bytes": 45716,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/train-08.glb",
+      "triangles": 184,
+      "bytes": 45732,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/volcanic_vent-01.glb",
+      "triangles": 90,
+      "bytes": 25124,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/volcanic_vent-02.glb",
+      "triangles": 90,
+      "bytes": 25112,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/volcanic_vent-03.glb",
+      "triangles": 90,
+      "bytes": 25116,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/volcanic_vent-04.glb",
+      "triangles": 90,
+      "bytes": 25116,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/volcanic_vent-05.glb",
+      "triangles": 90,
+      "bytes": 25108,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/volcanic_vent-06.glb",
+      "triangles": 90,
+      "bytes": 25116,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/volcanic_vent-07.glb",
+      "triangles": 90,
+      "bytes": 25116,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/volcanic_vent-08.glb",
+      "triangles": 90,
+      "bytes": 25112,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/water_tower-01.glb",
+      "triangles": 98,
+      "bytes": 23604,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/water_tower-02.glb",
+      "triangles": 98,
+      "bytes": 23620,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/water_tower-03.glb",
+      "triangles": 98,
+      "bytes": 23604,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/water_tower-04.glb",
+      "triangles": 98,
+      "bytes": 23620,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/water_tower-05.glb",
+      "triangles": 98,
+      "bytes": 23604,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/water_tower-06.glb",
+      "triangles": 98,
+      "bytes": 23596,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/water_tower-07.glb",
+      "triangles": 98,
+      "bytes": 23608,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/water_tower-08.glb",
+      "triangles": 98,
+      "bytes": 23620,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/wind_turbine-01.glb",
+      "triangles": 76,
+      "bytes": 17860,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/wind_turbine-02.glb",
+      "triangles": 76,
+      "bytes": 17860,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/wind_turbine-03.glb",
+      "triangles": 76,
+      "bytes": 17848,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/wind_turbine-04.glb",
+      "triangles": 76,
+      "bytes": 17860,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/wind_turbine-05.glb",
+      "triangles": 76,
+      "bytes": 17844,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/wind_turbine-06.glb",
+      "triangles": 76,
+      "bytes": 17836,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/wind_turbine-07.glb",
+      "triangles": 76,
+      "bytes": 17844,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/expansion-v14/models/wind_turbine-08.glb",
+      "triangles": 76,
+      "bytes": 17860,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/apartment-00.glb",
+      "triangles": 708,
+      "bytes": 171976,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/apartment-01.glb",
+      "triangles": 636,
+      "bytes": 156824,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/apartment-02.glb",
+      "triangles": 612,
+      "bytes": 151728,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/apartment-03.glb",
+      "triangles": 612,
+      "bytes": 151680,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/apartment-04.glb",
+      "triangles": 612,
+      "bytes": 151732,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/apartment-05.glb",
+      "triangles": 876,
+      "bytes": 216360,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/barn-00.glb",
+      "triangles": 332,
+      "bytes": 84040,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/barn-01.glb",
+      "triangles": 332,
+      "bytes": 92676,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/barn-02.glb",
+      "triangles": 284,
+      "bytes": 82520,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/barn-03.glb",
+      "triangles": 332,
+      "bytes": 92668,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/barn-04.glb",
+      "triangles": 332,
+      "bytes": 92660,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/barn-05.glb",
+      "triangles": 332,
+      "bytes": 92628,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/castle-00.glb",
+      "triangles": 444,
+      "bytes": 107100,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/castle-01.glb",
+      "triangles": 588,
+      "bytes": 137720,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766"
+      ]
+    },
+    {
+      "path": "world/world-v10/castle-02.glb",
+      "triangles": 516,
+      "bytes": 122468,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/castle-03.glb",
+      "triangles": 444,
+      "bytes": 107100,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/castle-04.glb",
+      "triangles": 516,
+      "bytes": 122452,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/castle-05.glb",
+      "triangles": 588,
+      "bytes": 137700,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/chalet-00.glb",
+      "triangles": 236,
+      "bytes": 72308,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/chalet-01.glb",
+      "triangles": 236,
+      "bytes": 72336,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/chalet-02.glb",
+      "triangles": 188,
+      "bytes": 62168,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/chalet-03.glb",
+      "triangles": 236,
+      "bytes": 72328,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/chalet-04.glb",
+      "triangles": 236,
+      "bytes": 63688,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/chalet-05.glb",
+      "triangles": 236,
+      "bytes": 72328,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/church-00.glb",
+      "triangles": 260,
+      "bytes": 77424,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/church-01.glb",
+      "triangles": 140,
+      "bytes": 52040,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/church-02.glb",
+      "triangles": 188,
+      "bytes": 53540,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/church-03.glb",
+      "triangles": 260,
+      "bytes": 77400,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/church-04.glb",
+      "triangles": 260,
+      "bytes": 77344,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/church-05.glb",
+      "triangles": 140,
+      "bytes": 52000,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/cottage-00.glb",
+      "triangles": 116,
+      "bytes": 46952,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/cottage-01.glb",
+      "triangles": 116,
+      "bytes": 46944,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/cottage-02.glb",
+      "triangles": 188,
+      "bytes": 62160,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/cottage-03.glb",
+      "triangles": 140,
+      "bytes": 52020,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/cottage-04.glb",
+      "triangles": 188,
+      "bytes": 62144,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/cottage-05.glb",
+      "triangles": 188,
+      "bytes": 53508,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/factory-00.glb",
+      "triangles": 480,
+      "bytes": 123696,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/factory-01.glb",
+      "triangles": 552,
+      "bytes": 147652,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/factory-02.glb",
+      "triangles": 480,
+      "bytes": 123720,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/factory-03.glb",
+      "triangles": 336,
+      "bytes": 93156,
+      "images": [
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/factory-04.glb",
+      "triangles": 336,
+      "bytes": 93188,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/factory-05.glb",
+      "triangles": 408,
+      "bytes": 108460,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/fort-00.glb",
+      "triangles": 204,
+      "bytes": 56292,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/fort-01.glb",
+      "triangles": 204,
+      "bytes": 64924,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/fort-02.glb",
+      "triangles": 228,
+      "bytes": 61364,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766"
+      ]
+    },
+    {
+      "path": "world/world-v10/fort-03.glb",
+      "triangles": 252,
+      "bytes": 66480,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/fort-04.glb",
+      "triangles": 228,
+      "bytes": 70032,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/fort-05.glb",
+      "triangles": 252,
+      "bytes": 66444,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/greenhouse-00.glb",
+      "triangles": 152,
+      "bytes": 54540,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/greenhouse-01.glb",
+      "triangles": 176,
+      "bytes": 59636,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/greenhouse-02.glb",
+      "triangles": 152,
+      "bytes": 54544,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/greenhouse-03.glb",
+      "triangles": 152,
+      "bytes": 45936,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/greenhouse-04.glb",
+      "triangles": 152,
+      "bytes": 54540,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/greenhouse-05.glb",
+      "triangles": 272,
+      "bytes": 79932,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/lighthouse-00.glb",
+      "triangles": 420,
+      "bytes": 111052,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/lighthouse-01.glb",
+      "triangles": 420,
+      "bytes": 111040,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/lighthouse-02.glb",
+      "triangles": 468,
+      "bytes": 121100,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/lighthouse-03.glb",
+      "triangles": 420,
+      "bytes": 111048,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/lighthouse-04.glb",
+      "triangles": 372,
+      "bytes": 100788,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/lighthouse-05.glb",
+      "triangles": 420,
+      "bytes": 110972,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/market-00.glb",
+      "triangles": 152,
+      "bytes": 45916,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/market-01.glb",
+      "triangles": 128,
+      "bytes": 40860,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/market-02.glb",
+      "triangles": 152,
+      "bytes": 54568,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/market-03.glb",
+      "triangles": 152,
+      "bytes": 54540,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/market-04.glb",
+      "triangles": 128,
+      "bytes": 49464,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/market-05.glb",
+      "triangles": 152,
+      "bytes": 45940,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/station-00.glb",
+      "triangles": 608,
+      "bytes": 142552,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/station-01.glb",
+      "triangles": 416,
+      "bytes": 110432,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/station-02.glb",
+      "triangles": 368,
+      "bytes": 91636,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/station-03.glb",
+      "triangles": 368,
+      "bytes": 100308,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/station-04.glb",
+      "triangles": 608,
+      "bytes": 142540,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/station-05.glb",
+      "triangles": 680,
+      "bytes": 166400,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/tower-00.glb",
+      "triangles": 684,
+      "bytes": 175564,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/tower-01.glb",
+      "triangles": 684,
+      "bytes": 167032,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/tower-02.glb",
+      "triangles": 468,
+      "bytes": 121172,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/tower-03.glb",
+      "triangles": 684,
+      "bytes": 166936,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/tower-04.glb",
+      "triangles": 468,
+      "bytes": 121196,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/tower-05.glb",
+      "triangles": 684,
+      "bytes": 175492,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/townhouse-00.glb",
+      "triangles": 224,
+      "bytes": 69760,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/townhouse-01.glb",
+      "triangles": 224,
+      "bytes": 69752,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/townhouse-02.glb",
+      "triangles": 272,
+      "bytes": 79924,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/townhouse-03.glb",
+      "triangles": 224,
+      "bytes": 61116,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/townhouse-04.glb",
+      "triangles": 224,
+      "bytes": 69792,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/townhouse-05.glb",
+      "triangles": 224,
+      "bytes": 69768,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/warehouse-00.glb",
+      "triangles": 372,
+      "bytes": 100816,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/warehouse-01.glb",
+      "triangles": 468,
+      "bytes": 129808,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/warehouse-02.glb",
+      "triangles": 372,
+      "bytes": 109460,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/warehouse-03.glb",
+      "triangles": 420,
+      "bytes": 110956,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/warehouse-04.glb",
+      "triangles": 420,
+      "bytes": 110992,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/warehouse-05.glb",
+      "triangles": 420,
+      "bytes": 111032,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v10/windmill-00.glb",
+      "triangles": 252,
+      "bytes": 66616,
+      "images": [
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/windmill-01.glb",
+      "triangles": 252,
+      "bytes": 66628,
+      "images": [
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/windmill-02.glb",
+      "triangles": 252,
+      "bytes": 66612,
+      "images": [
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/windmill-03.glb",
+      "triangles": 252,
+      "bytes": 66628,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/world-v10/windmill-04.glb",
+      "triangles": 252,
+      "bytes": 75280,
+      "images": [
+        "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa",
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v10/windmill-05.glb",
+      "triangles": 252,
+      "bytes": 66568,
+      "images": [
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb"
+      ]
+    },
+    {
+      "path": "world/world-v11/apartment-00.glb",
+      "triangles": 408,
+      "bytes": 107404,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/apartment-01.glb",
+      "triangles": 336,
+      "bytes": 92348,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/apartment-02.glb",
+      "triangles": 912,
+      "bytes": 212920,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/apartment-03.glb",
+      "triangles": 336,
+      "bytes": 92376,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/apartment-04.glb",
+      "triangles": 552,
+      "bytes": 137592,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/apartment-05.glb",
+      "triangles": 408,
+      "bytes": 107440,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/apartment-06.glb",
+      "triangles": 528,
+      "bytes": 132504,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/apartment-07.glb",
+      "triangles": 432,
+      "bytes": 112508,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/barn-00.glb",
+      "triangles": 220,
+      "bytes": 66560,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/barn-01.glb",
+      "triangles": 220,
+      "bytes": 66540,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/barn-02.glb",
+      "triangles": 268,
+      "bytes": 76580,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/barn-03.glb",
+      "triangles": 268,
+      "bytes": 76596,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/barn-04.glb",
+      "triangles": 240,
+      "bytes": 71080,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/barn-05.glb",
+      "triangles": 240,
+      "bytes": 71060,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/barn-06.glb",
+      "triangles": 288,
+      "bytes": 81124,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/barn-07.glb",
+      "triangles": 288,
+      "bytes": 81140,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/castle-00.glb",
+      "triangles": 560,
+      "bytes": 117180,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v11/castle-01.glb",
+      "triangles": 544,
+      "bytes": 119896,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v11/castle-02.glb",
+      "triangles": 656,
+      "bytes": 137304,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v11/castle-03.glb",
+      "triangles": 496,
+      "bytes": 109884,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v11/castle-04.glb",
+      "triangles": 608,
+      "bytes": 127232,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v11/castle-05.glb",
+      "triangles": 592,
+      "bytes": 129956,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v11/castle-06.glb",
+      "triangles": 560,
+      "bytes": 117188,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v11/castle-07.glb",
+      "triangles": 544,
+      "bytes": 119940,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v11/chalet-00.glb",
+      "triangles": 148,
+      "bytes": 51488,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/chalet-01.glb",
+      "triangles": 220,
+      "bytes": 66540,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/chalet-02.glb",
+      "triangles": 172,
+      "bytes": 56496,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/chalet-03.glb",
+      "triangles": 268,
+      "bytes": 76596,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/chalet-04.glb",
+      "triangles": 168,
+      "bytes": 56004,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/chalet-05.glb",
+      "triangles": 240,
+      "bytes": 71060,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/chalet-06.glb",
+      "triangles": 192,
+      "bytes": 61012,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/chalet-07.glb",
+      "triangles": 288,
+      "bytes": 81140,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/church-00.glb",
+      "triangles": 208,
+      "bytes": 66280,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/church-01.glb",
+      "triangles": 208,
+      "bytes": 66264,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/church-02.glb",
+      "triangles": 256,
+      "bytes": 76312,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/church-03.glb",
+      "triangles": 256,
+      "bytes": 76328,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/church-04.glb",
+      "triangles": 208,
+      "bytes": 66276,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/church-05.glb",
+      "triangles": 208,
+      "bytes": 66260,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/church-06.glb",
+      "triangles": 256,
+      "bytes": 76312,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/church-07.glb",
+      "triangles": 256,
+      "bytes": 76328,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/cottage-00.glb",
+      "triangles": 148,
+      "bytes": 51488,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/cottage-01.glb",
+      "triangles": 220,
+      "bytes": 66540,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/cottage-02.glb",
+      "triangles": 172,
+      "bytes": 56496,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/cottage-03.glb",
+      "triangles": 268,
+      "bytes": 76596,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/cottage-04.glb",
+      "triangles": 168,
+      "bytes": 56004,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/cottage-05.glb",
+      "triangles": 240,
+      "bytes": 71060,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/cottage-06.glb",
+      "triangles": 192,
+      "bytes": 61012,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/cottage-07.glb",
+      "triangles": 288,
+      "bytes": 81140,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/factory-00.glb",
+      "triangles": 224,
+      "bytes": 67056,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/factory-01.glb",
+      "triangles": 256,
+      "bytes": 71852,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/factory-02.glb",
+      "triangles": 336,
+      "bytes": 86728,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/factory-03.glb",
+      "triangles": 272,
+      "bytes": 77092,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/factory-04.glb",
+      "triangles": 256,
+      "bytes": 71880,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/factory-05.glb",
+      "triangles": 288,
+      "bytes": 76688,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/factory-06.glb",
+      "triangles": 272,
+      "bytes": 77080,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/factory-07.glb",
+      "triangles": 304,
+      "bytes": 81928,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/fort-00.glb",
+      "triangles": 444,
+      "bytes": 88200,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766"
+      ]
+    },
+    {
+      "path": "world/world-v11/fort-01.glb",
+      "triangles": 380,
+      "bytes": 80860,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766"
+      ]
+    },
+    {
+      "path": "world/world-v11/fort-02.glb",
+      "triangles": 444,
+      "bytes": 88200,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766"
+      ]
+    },
+    {
+      "path": "world/world-v11/fort-03.glb",
+      "triangles": 380,
+      "bytes": 80896,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766"
+      ]
+    },
+    {
+      "path": "world/world-v11/fort-04.glb",
+      "triangles": 444,
+      "bytes": 88196,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766"
+      ]
+    },
+    {
+      "path": "world/world-v11/fort-05.glb",
+      "triangles": 380,
+      "bytes": 80860,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766"
+      ]
+    },
+    {
+      "path": "world/world-v11/fort-06.glb",
+      "triangles": 444,
+      "bytes": 88196,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766"
+      ]
+    },
+    {
+      "path": "world/world-v11/fort-07.glb",
+      "triangles": 380,
+      "bytes": 80892,
+      "images": [
+        "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766"
+      ]
+    },
+    {
+      "path": "world/world-v11/greenhouse-00.glb",
+      "triangles": 248,
+      "bytes": 74300,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/greenhouse-01.glb",
+      "triangles": 248,
+      "bytes": 74284,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/greenhouse-02.glb",
+      "triangles": 296,
+      "bytes": 84352,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/greenhouse-03.glb",
+      "triangles": 296,
+      "bytes": 84364,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/greenhouse-04.glb",
+      "triangles": 248,
+      "bytes": 74304,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/greenhouse-05.glb",
+      "triangles": 248,
+      "bytes": 74288,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/greenhouse-06.glb",
+      "triangles": 296,
+      "bytes": 84360,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/greenhouse-07.glb",
+      "triangles": 296,
+      "bytes": 84372,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/lighthouse-00.glb",
+      "triangles": 300,
+      "bytes": 64544,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v11/lighthouse-01.glb",
+      "triangles": 300,
+      "bytes": 64528,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v11/lighthouse-02.glb",
+      "triangles": 300,
+      "bytes": 64544,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v11/lighthouse-03.glb",
+      "triangles": 300,
+      "bytes": 64544,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v11/lighthouse-04.glb",
+      "triangles": 300,
+      "bytes": 64544,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v11/lighthouse-05.glb",
+      "triangles": 300,
+      "bytes": 64528,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v11/lighthouse-06.glb",
+      "triangles": 300,
+      "bytes": 64544,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v11/lighthouse-07.glb",
+      "triangles": 300,
+      "bytes": 64544,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v11/market-00.glb",
+      "triangles": 248,
+      "bytes": 74236,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/market-01.glb",
+      "triangles": 248,
+      "bytes": 74208,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/market-02.glb",
+      "triangles": 296,
+      "bytes": 84284,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/market-03.glb",
+      "triangles": 296,
+      "bytes": 84300,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/market-04.glb",
+      "triangles": 248,
+      "bytes": 74248,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/market-05.glb",
+      "triangles": 248,
+      "bytes": 74220,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/market-06.glb",
+      "triangles": 296,
+      "bytes": 84300,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/market-07.glb",
+      "triangles": 296,
+      "bytes": 84316,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/station-00.glb",
+      "triangles": 248,
+      "bytes": 74236,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/station-01.glb",
+      "triangles": 248,
+      "bytes": 74208,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/station-02.glb",
+      "triangles": 296,
+      "bytes": 84284,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/station-03.glb",
+      "triangles": 296,
+      "bytes": 84300,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/station-04.glb",
+      "triangles": 248,
+      "bytes": 74248,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/station-05.glb",
+      "triangles": 248,
+      "bytes": 74220,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/station-06.glb",
+      "triangles": 296,
+      "bytes": 84300,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/station-07.glb",
+      "triangles": 296,
+      "bytes": 84316,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/tower-00.glb",
+      "triangles": 432,
+      "bytes": 112504,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/tower-01.glb",
+      "triangles": 864,
+      "bytes": 202940,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/tower-02.glb",
+      "triangles": 912,
+      "bytes": 213140,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/tower-03.glb",
+      "triangles": 744,
+      "bytes": 177816,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/tower-04.glb",
+      "triangles": 600,
+      "bytes": 147756,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/tower-05.glb",
+      "triangles": 1080,
+      "bytes": 248316,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/tower-06.glb",
+      "triangles": 576,
+      "bytes": 142672,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/tower-07.glb",
+      "triangles": 1056,
+      "bytes": 243284,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/townhouse-00.glb",
+      "triangles": 116,
+      "bytes": 46688,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/townhouse-01.glb",
+      "triangles": 188,
+      "bytes": 61728,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/townhouse-02.glb",
+      "triangles": 140,
+      "bytes": 51696,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/townhouse-03.glb",
+      "triangles": 236,
+      "bytes": 71772,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/townhouse-04.glb",
+      "triangles": 116,
+      "bytes": 46692,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/townhouse-05.glb",
+      "triangles": 188,
+      "bytes": 61740,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/townhouse-06.glb",
+      "triangles": 140,
+      "bytes": 51704,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/townhouse-07.glb",
+      "triangles": 236,
+      "bytes": 71788,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/warehouse-00.glb",
+      "triangles": 192,
+      "bytes": 62244,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/warehouse-01.glb",
+      "triangles": 192,
+      "bytes": 62228,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/warehouse-02.glb",
+      "triangles": 240,
+      "bytes": 72244,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/warehouse-03.glb",
+      "triangles": 240,
+      "bytes": 72272,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/warehouse-04.glb",
+      "triangles": 192,
+      "bytes": 62252,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/warehouse-05.glb",
+      "triangles": 192,
+      "bytes": 62236,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/warehouse-06.glb",
+      "triangles": 240,
+      "bytes": 72256,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/warehouse-07.glb",
+      "triangles": 240,
+      "bytes": 72284,
+      "images": [
+        "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83",
+        "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d"
+      ]
+    },
+    {
+      "path": "world/world-v11/windmill-00.glb",
+      "triangles": 212,
+      "bytes": 57976,
+      "images": [
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v11/windmill-01.glb",
+      "triangles": 212,
+      "bytes": 57968,
+      "images": [
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v11/windmill-02.glb",
+      "triangles": 260,
+      "bytes": 68020,
+      "images": [
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v11/windmill-03.glb",
+      "triangles": 260,
+      "bytes": 68036,
+      "images": [
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v11/windmill-04.glb",
+      "triangles": 212,
+      "bytes": 58000,
+      "images": [
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v11/windmill-05.glb",
+      "triangles": 212,
+      "bytes": 57984,
+      "images": [
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v11/windmill-06.glb",
+      "triangles": 260,
+      "bytes": 68036,
+      "images": [
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    },
+    {
+      "path": "world/world-v11/windmill-07.glb",
+      "triangles": 260,
+      "bytes": 68048,
+      "images": [
+        "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb",
+        "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83"
+      ]
+    }
+  ],
+  "embeddedImages": {
+    "187925e4f37b68e8a89b43235275314e2022eb2d9e372bfc7d999172b99dcc83": {
+      "bytes": 4055,
+      "references": 320
+    },
+    "43eff4efd0b4c317a4dbd14b5e177af08a49b6dc4eb4fd4e16f5082e299a641d": {
+      "bytes": 8696,
+      "references": 198
+    },
+    "3bc3302a8c4f6e5b95d6c327f363de20c0ffaebe8c8301ee568bd9c30cf882aa": {
+      "bytes": 8393,
+      "references": 73
+    },
+    "8a1a49a1d89a079cd37e9c1b9943a5abb56ab147691bbdfe79a7d25d370302cb": {
+      "bytes": 8553,
+      "references": 54
+    },
+    "eff9fecad4099a317de65d41cfb91af999e6e54fd23fb328665b6f6c0bd6562d": {
+      "bytes": 8420,
+      "references": 8
+    },
+    "022d474c776380984d50fc1d2e41c0e9f4b8f40f43f0d543e518f3338952964e": {
+      "bytes": 8386,
+      "references": 194
+    },
+    "97cdbf1c0cf7a7ad3cf40be2d36ad8a723f475d3fc0733c37e6ddcc2c6e6a5ea": {
+      "bytes": 8611,
+      "references": 8
+    },
+    "0ea85278d80299955c7b8214b609f9b4680a603507ba888fe57a157e429eb766": {
+      "bytes": 8454,
+      "references": 44
+    }
+  },
+  "pngOptimized": 203,
+  "pngBytesSaved": 196087
+}

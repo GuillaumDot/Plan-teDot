@@ -1,0 +1,4 @@
+# Cosmic Reactions — PlanèteDot
+48 GIFs 128×128, 24 images, 1,68 s, boucle, fond transparent (GIF transparence binaire), 48 posters PNG. 16 émotions × 3 variantes. Glyphes Noto Color Emoji (SIL OFL 1.1), animations et ornements procéduraux originaux. Ne pas redistribuer la police.
+## Claude
+Charger manifest.json. Conserver les identifiants existants des réactions en les associant aux id du catalogue. Enregistrer id, variante, cible playlist/titre et message validé côté serveur; ne pas envoyer les GIFs en base. Afficher le poster au repos, GIF au toucher ou pendant une réaction reçue, revenir au poster après 1680 ms. Respecter prefers-reduced-motion. Charger à la demande, éviter 48 animations simultanées. Utiliser reactions.mjs pour varier sans répétition immédiate. Garder les règles d’accès existantes. Aucun changement du moteur ou de Supabase. Tester Safari iOS.

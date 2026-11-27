@@ -1,0 +1,2 @@
+import assert from 'node:assert/strict';import {typography,styles} from './typography.mjs';
+for(const k of Object.keys(styles)){assert(typography(k,1000));assert.equal(typography(k,0),null);assert.equal(typography(k,3750),null);assert.equal(typography(k,1000,{visible:false}),null);assert.equal(typography(k,1000,{reducedMotion:true,beat:1}).scale,1);assert.equal(typography(k,1000,{variant:2}).layout,'brackets');}assert.equal(typography('unknown',1000),null);console.log('97 assertions passed');

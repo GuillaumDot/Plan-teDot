@@ -1,0 +1,306 @@
+[
+  {
+    "id": "dance",
+    "emoji": "🕺",
+    "message": "Ça me fait danser !",
+    "variants": [
+      {
+        "gif": "dance-1.gif",
+        "poster": "dance-1.png"
+      },
+      {
+        "gif": "dance-2.gif",
+        "poster": "dance-2.png"
+      },
+      {
+        "gif": "dance-3.gif",
+        "poster": "dance-3.png"
+      }
+    ]
+  },
+  {
+    "id": "groove",
+    "emoji": "💃",
+    "message": "Quel groove !",
+    "variants": [
+      {
+        "gif": "groove-1.gif",
+        "poster": "groove-1.png"
+      },
+      {
+        "gif": "groove-2.gif",
+        "poster": "groove-2.png"
+      },
+      {
+        "gif": "groove-3.gif",
+        "poster": "groove-3.png"
+      }
+    ]
+  },
+  {
+    "id": "music",
+    "emoji": "🎶",
+    "message": "Quelle mélodie !",
+    "variants": [
+      {
+        "gif": "music-1.gif",
+        "poster": "music-1.png"
+      },
+      {
+        "gif": "music-2.gif",
+        "poster": "music-2.png"
+      },
+      {
+        "gif": "music-3.gif",
+        "poster": "music-3.png"
+      }
+    ]
+  },
+  {
+    "id": "fire",
+    "emoji": "🔥",
+    "message": "C’est du feu !",
+    "variants": [
+      {
+        "gif": "fire-1.gif",
+        "poster": "fire-1.png"
+      },
+      {
+        "gif": "fire-2.gif",
+        "poster": "fire-2.png"
+      },
+      {
+        "gif": "fire-3.gif",
+        "poster": "fire-3.png"
+      }
+    ]
+  },
+  {
+    "id": "headphones",
+    "emoji": "🎧",
+    "message": "À écouter en boucle !",
+    "variants": [
+      {
+        "gif": "headphones-1.gif",
+        "poster": "headphones-1.png"
+      },
+      {
+        "gif": "headphones-2.gif",
+        "poster": "headphones-2.png"
+      },
+      {
+        "gif": "headphones-3.gif",
+        "poster": "headphones-3.png"
+      }
+    ]
+  },
+  {
+    "id": "applause",
+    "emoji": "🙌",
+    "message": "Bravo !",
+    "variants": [
+      {
+        "gif": "applause-1.gif",
+        "poster": "applause-1.png"
+      },
+      {
+        "gif": "applause-2.gif",
+        "poster": "applause-2.png"
+      },
+      {
+        "gif": "applause-3.gif",
+        "poster": "applause-3.png"
+      }
+    ]
+  },
+  {
+    "id": "magic",
+    "emoji": "✨",
+    "message": "Magique !",
+    "variants": [
+      {
+        "gif": "magic-1.gif",
+        "poster": "magic-1.png"
+      },
+      {
+        "gif": "magic-2.gif",
+        "poster": "magic-2.png"
+      },
+      {
+        "gif": "magic-3.gif",
+        "poster": "magic-3.png"
+      }
+    ]
+  },
+  {
+    "id": "love",
+    "emoji": "💜",
+    "message": "Coup de cœur !",
+    "variants": [
+      {
+        "gif": "love-1.gif",
+        "poster": "love-1.png"
+      },
+      {
+        "gif": "love-2.gif",
+        "poster": "love-2.png"
+      },
+      {
+        "gif": "love-3.gif",
+        "poster": "love-3.png"
+      }
+    ]
+  },
+  {
+    "id": "chills",
+    "emoji": "⚡",
+    "message": "Des frissons !",
+    "variants": [
+      {
+        "gif": "chills-1.gif",
+        "poster": "chills-1.png"
+      },
+      {
+        "gif": "chills-2.gif",
+        "poster": "chills-2.png"
+      },
+      {
+        "gif": "chills-3.gif",
+        "poster": "chills-3.png"
+      }
+    ]
+  },
+  {
+    "id": "space",
+    "emoji": "🚀",
+    "message": "Ça me transporte !",
+    "variants": [
+      {
+        "gif": "space-1.gif",
+        "poster": "space-1.png"
+      },
+      {
+        "gif": "space-2.gif",
+        "poster": "space-2.png"
+      },
+      {
+        "gif": "space-3.gif",
+        "poster": "space-3.png"
+      }
+    ]
+  },
+  {
+    "id": "sad",
+    "emoji": "🥹",
+    "message": "Ça me touche.",
+    "variants": [
+      {
+        "gif": "sad-1.gif",
+        "poster": "sad-1.png"
+      },
+      {
+        "gif": "sad-2.gif",
+        "poster": "sad-2.png"
+      },
+      {
+        "gif": "sad-3.gif",
+        "poster": "sad-3.png"
+      }
+    ]
+  },
+  {
+    "id": "repeat",
+    "emoji": "🔁",
+    "message": "Encore une fois !",
+    "variants": [
+      {
+        "gif": "repeat-1.gif",
+        "poster": "repeat-1.png"
+      },
+      {
+        "gif": "repeat-2.gif",
+        "poster": "repeat-2.png"
+      },
+      {
+        "gif": "repeat-3.gif",
+        "poster": "repeat-3.png"
+      }
+    ]
+  },
+  {
+    "id": "mind",
+    "emoji": "🤯",
+    "message": "Incroyable !",
+    "variants": [
+      {
+        "gif": "mind-1.gif",
+        "poster": "mind-1.png"
+      },
+      {
+        "gif": "mind-2.gif",
+        "poster": "mind-2.png"
+      },
+      {
+        "gif": "mind-3.gif",
+        "poster": "mind-3.png"
+      }
+    ]
+  },
+  {
+    "id": "night",
+    "emoji": "🌙",
+    "message": "Quelle ambiance !",
+    "variants": [
+      {
+        "gif": "night-1.gif",
+        "poster": "night-1.png"
+      },
+      {
+        "gif": "night-2.gif",
+        "poster": "night-2.png"
+      },
+      {
+        "gif": "night-3.gif",
+        "poster": "night-3.png"
+      }
+    ]
+  },
+  {
+    "id": "bass",
+    "emoji": "🔊",
+    "message": "La basse est folle !",
+    "variants": [
+      {
+        "gif": "bass-1.gif",
+        "poster": "bass-1.png"
+      },
+      {
+        "gif": "bass-2.gif",
+        "poster": "bass-2.png"
+      },
+      {
+        "gif": "bass-3.gif",
+        "poster": "bass-3.png"
+      }
+    ]
+  },
+  {
+    "id": "diamond",
+    "emoji": "💎",
+    "message": "Une pépite !",
+    "variants": [
+      {
+        "gif": "diamond-1.gif",
+        "poster": "diamond-1.png"
+      },
+      {
+        "gif": "diamond-2.gif",
+        "poster": "diamond-2.png"
+      },
+      {
+        "gif": "diamond-3.gif",
+        "poster": "diamond-3.png"
+      }
+    ]
+  }
+]

@@ -1,0 +1,3 @@
+export function fxVariant(seed,zone,family){let h=2166136261;for(const c of JSON.stringify([seed,zone,family]))h=Math.imul(h^c.charCodeAt(0),16777619);return (h>>>0)%8;}
+export function downhillStep(sample,x,y,step=.01){const h=sample(x,y);let best=[x,y,h];for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,1],[1,-1],[-1,-1]]){const a=x+dx*step,b=y+dy*step,v=sample(a,b);if(Number.isFinite(v)&&v<best[2])best=[a,b,v];}return best;}
+export function traceFlow(sample,x,y,steps=64,step=.01){const path=[[x,y,sample(x,y)]];for(let i=0;i<steps;i++){const q=downhillStep(sample,x,y,step);if(q[0]===x&&q[1]===y)break;path.push(q);[x,y]=q;}return path;}

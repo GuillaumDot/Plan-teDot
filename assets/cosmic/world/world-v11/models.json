@@ -1,0 +1,2110 @@
+[
+  {
+    "file": "cottage-00.glb",
+    "family": "cottage",
+    "variant": 0,
+    "triangles": 148,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 72,
+      "roof": 8,
+      "door": 12,
+      "chimney": 32
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "cottage-01.glb",
+    "family": "cottage",
+    "variant": 1,
+    "triangles": 220,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 144,
+      "roof": 8,
+      "door": 12,
+      "chimney": 32
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "cottage-02.glb",
+    "family": "cottage",
+    "variant": 2,
+    "triangles": 172,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 96,
+      "roof": 8,
+      "door": 12,
+      "chimney": 32
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "cottage-03.glb",
+    "family": "cottage",
+    "variant": 3,
+    "triangles": 268,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 192,
+      "roof": 8,
+      "door": 12,
+      "chimney": 32
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "cottage-04.glb",
+    "family": "cottage",
+    "variant": 4,
+    "triangles": 168,
+    "parts": {
+      "foundation": 12,
+      "structure": 24,
+      "window": 72,
+      "roof": 16,
+      "door": 12,
+      "chimney": 32
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "cottage-05.glb",
+    "family": "cottage",
+    "variant": 5,
+    "triangles": 240,
+    "parts": {
+      "foundation": 12,
+      "structure": 24,
+      "window": 144,
+      "roof": 16,
+      "door": 12,
+      "chimney": 32
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "cottage-06.glb",
+    "family": "cottage",
+    "variant": 6,
+    "triangles": 192,
+    "parts": {
+      "foundation": 12,
+      "structure": 24,
+      "window": 96,
+      "roof": 16,
+      "door": 12,
+      "chimney": 32
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "cottage-07.glb",
+    "family": "cottage",
+    "variant": 7,
+    "triangles": 288,
+    "parts": {
+      "foundation": 12,
+      "structure": 24,
+      "window": 192,
+      "roof": 16,
+      "door": 12,
+      "chimney": 32
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "chalet-00.glb",
+    "family": "chalet",
+    "variant": 0,
+    "triangles": 148,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 72,
+      "roof": 8,
+      "door": 12,
+      "chimney": 32
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "chalet-01.glb",
+    "family": "chalet",
+    "variant": 1,
+    "triangles": 220,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 144,
+      "roof": 8,
+      "door": 12,
+      "chimney": 32
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "chalet-02.glb",
+    "family": "chalet",
+    "variant": 2,
+    "triangles": 172,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 96,
+      "roof": 8,
+      "door": 12,
+      "chimney": 32
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "chalet-03.glb",
+    "family": "chalet",
+    "variant": 3,
+    "triangles": 268,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 192,
+      "roof": 8,
+      "door": 12,
+      "chimney": 32
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "chalet-04.glb",
+    "family": "chalet",
+    "variant": 4,
+    "triangles": 168,
+    "parts": {
+      "foundation": 12,
+      "structure": 24,
+      "window": 72,
+      "roof": 16,
+      "door": 12,
+      "chimney": 32
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "chalet-05.glb",
+    "family": "chalet",
+    "variant": 5,
+    "triangles": 240,
+    "parts": {
+      "foundation": 12,
+      "structure": 24,
+      "window": 144,
+      "roof": 16,
+      "door": 12,
+      "chimney": 32
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "chalet-06.glb",
+    "family": "chalet",
+    "variant": 6,
+    "triangles": 192,
+    "parts": {
+      "foundation": 12,
+      "structure": 24,
+      "window": 96,
+      "roof": 16,
+      "door": 12,
+      "chimney": 32
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "chalet-07.glb",
+    "family": "chalet",
+    "variant": 7,
+    "triangles": 288,
+    "parts": {
+      "foundation": 12,
+      "structure": 24,
+      "window": 192,
+      "roof": 16,
+      "door": 12,
+      "chimney": 32
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "townhouse-00.glb",
+    "family": "townhouse",
+    "variant": 0,
+    "triangles": 116,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 72,
+      "roof": 8,
+      "door": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "townhouse-01.glb",
+    "family": "townhouse",
+    "variant": 1,
+    "triangles": 188,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 144,
+      "roof": 8,
+      "door": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "townhouse-02.glb",
+    "family": "townhouse",
+    "variant": 2,
+    "triangles": 140,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 96,
+      "roof": 8,
+      "door": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "townhouse-03.glb",
+    "family": "townhouse",
+    "variant": 3,
+    "triangles": 236,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 192,
+      "roof": 8,
+      "door": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "townhouse-04.glb",
+    "family": "townhouse",
+    "variant": 4,
+    "triangles": 116,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 72,
+      "roof": 8,
+      "door": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "townhouse-05.glb",
+    "family": "townhouse",
+    "variant": 5,
+    "triangles": 188,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 144,
+      "roof": 8,
+      "door": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "townhouse-06.glb",
+    "family": "townhouse",
+    "variant": 6,
+    "triangles": 140,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 96,
+      "roof": 8,
+      "door": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "townhouse-07.glb",
+    "family": "townhouse",
+    "variant": 7,
+    "triangles": 236,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 192,
+      "roof": 8,
+      "door": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "apartment-00.glb",
+    "family": "apartment",
+    "variant": 0,
+    "triangles": 408,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 216,
+      "balcony": 144,
+      "roof": 12,
+      "door": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "apartment-01.glb",
+    "family": "apartment",
+    "variant": 1,
+    "triangles": 336,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 288,
+      "roof": 12,
+      "door": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "apartment-02.glb",
+    "family": "apartment",
+    "variant": 2,
+    "triangles": 912,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 480,
+      "balcony": 384,
+      "roof": 12,
+      "door": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "apartment-03.glb",
+    "family": "apartment",
+    "variant": 3,
+    "triangles": 336,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 288,
+      "roof": 12,
+      "door": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "apartment-04.glb",
+    "family": "apartment",
+    "variant": 4,
+    "triangles": 552,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 288,
+      "balcony": 216,
+      "roof": 12,
+      "door": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "apartment-05.glb",
+    "family": "apartment",
+    "variant": 5,
+    "triangles": 408,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 360,
+      "roof": 12,
+      "door": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "apartment-06.glb",
+    "family": "apartment",
+    "variant": 6,
+    "triangles": 528,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 288,
+      "balcony": 192,
+      "roof": 12,
+      "door": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "apartment-07.glb",
+    "family": "apartment",
+    "variant": 7,
+    "triangles": 432,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 384,
+      "roof": 12,
+      "door": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "tower-00.glb",
+    "family": "tower",
+    "variant": 0,
+    "triangles": 432,
+    "parts": {
+      "foundation": 12,
+      "structure": 24,
+      "window": 360,
+      "cornice": 24,
+      "antenna": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "tower-01.glb",
+    "family": "tower",
+    "variant": 1,
+    "triangles": 864,
+    "parts": {
+      "foundation": 12,
+      "structure": 36,
+      "window": 768,
+      "cornice": 36,
+      "antenna": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "tower-02.glb",
+    "family": "tower",
+    "variant": 2,
+    "triangles": 912,
+    "parts": {
+      "foundation": 12,
+      "structure": 48,
+      "window": 792,
+      "cornice": 48,
+      "antenna": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "tower-03.glb",
+    "family": "tower",
+    "variant": 3,
+    "triangles": 744,
+    "parts": {
+      "foundation": 12,
+      "structure": 24,
+      "window": 672,
+      "cornice": 24,
+      "antenna": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "tower-04.glb",
+    "family": "tower",
+    "variant": 4,
+    "triangles": 600,
+    "parts": {
+      "foundation": 12,
+      "structure": 36,
+      "window": 504,
+      "cornice": 36,
+      "antenna": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "tower-05.glb",
+    "family": "tower",
+    "variant": 5,
+    "triangles": 1080,
+    "parts": {
+      "foundation": 12,
+      "structure": 48,
+      "window": 960,
+      "cornice": 48,
+      "antenna": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "tower-06.glb",
+    "family": "tower",
+    "variant": 6,
+    "triangles": 576,
+    "parts": {
+      "foundation": 12,
+      "structure": 24,
+      "window": 504,
+      "cornice": 24,
+      "antenna": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "tower-07.glb",
+    "family": "tower",
+    "variant": 7,
+    "triangles": 1056,
+    "parts": {
+      "foundation": 12,
+      "structure": 36,
+      "window": 960,
+      "cornice": 36,
+      "antenna": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "factory-00.glb",
+    "family": "factory",
+    "variant": 0,
+    "triangles": 224,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 144,
+      "roof": 12,
+      "door": 12,
+      "chimney": 32
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "factory-01.glb",
+    "family": "factory",
+    "variant": 1,
+    "triangles": 256,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 144,
+      "roof": 12,
+      "door": 12,
+      "chimney": 64
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "factory-02.glb",
+    "family": "factory",
+    "variant": 2,
+    "triangles": 336,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 192,
+      "roof": 12,
+      "door": 12,
+      "chimney": 96
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "factory-03.glb",
+    "family": "factory",
+    "variant": 3,
+    "triangles": 272,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 192,
+      "roof": 12,
+      "door": 12,
+      "chimney": 32
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "factory-04.glb",
+    "family": "factory",
+    "variant": 4,
+    "triangles": 256,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 144,
+      "roof": 12,
+      "door": 12,
+      "chimney": 64
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "factory-05.glb",
+    "family": "factory",
+    "variant": 5,
+    "triangles": 288,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 144,
+      "roof": 12,
+      "door": 12,
+      "chimney": 96
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "factory-06.glb",
+    "family": "factory",
+    "variant": 6,
+    "triangles": 272,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 192,
+      "roof": 12,
+      "door": 12,
+      "chimney": 32
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "factory-07.glb",
+    "family": "factory",
+    "variant": 7,
+    "triangles": 304,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 192,
+      "roof": 12,
+      "door": 12,
+      "chimney": 64
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "church-00.glb",
+    "family": "church",
+    "variant": 0,
+    "triangles": 208,
+    "parts": {
+      "foundation": 12,
+      "structure": 24,
+      "window": 144,
+      "roof": 16,
+      "door": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "church-01.glb",
+    "family": "church",
+    "variant": 1,
+    "triangles": 208,
+    "parts": {
+      "foundation": 12,
+      "structure": 24,
+      "window": 144,
+      "roof": 16,
+      "door": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "church-02.glb",
+    "family": "church",
+    "variant": 2,
+    "triangles": 256,
+    "parts": {
+      "foundation": 12,
+      "structure": 24,
+      "window": 192,
+      "roof": 16,
+      "door": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "church-03.glb",
+    "family": "church",
+    "variant": 3,
+    "triangles": 256,
+    "parts": {
+      "foundation": 12,
+      "structure": 24,
+      "window": 192,
+      "roof": 16,
+      "door": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "church-04.glb",
+    "family": "church",
+    "variant": 4,
+    "triangles": 208,
+    "parts": {
+      "foundation": 12,
+      "structure": 24,
+      "window": 144,
+      "roof": 16,
+      "door": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "church-05.glb",
+    "family": "church",
+    "variant": 5,
+    "triangles": 208,
+    "parts": {
+      "foundation": 12,
+      "structure": 24,
+      "window": 144,
+      "roof": 16,
+      "door": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "church-06.glb",
+    "family": "church",
+    "variant": 6,
+    "triangles": 256,
+    "parts": {
+      "foundation": 12,
+      "structure": 24,
+      "window": 192,
+      "roof": 16,
+      "door": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "church-07.glb",
+    "family": "church",
+    "variant": 7,
+    "triangles": 256,
+    "parts": {
+      "foundation": 12,
+      "structure": 24,
+      "window": 192,
+      "roof": 16,
+      "door": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "castle-00.glb",
+    "family": "castle",
+    "variant": 0,
+    "triangles": 560,
+    "parts": {
+      "foundation": 12,
+      "structure": 252,
+      "battlement": 192,
+      "window": 96,
+      "roof": 8
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "castle-01.glb",
+    "family": "castle",
+    "variant": 1,
+    "triangles": 544,
+    "parts": {
+      "foundation": 12,
+      "structure": 188,
+      "battlement": 192,
+      "window": 144,
+      "roof": 8
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "castle-02.glb",
+    "family": "castle",
+    "variant": 2,
+    "triangles": 656,
+    "parts": {
+      "foundation": 12,
+      "structure": 252,
+      "battlement": 192,
+      "window": 192,
+      "roof": 8
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "castle-03.glb",
+    "family": "castle",
+    "variant": 3,
+    "triangles": 496,
+    "parts": {
+      "foundation": 12,
+      "structure": 188,
+      "battlement": 192,
+      "window": 96,
+      "roof": 8
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "castle-04.glb",
+    "family": "castle",
+    "variant": 4,
+    "triangles": 608,
+    "parts": {
+      "foundation": 12,
+      "structure": 252,
+      "battlement": 192,
+      "window": 144,
+      "roof": 8
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "castle-05.glb",
+    "family": "castle",
+    "variant": 5,
+    "triangles": 592,
+    "parts": {
+      "foundation": 12,
+      "structure": 188,
+      "battlement": 192,
+      "window": 192,
+      "roof": 8
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "castle-06.glb",
+    "family": "castle",
+    "variant": 6,
+    "triangles": 560,
+    "parts": {
+      "foundation": 12,
+      "structure": 252,
+      "battlement": 192,
+      "window": 96,
+      "roof": 8
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "castle-07.glb",
+    "family": "castle",
+    "variant": 7,
+    "triangles": 544,
+    "parts": {
+      "foundation": 12,
+      "structure": 188,
+      "battlement": 192,
+      "window": 144,
+      "roof": 8
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "barn-00.glb",
+    "family": "barn",
+    "variant": 0,
+    "triangles": 220,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 144,
+      "roof": 8,
+      "door": 12,
+      "chimney": 32
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "barn-01.glb",
+    "family": "barn",
+    "variant": 1,
+    "triangles": 220,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 144,
+      "roof": 8,
+      "door": 12,
+      "chimney": 32
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "barn-02.glb",
+    "family": "barn",
+    "variant": 2,
+    "triangles": 268,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 192,
+      "roof": 8,
+      "door": 12,
+      "chimney": 32
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "barn-03.glb",
+    "family": "barn",
+    "variant": 3,
+    "triangles": 268,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 192,
+      "roof": 8,
+      "door": 12,
+      "chimney": 32
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "barn-04.glb",
+    "family": "barn",
+    "variant": 4,
+    "triangles": 240,
+    "parts": {
+      "foundation": 12,
+      "structure": 24,
+      "window": 144,
+      "roof": 16,
+      "door": 12,
+      "chimney": 32
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "barn-05.glb",
+    "family": "barn",
+    "variant": 5,
+    "triangles": 240,
+    "parts": {
+      "foundation": 12,
+      "structure": 24,
+      "window": 144,
+      "roof": 16,
+      "door": 12,
+      "chimney": 32
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "barn-06.glb",
+    "family": "barn",
+    "variant": 6,
+    "triangles": 288,
+    "parts": {
+      "foundation": 12,
+      "structure": 24,
+      "window": 192,
+      "roof": 16,
+      "door": 12,
+      "chimney": 32
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "barn-07.glb",
+    "family": "barn",
+    "variant": 7,
+    "triangles": 288,
+    "parts": {
+      "foundation": 12,
+      "structure": 24,
+      "window": 192,
+      "roof": 16,
+      "door": 12,
+      "chimney": 32
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "market-00.glb",
+    "family": "market",
+    "variant": 0,
+    "triangles": 248,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 144,
+      "roof": 8,
+      "door": 12,
+      "column": 48,
+      "canopy": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "market-01.glb",
+    "family": "market",
+    "variant": 1,
+    "triangles": 248,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 144,
+      "roof": 8,
+      "door": 12,
+      "column": 48,
+      "canopy": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "market-02.glb",
+    "family": "market",
+    "variant": 2,
+    "triangles": 296,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 192,
+      "roof": 8,
+      "door": 12,
+      "column": 48,
+      "canopy": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "market-03.glb",
+    "family": "market",
+    "variant": 3,
+    "triangles": 296,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 192,
+      "roof": 8,
+      "door": 12,
+      "column": 48,
+      "canopy": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "market-04.glb",
+    "family": "market",
+    "variant": 4,
+    "triangles": 248,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 144,
+      "roof": 8,
+      "door": 12,
+      "column": 48,
+      "canopy": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "market-05.glb",
+    "family": "market",
+    "variant": 5,
+    "triangles": 248,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 144,
+      "roof": 8,
+      "door": 12,
+      "column": 48,
+      "canopy": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "market-06.glb",
+    "family": "market",
+    "variant": 6,
+    "triangles": 296,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 192,
+      "roof": 8,
+      "door": 12,
+      "column": 48,
+      "canopy": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "market-07.glb",
+    "family": "market",
+    "variant": 7,
+    "triangles": 296,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 192,
+      "roof": 8,
+      "door": 12,
+      "column": 48,
+      "canopy": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "station-00.glb",
+    "family": "station",
+    "variant": 0,
+    "triangles": 248,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 144,
+      "roof": 8,
+      "door": 12,
+      "column": 48,
+      "canopy": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "station-01.glb",
+    "family": "station",
+    "variant": 1,
+    "triangles": 248,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 144,
+      "roof": 8,
+      "door": 12,
+      "column": 48,
+      "canopy": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "station-02.glb",
+    "family": "station",
+    "variant": 2,
+    "triangles": 296,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 192,
+      "roof": 8,
+      "door": 12,
+      "column": 48,
+      "canopy": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "station-03.glb",
+    "family": "station",
+    "variant": 3,
+    "triangles": 296,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 192,
+      "roof": 8,
+      "door": 12,
+      "column": 48,
+      "canopy": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "station-04.glb",
+    "family": "station",
+    "variant": 4,
+    "triangles": 248,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 144,
+      "roof": 8,
+      "door": 12,
+      "column": 48,
+      "canopy": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "station-05.glb",
+    "family": "station",
+    "variant": 5,
+    "triangles": 248,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 144,
+      "roof": 8,
+      "door": 12,
+      "column": 48,
+      "canopy": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "station-06.glb",
+    "family": "station",
+    "variant": 6,
+    "triangles": 296,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 192,
+      "roof": 8,
+      "door": 12,
+      "column": 48,
+      "canopy": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "station-07.glb",
+    "family": "station",
+    "variant": 7,
+    "triangles": 296,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 192,
+      "roof": 8,
+      "door": 12,
+      "column": 48,
+      "canopy": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "lighthouse-00.glb",
+    "family": "lighthouse",
+    "variant": 0,
+    "triangles": 300,
+    "parts": {
+      "foundation": 12,
+      "structure": 192,
+      "lantern": 48,
+      "roof": 48
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "lighthouse-01.glb",
+    "family": "lighthouse",
+    "variant": 1,
+    "triangles": 300,
+    "parts": {
+      "foundation": 12,
+      "structure": 192,
+      "lantern": 48,
+      "roof": 48
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "lighthouse-02.glb",
+    "family": "lighthouse",
+    "variant": 2,
+    "triangles": 300,
+    "parts": {
+      "foundation": 12,
+      "structure": 192,
+      "lantern": 48,
+      "roof": 48
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "lighthouse-03.glb",
+    "family": "lighthouse",
+    "variant": 3,
+    "triangles": 300,
+    "parts": {
+      "foundation": 12,
+      "structure": 192,
+      "lantern": 48,
+      "roof": 48
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "lighthouse-04.glb",
+    "family": "lighthouse",
+    "variant": 4,
+    "triangles": 300,
+    "parts": {
+      "foundation": 12,
+      "structure": 192,
+      "lantern": 48,
+      "roof": 48
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "lighthouse-05.glb",
+    "family": "lighthouse",
+    "variant": 5,
+    "triangles": 300,
+    "parts": {
+      "foundation": 12,
+      "structure": 192,
+      "lantern": 48,
+      "roof": 48
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "lighthouse-06.glb",
+    "family": "lighthouse",
+    "variant": 6,
+    "triangles": 300,
+    "parts": {
+      "foundation": 12,
+      "structure": 192,
+      "lantern": 48,
+      "roof": 48
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "lighthouse-07.glb",
+    "family": "lighthouse",
+    "variant": 7,
+    "triangles": 300,
+    "parts": {
+      "foundation": 12,
+      "structure": 192,
+      "lantern": 48,
+      "roof": 48
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "warehouse-00.glb",
+    "family": "warehouse",
+    "variant": 0,
+    "triangles": 192,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 144,
+      "roof": 12,
+      "door": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "warehouse-01.glb",
+    "family": "warehouse",
+    "variant": 1,
+    "triangles": 192,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 144,
+      "roof": 12,
+      "door": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "warehouse-02.glb",
+    "family": "warehouse",
+    "variant": 2,
+    "triangles": 240,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 192,
+      "roof": 12,
+      "door": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "warehouse-03.glb",
+    "family": "warehouse",
+    "variant": 3,
+    "triangles": 240,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 192,
+      "roof": 12,
+      "door": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "warehouse-04.glb",
+    "family": "warehouse",
+    "variant": 4,
+    "triangles": 192,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 144,
+      "roof": 12,
+      "door": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "warehouse-05.glb",
+    "family": "warehouse",
+    "variant": 5,
+    "triangles": 192,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 144,
+      "roof": 12,
+      "door": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "warehouse-06.glb",
+    "family": "warehouse",
+    "variant": 6,
+    "triangles": 240,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 192,
+      "roof": 12,
+      "door": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "warehouse-07.glb",
+    "family": "warehouse",
+    "variant": 7,
+    "triangles": 240,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 192,
+      "roof": 12,
+      "door": 12
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "fort-00.glb",
+    "family": "fort",
+    "variant": 0,
+    "triangles": 444,
+    "parts": {
+      "foundation": 12,
+      "structure": 240,
+      "battlement": 192
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "fort-01.glb",
+    "family": "fort",
+    "variant": 1,
+    "triangles": 380,
+    "parts": {
+      "foundation": 12,
+      "structure": 176,
+      "battlement": 192
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "fort-02.glb",
+    "family": "fort",
+    "variant": 2,
+    "triangles": 444,
+    "parts": {
+      "foundation": 12,
+      "structure": 240,
+      "battlement": 192
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "fort-03.glb",
+    "family": "fort",
+    "variant": 3,
+    "triangles": 380,
+    "parts": {
+      "foundation": 12,
+      "structure": 176,
+      "battlement": 192
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "fort-04.glb",
+    "family": "fort",
+    "variant": 4,
+    "triangles": 444,
+    "parts": {
+      "foundation": 12,
+      "structure": 240,
+      "battlement": 192
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "fort-05.glb",
+    "family": "fort",
+    "variant": 5,
+    "triangles": 380,
+    "parts": {
+      "foundation": 12,
+      "structure": 176,
+      "battlement": 192
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "fort-06.glb",
+    "family": "fort",
+    "variant": 6,
+    "triangles": 444,
+    "parts": {
+      "foundation": 12,
+      "structure": 240,
+      "battlement": 192
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "fort-07.glb",
+    "family": "fort",
+    "variant": 7,
+    "triangles": 380,
+    "parts": {
+      "foundation": 12,
+      "structure": 176,
+      "battlement": 192
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "greenhouse-00.glb",
+    "family": "greenhouse",
+    "variant": 0,
+    "triangles": 248,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 144,
+      "roof": 8,
+      "door": 12,
+      "frame": 60
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "greenhouse-01.glb",
+    "family": "greenhouse",
+    "variant": 1,
+    "triangles": 248,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 144,
+      "roof": 8,
+      "door": 12,
+      "frame": 60
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "greenhouse-02.glb",
+    "family": "greenhouse",
+    "variant": 2,
+    "triangles": 296,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 192,
+      "roof": 8,
+      "door": 12,
+      "frame": 60
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "greenhouse-03.glb",
+    "family": "greenhouse",
+    "variant": 3,
+    "triangles": 296,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 192,
+      "roof": 8,
+      "door": 12,
+      "frame": 60
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "greenhouse-04.glb",
+    "family": "greenhouse",
+    "variant": 4,
+    "triangles": 248,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 144,
+      "roof": 8,
+      "door": 12,
+      "frame": 60
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "greenhouse-05.glb",
+    "family": "greenhouse",
+    "variant": 5,
+    "triangles": 248,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 144,
+      "roof": 8,
+      "door": 12,
+      "frame": 60
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "greenhouse-06.glb",
+    "family": "greenhouse",
+    "variant": 6,
+    "triangles": 296,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 192,
+      "roof": 8,
+      "door": 12,
+      "frame": 60
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "greenhouse-07.glb",
+    "family": "greenhouse",
+    "variant": 7,
+    "triangles": 296,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 192,
+      "roof": 8,
+      "door": 12,
+      "frame": 60
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "windmill-00.glb",
+    "family": "windmill",
+    "variant": 0,
+    "triangles": 212,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 144,
+      "roof": 8,
+      "door": 12,
+      "blade": 24
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "windmill-01.glb",
+    "family": "windmill",
+    "variant": 1,
+    "triangles": 212,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 144,
+      "roof": 8,
+      "door": 12,
+      "blade": 24
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "windmill-02.glb",
+    "family": "windmill",
+    "variant": 2,
+    "triangles": 260,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 192,
+      "roof": 8,
+      "door": 12,
+      "blade": 24
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "windmill-03.glb",
+    "family": "windmill",
+    "variant": 3,
+    "triangles": 260,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 192,
+      "roof": 8,
+      "door": 12,
+      "blade": 24
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "windmill-04.glb",
+    "family": "windmill",
+    "variant": 4,
+    "triangles": 212,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 144,
+      "roof": 8,
+      "door": 12,
+      "blade": 24
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "windmill-05.glb",
+    "family": "windmill",
+    "variant": 5,
+    "triangles": 212,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 144,
+      "roof": 8,
+      "door": 12,
+      "blade": 24
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "windmill-06.glb",
+    "family": "windmill",
+    "variant": 6,
+    "triangles": 260,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 192,
+      "roof": 8,
+      "door": 12,
+      "blade": 24
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  },
+  {
+    "file": "windmill-07.glb",
+    "family": "windmill",
+    "variant": 7,
+    "triangles": 260,
+    "parts": {
+      "foundation": 12,
+      "structure": 12,
+      "window": 192,
+      "roof": 8,
+      "door": 12,
+      "blade": 24
+    },
+    "up": "Y",
+    "placement": "base center",
+    "native": "reference only"
+  }
+]

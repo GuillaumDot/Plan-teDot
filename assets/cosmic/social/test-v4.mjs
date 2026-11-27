@@ -1,0 +1,2 @@
+import assert from 'node:assert/strict';import {Events,cue} from './cinematic.mjs';
+const e=new Events();assert(e.add({id:'a',target:'p',kind:'dance'},0));assert(!e.add({id:'a',target:'p',kind:'dance'},1));assert.equal(e.sample(500)[0].phase,'perform');assert.equal(e.sample(500,()=>({visible:false})).length,0);assert.equal(cue(500,{reducedMotion:true}).frame,0);assert.equal(cue(500,{shadow:0}).light,.25);assert.equal(e.sample(4200).length,0);assert.equal(cue(-1),null);console.log('8 assertions OK');

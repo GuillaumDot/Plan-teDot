@@ -1,0 +1,610 @@
+[
+  {
+    "id": "gas_00",
+    "name": "bandes zonales",
+    "file": "gas_00.png",
+    "channels": {
+      "R": "density",
+      "G": "detail",
+      "B": "emission mask"
+    },
+    "colorSpace": "linear",
+    "wrap": "repeat longitude; clamp latitude",
+    "typeIds": [
+      2
+    ]
+  },
+  {
+    "id": "gas_01",
+    "name": "jet ondulant",
+    "file": "gas_01.png",
+    "channels": {
+      "R": "density",
+      "G": "detail",
+      "B": "emission mask"
+    },
+    "colorSpace": "linear",
+    "wrap": "repeat longitude; clamp latitude",
+    "typeIds": [
+      2
+    ]
+  },
+  {
+    "id": "gas_02",
+    "name": "ovale cyclonique",
+    "file": "gas_02.png",
+    "channels": {
+      "R": "density",
+      "G": "detail",
+      "B": "emission mask"
+    },
+    "colorSpace": "linear",
+    "wrap": "repeat longitude; clamp latitude",
+    "typeIds": [
+      2
+    ]
+  },
+  {
+    "id": "gas_03",
+    "name": "vortex polaires",
+    "file": "gas_03.png",
+    "channels": {
+      "R": "density",
+      "G": "detail",
+      "B": "emission mask"
+    },
+    "colorSpace": "linear",
+    "wrap": "repeat longitude; clamp latitude",
+    "typeIds": [
+      2
+    ]
+  },
+  {
+    "id": "gas_04",
+    "name": "festons",
+    "file": "gas_04.png",
+    "channels": {
+      "R": "density",
+      "G": "detail",
+      "B": "emission mask"
+    },
+    "colorSpace": "linear",
+    "wrap": "repeat longitude; clamp latitude",
+    "typeIds": [
+      2
+    ]
+  },
+  {
+    "id": "gas_05",
+    "name": "cellules convectives",
+    "file": "gas_05.png",
+    "channels": {
+      "R": "density",
+      "G": "detail",
+      "B": "emission mask"
+    },
+    "colorSpace": "linear",
+    "wrap": "repeat longitude; clamp latitude",
+    "typeIds": [
+      2
+    ]
+  },
+  {
+    "id": "gas_06",
+    "name": "cisaillement",
+    "file": "gas_06.png",
+    "channels": {
+      "R": "density",
+      "G": "detail",
+      "B": "emission mask"
+    },
+    "colorSpace": "linear",
+    "wrap": "repeat longitude; clamp latitude",
+    "typeIds": [
+      2
+    ]
+  },
+  {
+    "id": "gas_07",
+    "name": "tempête multiple",
+    "file": "gas_07.png",
+    "channels": {
+      "R": "density",
+      "G": "detail",
+      "B": "emission mask"
+    },
+    "colorSpace": "linear",
+    "wrap": "repeat longitude; clamp latitude",
+    "typeIds": [
+      2
+    ]
+  },
+  {
+    "id": "spectral_00",
+    "name": "filaments",
+    "file": "spectral_00.png",
+    "channels": {
+      "R": "density",
+      "G": "detail",
+      "B": "emission mask"
+    },
+    "colorSpace": "linear",
+    "wrap": "repeat longitude; clamp latitude",
+    "typeIds": [
+      6
+    ]
+  },
+  {
+    "id": "spectral_01",
+    "name": "voiles",
+    "file": "spectral_01.png",
+    "channels": {
+      "R": "density",
+      "G": "detail",
+      "B": "emission mask"
+    },
+    "colorSpace": "linear",
+    "wrap": "repeat longitude; clamp latitude",
+    "typeIds": [
+      6
+    ]
+  },
+  {
+    "id": "spectral_02",
+    "name": "coquilles",
+    "file": "spectral_02.png",
+    "channels": {
+      "R": "density",
+      "G": "detail",
+      "B": "emission mask"
+    },
+    "colorSpace": "linear",
+    "wrap": "repeat longitude; clamp latitude",
+    "typeIds": [
+      6
+    ]
+  },
+  {
+    "id": "spectral_03",
+    "name": "nœuds lumineux",
+    "file": "spectral_03.png",
+    "channels": {
+      "R": "density",
+      "G": "detail",
+      "B": "emission mask"
+    },
+    "colorSpace": "linear",
+    "wrap": "repeat longitude; clamp latitude",
+    "typeIds": [
+      6
+    ]
+  },
+  {
+    "id": "spectral_04",
+    "name": "rubans",
+    "file": "spectral_04.png",
+    "channels": {
+      "R": "density",
+      "G": "detail",
+      "B": "emission mask"
+    },
+    "colorSpace": "linear",
+    "wrap": "repeat longitude; clamp latitude",
+    "typeIds": [
+      6
+    ]
+  },
+  {
+    "id": "spectral_05",
+    "name": "cavités",
+    "file": "spectral_05.png",
+    "channels": {
+      "R": "density",
+      "G": "detail",
+      "B": "emission mask"
+    },
+    "colorSpace": "linear",
+    "wrap": "repeat longitude; clamp latitude",
+    "typeIds": [
+      6
+    ]
+  },
+  {
+    "id": "spectral_06",
+    "name": "arcs",
+    "file": "spectral_06.png",
+    "channels": {
+      "R": "density",
+      "G": "detail",
+      "B": "emission mask"
+    },
+    "colorSpace": "linear",
+    "wrap": "repeat longitude; clamp latitude",
+    "typeIds": [
+      6
+    ]
+  },
+  {
+    "id": "spectral_07",
+    "name": "brume diffuse",
+    "file": "spectral_07.png",
+    "channels": {
+      "R": "density",
+      "G": "detail",
+      "B": "emission mask"
+    },
+    "colorSpace": "linear",
+    "wrap": "repeat longitude; clamp latitude",
+    "typeIds": [
+      6
+    ]
+  },
+  {
+    "id": "cloud_00",
+    "name": "cumulus",
+    "file": "cloud_00.png",
+    "channels": {
+      "R": "density",
+      "G": "detail",
+      "B": "emission mask"
+    },
+    "colorSpace": "linear",
+    "wrap": "repeat longitude; clamp latitude",
+    "typeIds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      6,
+      7,
+      11
+    ]
+  },
+  {
+    "id": "cloud_01",
+    "name": "stratus",
+    "file": "cloud_01.png",
+    "channels": {
+      "R": "density",
+      "G": "detail",
+      "B": "emission mask"
+    },
+    "colorSpace": "linear",
+    "wrap": "repeat longitude; clamp latitude",
+    "typeIds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      6,
+      7,
+      11
+    ]
+  },
+  {
+    "id": "cloud_02",
+    "name": "cirrus",
+    "file": "cloud_02.png",
+    "channels": {
+      "R": "density",
+      "G": "detail",
+      "B": "emission mask"
+    },
+    "colorSpace": "linear",
+    "wrap": "repeat longitude; clamp latitude",
+    "typeIds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      6,
+      7,
+      11
+    ]
+  },
+  {
+    "id": "cloud_03",
+    "name": "cumulonimbus",
+    "file": "cloud_03.png",
+    "channels": {
+      "R": "density",
+      "G": "detail",
+      "B": "emission mask"
+    },
+    "colorSpace": "linear",
+    "wrap": "repeat longitude; clamp latitude",
+    "typeIds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      6,
+      7,
+      11
+    ]
+  },
+  {
+    "id": "cloud_04",
+    "name": "lenticulaires",
+    "file": "cloud_04.png",
+    "channels": {
+      "R": "density",
+      "G": "detail",
+      "B": "emission mask"
+    },
+    "colorSpace": "linear",
+    "wrap": "repeat longitude; clamp latitude",
+    "typeIds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      6,
+      7,
+      11
+    ]
+  },
+  {
+    "id": "cloud_05",
+    "name": "cellules ouvertes",
+    "file": "cloud_05.png",
+    "channels": {
+      "R": "density",
+      "G": "detail",
+      "B": "emission mask"
+    },
+    "colorSpace": "linear",
+    "wrap": "repeat longitude; clamp latitude",
+    "typeIds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      6,
+      7,
+      11
+    ]
+  },
+  {
+    "id": "cloud_06",
+    "name": "cellules fermées",
+    "file": "cloud_06.png",
+    "channels": {
+      "R": "density",
+      "G": "detail",
+      "B": "emission mask"
+    },
+    "colorSpace": "linear",
+    "wrap": "repeat longitude; clamp latitude",
+    "typeIds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      6,
+      7,
+      11
+    ]
+  },
+  {
+    "id": "cloud_07",
+    "name": "brouillard",
+    "file": "cloud_07.png",
+    "channels": {
+      "R": "density",
+      "G": "detail",
+      "B": "emission mask"
+    },
+    "colorSpace": "linear",
+    "wrap": "repeat longitude; clamp latitude",
+    "typeIds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      6,
+      7,
+      11
+    ]
+  },
+  {
+    "id": "dust_00",
+    "name": "sable",
+    "file": "dust_00.png",
+    "channels": {
+      "R": "density",
+      "G": "detail",
+      "B": "emission mask"
+    },
+    "colorSpace": "linear",
+    "wrap": "repeat longitude; clamp latitude",
+    "typeIds": [
+      0,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      9,
+      10,
+      11
+    ]
+  },
+  {
+    "id": "dust_01",
+    "name": "cendres",
+    "file": "dust_01.png",
+    "channels": {
+      "R": "density",
+      "G": "detail",
+      "B": "emission mask"
+    },
+    "colorSpace": "linear",
+    "wrap": "repeat longitude; clamp latitude",
+    "typeIds": [
+      0,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      9,
+      10,
+      11
+    ]
+  },
+  {
+    "id": "dust_02",
+    "name": "silicates",
+    "file": "dust_02.png",
+    "channels": {
+      "R": "density",
+      "G": "detail",
+      "B": "emission mask"
+    },
+    "colorSpace": "linear",
+    "wrap": "repeat longitude; clamp latitude",
+    "typeIds": [
+      0,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      9,
+      10,
+      11
+    ]
+  },
+  {
+    "id": "dust_03",
+    "name": "glace",
+    "file": "dust_03.png",
+    "channels": {
+      "R": "density",
+      "G": "detail",
+      "B": "emission mask"
+    },
+    "colorSpace": "linear",
+    "wrap": "repeat longitude; clamp latitude",
+    "typeIds": [
+      0,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      9,
+      10,
+      11
+    ]
+  },
+  {
+    "id": "dust_04",
+    "name": "poussière cosmique",
+    "file": "dust_04.png",
+    "channels": {
+      "R": "density",
+      "G": "detail",
+      "B": "emission mask"
+    },
+    "colorSpace": "linear",
+    "wrap": "repeat longitude; clamp latitude",
+    "typeIds": [
+      0,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      9,
+      10,
+      11
+    ]
+  },
+  {
+    "id": "dust_05",
+    "name": "brume minérale",
+    "file": "dust_05.png",
+    "channels": {
+      "R": "density",
+      "G": "detail",
+      "B": "emission mask"
+    },
+    "colorSpace": "linear",
+    "wrap": "repeat longitude; clamp latitude",
+    "typeIds": [
+      0,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      9,
+      10,
+      11
+    ]
+  },
+  {
+    "id": "dust_06",
+    "name": "panache",
+    "file": "dust_06.png",
+    "channels": {
+      "R": "density",
+      "G": "detail",
+      "B": "emission mask"
+    },
+    "colorSpace": "linear",
+    "wrap": "repeat longitude; clamp latitude",
+    "typeIds": [
+      0,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      9,
+      10,
+      11
+    ]
+  },
+  {
+    "id": "dust_07",
+    "name": "anneau diffus",
+    "file": "dust_07.png",
+    "channels": {
+      "R": "density",
+      "G": "detail",
+      "B": "emission mask"
+    },
+    "colorSpace": "linear",
+    "wrap": "repeat longitude; clamp latitude",
+    "typeIds": [
+      0,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      9,
+      10,
+      11
+    ]
+  }
+]

@@ -1,0 +1,770 @@
+[
+  {
+    "file": "meteor_00.png",
+    "family": "meteor",
+    "variant": 0,
+    "domain": "space",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "meteor_01.png",
+    "family": "meteor",
+    "variant": 1,
+    "domain": "space",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "meteor_02.png",
+    "family": "meteor",
+    "variant": 2,
+    "domain": "space",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "meteor_03.png",
+    "family": "meteor",
+    "variant": 3,
+    "domain": "space",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "meteor_04.png",
+    "family": "meteor",
+    "variant": 4,
+    "domain": "space",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "meteor_05.png",
+    "family": "meteor",
+    "variant": 5,
+    "domain": "space",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "meteor_06.png",
+    "family": "meteor",
+    "variant": 6,
+    "domain": "space",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "meteor_07.png",
+    "family": "meteor",
+    "variant": 7,
+    "domain": "space",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "eruption_00.png",
+    "family": "eruption",
+    "variant": 0,
+    "domain": "volcanic",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "eruption_01.png",
+    "family": "eruption",
+    "variant": 1,
+    "domain": "volcanic",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "eruption_02.png",
+    "family": "eruption",
+    "variant": 2,
+    "domain": "volcanic",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "eruption_03.png",
+    "family": "eruption",
+    "variant": 3,
+    "domain": "volcanic",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "eruption_04.png",
+    "family": "eruption",
+    "variant": 4,
+    "domain": "volcanic",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "eruption_05.png",
+    "family": "eruption",
+    "variant": 5,
+    "domain": "volcanic",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "eruption_06.png",
+    "family": "eruption",
+    "variant": 6,
+    "domain": "volcanic",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "eruption_07.png",
+    "family": "eruption",
+    "variant": 7,
+    "domain": "volcanic",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "storm_00.png",
+    "family": "storm",
+    "variant": 0,
+    "domain": "atmosphere",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "storm_01.png",
+    "family": "storm",
+    "variant": 1,
+    "domain": "atmosphere",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "storm_02.png",
+    "family": "storm",
+    "variant": 2,
+    "domain": "atmosphere",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "storm_03.png",
+    "family": "storm",
+    "variant": 3,
+    "domain": "atmosphere",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "storm_04.png",
+    "family": "storm",
+    "variant": 4,
+    "domain": "atmosphere",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "storm_05.png",
+    "family": "storm",
+    "variant": 5,
+    "domain": "atmosphere",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "storm_06.png",
+    "family": "storm",
+    "variant": 6,
+    "domain": "atmosphere",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "storm_07.png",
+    "family": "storm",
+    "variant": 7,
+    "domain": "atmosphere",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "rain_00.png",
+    "family": "rain",
+    "variant": 0,
+    "domain": "atmosphere",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "rain_01.png",
+    "family": "rain",
+    "variant": 1,
+    "domain": "atmosphere",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "rain_02.png",
+    "family": "rain",
+    "variant": 2,
+    "domain": "atmosphere",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "rain_03.png",
+    "family": "rain",
+    "variant": 3,
+    "domain": "atmosphere",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "rain_04.png",
+    "family": "rain",
+    "variant": 4,
+    "domain": "atmosphere",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "rain_05.png",
+    "family": "rain",
+    "variant": 5,
+    "domain": "atmosphere",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "rain_06.png",
+    "family": "rain",
+    "variant": 6,
+    "domain": "atmosphere",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "rain_07.png",
+    "family": "rain",
+    "variant": 7,
+    "domain": "atmosphere",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "snow_00.png",
+    "family": "snow",
+    "variant": 0,
+    "domain": "cold",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "snow_01.png",
+    "family": "snow",
+    "variant": 1,
+    "domain": "cold",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "snow_02.png",
+    "family": "snow",
+    "variant": 2,
+    "domain": "cold",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "snow_03.png",
+    "family": "snow",
+    "variant": 3,
+    "domain": "cold",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "snow_04.png",
+    "family": "snow",
+    "variant": 4,
+    "domain": "cold",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "snow_05.png",
+    "family": "snow",
+    "variant": 5,
+    "domain": "cold",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "snow_06.png",
+    "family": "snow",
+    "variant": 6,
+    "domain": "cold",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "snow_07.png",
+    "family": "snow",
+    "variant": 7,
+    "domain": "cold",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "dust_00.png",
+    "family": "dust",
+    "variant": 0,
+    "domain": "dry",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "dust_01.png",
+    "family": "dust",
+    "variant": 1,
+    "domain": "dry",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "dust_02.png",
+    "family": "dust",
+    "variant": 2,
+    "domain": "dry",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "dust_03.png",
+    "family": "dust",
+    "variant": 3,
+    "domain": "dry",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "dust_04.png",
+    "family": "dust",
+    "variant": 4,
+    "domain": "dry",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "dust_05.png",
+    "family": "dust",
+    "variant": 5,
+    "domain": "dry",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "dust_06.png",
+    "family": "dust",
+    "variant": 6,
+    "domain": "dry",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "dust_07.png",
+    "family": "dust",
+    "variant": 7,
+    "domain": "dry",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "lava_00.png",
+    "family": "lava",
+    "variant": 0,
+    "domain": "volcanic",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "lava_01.png",
+    "family": "lava",
+    "variant": 1,
+    "domain": "volcanic",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "lava_02.png",
+    "family": "lava",
+    "variant": 2,
+    "domain": "volcanic",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "lava_03.png",
+    "family": "lava",
+    "variant": 3,
+    "domain": "volcanic",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "lava_04.png",
+    "family": "lava",
+    "variant": 4,
+    "domain": "volcanic",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "lava_05.png",
+    "family": "lava",
+    "variant": 5,
+    "domain": "volcanic",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "lava_06.png",
+    "family": "lava",
+    "variant": 6,
+    "domain": "volcanic",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "lava_07.png",
+    "family": "lava",
+    "variant": 7,
+    "domain": "volcanic",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "runoff_00.png",
+    "family": "runoff",
+    "variant": 0,
+    "domain": "surface",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "runoff_01.png",
+    "family": "runoff",
+    "variant": 1,
+    "domain": "surface",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "runoff_02.png",
+    "family": "runoff",
+    "variant": 2,
+    "domain": "surface",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "runoff_03.png",
+    "family": "runoff",
+    "variant": 3,
+    "domain": "surface",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "runoff_04.png",
+    "family": "runoff",
+    "variant": 4,
+    "domain": "surface",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "runoff_05.png",
+    "family": "runoff",
+    "variant": 5,
+    "domain": "surface",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "runoff_06.png",
+    "family": "runoff",
+    "variant": 6,
+    "domain": "surface",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  },
+  {
+    "file": "runoff_07.png",
+    "family": "runoff",
+    "variant": 7,
+    "domain": "surface",
+    "channels": [
+      "density",
+      "detail",
+      "emission"
+    ],
+    "projection": "local mask; not a world map"
+  }
+]

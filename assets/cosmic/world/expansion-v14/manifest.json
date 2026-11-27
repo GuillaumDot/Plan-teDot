@@ -1,0 +1,2418 @@
+[
+  {
+    "id": "bridge-01",
+    "family": "bridge",
+    "path": "models/bridge-01.glb",
+    "triangles": 60,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "bridge-02",
+    "family": "bridge",
+    "path": "models/bridge-02.glb",
+    "triangles": 60,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "bridge-03",
+    "family": "bridge",
+    "path": "models/bridge-03.glb",
+    "triangles": 60,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "bridge-04",
+    "family": "bridge",
+    "path": "models/bridge-04.glb",
+    "triangles": 60,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "bridge-05",
+    "family": "bridge",
+    "path": "models/bridge-05.glb",
+    "triangles": 60,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "bridge-06",
+    "family": "bridge",
+    "path": "models/bridge-06.glb",
+    "triangles": 60,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "bridge-07",
+    "family": "bridge",
+    "path": "models/bridge-07.glb",
+    "triangles": 60,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "bridge-08",
+    "family": "bridge",
+    "path": "models/bridge-08.glb",
+    "triangles": 60,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "rail_station-01",
+    "family": "rail_station",
+    "path": "models/rail_station-01.glb",
+    "triangles": 60,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "rail_station-02",
+    "family": "rail_station",
+    "path": "models/rail_station-02.glb",
+    "triangles": 60,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "rail_station-03",
+    "family": "rail_station",
+    "path": "models/rail_station-03.glb",
+    "triangles": 60,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "rail_station-04",
+    "family": "rail_station",
+    "path": "models/rail_station-04.glb",
+    "triangles": 60,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "rail_station-05",
+    "family": "rail_station",
+    "path": "models/rail_station-05.glb",
+    "triangles": 60,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "rail_station-06",
+    "family": "rail_station",
+    "path": "models/rail_station-06.glb",
+    "triangles": 60,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "rail_station-07",
+    "family": "rail_station",
+    "path": "models/rail_station-07.glb",
+    "triangles": 60,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "rail_station-08",
+    "family": "rail_station",
+    "path": "models/rail_station-08.glb",
+    "triangles": 60,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "train-01",
+    "family": "train",
+    "path": "models/train-01.glb",
+    "triangles": 184,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "train-02",
+    "family": "train",
+    "path": "models/train-02.glb",
+    "triangles": 184,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "train-03",
+    "family": "train",
+    "path": "models/train-03.glb",
+    "triangles": 184,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "train-04",
+    "family": "train",
+    "path": "models/train-04.glb",
+    "triangles": 184,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "train-05",
+    "family": "train",
+    "path": "models/train-05.glb",
+    "triangles": 184,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "train-06",
+    "family": "train",
+    "path": "models/train-06.glb",
+    "triangles": 184,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "train-07",
+    "family": "train",
+    "path": "models/train-07.glb",
+    "triangles": 184,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "train-08",
+    "family": "train",
+    "path": "models/train-08.glb",
+    "triangles": 184,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "road_vehicle-01",
+    "family": "road_vehicle",
+    "path": "models/road_vehicle-01.glb",
+    "triangles": 184,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "road_vehicle-02",
+    "family": "road_vehicle",
+    "path": "models/road_vehicle-02.glb",
+    "triangles": 184,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "road_vehicle-03",
+    "family": "road_vehicle",
+    "path": "models/road_vehicle-03.glb",
+    "triangles": 184,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "road_vehicle-04",
+    "family": "road_vehicle",
+    "path": "models/road_vehicle-04.glb",
+    "triangles": 184,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "road_vehicle-05",
+    "family": "road_vehicle",
+    "path": "models/road_vehicle-05.glb",
+    "triangles": 184,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "road_vehicle-06",
+    "family": "road_vehicle",
+    "path": "models/road_vehicle-06.glb",
+    "triangles": 184,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "road_vehicle-07",
+    "family": "road_vehicle",
+    "path": "models/road_vehicle-07.glb",
+    "triangles": 184,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "road_vehicle-08",
+    "family": "road_vehicle",
+    "path": "models/road_vehicle-08.glb",
+    "triangles": 184,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "cargo_ship-01",
+    "family": "cargo_ship",
+    "path": "models/cargo_ship-01.glb",
+    "triangles": 184,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "cargo_ship-02",
+    "family": "cargo_ship",
+    "path": "models/cargo_ship-02.glb",
+    "triangles": 184,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "cargo_ship-03",
+    "family": "cargo_ship",
+    "path": "models/cargo_ship-03.glb",
+    "triangles": 184,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "cargo_ship-04",
+    "family": "cargo_ship",
+    "path": "models/cargo_ship-04.glb",
+    "triangles": 184,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "cargo_ship-05",
+    "family": "cargo_ship",
+    "path": "models/cargo_ship-05.glb",
+    "triangles": 184,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "cargo_ship-06",
+    "family": "cargo_ship",
+    "path": "models/cargo_ship-06.glb",
+    "triangles": 184,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "cargo_ship-07",
+    "family": "cargo_ship",
+    "path": "models/cargo_ship-07.glb",
+    "triangles": 184,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "cargo_ship-08",
+    "family": "cargo_ship",
+    "path": "models/cargo_ship-08.glb",
+    "triangles": 184,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "harbor_crane-01",
+    "family": "harbor_crane",
+    "path": "models/harbor_crane-01.glb",
+    "triangles": 64,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "harbor_crane-02",
+    "family": "harbor_crane",
+    "path": "models/harbor_crane-02.glb",
+    "triangles": 64,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "harbor_crane-03",
+    "family": "harbor_crane",
+    "path": "models/harbor_crane-03.glb",
+    "triangles": 64,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "harbor_crane-04",
+    "family": "harbor_crane",
+    "path": "models/harbor_crane-04.glb",
+    "triangles": 64,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "harbor_crane-05",
+    "family": "harbor_crane",
+    "path": "models/harbor_crane-05.glb",
+    "triangles": 64,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "harbor_crane-06",
+    "family": "harbor_crane",
+    "path": "models/harbor_crane-06.glb",
+    "triangles": 64,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "harbor_crane-07",
+    "family": "harbor_crane",
+    "path": "models/harbor_crane-07.glb",
+    "triangles": 64,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "harbor_crane-08",
+    "family": "harbor_crane",
+    "path": "models/harbor_crane-08.glb",
+    "triangles": 64,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "lighthouse-01",
+    "family": "lighthouse",
+    "path": "models/lighthouse-01.glb",
+    "triangles": 98,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "lighthouse-02",
+    "family": "lighthouse",
+    "path": "models/lighthouse-02.glb",
+    "triangles": 98,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "lighthouse-03",
+    "family": "lighthouse",
+    "path": "models/lighthouse-03.glb",
+    "triangles": 98,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "lighthouse-04",
+    "family": "lighthouse",
+    "path": "models/lighthouse-04.glb",
+    "triangles": 98,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "lighthouse-05",
+    "family": "lighthouse",
+    "path": "models/lighthouse-05.glb",
+    "triangles": 98,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "lighthouse-06",
+    "family": "lighthouse",
+    "path": "models/lighthouse-06.glb",
+    "triangles": 98,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "lighthouse-07",
+    "family": "lighthouse",
+    "path": "models/lighthouse-07.glb",
+    "triangles": 98,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "lighthouse-08",
+    "family": "lighthouse",
+    "path": "models/lighthouse-08.glb",
+    "triangles": 98,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "wind_turbine-01",
+    "family": "wind_turbine",
+    "path": "models/wind_turbine-01.glb",
+    "triangles": 76,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "wind_turbine-02",
+    "family": "wind_turbine",
+    "path": "models/wind_turbine-02.glb",
+    "triangles": 76,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "wind_turbine-03",
+    "family": "wind_turbine",
+    "path": "models/wind_turbine-03.glb",
+    "triangles": 76,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "wind_turbine-04",
+    "family": "wind_turbine",
+    "path": "models/wind_turbine-04.glb",
+    "triangles": 76,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "wind_turbine-05",
+    "family": "wind_turbine",
+    "path": "models/wind_turbine-05.glb",
+    "triangles": 76,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "wind_turbine-06",
+    "family": "wind_turbine",
+    "path": "models/wind_turbine-06.glb",
+    "triangles": 76,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "wind_turbine-07",
+    "family": "wind_turbine",
+    "path": "models/wind_turbine-07.glb",
+    "triangles": 76,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "wind_turbine-08",
+    "family": "wind_turbine",
+    "path": "models/wind_turbine-08.glb",
+    "triangles": 76,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "solar_array-01",
+    "family": "solar_array",
+    "path": "models/solar_array-01.glb",
+    "triangles": 72,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "solar_array-02",
+    "family": "solar_array",
+    "path": "models/solar_array-02.glb",
+    "triangles": 72,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "solar_array-03",
+    "family": "solar_array",
+    "path": "models/solar_array-03.glb",
+    "triangles": 72,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "solar_array-04",
+    "family": "solar_array",
+    "path": "models/solar_array-04.glb",
+    "triangles": 72,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "solar_array-05",
+    "family": "solar_array",
+    "path": "models/solar_array-05.glb",
+    "triangles": 72,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "solar_array-06",
+    "family": "solar_array",
+    "path": "models/solar_array-06.glb",
+    "triangles": 72,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "solar_array-07",
+    "family": "solar_array",
+    "path": "models/solar_array-07.glb",
+    "triangles": 72,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "solar_array-08",
+    "family": "solar_array",
+    "path": "models/solar_array-08.glb",
+    "triangles": 72,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "water_tower-01",
+    "family": "water_tower",
+    "path": "models/water_tower-01.glb",
+    "triangles": 98,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "water_tower-02",
+    "family": "water_tower",
+    "path": "models/water_tower-02.glb",
+    "triangles": 98,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "water_tower-03",
+    "family": "water_tower",
+    "path": "models/water_tower-03.glb",
+    "triangles": 98,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "water_tower-04",
+    "family": "water_tower",
+    "path": "models/water_tower-04.glb",
+    "triangles": 98,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "water_tower-05",
+    "family": "water_tower",
+    "path": "models/water_tower-05.glb",
+    "triangles": 98,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "water_tower-06",
+    "family": "water_tower",
+    "path": "models/water_tower-06.glb",
+    "triangles": 98,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "water_tower-07",
+    "family": "water_tower",
+    "path": "models/water_tower-07.glb",
+    "triangles": 98,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "water_tower-08",
+    "family": "water_tower",
+    "path": "models/water_tower-08.glb",
+    "triangles": 98,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "observatory-01",
+    "family": "observatory",
+    "path": "models/observatory-01.glb",
+    "triangles": 332,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "observatory-02",
+    "family": "observatory",
+    "path": "models/observatory-02.glb",
+    "triangles": 332,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "observatory-03",
+    "family": "observatory",
+    "path": "models/observatory-03.glb",
+    "triangles": 332,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "observatory-04",
+    "family": "observatory",
+    "path": "models/observatory-04.glb",
+    "triangles": 332,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "observatory-05",
+    "family": "observatory",
+    "path": "models/observatory-05.glb",
+    "triangles": 332,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "observatory-06",
+    "family": "observatory",
+    "path": "models/observatory-06.glb",
+    "triangles": 332,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "observatory-07",
+    "family": "observatory",
+    "path": "models/observatory-07.glb",
+    "triangles": 332,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "observatory-08",
+    "family": "observatory",
+    "path": "models/observatory-08.glb",
+    "triangles": 332,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "satellite_dish-01",
+    "family": "satellite_dish",
+    "path": "models/satellite_dish-01.glb",
+    "triangles": 98,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "satellite_dish-02",
+    "family": "satellite_dish",
+    "path": "models/satellite_dish-02.glb",
+    "triangles": 98,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "satellite_dish-03",
+    "family": "satellite_dish",
+    "path": "models/satellite_dish-03.glb",
+    "triangles": 98,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "satellite_dish-04",
+    "family": "satellite_dish",
+    "path": "models/satellite_dish-04.glb",
+    "triangles": 98,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "satellite_dish-05",
+    "family": "satellite_dish",
+    "path": "models/satellite_dish-05.glb",
+    "triangles": 98,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "satellite_dish-06",
+    "family": "satellite_dish",
+    "path": "models/satellite_dish-06.glb",
+    "triangles": 98,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "satellite_dish-07",
+    "family": "satellite_dish",
+    "path": "models/satellite_dish-07.glb",
+    "triangles": 98,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "satellite_dish-08",
+    "family": "satellite_dish",
+    "path": "models/satellite_dish-08.glb",
+    "triangles": 98,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "launch_pad-01",
+    "family": "launch_pad",
+    "path": "models/launch_pad-01.glb",
+    "triangles": 66,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "launch_pad-02",
+    "family": "launch_pad",
+    "path": "models/launch_pad-02.glb",
+    "triangles": 66,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "launch_pad-03",
+    "family": "launch_pad",
+    "path": "models/launch_pad-03.glb",
+    "triangles": 66,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "launch_pad-04",
+    "family": "launch_pad",
+    "path": "models/launch_pad-04.glb",
+    "triangles": 66,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "launch_pad-05",
+    "family": "launch_pad",
+    "path": "models/launch_pad-05.glb",
+    "triangles": 66,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "launch_pad-06",
+    "family": "launch_pad",
+    "path": "models/launch_pad-06.glb",
+    "triangles": 66,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "launch_pad-07",
+    "family": "launch_pad",
+    "path": "models/launch_pad-07.glb",
+    "triangles": 66,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "launch_pad-08",
+    "family": "launch_pad",
+    "path": "models/launch_pad-08.glb",
+    "triangles": 66,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "space_beacon-01",
+    "family": "space_beacon",
+    "path": "models/space_beacon-01.glb",
+    "triangles": 98,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "space_beacon-02",
+    "family": "space_beacon",
+    "path": "models/space_beacon-02.glb",
+    "triangles": 98,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "space_beacon-03",
+    "family": "space_beacon",
+    "path": "models/space_beacon-03.glb",
+    "triangles": 98,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "space_beacon-04",
+    "family": "space_beacon",
+    "path": "models/space_beacon-04.glb",
+    "triangles": 98,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "space_beacon-05",
+    "family": "space_beacon",
+    "path": "models/space_beacon-05.glb",
+    "triangles": 98,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "space_beacon-06",
+    "family": "space_beacon",
+    "path": "models/space_beacon-06.glb",
+    "triangles": 98,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "space_beacon-07",
+    "family": "space_beacon",
+    "path": "models/space_beacon-07.glb",
+    "triangles": 98,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "space_beacon-08",
+    "family": "space_beacon",
+    "path": "models/space_beacon-08.glb",
+    "triangles": 98,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "monument-01",
+    "family": "monument",
+    "path": "models/monument-01.glb",
+    "triangles": 66,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "monument-02",
+    "family": "monument",
+    "path": "models/monument-02.glb",
+    "triangles": 66,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "monument-03",
+    "family": "monument",
+    "path": "models/monument-03.glb",
+    "triangles": 66,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "monument-04",
+    "family": "monument",
+    "path": "models/monument-04.glb",
+    "triangles": 66,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "monument-05",
+    "family": "monument",
+    "path": "models/monument-05.glb",
+    "triangles": 66,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "monument-06",
+    "family": "monument",
+    "path": "models/monument-06.glb",
+    "triangles": 66,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "monument-07",
+    "family": "monument",
+    "path": "models/monument-07.glb",
+    "triangles": 66,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "monument-08",
+    "family": "monument",
+    "path": "models/monument-08.glb",
+    "triangles": 66,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "stadium-01",
+    "family": "stadium",
+    "path": "models/stadium-01.glb",
+    "triangles": 332,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "stadium-02",
+    "family": "stadium",
+    "path": "models/stadium-02.glb",
+    "triangles": 332,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "stadium-03",
+    "family": "stadium",
+    "path": "models/stadium-03.glb",
+    "triangles": 332,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "stadium-04",
+    "family": "stadium",
+    "path": "models/stadium-04.glb",
+    "triangles": 332,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "stadium-05",
+    "family": "stadium",
+    "path": "models/stadium-05.glb",
+    "triangles": 332,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "stadium-06",
+    "family": "stadium",
+    "path": "models/stadium-06.glb",
+    "triangles": 332,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "stadium-07",
+    "family": "stadium",
+    "path": "models/stadium-07.glb",
+    "triangles": 332,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "stadium-08",
+    "family": "stadium",
+    "path": "models/stadium-08.glb",
+    "triangles": 332,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "greenhouse-01",
+    "family": "greenhouse",
+    "path": "models/greenhouse-01.glb",
+    "triangles": 332,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "greenhouse-02",
+    "family": "greenhouse",
+    "path": "models/greenhouse-02.glb",
+    "triangles": 332,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "greenhouse-03",
+    "family": "greenhouse",
+    "path": "models/greenhouse-03.glb",
+    "triangles": 332,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "greenhouse-04",
+    "family": "greenhouse",
+    "path": "models/greenhouse-04.glb",
+    "triangles": 332,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "greenhouse-05",
+    "family": "greenhouse",
+    "path": "models/greenhouse-05.glb",
+    "triangles": 332,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "greenhouse-06",
+    "family": "greenhouse",
+    "path": "models/greenhouse-06.glb",
+    "triangles": 332,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "greenhouse-07",
+    "family": "greenhouse",
+    "path": "models/greenhouse-07.glb",
+    "triangles": 332,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "greenhouse-08",
+    "family": "greenhouse",
+    "path": "models/greenhouse-08.glb",
+    "triangles": 332,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "market-01",
+    "family": "market",
+    "path": "models/market-01.glb",
+    "triangles": 60,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "market-02",
+    "family": "market",
+    "path": "models/market-02.glb",
+    "triangles": 60,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "market-03",
+    "family": "market",
+    "path": "models/market-03.glb",
+    "triangles": 60,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "market-04",
+    "family": "market",
+    "path": "models/market-04.glb",
+    "triangles": 60,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "market-05",
+    "family": "market",
+    "path": "models/market-05.glb",
+    "triangles": 60,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "market-06",
+    "family": "market",
+    "path": "models/market-06.glb",
+    "triangles": 60,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "market-07",
+    "family": "market",
+    "path": "models/market-07.glb",
+    "triangles": 60,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "market-08",
+    "family": "market",
+    "path": "models/market-08.glb",
+    "triangles": 60,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "pine-01",
+    "family": "pine",
+    "path": "models/pine-01.glb",
+    "triangles": 94,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate"
+    ]
+  },
+  {
+    "id": "pine-02",
+    "family": "pine",
+    "path": "models/pine-02.glb",
+    "triangles": 94,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate"
+    ]
+  },
+  {
+    "id": "pine-03",
+    "family": "pine",
+    "path": "models/pine-03.glb",
+    "triangles": 94,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate"
+    ]
+  },
+  {
+    "id": "pine-04",
+    "family": "pine",
+    "path": "models/pine-04.glb",
+    "triangles": 94,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate"
+    ]
+  },
+  {
+    "id": "pine-05",
+    "family": "pine",
+    "path": "models/pine-05.glb",
+    "triangles": 94,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate"
+    ]
+  },
+  {
+    "id": "pine-06",
+    "family": "pine",
+    "path": "models/pine-06.glb",
+    "triangles": 94,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate"
+    ]
+  },
+  {
+    "id": "pine-07",
+    "family": "pine",
+    "path": "models/pine-07.glb",
+    "triangles": 94,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate"
+    ]
+  },
+  {
+    "id": "pine-08",
+    "family": "pine",
+    "path": "models/pine-08.glb",
+    "triangles": 94,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate"
+    ]
+  },
+  {
+    "id": "broadleaf-01",
+    "family": "broadleaf",
+    "path": "models/broadleaf-01.glb",
+    "triangles": 280,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate"
+    ]
+  },
+  {
+    "id": "broadleaf-02",
+    "family": "broadleaf",
+    "path": "models/broadleaf-02.glb",
+    "triangles": 280,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate"
+    ]
+  },
+  {
+    "id": "broadleaf-03",
+    "family": "broadleaf",
+    "path": "models/broadleaf-03.glb",
+    "triangles": 280,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate"
+    ]
+  },
+  {
+    "id": "broadleaf-04",
+    "family": "broadleaf",
+    "path": "models/broadleaf-04.glb",
+    "triangles": 280,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate"
+    ]
+  },
+  {
+    "id": "broadleaf-05",
+    "family": "broadleaf",
+    "path": "models/broadleaf-05.glb",
+    "triangles": 280,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate"
+    ]
+  },
+  {
+    "id": "broadleaf-06",
+    "family": "broadleaf",
+    "path": "models/broadleaf-06.glb",
+    "triangles": 280,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate"
+    ]
+  },
+  {
+    "id": "broadleaf-07",
+    "family": "broadleaf",
+    "path": "models/broadleaf-07.glb",
+    "triangles": 280,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate"
+    ]
+  },
+  {
+    "id": "broadleaf-08",
+    "family": "broadleaf",
+    "path": "models/broadleaf-08.glb",
+    "triangles": 280,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate"
+    ]
+  },
+  {
+    "id": "cactus-01",
+    "family": "cactus",
+    "path": "models/cactus-01.glb",
+    "triangles": 132,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "arid"
+    ]
+  },
+  {
+    "id": "cactus-02",
+    "family": "cactus",
+    "path": "models/cactus-02.glb",
+    "triangles": 132,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "arid"
+    ]
+  },
+  {
+    "id": "cactus-03",
+    "family": "cactus",
+    "path": "models/cactus-03.glb",
+    "triangles": 132,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "arid"
+    ]
+  },
+  {
+    "id": "cactus-04",
+    "family": "cactus",
+    "path": "models/cactus-04.glb",
+    "triangles": 132,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "arid"
+    ]
+  },
+  {
+    "id": "cactus-05",
+    "family": "cactus",
+    "path": "models/cactus-05.glb",
+    "triangles": 132,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "arid"
+    ]
+  },
+  {
+    "id": "cactus-06",
+    "family": "cactus",
+    "path": "models/cactus-06.glb",
+    "triangles": 132,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "arid"
+    ]
+  },
+  {
+    "id": "cactus-07",
+    "family": "cactus",
+    "path": "models/cactus-07.glb",
+    "triangles": 132,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "arid"
+    ]
+  },
+  {
+    "id": "cactus-08",
+    "family": "cactus",
+    "path": "models/cactus-08.glb",
+    "triangles": 132,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "arid"
+    ]
+  },
+  {
+    "id": "rock_arch-01",
+    "family": "rock_arch",
+    "path": "models/rock_arch-01.glb",
+    "triangles": 720,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "rock_arch-02",
+    "family": "rock_arch",
+    "path": "models/rock_arch-02.glb",
+    "triangles": 720,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "rock_arch-03",
+    "family": "rock_arch",
+    "path": "models/rock_arch-03.glb",
+    "triangles": 720,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "rock_arch-04",
+    "family": "rock_arch",
+    "path": "models/rock_arch-04.glb",
+    "triangles": 720,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "rock_arch-05",
+    "family": "rock_arch",
+    "path": "models/rock_arch-05.glb",
+    "triangles": 720,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "rock_arch-06",
+    "family": "rock_arch",
+    "path": "models/rock_arch-06.glb",
+    "triangles": 720,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "rock_arch-07",
+    "family": "rock_arch",
+    "path": "models/rock_arch-07.glb",
+    "triangles": 720,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "rock_arch-08",
+    "family": "rock_arch",
+    "path": "models/rock_arch-08.glb",
+    "triangles": 720,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "temperate",
+      "arid",
+      "cold"
+    ]
+  },
+  {
+    "id": "ice_spire-01",
+    "family": "ice_spire",
+    "path": "models/ice_spire-01.glb",
+    "triangles": 90,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "cold"
+    ]
+  },
+  {
+    "id": "ice_spire-02",
+    "family": "ice_spire",
+    "path": "models/ice_spire-02.glb",
+    "triangles": 90,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "cold"
+    ]
+  },
+  {
+    "id": "ice_spire-03",
+    "family": "ice_spire",
+    "path": "models/ice_spire-03.glb",
+    "triangles": 90,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "cold"
+    ]
+  },
+  {
+    "id": "ice_spire-04",
+    "family": "ice_spire",
+    "path": "models/ice_spire-04.glb",
+    "triangles": 90,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "cold"
+    ]
+  },
+  {
+    "id": "ice_spire-05",
+    "family": "ice_spire",
+    "path": "models/ice_spire-05.glb",
+    "triangles": 90,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "cold"
+    ]
+  },
+  {
+    "id": "ice_spire-06",
+    "family": "ice_spire",
+    "path": "models/ice_spire-06.glb",
+    "triangles": 90,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "cold"
+    ]
+  },
+  {
+    "id": "ice_spire-07",
+    "family": "ice_spire",
+    "path": "models/ice_spire-07.glb",
+    "triangles": 90,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "cold"
+    ]
+  },
+  {
+    "id": "ice_spire-08",
+    "family": "ice_spire",
+    "path": "models/ice_spire-08.glb",
+    "triangles": 90,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "cold"
+    ]
+  },
+  {
+    "id": "volcanic_vent-01",
+    "family": "volcanic_vent",
+    "path": "models/volcanic_vent-01.glb",
+    "triangles": 90,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "volcanic"
+    ]
+  },
+  {
+    "id": "volcanic_vent-02",
+    "family": "volcanic_vent",
+    "path": "models/volcanic_vent-02.glb",
+    "triangles": 90,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "volcanic"
+    ]
+  },
+  {
+    "id": "volcanic_vent-03",
+    "family": "volcanic_vent",
+    "path": "models/volcanic_vent-03.glb",
+    "triangles": 90,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "volcanic"
+    ]
+  },
+  {
+    "id": "volcanic_vent-04",
+    "family": "volcanic_vent",
+    "path": "models/volcanic_vent-04.glb",
+    "triangles": 90,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "volcanic"
+    ]
+  },
+  {
+    "id": "volcanic_vent-05",
+    "family": "volcanic_vent",
+    "path": "models/volcanic_vent-05.glb",
+    "triangles": 90,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "volcanic"
+    ]
+  },
+  {
+    "id": "volcanic_vent-06",
+    "family": "volcanic_vent",
+    "path": "models/volcanic_vent-06.glb",
+    "triangles": 90,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "volcanic"
+    ]
+  },
+  {
+    "id": "volcanic_vent-07",
+    "family": "volcanic_vent",
+    "path": "models/volcanic_vent-07.glb",
+    "triangles": 90,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "volcanic"
+    ]
+  },
+  {
+    "id": "volcanic_vent-08",
+    "family": "volcanic_vent",
+    "path": "models/volcanic_vent-08.glb",
+    "triangles": 90,
+    "units": "normalized",
+    "up": "Y",
+    "biomes": [
+      "volcanic"
+    ]
+  }
+]

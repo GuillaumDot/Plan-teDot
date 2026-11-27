@@ -1,0 +1,6 @@
+const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
+export function activity({daylight=1,stage=0,beat=0,quality=1,visible=true}={}){const d=clamp(daylight),s=clamp(stage),q=clamp(quality);return {windows:visible?(1-d)*s:0,traffic:visible?Math.floor(12*s*q*(.25+.75*d)):0,industry:visible?s*(.4+.6*d):0,beacon:visible?(.15+.2*clamp(beat))*(1-d):0};}
+export function lod({pixels=0,visible=true,quality=1}={}){if(!visible||pixels<3)return 'none';if(pixels<18||quality<.3)return 'impostor';if(pixels<70||quality<.7)return 'low';return 'mesh';}
+export function routeSample(points,t){if(!Array.isArray(points)||points.length<2)return null;const lengths=points.slice(1).map((p,i)=>Math.hypot(...p.map((v,j)=>v-points[i][j])));const total=lengths.reduce((a,b)=>a+b,0);if(!total)return points[0].slice();let d=(((t%1)+1)%1)*total;for(let i=0;i<lengths.length;i++){if(lengths[i]&&d<=lengths[i])return points[i].map((v,j)=>v+(points[i+1][j]-v)*d/lengths[i]);d-=lengths[i];}return points.at(-1).slice();}
+export function wind({time=0,seed=0,strength=0}={}){return Math.sin(time*.7+seed)*clamp(strength)*.12;}
+export function eligible(model,{solid=true,biome='temperate',stage=0}={}){return solid&&stage>0&&model.biomes.includes(biome);}

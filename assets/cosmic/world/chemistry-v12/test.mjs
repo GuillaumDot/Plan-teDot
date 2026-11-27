@@ -1,0 +1,3 @@
+import assert from 'node:assert/strict';import {resolve} from './resolve.mjs';
+const scene={walls:[{id:'w',a:[0,0],b:[10,0],height:5}],paths:[{id:'p',a:[5,-5],b:[5,5],width:2}],buildings:[{id:'b',corners:[[0,0],[1,0]]}],terrain:q=>q[0],humidity:.8,stage:.5};
+const a=resolve(scene);assert(a.some(x=>x.kind==='arch'&&x.t===.5));assert(a.some(x=>x.kind==='foundation'&&x.posts[0]===1));assert(a.some(x=>x.kind==='ivy'));assert.deepEqual(a,resolve(scene));assert.deepEqual(resolve({...scene,solid:false}),[]);assert(resolve({...scene,water:q=>Math.abs(q[1])<1}).some(x=>x.kind==='bridge'));assert(resolve({...scene,terrain:q=>q[1]}).some(x=>x.kind==='stairs'));console.log('7 checks passed');
