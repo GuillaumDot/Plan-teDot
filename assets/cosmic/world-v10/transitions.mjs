@@ -1,0 +1,8 @@
+// Pure runtime helpers; no renderer or save mutations.
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+export function smooth(a,b,x){if(!(b>a))throw new RangeError('Invalid transition');const t=clamp((x-a)/(b-a));return t*t*(3-2*t);}
+export function blendWeights(values,out=new Float32Array(values.length)){let total=0;for(let i=0;i<values.length;i++){const v=Number.isFinite(values[i])?Math.max(0,values[i]):0;out[i]=v;total+=v;}if(total===0){out.fill(0);if(out.length)out[0]=1;}else for(let i=0;i<values.length;i++)out[i]/=total;return out;}
+export function approach(current,target,dt,tau){return current+(target-current)*(-Math.expm1(-clamp(dt,0,.25)/Math.max(.001,tau)));}
+export function earthWeights({temperature,humidity,elevation},out=new Float32Array(6)){const snow=smooth(.72,.92,elevation)+(1-smooth(-8,3,temperature));const rock=smooth(.52,.82,elevation);const wet=smooth(.25,.8,humidity);const hot=smooth(15,30,temperature);const cold=1-smooth(0,12,temperature);out[0]=clamp(snow);out[1]=(1-out[0])*rock;const land=(1-out[0])*(1-rock);out[2]=land*(1-wet)*hot;out[3]=land*(1-wet)*(1-hot);out[4]=land*wet*(1-cold);out[5]=land*wet*cold;return blendWeights(out,out);}
+// Quality changes only after sustained pressure; caller supplies measured frame time.
+export function qualityStep(state,frameMs,dt,targetMs=33.33){const elapsed=clamp(dt,0,.25);const average=approach(state.average??targetMs,frameMs,elapsed,1);let pressure=average>targetMs*1.15?(state.pressure??0)+elapsed:0;let headroom=average<targetMs*.78?(state.headroom??0)+elapsed:0;let tier=clamp(state.tier??2,0,3);if(pressure>=2&&tier>0){tier--;pressure=0;headroom=0;}else if(headroom>=8&&tier<3){tier++;pressure=0;headroom=0;}return {average,pressure,headroom,tier};}
