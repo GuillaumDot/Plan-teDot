@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#010208">
 <title>planèteDot · ton univers musical</title>
-<meta name="pd-version" content="10.0.1-test.1">
+<meta name="pd-version" content="10.0.2-rc.1">
 <meta name="description" content="PlanèteDot · l’album de GuillaumDot et ton univers musical en 3D : chaque planète est un morceau.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PlanèteDot">
@@ -1410,7 +1410,8 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden) PDG.
 function pdGov(avg){ if (PDG.no) return;
   if (pdHold() || document.hidden || performance.now() - PDG.calm < 4000 || PDTX.q.length){ PDG.n = 0; return; }
   if (avg > .05 && scale <= SMIN + .01 && !POST.on){ if (++PDG.n < 6) return;
-    if (!PDTX.off){ PDTX.off = 1; PDTX.q = []; if (PDTX.on){ PDTX.on = 0; console.info('[PlanèteDot] téléphone à la peine : textures 8.2 coupées, rendu V8.0'); } }
+    // Keep validated atlas resident. perf() already reduces render resolution, effects and detail.
+    if (!PDG.hint) console.info('[PlanèteDot] charge élevée : atlas conservé, effets réduits');
     if (!PDG.hint && TIER > 0 && avg > .065){ PDG.hint = 1; try { localStorage.setItem('pd.perf', JSON.stringify({t: TIER - 1, d: Date.now()})); } catch(e){} } }
   else PDG.n = 0; }
 
@@ -2601,7 +2602,7 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){ gFs=max(n.z,.12);
           oc=max(oc,smoothstep(0.,1.,((hl-g0s)*H-t*tE)/(t*.4+.003))); } gTQ=false;
         rSh=1.-oc*.6*min(1.,det*1.5)*smoothstep(-.15,.05,Lz0)*smoothstep(.6,.45,Lz0); } } }
   if(!(uType==11||uType==1)){ n=nb; shd*=rSh; }
-  float ndl=dot(n,L); float dif=lam(ndl)*shd; float amb=.072+.052*clamp(uAtmo,0.,1.)*(.5+.5*n0.y);
+  float ndl=dot(n,L); float dif=lam(ndl)*shd; float amb=.045+.025*clamp(uAtmo,0.,1.)*(.5+.5*n0.y);
   vec3 col; vec3 emi=vec3(0.); float a=1.; float land=1.; float spec=0.;
   if(sT){ col=vec3(.4); }   /* V8.4 : couleur faite plus bas par solid84 */
   else if(uType==0){ float f=fbm(sp*1.3); float cr=fbm(sp*5.); col=mix(uC2*.45,uC1,smoothstep(.3,.7,f)); col*=.68+.55*cr; col*=.9+.2*sin(dot(sp,vec3(9.,3.,7.))+fbm3(sp*4.)*6.)*(.3+det); col*=.93+.14*sin(s.y*90.+fbm3(sp*3.)*9.)*det;
@@ -2915,7 +2916,7 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){ gFs=max(n.z,.12);
   vec3 sun=uSun*uSunI; if(uType==2) col*=.62+.38*pow(max(n0.z,0.),.35); if(uType==10||uType==0||uType==9) dif*=1.+.22*pow(max(L.z,0.),8.)*shd;
   vec3 sky=mix(sun,uAt*1.2,.55*clamp(uAtmo*1.4,0.,1.));
   vec3 lit=col*(amb*mix(vec3(1.),sky,.7)+dif*sun+(1.-shd)*max(ndl,0.)*sky*.06*uAtmo)+emi;
-  lit+=col*mix(vec3(.12,.16,.22),sky,.32)*(.18+.32*uAtmo)*(1.-smoothstep(.0,.6,dif));
+  lit+=col*mix(vec3(.12,.16,.22),sky,.32)*(.07+.12*uAtmo)*(1.-smoothstep(.0,.6,dif));
   if(gPl93>.003){ float pL=lam(dot(n0,L)+.08)*mix(1.,shd,.7); lit=mix(lit,gPc93*(amb*mix(vec3(1.),sky,.7)+pL*sun)+gPe93,gPl93); }   // V9.3 : panache de fumée au-dessus du sol
   lit+=vec3(.95,.72,.55)*cloudA*max(0.,lam(ndl+.14)-lam(ndl))*sun*.9;
   if(uType==3) lit+=col*vec3(.25,.55,.95)*max(0.,lam(ndl+.3)-dif)*.35*sun;
@@ -2993,15 +2994,15 @@ void main(){
   if(uKind==5){ vec3 c=uC1*exp(-max(r-1.,0.)*1.6)*.05; for(int i=0;i<4;i++){ float ph=fract(uT*.18+float(i)/4.); float dd=(r-(1.05+ph*3.3))*2.6; c+=uC1*exp(-dd*dd)*(1.-ph)*(1.-ph)*.16; }
     o=vec4(c*uAlpha*smoothstep(4.4,3.2,r),0.); return; }
   if(uKind==6){ vec2 q=mat2(cos(uRoll),sin(uRoll),-sin(uRoll),cos(uRoll))*p; q.y/=max(uRingS,.22); float r2=length(q); float an=atan(q.y,q.x);
-    float sw=sin(2.*(an-log(r2+.04)*2.6)+uT*.1+uSeed*6.);
+    float sw=sin(2.*(an-log(r2+.04)*2.6)+uT*.22+uSeed*6.);
     float arm=pow(.5+.5*sw,2.5)*exp(-r2*2.4); float dust=fbm3(vec3(q*5.,uSeed))*.7+.3;
     float core=exp(-r2*r2*55.)*1.6+exp(-r2*8.)*.45;
     float lane=smoothstep(.4,0.,abs(sw+.5))*exp(-r2*1.8)*.6; float knots=smoothstep(.7,.9,n3(vec3(q*13.,uSeed+2.)))*arm; float arm2=pow(.5+.5*sin(4.*(an-log(r2+.04)*2.6)+uT*.1+uSeed*3.),4.)*exp(-r2*3.2)*.35;
     vec3 c=uC1*(arm+arm2)*dust*1.25*(1.-lane)+mix(uC1,vec3(1.,.9,.75),.65)*core; c+=vec3(1.,.42,.6)*knots*.65; c+=mix(uC1,vec3(.45,.65,1.),.7)*exp(-r2*1.5)*.13*(.5+.5*fbm3(vec3(q*3.,uSeed+5.)));
     c+=vec3(1.,.92,.8)*exp(-pow(q.y*9.,2.)-pow(q.x*3.5,2.))*.35;
     c+=vec3(.9,.95,1.)*step(.982,h3(vec3(floor(q*55.),uSeed)))*exp(-r2*2.5)*.9;
-    if(uTxOn>.5){ float ga=uT*.012+uSeed; vec2 gq=mat2(cos(ga),sin(ga),-sin(ga),cos(ga))*q; vec3 gt=textureLod(uGal,vec3(gq*.5+.5,mod(floor(uSeed*7.),2.)),log2(max(256./(max(uR,1.)*sqrt(max(uRingS,.22))),1e-3))).rgb;
-      c=mix(c,gt*mix(vec3(1.),uC1*1.5+.15,.4)*1.7,.82); }
+    if(uTxOn>.5){ float ga=uT*.075+uSeed; vec2 gq=mat2(cos(ga),sin(ga),-sin(ga),cos(ga))*q; vec3 gt=textureLod(uGal,vec3(gq*.5+.5,mod(floor(uSeed*7.),2.)),log2(max(256./(max(uR,1.)*sqrt(max(uRingS,.22))),1e-3))).rgb;
+      c=mix(c,gt*mix(vec3(1.),uC1*1.5+.15,.4)*1.7,.58); }
     c*=1.+.4*dot(normalize(p+1e-4),uL.xy)*smoothstep(0.,.25,r2); c+=vec3(1.,.85,.6)*max(dot(normalize(p+1e-4),uL.xy),0.)*arm*.25*length(uL.xy);
     c*=smoothstep(1.,.65,r2)*(1.+uHi*.6);
     if(uHi>0.){ float rr=abs(length(p)-.95); c+=uC1*uHi*exp(-rr*rr*700.)*.8; }
@@ -3167,7 +3168,7 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){ gFs=max(n.z,.12);
           oc=max(oc,smoothstep(0.,1.,((hl-g0s)*H-t*tE)/(t*.4+.003))); } gTQ=false;
         rSh=1.-oc*.6*min(1.,det*1.5)*smoothstep(-.15,.05,Lz0)*smoothstep(.6,.45,Lz0); } } }
   if(!(uType==11||uType==1)){ n=nb; shd*=rSh; }
-  float ndl=dot(n,L); float dif=lam(ndl)*shd; float amb=.072+.052*clamp(uAtmo,0.,1.)*(.5+.5*n0.y);
+  float ndl=dot(n,L); float dif=lam(ndl)*shd; float amb=.045+.025*clamp(uAtmo,0.,1.)*(.5+.5*n0.y);
   vec3 col; vec3 emi=vec3(0.); float a=1.; float land=1.; float spec=0.;
   if(uType==0){ float f=fbm(sp*1.3); float cr=fbm(sp*5.); col=mix(uC2*.45,uC1,smoothstep(.3,.7,f)); col*=.68+.55*cr; col*=.9+.2*sin(dot(sp,vec3(9.,3.,7.))+fbm3(sp*4.)*6.)*(.3+det); col*=.93+.14*sin(s.y*90.+fbm3(sp*3.)*9.)*det;
     float veg=smoothstep(.55,.15,abs(s.y))*clamp(uStage/3.,.12,1.)*smoothstep(.45,.6,f); col=mix(col,vec3(.13,.3,.1)*(.7+fbm3(sp*9.)*.6),veg*.55);
@@ -3450,7 +3451,7 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){ gFs=max(n.z,.12);
   vec3 sun=uSun*uSunI; if(uType==2) col*=.62+.38*pow(max(n0.z,0.),.35); if(uType==10||uType==0||uType==9) dif*=1.+.22*pow(max(L.z,0.),8.)*shd;
   vec3 sky=mix(sun,uAt*1.2,.55*clamp(uAtmo*1.4,0.,1.));
   vec3 lit=col*(amb*mix(vec3(1.),sky,.7)+dif*sun+(1.-shd)*max(ndl,0.)*sky*.06*uAtmo)+emi;
-  lit+=col*mix(vec3(.12,.16,.22),sky,.32)*(.18+.32*uAtmo)*(1.-smoothstep(.0,.6,dif));
+  lit+=col*mix(vec3(.12,.16,.22),sky,.32)*(.07+.12*uAtmo)*(1.-smoothstep(.0,.6,dif));
   if(gPl93>.003){ float pL=lam(dot(n0,L)+.08)*mix(1.,shd,.7); lit=mix(lit,gPc93*(amb*mix(vec3(1.),sky,.7)+pL*sun)+gPe93,gPl93); }   // V9.3 : panache de fumée au-dessus du sol
   lit+=vec3(.95,.72,.55)*cloudA*max(0.,lam(ndl+.14)-lam(ndl))*sun*.9;
   if(uType==3) lit+=col*vec3(.25,.55,.95)*max(0.,lam(ndl+.3)-dif)*.35*sun;
@@ -3525,7 +3526,7 @@ void main(){
   if(uKind==5){ vec3 c=uC1*exp(-max(r-1.,0.)*1.6)*.05; for(int i=0;i<4;i++){ float ph=fract(uT*.18+float(i)/4.); float dd=(r-(1.05+ph*3.3))*2.6; c+=uC1*exp(-dd*dd)*(1.-ph)*(1.-ph)*.16; }
     o=vec4(c*uAlpha*smoothstep(4.4,3.2,r),0.); return; }
   if(uKind==6){ vec2 q=mat2(cos(uRoll),sin(uRoll),-sin(uRoll),cos(uRoll))*p; q.y/=max(uRingS,.22); float r2=length(q); float an=atan(q.y,q.x);
-    float sw=sin(2.*(an-log(r2+.04)*2.6)+uT*.1+uSeed*6.);
+    float sw=sin(2.*(an-log(r2+.04)*2.6)+uT*.22+uSeed*6.);
     float arm=pow(.5+.5*sw,2.5)*exp(-r2*2.4); float dust=fbm3(vec3(q*5.,uSeed))*.7+.3;
     float core=exp(-r2*r2*55.)*1.6+exp(-r2*8.)*.45;
     float lane=smoothstep(.4,0.,abs(sw+.5))*exp(-r2*1.8)*.6; float knots=smoothstep(.7,.9,n3(vec3(q*13.,uSeed+2.)))*arm; float arm2=pow(.5+.5*sin(4.*(an-log(r2+.04)*2.6)+uT*.1+uSeed*3.),4.)*exp(-r2*3.2)*.35;
@@ -3611,9 +3612,8 @@ function pd9PbrInit(){
   G.useProgram(SP.p);G.uniform1i(SP.u.uPDNormal,4);
   PD9PBR.active=true;
   // Explicit candidate opt-in until actual UV orientation is validated.
-  if(new URLSearchParams(location.search).get('pbr')!=='1')return;
+  if(new URLSearchParams(location.search).get('pbr')==='0')return;
   const local=new URL('assets/blender/pbr-512/',document.baseURI);
-  const remote='https://raw.githubusercontent.com/GuillaumDot/Plan-teDot/6dd4388d7472de85c93ad77882869e10a6e3dbb9/assets/blender/pbr-512/';
   const epoch=++PD9PBR.epoch;
   const alive=()=>PD9PBR.epoch===epoch&&!G.isContextLost();
   function load(url){
@@ -3634,7 +3634,7 @@ function pd9PbrInit(){
       const file=name+'-normal.png';
       let img=await load(new URL(file,local).href);
       if(!alive())break;
-      if(!img)img=await load(remote+file);
+      // Local assets are bundled; do not retry a remote URL during playback.
       if(!alive())break;
       if(img){const t=upload(img);if(t)PD9PBR.maps.set(name,t);}
     }
@@ -3648,7 +3648,7 @@ function pd9PbrDraw(o, uniforms=SP.u){
   const entry=PD9PBR_E[o.type||0];
   const t=o.kind===0&&entry?PD9PBR.maps.get(entry[0]):null, tx=t||PD9PBR.neutral;
   if(PD9PBR.cur!==tx){PD9PBR.cur=tx;const old=GLR.at;gl.activeTexture(gl.TEXTURE0+4);gl.bindTexture(gl.TEXTURE_2D,tx);gl.activeTexture(old);}
-  gl.uniform2f(uniforms.uPDMaterial,t?.35:0,entry?entry[1]:.5);
+  gl.uniform2f(uniforms.uPDMaterial,t?(o.type===1||o.type===11?.30:o.type===2?.22:.48):0,entry?entry[1]:.5);
 }
 pd9PbrInit();
 // V9.4 · relief cuit dans Blender (essai sur le volcan principal) : chargé après l'ouverture, sans rien bloquer.
@@ -4348,11 +4348,14 @@ function pdRecoveryPaint(){
 // one planet family. Its saved territories, palette and climate stay in the
 // same object-space coordinates in orbit and inside the V10 compositor.
 const PD_ENV_ENABLED=new URLSearchParams(location.search).get('environment')!=='0';
+const PD_ENV_COMPOSITE=new URLSearchParams(location.search).get('envComposite')==='1';
 const pdEnvironmentPrograms=new Map();
 let pdEnvironmentPending=null, pdEnvironmentSources=null, pdEnvironmentCompositor=null, pdEnvironmentLoading=false;
 const pdParallelCompile=PD_ENV_ENABLED?gl.getExtension('KHR_parallel_shader_compile'):null;
 function pdEnvironmentProgram(type){
  if(!pdEnvironmentPrograms.has(type)){
+  if(!pdParallelCompile&&mode!=='planet')return null;
+  if(pdEnvironmentPrograms.size>=3&&!pdEnvironmentPending){const key=pdEnvironmentPrograms.keys().next().value;const old=pdEnvironmentPrograms.get(key);if(old?.program)gl.deleteProgram(old.program);pdEnvironmentPrograms.delete(key);}
   if(pdEnvironmentPending && pdParallelCompile &&
      !gl.getProgramParameter(pdEnvironmentPending,pdParallelCompile.COMPLETION_STATUS_KHR))return null;
   if(!pdEnvironmentSources)pdEnvironmentSources=gl.getAttachedShaders(SP.p).map(shader=>({
@@ -4388,7 +4391,7 @@ function pdEnvironmentDraw(o){
  const entry=pdEnvironmentProgram(o.type);
  if(!entry)return false;
  const focusView=mode==='planet'&&o.pd9.id===focus;
- if(focusView&&!pdEnvironmentCompositor&&!pdEnvironmentLoading){
+ if(PD_ENV_COMPOSITE&&focusView&&!pdEnvironmentCompositor&&!pdEnvironmentLoading){
   pdEnvironmentLoading=true;
   import('./assets/cosmic/world-v10/scene-bridge.mjs').then(m=>{
    pdEnvironmentCompositor=m.createSceneCompositor(gl);
@@ -4397,14 +4400,15 @@ function pdEnvironmentDraw(o){
  const paint=(body,w,h)=>{
   const u=entry.uniforms;
   gl.useProgram(entry.program);gl.bindVertexArray(quad);
-  if(!entry.bound){pdRepairSamplers(u);entry.bound=true;}
+  // Atlas swaps and other passes can change global texture bindings.
+  if(!entry.bound||entry.atlas!==PDTX.t?.arr||entry.relief!==PDRV.tx){pdRepairSamplers(u);entry.bound=true;entry.atlas=PDTX.t?.arr;entry.relief=PDRV.tx;}
   gl.uniform2f(u.uRes,w,h);gl.uniform1f(u.uT,time);gl.uniform1f(u.uTxOn,PDTX.on);
   gl.uniform1f(u.uTxS,PDTX.sz);gl.uniform1f(u.uVSOn,PDRV.on);
   pdAdvancedBody(body,u,o);
  };
  glowFlush();
  try{
-  if(focusView&&pdEnvironmentCompositor){
+  if(PD_ENV_COMPOSITE&&focusView&&pdEnvironmentCompositor){
    const frame=pdFrame(o.x,o.y);
    const light=Array.from(pdInF(frame,o.L||[0,0,1],PDB_L,0));
    const basis=new Float32Array(PDB_VW);
@@ -4436,7 +4440,7 @@ function drawBody(o){
  if(pdEnvironmentDraw(o))return;
  if(pdSafeBody(o))return;
  const eligible=!PD_REC_ADV&&!PD_REC_ACTIVE&&(mode==='system'||mode==='planet')&&[0,1,6].includes(o.kind)&&o.r>8&&o.alpha>.6&&o.x>3&&o.x<W-3&&o.y>3&&o.y<H-3;
- const check=eligible&&(PD_REC_PROBE<3||PD_REC_STATE!==PDTX.on||time-PD_REC_LAST>8)&&time-PD_REC_LAST>.35;
+ const check=eligible&&(PD_REC_PROBE<3||PD_REC_STATE!==PDTX.on||PD_REC_FAIL>0)&&time-PD_REC_LAST>.7;
  if(!check){pdAdvancedBody(o);return;}
  PD_REC_LAST=time;PD_REC_STATE=PDTX.on;PD_REC_PROBE++;
  const x=Math.floor(o.x),y=Math.floor(H-o.y-1),before=new Uint8Array(4),after=new Uint8Array(4);
@@ -4467,7 +4471,7 @@ function pdAdvancedBody(o,u=SP.u,screenBody=o){
   gl.uniform1f(u.uPlay, o.play || 0); gl.uniform1f(u.uBeat, o.beat || 0); gl.uniform1f(u.uLv, o.lv || 0); gl.uniform1f(u.uBs, o.bs || 0); if (u.uSp) gl.uniform4fv(u.uSp, o.spb || [0, 0, 0, 0]); gl.uniform1f(u.uBt, o.bt ?? 9); if (u.uPh){ gl.uniform4f(u.uPh, PDPH.r, PDPH.w1, PDPH.w2, PDPH.b); if (u.uPh2) gl.uniform2f(u.uPh2, PDPH.a, PDK.s); } gl.uniform1f(u.uSunI, o.sunI ?? 1); gl.uniform3fv(u.uSun, o.sun || [1, 1, 1]); gl.uniform1f(u.uIrr, o.irr || 0);
   if (o.terN){ gl.uniform4fv(u.uTer, o.ter); gl.uniform4fv(u.uTerB, o.terB); }
   const vwU = o.uq ? pdVWq(o.uq, fr ? PDB_VW : (o.vw || VWM)) : (fr ? PDB_VW : (o.vw || VWM)); gl.uniformMatrix3fv(u.uVW, false, vwU); if (u.uBreath) gl.uniform4f(u.uBreath, PDBR.k * PDMS.k, 0, PDBR.tx * PDTX.on, 0); if (o.pd9) pd9Seen(screenBody, vwU); gl.uniform1i(u.uOccN, o.occN || 0); if (o.occN){ OCC12.fill(0); for (let i = 0; i < 12 && i < o.occ.length; i++) OCC12[i] = o.occ[i]; if (fr) for (let k = 0; k < 12; k += 4) pdInF(fr, OCC12, OCC12, k); gl.uniform4fv(u.uOcc, OCC12); }
-  gl.uniform1f(u.uArch, o.arch || 0); gl.uniform1f(u.uQual, QUAL); if (u.uGD) gl.uniform1f(u.uGD, o.gd ?? (o.pd9 && o.pd9.gd ? 1 : 0)); gl.uniform1f(u.uEvo, o.evo || 0); if (o.evo) gl.uniform3fv(u.uEvoD, o.evoD); gl.uniform1f(u.uWx, o.wx || 0); gl.uniform1f(u.uFlash, o.flash || 0);   // V9.7 : uGD = la PlanèteDot (monde des villes) ; V9.8.1 : évolution, météo et éclairs de nouveau envoyés (coupés par erreur en V9.7)
+  gl.uniform1f(u.uArch, o.arch || 0); gl.uniform1f(u.uQual, mode==='planet'&&o.kind===0?Math.max(QUAL,PRV.qLow?.42:.62):QUAL); if (u.uGD) gl.uniform1f(u.uGD, o.gd ?? (o.pd9 && o.pd9.gd ? 1 : 0)); gl.uniform1f(u.uEvo, o.evo || 0); if (o.evo) gl.uniform3fv(u.uEvoD, o.evoD); gl.uniform1f(u.uWx, o.wx || 0); gl.uniform1f(u.uFlash, o.flash || 0);   // V9.7 : uGD = la PlanèteDot (monde des villes) ; V9.8.1 : évolution, météo et éclairs de nouveau envoyés (coupés par erreur en V9.7)
   gl.uniform1i(u.uTkN, o.cq ? o.cq.n : 0); gl.uniform1i(u.uTkSel, o.cq ? o.cq.sel : -1); gl.uniform1f(u.uTkHi, o.cq ? o.cq.hi : 0); if (o.cq && o.cq.n){ { const zq = pdZoneLerp(o.cq, o.pd9); gl.uniform4fv(u.uTk, zq.tk); gl.uniform4fv(u.uTkB, zq.tkB); } if (u.uTkG) gl.uniform4fv(u.uTkG, o.cq.tkG || TKG0); }
   if (o.kind === 3){ const hb = o.r * .26, y0 = Math.floor(H - o.y - hb); gl.enable(gl.SCISSOR_TEST); gl.scissor(0, y0, W, Math.max(0, Math.ceil(H - o.y + hb) - y0)); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); gl.disable(gl.SCISSOR_TEST); return; }   // V9 · fluidité : la traînée n'éclaire qu'une bande, le reste de l'écran n'est plus calculé pour rien
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -5113,7 +5117,7 @@ function renderGalaxy(dt){
     const pos = sysPos(o.id), pr = project(pos); if (!pr) return;
     const s = o.s, lv = s.level || 1; const r = pxR(galRadius(o), pr.w);
     const match = !gFilter || sysGenres(s).includes(gFilter); const locked = gLock && gLock.id === o.id;
-    bodies.push({w: pr.w, kind: 6, L: core ? gL(pr, core) : null, sun: LOGO_SUN, sunI: 1 + 1.1 * clamp(1 - Math.hypot(pos[0], pos[2]) / 85, 0, 1) * (1 + bassLvl * .35), x: pr.x, y: pr.y, r, q: 1, c1: hsl(s.hue ?? .58, .7, .65), seed: hashStr(o.id) * 10, roll: hashStr(o.id + 'r') * 3, ringS: clamp(Math.abs(Math.sin(cam.pitch + hashStr(o.id + 't') * .6)), .25, 1), alpha: (match ? 1 : .2) * (locked ? 1 : pdDepthA(pr.w)), hi: locked ? 1 : (o.mine ? .4 : 0)}); galDeco(o, pr, bodies[bodies.length - 1], bodies, true);
+    bodies.push({w: pr.w, kind: 6, L: core ? gL(pr, core) : null, sun: LOGO_SUN, sunI: 1 + 1.1 * clamp(1 - Math.hypot(pos[0], pos[2]) / 85, 0, 1) * (1 + bassLvl * .35), x: pr.x, y: pr.y, r, q: 1, c1: hsl(s.hue ?? .58, .7, .65), seed: hashStr(o.id) * 10, roll: hashStr(o.id + 'r') * 3 + .035*time, ringS: clamp(Math.abs(Math.sin(cam.pitch + hashStr(o.id + 't') * .6)), .25, 1), alpha: (match ? 1 : .2) * (locked ? 1 : pdDepthA(pr.w)), hi: locked ? 1 : (o.mine ? .4 : 0)}); galDeco(o, pr, bodies[bodies.length - 1], bodies, true);
     const d = Math.hypot(pr.x - cx, pr.y - cy); if (d < bd && d < 70 * RS){ bd = d; best = o; }
     picks.push({x: pr.x, y: pr.y, r: Math.max(r * 1.5, 26 * RS), w: pr.w, act: () => lockSys(o, true)});
     if (HOVP && Math.hypot(HOVP[0] - pr.x, HOVP[1] - pr.y) < Math.max(r * 1.6, 34 * RS)) hov = o;

@@ -20,7 +20,7 @@ const fixture=`window.__pdAppSmoke={
     const fresh=makePlanet('Version check',11);const publicVersion=sanitize(snapshot()).planets[0].generatorVersion;
     return {version:p.generatorVersion??null,seed:p.seed,newVersion:fresh.generatorVersion,publicVersion,oldPublic,unchanged};
   },
-  tick(){frame(performance.now(),true);return {state:pd10Status(),draws:window.__pdSmokeDraws||0,mode,seed:VIEW.planets[0]?.seed,version:VIEW.planets[0]?.generatorVersion??null,error:gl.getError(),recovery:PD_REC_ACTIVE};},
+  tick(){frame(performance.now(),true);return {state:pd10Status(),draws:window.__pdSmokeDraws||0,mode,seed:VIEW.planets[0]?.seed,version:VIEW.planets[0]?.generatorVersion??null,error:gl.getError(),recovery:PD_REC_ACTIVE,envDraws:window.__pdEnvDraws||0};},
   leave(){backToSystem();pdStopFrame();frame(performance.now(),true);return pd10Status();},
   fail(){PD10Host?.contextLost();return pd10Status();},
   playFixture(){
@@ -38,6 +38,7 @@ const fixture=`window.__pdAppSmoke={
 
 };\n`;
 let html=patch(raw,'if(ok)pd9OccAdd(b);','if(ok){window.__pdSmokeDraws=(window.__pdSmokeDraws||0)+1;pd9OccAdd(b);}');
+html=patch(html,'if(pdEnvironmentDraw(o))return;','if(pdEnvironmentDraw(o)){window.__pdEnvDraws=(window.__pdEnvDraws||0)+1;return;}');
 html=patch(html,'/* ---------- ?perf=1 : a small live meter',fixture+'/* ---------- ?perf=1 : a small live meter');
 const browser=await chromium.launch({headless:true,args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--autoplay-policy=no-user-gesture-required']});
 try{
@@ -45,7 +46,7 @@ try{
  // No real authentication, telemetry, media services, or database writes.
  await context.route('**/*',route=>{const u=new URL(route.request().url());if(u.origin!==base)return route.abort();if(u.pathname==='/index.html')return route.fulfill({contentType:'text/html; charset=utf-8',body:html});return route.continue();});
  const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto(base+'/index.html?advanced=1',{waitUntil:'domcontentloaded',timeout:90000});
+ await page.goto(base+'/index.html?advanced=1&environment=0',{waitUntil:'domcontentloaded',timeout:90000});
  await page.waitForFunction(()=>!!window.__pdAppSmoke,{timeout:90000});
  assert.deepEqual(await page.evaluate(()=>window.__pdAppSmoke.setup()),{version:10,seed:7,newVersion:10,publicVersion:10,oldPublic:10,unchanged:true});
  let result;
@@ -72,5 +73,10 @@ try{
  assert.deepEqual(errors,[]);
  await page.screenshot({path:'v10-app-fallback.png'});
  console.log('Actual index migration, preserved planet payload, public version, focus, leave and legacy fallback verified');
+ const env=await context.newPage();const envErrors=[];env.on('pageerror',e=>envErrors.push(e.message));
+ await env.goto(base+'/index.html?advanced=1',{waitUntil:'domcontentloaded',timeout:90000});await env.waitForFunction(()=>!!window.__pdAppSmoke,null,{timeout:90000});
+ await env.evaluate(()=>window.__pdAppSmoke.setup());let envResult;
+ for(let i=0;i<100;i++){envResult=await env.evaluate(()=>window.__pdAppSmoke.tick());if(envResult.envDraws>0)break;await env.waitForTimeout(100);}
+ assert.ok(envResult.envDraws>0,'Historical environment pass did not render: '+JSON.stringify(envResult));assert.equal(envResult.error,0);assert.deepEqual(envErrors,[]);await env.screenshot({path:'v10-app-environment.png'});console.log('Default authored environment path verified');
  await context.close();
 }finally{await browser.close();}

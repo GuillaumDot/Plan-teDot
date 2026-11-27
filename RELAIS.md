@@ -144,3 +144,6 @@ Fondateur autorise publication si prête et demande remise à zéro des comptes.
 
 ## Relais ChatGPT — V10 — remodelage des planètes existantes
 4fd35cb CPU/WebGL verts (45999960063/45999959868). Demande du fondateur : remodeler les anciens mondes. Migration du marqueur vers 10 dans fixSys, même règle snapshot/sanitize/copie; graine, ID, playlists, territoires et XP conservés. Sauvegarde normale à la connexion déjà présente. Types non supportés et graines invalides restent historiques. Test de l'index sans preview et égalité du reste du payload ajouté. Aucun compte/fichier supprimé, aucune mutation SQL, main inchangée. Nouveau CI et iPhone requis avant publication.
+
+## Relais ChatGPT — 10.0.2-rc.1 — reprise Work
+Reprise des trois commits 3000bfd, 5ede50c, 5074df5. Préservation atlas, activation normales Blender locales, contraste, LOD focus, limitation compilation/cache, composition directe par défaut, animation des galaxies renforcée. Test réel des deux chemins ajouté. Branche dev/chatgpt-world-v10 basée sur Work, main inchangée jusqu'à CI vert. Aucune mutation Supabase/audio. Validation iPhone nécessaire.
