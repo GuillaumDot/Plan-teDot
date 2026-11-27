@@ -138,3 +138,6 @@ Consolidation cdd0c6a CPU/WebGL verts (45998670027/45998669766). Ajout app-smoke
 
 ## Relais ChatGPT — V10 — validation app et lecture locale
 Run 45998985767 vert : vrai index focus V10, sortie et fallback V9, absence de migration et 7/7 tests historiques. Captures artifact 15197556361. Nouveau test synthétique WAV via playList/load, continuité au repli et pause/reprise. CI à confirmer; pas de validation iPhone, MP3 album ni écran verrouillé. Index/main/Supabase inchangés.
+
+## Relais ChatGPT — candidate V10.0.0
+Fondateur autorise publication si prête et demande remise à zéro des comptes. 9181503 CPU/WebGL verts, y compris continuité WAV. Candidate version 10.0.0 : moteur focus activé par défaut, world10=0 repli, nouvelles planètes version 10, copies et anciens mondes conservés, version transmise par snapshot/sanitize. Nouveau CI requis avant publication. Supabase lu uniquement : 9 comptes, 8 systèmes, 29 objets appartenant aux utilisateurs; suppression non exécutée, risque perte audio et blocage Storage. Le versionnement évite le besoin technique d'effacer les comptes. Aucune modification main ni serveur. iPhone/MP3 verrouillé non validés.

@@ -182,6 +182,11 @@ import {Script} from 'node:vm';
 const legacyIndex=readFileSync(new URL('../../../index.html',import.meta.url),'utf8');
 const inlineScripts=[...legacyIndex.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)].filter(m=>!m[1].includes('src='));
 assert.ok(inlineScripts.length>0);for(const m of inlineScripts)new Script(m[2],{filename:'index.html:inline'});
-assert.ok(legacyIndex.includes("PD10_QUERY.get('world10') === '1'")&&legacyIndex.includes("PD10_QUERY.get('world10preview') === '1'"));
+assert.ok(legacyIndex.includes("PD10_QUERY.get('world10') !== '0'")&&legacyIndex.includes("PD10_QUERY.get('world10preview') === '1'"));
 assert.ok(legacyIndex.includes('b.pd9===p&&pd10FocusDraw(p,b,dt)')&&legacyIndex.includes('if(PD10Host&&(mode!==\'planet\'||AF))PD10Host.leave()'));
 console.log('Main index inline JavaScript syntax and opt-in integration verified');
+
+assert.ok(legacyIndex.includes('name="pd-version" content="10.0.0"'));
+assert.ok(legacyIndex.includes('name, type, generatorVersion: 10, size: 1'));
+assert.ok(legacyIndex.includes('generatorVersion: p.generatorVersion===10?10:0')&&legacyIndex.includes('generatorVersion:p.generatorVersion===10?10:0'));
+console.log('V10 default for new planets; explicit rollback and legacy version preservation');

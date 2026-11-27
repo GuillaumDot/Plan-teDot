@@ -7,13 +7,15 @@ function patch(s,a,b){assert.ok(s.includes(a)&&s.indexOf(a)===s.lastIndexOf(a),'
 // This instrumented HTML is served ONLY inside an isolated browser test.
 // No test hooks are added to the deployed application.
 const fixture=`window.__pdAppSmoke={
-  setup(){
+  setup(versioned=false){
     pdStopFrame();guestMode=true;remoteReady=false;authUser=null;ME=null;
     SYS=fixSys(defaultSystem());SYS.name='Fixture';SYS.user='Fixture';
     const p=makePlanet('Fixture',11,{seed:7,auto:false,ring:0});
+    if(!versioned)delete p.generatorVersion;
     SYS.planets=[p];VIEW=SYS;readonly=true;
     enterSystem(SYS,true);land(p);pdStopFrame();
-    return {version:p.generatorVersion??null,seed:p.seed};
+    const fresh=makePlanet('Version check',11);const publicVersion=sanitize(snapshot()).planets[0].generatorVersion;
+    return {version:p.generatorVersion??null,seed:p.seed,newVersion:fresh.generatorVersion,publicVersion};
   },
   tick(){frame(performance.now(),true);return {state:pd10Status(),draws:window.__pdSmokeDraws||0,mode,seed:VIEW.planets[0]?.seed,version:VIEW.planets[0]?.generatorVersion??null,error:gl.getError(),recovery:PD_REC_ACTIVE};},
   leave(){backToSystem();pdStopFrame();frame(performance.now(),true);return pd10Status();},
@@ -42,7 +44,7 @@ try{
  const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto(base+'/index.html?world10=1&world10preview=1&advanced=1',{waitUntil:'domcontentloaded',timeout:90000});
  await page.waitForFunction(()=>!!window.__pdAppSmoke,{timeout:90000});
- assert.deepEqual(await page.evaluate(()=>window.__pdAppSmoke.setup()),{version:null,seed:7});
+ assert.deepEqual(await page.evaluate(()=>window.__pdAppSmoke.setup()),{version:null,seed:7,newVersion:10,publicVersion:0});
  let result;
  for(let i=0;i<100;i++){result=await page.evaluate(()=>window.__pdAppSmoke.tick());if(result.draws>0||result.state==='fallback')break;await page.waitForTimeout(100);}
  assert.ok(result.draws>0,'V10 did not draw through actual application: '+JSON.stringify(result));
@@ -50,7 +52,7 @@ try{
  await page.screenshot({path:'v10-app-focus.png'});
  assert.equal(await page.evaluate(()=>window.__pdAppSmoke.leave()),'idle');
  // The same fixture can return to the historic renderer on an injected failure.
- await page.evaluate(()=>window.__pdAppSmoke.setup());
+ assert.deepEqual(await page.evaluate(()=>window.__pdAppSmoke.setup(true)),{version:10,seed:7,newVersion:10,publicVersion:10});
  for(let i=0;i<100;i++){result=await page.evaluate(()=>window.__pdAppSmoke.tick());if(result.state==='ready'||result.state==='fallback')break;await page.waitForTimeout(100);}
  assert.equal(result.state,'ready');
  await page.evaluate(()=>window.__pdAppSmoke.playFixture());
@@ -63,7 +65,7 @@ try{
  await page.evaluate(()=>window.__pdAppSmoke.resume());await page.waitForFunction(t=>window.__pdAppSmoke.audio().time>t+.15,paused.time,{timeout:10000});
  await page.evaluate(()=>window.__pdAppSmoke.pause());
  console.log('Synthetic local WAV through playList, playback continuity across graphics fallback and pause/resume verified');
- const fallback=await page.evaluate(()=>window.__pdAppSmoke.tick());assert.equal(fallback.state,'fallback');assert.equal(fallback.error,0);assert.equal(fallback.mode,'planet');assert.equal(fallback.version,null);
+ const fallback=await page.evaluate(()=>window.__pdAppSmoke.tick());assert.equal(fallback.state,'fallback');assert.equal(fallback.error,0);assert.equal(fallback.mode,'planet');assert.equal(fallback.version,10);
  assert.deepEqual(errors,[]);
  await page.screenshot({path:'v10-app-fallback.png'});
  console.log('Actual index focus, ephemeral version, leave and legacy fallback verified');
