@@ -120,3 +120,13 @@ assert.equal(cluster.instances,3);assert.ok(cluster.triangles<=VEGETATION_BUDGET
 assert.deepEqual(cluster,vegetationGeometry({...plantWorld,natural:{vegetation:[{dir:[0,0,-1],kind:'pine'}]}},plants));
 assert.ok(cluster.vertices.every(Number.isFinite));
 console.log('Bounded deterministic forest clusters verified');
+
+import {MODEL_VERTEX_STRIDE} from './static-glb.mjs';
+for(const mesh of [...Object.values(variants),...Object.values(plants)]){
+ assert.equal(mesh.vertices.length,mesh.triangles*3*MODEL_VERTEX_STRIDE);
+ for(let i=0;i<mesh.vertices.length;i+=MODEL_VERTEX_STRIDE)for(let k=7;k<11;k++)assert.ok(mesh.vertices[i+k]>=0&&mesh.vertices[i+k]<=1);
+}
+const shades=new Set();for(let i=0;i<model.vertices.length;i+=MODEL_VERTEX_STRIDE)shades.add(Array.from(model.vertices.subarray(i+7,i+11)).join(','));assert.ok(shades.size>1,'Original materials must differ');
+assert.equal(placed.vertices.length,model.vertices.length);
+assert.deepEqual(placed.vertices.slice(7,11),model.vertices.slice(7,11));
+console.log('GLB vertex colors and roughness preserved through placement');

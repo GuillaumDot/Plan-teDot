@@ -1,6 +1,8 @@
 // Restricted glTF 2.0 reader for our static, embedded, indexed triangle models.
 // No external buffers, compression, skins, animation or texture decoding.
 export const MODEL_TRIANGLE_BUDGET=12000;
+export const MODEL_VERTEX_STRIDE=11;
+const clamp01=x=>Number.isFinite(x)?Math.max(0,Math.min(1,x)):1;
 export const CITY_MODEL_PATH='assets/cosmic/world/world-v11/cottage-00.glb';
 export const CITY_MODEL_PATHS=Object.freeze({cottage:CITY_MODEL_PATH,tower:'assets/cosmic/world/world-v11/tower-00.glb',factory:'assets/cosmic/world/world-v11/factory-00.glb'});
 const identity=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1];
@@ -18,9 +20,9 @@ export function decodeStaticGLB(buffer,{maxTriangles=MODEL_TRIANGLE_BUDGET}={}){
  function accessor(index,type,allowed){
   const a=j.accessors?.[index],v=j.bufferViews?.[a?.bufferView];
   if(!a||!v||a.type!==type||!allowed.includes(a.componentType)||a.sparse||v.buffer!==0||!Number.isInteger(a.count)||a.count<1)throw Error('Unsupported GLB accessor');
-  const count=type==='VEC3'?3:1,bytes=a.componentType===5123?2:4,stride=v.byteStride??count*bytes,offset=(v.byteOffset??0)+(a.byteOffset??0),end=offset+(a.count-1)*stride+count*bytes;
+  const count=type==='VEC4'?4:type==='VEC3'?3:1,bytes=a.componentType===5121?1:a.componentType===5123?2:4,stride=v.byteStride??count*bytes,offset=(v.byteOffset??0)+(a.byteOffset??0),end=offset+(a.count-1)*stride+count*bytes;
   if(offset<0||stride<count*bytes||end>(v.byteOffset??0)+v.byteLength||end>d.getUint32(bin,true))throw Error('GLB accessor outside buffer');
-  return {count:a.count,read(i){if(!Number.isInteger(i)||i<0||i>=a.count)throw Error('GLB index outside accessor');const p=bin+8+offset+i*stride;return Array.from({length:count},(_,k)=>a.componentType===5126?d.getFloat32(p+k*bytes,true):a.componentType===5123?d.getUint16(p,true):d.getUint32(p,true));}};
+  return {count:a.count,read(i){if(!Number.isInteger(i)||i<0||i>=a.count)throw Error('GLB index outside accessor');const p=bin+8+offset+i*stride;return Array.from({length:count},(_,k)=>a.componentType===5126?d.getFloat32(p+k*bytes,true):a.componentType===5121?d.getUint8(p+k*bytes):a.componentType===5123?d.getUint16(p+k*bytes,true):d.getUint32(p+k*bytes,true));}};
  }
  const vertices=[];let triangles=0;
  function visit(index,parent,depth=0){
@@ -31,12 +33,18 @@ export function decodeStaticGLB(buffer,{maxTriangles=MODEL_TRIANGLE_BUDGET}={}){
    if((p.mode??4)!==4||p.indices===undefined)throw Error('GLB requires indexed triangles');
    const positions=accessor(p.attributes.POSITION,'VEC3',[5126]),indices=accessor(p.indices,'SCALAR',[5123,5125]);
    if(indices.count%3||triangles+indices.count/3>maxTriangles)throw Error('GLB triangle budget exceeded');
-   const material=j.materials?.[p.material]?.name;const tone=material==='leaf'?-.45:material==='wood'?-.9:material==='glass'?.42:.73;
+   const mat=j.materials?.[p.material],material=mat?.name,pbr=mat?.pbrMetallicRoughness;
+   const tone=material==='leaf'?-.45:material==='wood'?-.9:material==='glass'?.42:.73;
+   const factor=pbr?.baseColorFactor??[1,1,1,1],roughness=clamp01(pbr?.roughnessFactor??.8);
+   const ci=p.attributes.COLOR_0,ca=j.accessors?.[ci];
+   if(ca&&(!['VEC3','VEC4'].includes(ca.type)||ca.count!==positions.count||(ca.componentType!==5126&&!ca.normalized)))throw Error('Invalid GLB vertex colors');
+   const colors=ca?accessor(ci,ca.type,[5121,5123,5126]):null;
+   const divisor=ca?.componentType===5121?255:ca?.componentType===5123?65535:1;
    for(let i=0;i<indices.count;i+=3){
-    const q=[0,1,2].map(k=>point(m,positions.read(indices.read(i+k)[0])));
+    const ids=[0,1,2].map(k=>indices.read(i+k)[0]);const q=ids.map(id=>point(m,positions.read(id)));
     if(q.flat().some(x=>!Number.isFinite(x)))throw Error('Nonfinite GLB vertex');
     const normal=norm(cross(q[1].map((x,k)=>x-q[0][k]),q[2].map((x,k)=>x-q[0][k])));
-    for(const v of q)vertices.push(...v,...normal,tone);
+    for(let k=0;k<3;k++){const rgb=colors?colors.read(ids[k]):[1,1,1];vertices.push(...q[k],...normal,tone,...[0,1,2].map(c=>clamp01(rgb[c]/divisor*factor[c])),roughness);}
     triangles++;
    }
   }
@@ -45,7 +53,7 @@ export function decodeStaticGLB(buffer,{maxTriangles=MODEL_TRIANGLE_BUDGET}={}){
  for(const node of j.scenes?.[j.scene??0]?.nodes??[])visit(node,identity);
  if(!triangles)throw Error('Empty GLB');
  const min=[Infinity,Infinity,Infinity],max=[-Infinity,-Infinity,-Infinity];
- for(let i=0;i<vertices.length;i+=7)for(let k=0;k<3;k++){min[k]=Math.min(min[k],vertices[i+k]);max[k]=Math.max(max[k],vertices[i+k]);}
+ for(let i=0;i<vertices.length;i+=MODEL_VERTEX_STRIDE)for(let k=0;k<3;k++){min[k]=Math.min(min[k],vertices[i+k]);max[k]=Math.max(max[k],vertices[i+k]);}
  return {vertices:new Float32Array(vertices),triangles,min,max};
 }
 export async function loadCityModel({signal,kind='cottage'}={}){

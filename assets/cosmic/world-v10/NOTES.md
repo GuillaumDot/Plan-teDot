@@ -52,3 +52,6 @@ Centre de vortex déterministe par graine, dérive lente et bandes spirales sur 
 
 ## Vent et bosquets
 Vent analytique dans le vertex shader des modèles végétaux, ancrage approximatif au rayon 1, amplitude bornée et modulation légère par enveloppe audio. Les bâtiments ne sont pas déformés. Les sites végétaux sélectionnés sont servis d'abord, puis deux voisins pour les arbres (pas les cactus), en gardant le plafond partagé de 6 000 triangles et 48 instances maximum. Les voisins sont filtrés par eau/glace à l'échelle des cartes de rendu, pas par une nouvelle simulation écologique. Tests de déterminisme et dessin WebGL à temps distincts; aucune mesure FPS iPhone ni validation visuelle du vent.
+
+## Matériaux GLB colorés
+Lecture de COLOR_0 normalisé (octets, shorts ou float) et facteur de couleur, rugosité PBR par primitive; conservation des quatre composantes à travers le placement. Attribut supplémentaire seulement pour les GLB (44 octets par sommet contre 28, plafond triangles inchangé); bâtiments simplifiés inchangés. Éclairage direct avec spéculaire dépendant de la rugosité et lumière nocturne des vitrages, sans texture, normal map, transparence ou PBR complet. Tests CPU sur six modèles et contrôle du format de tampon WebGL. Mémoire supplémentaire maximale théorique des modèles GLB : 864 000 octets (18 000 triangles x 3 x 16). iPhone non mesuré.

@@ -58,8 +58,8 @@ export async function createPlanetRenderer(gl){
  gl.uniformMatrix4fv(u.uMVP,false,mvp);gl.uniform3fv(u.uEye,eye);gl.uniform3fv(u.uLight,light);gl.uniform1i(u.uFamily,planet.family);gl.uniform3fv(u.uAtmosphereTint,tints[planet.family]);gl.uniform1f(u.uAtmosphereDensity,planet.profile.base.atmosphere);gl.uniform1f(u.uRelief,planet.profile.base.relief*.08);gl.uniform1f(u.uShadowQuality,tier>=2?1:0);gl.uniform3fv(u.uStormCenter,planet.stormCenter);gl.uniform1f(u.uTexel,2/planet.size);gl.uniform1f(u.uTime,Number.isFinite(time)?time:0);planet.audioEnergy=visualAudio(planet.audioEnergy,audio,delta);gl.uniform1f(u.uAudio,planet.audioEnergy);
  gl.drawElements(gl.TRIANGLES,mesh.count,gl.UNSIGNED_SHORT,0);
  if(tier>=2&&planet.cityMesh&&cityProgram)cityProgram.draw(planet.cityMesh,mvp,light,growth);
- if(tier>=2&&growth>=1&&planet.landmarks&&cityProgram)cityProgram.draw(planet.landmarks,mvp,light,1);
- if(tier>=2&&planet.vegetation&&cityProgram)cityProgram.draw(planet.vegetation,mvp,light,1,time,.65+.35*planet.audioEnergy);
+ if(tier>=2&&growth>=1&&planet.landmarks&&cityProgram)cityProgram.draw(planet.landmarks,mvp,light,1,0,0,eye);
+ if(tier>=2&&planet.vegetation&&cityProgram)cityProgram.draw(planet.vegetation,mvp,light,1,time,.65+.35*planet.audioEnergy,eye);
  },
  dispose(){if(!disposed){disposed=true;for(const mesh of meshes.values())mesh.dispose();meshes.clear();gl.deleteTexture(neutral);cityProgram?.dispose();p.dispose();}}
  };

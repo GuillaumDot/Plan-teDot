@@ -1,5 +1,5 @@
 import {BIOMES,hash4,cellOf} from '../natural-world-v22/world.mjs';
-import {decodeStaticGLB} from './static-glb.mjs';
+import {decodeStaticGLB,MODEL_VERTEX_STRIDE} from './static-glb.mjs';
 import {assertTextureGL} from './texture-guard.mjs';
 export const VEGETATION_BUDGET=6000;
 export const VEGETATION_PATHS=Object.freeze(Object.fromEntries(['broadleaf','pine','cactus'].map(k=>[k,'assets/cosmic/world/expansion-v14/models/'+k+'-01.glb'])));
@@ -57,11 +57,11 @@ export function vegetationGeometry(world,models){
   const right=norm(cross(Math.abs(d[1])>.9?[1,0,0]:[0,1,0],d)),forward=cross(right,d);
   const extent=Math.max(...m.max.map((x,k)=>x-m.min[k]));if(!(extent>0))continue;
   const scale=(site.kind==='cactus'?.004:.006)/extent;
-  for(let i=0;i<m.vertices.length;i+=7){
+  for(let i=0;i<m.vertices.length;i+=MODEL_VERTEX_STRIDE){
    const a=m.vertices,x=(a[i]-(m.min[0]+m.max[0])/2)*scale,y=(a[i+1]-m.min[1])*scale,z=(a[i+2]-(m.min[2]+m.max[2])/2)*scale;
    const p=d.map((q,k)=>q*(1-.0003+y)+right[k]*x+forward[k]*z);
    const normal=d.map((q,k)=>right[k]*a[i+3]+q*a[i+4]+forward[k]*a[i+5]);
-   out.push(...p,...normal,a[i+6]<0?a[i+6]:-.9);
+   out.push(...p,...normal,a[i+6]<0?a[i+6]:-.9,...a.subarray(i+7,i+MODEL_VERTEX_STRIDE));
   }
   triangles+=m.triangles;instances++;kinds[site.kind]=(kinds[site.kind]??0)+1;
  }
@@ -72,5 +72,5 @@ export function uploadVegetation(gl,world,models){
  const old=gl.getParameter(gl.ARRAY_BUFFER_BINDING);let buffer;
  try{buffer=gl.createBuffer();if(!buffer)throw Error('Vegetation allocation failed');gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);assertTextureGL(gl,'Vegetation upload');}
  catch(e){if(buffer)gl.deleteBuffer(buffer);throw e;}finally{gl.bindBuffer(gl.ARRAY_BUFFER,old);}
- return {buffer,count:vertices.length/7,instances,triangles,kinds,buildings:0,buildingVertices:0,dispose(){if(buffer){gl.deleteBuffer(buffer);buffer=null;}}};
+ return {buffer,count:vertices.length/MODEL_VERTEX_STRIDE,stride:MODEL_VERTEX_STRIDE,instances,triangles,kinds,buildings:0,buildingVertices:0,dispose(){if(buffer){gl.deleteBuffer(buffer);buffer=null;}}};
 }
