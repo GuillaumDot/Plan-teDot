@@ -3,14 +3,14 @@
 import {isWebGL2} from './gl-compat.mjs';
 export const SCENE_TARGET_CAP=1024;
 const valid3=v=>v?.length===3&&Array.from(v).every(Number.isFinite);
-export function sceneFrame({basis,light,audio=0,time=0,delta=0,tier=2,growth=1}){
+export function sceneFrame({basis,light,audio=0,time=0,delta=0,tier=2,growth=1,sunIntensity=1,sunColor=[1,1,1]}){
  if(!Array.isArray(basis)||basis.length!==3||!basis.every(valid3)||!valid3(light))throw Error('Invalid scene basis');
  const [x,y,z]=basis;
  // Columns are legacy viewOf(object-space unit vectors); positive z is near.
  const mvp=new Float32Array([.92*x[0],.92*x[1],-.5*x[2],0,.92*y[0],.92*y[1],-.5*y[2],0,.92*z[0],.92*z[1],-.5*z[2],0,0,0,0,1]);
  const eye=[x[2]*3,y[2]*3,z[2]*3];
  const objectLight=basis.map(v=>v.reduce((sum,q,i)=>sum+q*light[i],0));
- return {mvp,eye,light:objectLight,audio,time,delta,tier,growth};
+ return {mvp,eye,light:objectLight,viewLight:light,audio,time,delta,tier,growth,sunIntensity,sunColor};
 }
 export function sceneRect(body,width,height){
  if(![body?.x,body?.y,body?.r,width,height].every(Number.isFinite)||body.r<=0||width<=0||height<=0)return null;
