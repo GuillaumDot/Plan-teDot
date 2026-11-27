@@ -1400,7 +1400,26 @@ function pd9BrTick(){ if (PDBR9.st === 0){ if (((PDTX.on && PDTX.ready) || PDL6.
 // V9.6 · combien d'images envoyer à la carte graphique à cette image : 1 hors ouverture ; pendant l'ouverture, une sur deux avant le toucher, aucune pendant le tour du logo, 1 pendant la plongée, 2 dans le tunnel
 function pd96Up(){ const I = INTRO; if (!I.gl) return 1; if (I.ph === 'img') return (window.__pdF || 0) & 1; if (!I.K || time < I.K + I.SP) return 0; return time >= I.K + I.SP + I.DV ? 2 : 1; }
 function pd96Calm(){ const I = INTRO; return !I.gl || I.ph === 'img' || (!!I.K && time >= I.K + I.SP + I.DV); }
-function pdTxTick(){ window.__pdF = (window.__pdF || 0) + 1; pd9BrTick(); if (!PDTX.st && !INTRO.on && time > 2.5) pdTxSoon(600);   // no opening animation (or it is over): start anyway
+const PD_DEBUG = new URLSearchParams(location.search).get('debug') === '1';
+let pdDebugEl=null,pdDebugFrames=0,pdDebugLast=0;
+function pdDebugTick(){
+  if(!PD_DEBUG)return;
+  const now=performance.now();
+  if(!pdDebugLast){pdDebugLast=now;return;}
+  pdDebugFrames++;
+  const elapsed=now-pdDebugLast;
+  if(elapsed<500)return;
+  const fps=Math.round(pdDebugFrames*1000/elapsed);
+  pdDebugFrames=0;pdDebugLast=now;
+  if(!pdDebugEl){
+    pdDebugEl=document.createElement('div');
+    pdDebugEl.id='pd-debug';
+    pdDebugEl.style.cssText='position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;z-index:2147483647;background:rgba(0,0,0,.82);color:#fff;font:11px/1.4 monospace;padding:4px 8px;white-space:pre-wrap;overflow-wrap:anywhere;pointer-events:none;text-align:left;';
+    document.body.appendChild(pdDebugEl);
+  }
+  pdDebugEl.textContent='FPS: '+fps+' | TIER: '+TIER+' | DPR: '+DPR+' | world10: '+Number(PD10_ENABLED)+'\nPDTX.on: '+PDTX.on+' | ready: '+PDTX.ready+' | bad: '+PDTX.bad+' | fail: '+PDTX.fail+' | sz: '+PDTX.sz+'\nPDTX.failure: '+(PDTX.failure||'—');
+}
+function pdTxTick(){ pdDebugTick(); window.__pdF = (window.__pdF || 0) + 1; pd9BrTick(); if (!PDTX.st && !INTRO.on && time > 2.5) pdTxSoon(600);   // no opening animation (or it is over): start anyway
   for (let i = pd96Up(); i > 0 && PDTX.q.length && !PDTX.off; i--) pdTxPut(PDTX.q.shift());
   if(PDTX.mipWait&&(!INTRO.on||INTRO.ph!=='seq'||INTRO.flashed))pdTxFin();
   if (PDTX.ready && !PDTX.on && !PDTX.off && pdTxHidden()){ PDTX.on = 1; console.info('[PlanèteDot] textures 8.2 allumées (' + PDTX.sz + ' px, ' + PDTX.dl + ' ms)'); } }
