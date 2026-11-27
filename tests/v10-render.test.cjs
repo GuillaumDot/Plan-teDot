@@ -7,7 +7,7 @@ const match=html.match(/const PD10_SHADER=pdTry\(\(\)=>compile\(("(?:\\.|[^"\\])
 assert.ok(match,'extract the actual shipped shader');
 const vs=JSON.parse(match[1]),frag=JSON.parse(match[2]);
 test('V10 source and isolation',()=>{
- assert.match(html,/name="pd-version" content="10\.0-alpha\.[12345]"/);
+ assert.match(html,/name="pd-version" content="10\.0-alpha\.[123456]"/);
  assert.doesNotMatch(frag,/\bsampler\w*\b/);
  assert.match(html,/function pd10Draw\(o\)/);
  assert.match(html,/if\(pd10Draw\(o\)\)return/);
@@ -35,14 +35,14 @@ test('actual WebGL2 compiles and draws all 12 planet types',async()=>{
  i('kind',0);i('album',0);const output=[];
  for(let type=0;type<12;type++){
  i('type',type);g.clearColor(0,0,0,0);g.clear(g.COLOR_BUFFER_BIT);g.drawArrays(g.TRIANGLE_STRIP,0,4);
- const buf=new Uint8Array(128*128*4);g.readPixels(0,0,128,128,g.RGBA,g.UNSIGNED_BYTE,buf);let pixels=0;const colors=new Set();
- for(let n=0;n<buf.length;n+=4)if(buf[n+3]>220){pixels++;colors.add(buf[n]+','+buf[n+1]+','+buf[n+2]);}
- output.push({type,pixels,colors:colors.size,error:g.getError()});
+ const buf=new Uint8Array(128*128*4);g.readPixels(0,0,128,128,g.RGBA,g.UNSIGNED_BYTE,buf);let pixels=0,signature=2166136261;const colors=new Set();
+ for(let n=0;n<buf.length;n+=4)if(buf[n+3]>220){pixels++;for(let k=0;k<3;k++)signature=Math.imul(signature^buf[n+k],16777619);colors.add(buf[n]+','+buf[n+1]+','+buf[n+2]);}
+ output.push({type,pixels,colors:colors.size,signature,error:g.getError()});
  }
  return output;
  },{vs,frag});
  for(const r of result){assert.equal(r.error,0,JSON.stringify(r));assert.ok(r.pixels>3500,JSON.stringify(r));assert.ok(r.colors>30,JSON.stringify(r));}
- console.log(result);
+ assert.notEqual(result[6].signature,result[7].signature,'spectral and vortex worlds must look distinct');console.log(result);
  }finally{await browser.close();}
 });
 
