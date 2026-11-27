@@ -32,7 +32,7 @@ export function createWorldAdapter({enabled=WORLD_CONFIG.enabled,createCache=cre
    const next=renderer.upload(world);planet=next;activeKey=key;
    // Optional visual resources must never prevent base geometry from appearing.
    for(const load of [()=>next.loadDetail(world.natural?.detailBiome,{signal:abort.signal,maxSize:256}),()=>next.loadLandmarks({signal:abort.signal}),()=>next.loadVegetation({signal:abort.signal})]){
-    try{Promise.resolve(load()).catch(()=>{});}catch(_){}
+    try{Promise.resolve(load()).catch(e=>{if(!abort.signal.aborted)console.warn('[PlanèteDot V10] optional asset:',e?.message||e);});}catch(e){if(!abort.signal.aborted)console.warn('[PlanèteDot V10] optional asset:',e?.message||e);}
    }
    return true;
   }catch(e){if(!closed&&id===revision)fallback(e);return false;}finally{if(pending?.id===id)pending=null;}})();

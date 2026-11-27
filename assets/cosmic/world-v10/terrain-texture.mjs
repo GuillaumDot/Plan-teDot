@@ -7,6 +7,13 @@ async function decodeTerrainImage(blob){
  try{return await new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=()=>reject(Error('Terrain image decode failed'));img.src=url;});}
  finally{URL.revokeObjectURL(url);}
 }
+// Shared pixel-store state: uploads must not inherit the legacy logo/atlas settings.
+function withTerrainUnpack(gl,fn){
+ const keys=[gl.UNPACK_FLIP_Y_WEBGL,gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,gl.UNPACK_ALIGNMENT,gl.UNPACK_COLORSPACE_CONVERSION_WEBGL];
+ const old=keys.map(k=>gl.getParameter(k));
+ try{[false,false,4,gl.NONE].forEach((v,i)=>gl.pixelStorei(keys[i],v));return fn();}
+ finally{keys.forEach((k,i)=>gl.pixelStorei(k,old[i]));}
+}
 export async function loadTerrainAlbedo(gl,type,biome,{maxSize=512,signal,channel='albedo'}={}){
  const asset=resolveTerrain(type,biome);if(!asset)return null;
  if(!['albedo','height'].includes(channel))throw new RangeError('Invalid terrain channel');
@@ -23,7 +30,7 @@ export async function loadTerrainAlbedo(gl,type,biome,{maxSize=512,signal,channe
  canvas.getContext('2d').drawImage(bitmap,0,0,canvas.width,canvas.height);
  assertTextureGL(gl,'Before terrain upload');
  const old=gl.getParameter(gl.TEXTURE_BINDING_2D);
- try{texture=gl.createTexture();if(!texture)throw new Error('Texture allocation failed');gl.bindTexture(gl.TEXTURE_2D,texture);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,canvas);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);assertTextureGL(gl,'Terrain upload');}finally{gl.bindTexture(gl.TEXTURE_2D,old);}
+ try{texture=gl.createTexture();if(!texture)throw new Error('Texture allocation failed');gl.bindTexture(gl.TEXTURE_2D,texture);withTerrainUnpack(gl,()=>gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,canvas));gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);assertTextureGL(gl,'Terrain upload');}finally{gl.bindTexture(gl.TEXTURE_2D,old);}
  return {texture,biome:asset.resolved,fallback:asset.fallback,width:canvas.width,height:canvas.height,bytes:canvas.width*canvas.height*4,dispose(){if(texture){gl.deleteTexture(texture);texture=null;}}};
  }catch(e){if(texture)gl.deleteTexture(texture);throw e;}finally{bitmap.close?.();}
 }
@@ -54,7 +61,7 @@ export async function loadEarthDetailAtlas(gl,{maxSize=256,signal,channel='albed
  try{
   texture=gl.createTexture();if(!texture)throw Error('Atlas allocation failed');
   gl.bindTexture(gl.TEXTURE_2D,texture);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);
-  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,canvas);
+  withTerrainUnpack(gl,()=>gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,canvas));
   gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
   assertTextureGL(gl,'Earth detail atlas');

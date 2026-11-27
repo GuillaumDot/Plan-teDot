@@ -32,6 +32,16 @@ try{
  return {valid,released,atlasValid,atlasReleased,heightValid,heightReleased,gas:gas===null,rejected,error:gl.getError()};
  });
  assert.deepEqual(textureCheck,{valid:true,released:true,atlasValid:true,atlasReleased:true,heightValid:true,heightReleased:true,gas:true,rejected:true,error:0});
+ const safariDecode=await page.evaluate(async()=>{
+  const {loadTerrainAlbedo}=await import('./terrain-texture.mjs');
+  const c=document.createElement('canvas'),gl=c.getContext('webgl2');
+  if(!gl)throw Error('WebGL2 unavailable');
+  const original=window.createImageBitmap;window.createImageBitmap=async()=>{throw Error('Forced WebKit decoder rejection');};
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,true);gl.pixelStorei(gl.UNPACK_ALIGNMENT,8);
+  try{const a=await loadTerrainAlbedo(gl,'rock','desert',{maxSize:64});const result={texture:gl.isTexture(a.texture),flip:gl.getParameter(gl.UNPACK_FLIP_Y_WEBGL),premultiply:gl.getParameter(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL),alignment:gl.getParameter(gl.UNPACK_ALIGNMENT),error:gl.getError()};a.dispose();return result;}
+  finally{window.createImageBitmap=original;}
+ });
+ assert.deepEqual(safariDecode,{texture:true,flip:true,premultiply:true,alignment:8,error:0});
  // Draw the same synthetic terrain at both tiers and inspect GL errors.
 // This checks both branches; visual shadow fidelity requires device review.
  const qualityCheck=await page.evaluate(async()=>{
