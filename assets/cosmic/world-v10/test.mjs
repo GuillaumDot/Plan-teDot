@@ -76,3 +76,11 @@ assert.deepEqual(network,infrastructureGeometry(networkWorld));
 assert.equal(infrastructureGeometry({...networkWorld,type:'gas'}).roads,0);
 const realNetwork=infrastructureGeometry(bakeWorld('earth',7,64));assert.ok(realNetwork.roads>0&&realNetwork.roads<=ROAD_SEGMENT_LIMIT);
 console.log('Natural infrastructure geometry verified');
+
+import {growthDrawCount} from './cities.mjs';
+assert.equal(growthDrawCount(9,0),0);assert.equal(growthDrawCount(9,1),270);
+assert.equal(growthDrawCount(9,.5),120);assert.equal(growthDrawCount(9,-5),0);assert.equal(growthDrawCount(9,2),270);
+let previous=0;for(let i=0;i<=100;i++){const count=growthDrawCount(144,i/100);assert.ok(count>=previous&&count%30===0);previous=count;}
+const twoCities=cityGeometry({...cityWorld,natural:{cities:[{cell:1,dir:[0,0,-1]},{cell:2,dir:[0,0,1]}]}});
+assert.equal(twoCities.buildings,18);assert.ok(twoCities.vertices[2]<0&&twoCities.vertices[30*7+2]>0,'First growth phase spans both cities');
+console.log('Monotonic civilization growth verified');

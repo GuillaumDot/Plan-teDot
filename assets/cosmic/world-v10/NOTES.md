@@ -34,3 +34,6 @@ Sites Natural World terrestres uniquement, neuf volumes simples par ville (144 m
 
 ## Infrastructures initiales
 Les chemins de V2.2 sont convertis en rubans sur la sphère, dans le même tampon et appel de dessin que les bâtiments. Les segments partagés sont dédupliqués, budget 768; les segments adjacents à une cellule de pont sont élargis et surélevés. Les ports sont des quais schématiques orientés vers une cellule d'eau voisine quand elle est détectée. Aucun nouveau tracé ni changement de géographie. Il s'agit de proxies orbitaux, pas de ponts/ports détaillés, ni d'industries ou trafic animés. Validation iPhone nécessaire.
+
+## Croissance urbaine
+Les bâtiments sont ordonnés par phases : centres de toutes les villes, voisins immédiats, puis périphérie. Le paramètre growth (0 à 1, fourni par l'appelant) contrôle le nombre de bâtiments affichés, sans recuire le monde ni réallouer le GPU. Les réseaux apparaissent à la fin de cette première séquence; quelques volumes périphériques bas et larges représentent des bâtiments industriels schématiques sur les sites portuaires/fluviaux. Curseur dans l'aperçu de laboratoire. Aucune horloge d'évolution persistante ou connexion à la progression de l'application n'est encore branchée. Les modèles Blender restent à intégrer.

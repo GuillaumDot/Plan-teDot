@@ -74,3 +74,6 @@ Module cities.mjs : géométrie déterministe en repère tangent sur les sites N
 
 ## Relais ChatGPT — V10 — réseaux de civilisation
 Rubans géométriques des routes Natural World, ponts schématiques sur les cellules de franchissement, quais orientés vers l'eau détectée, budget 768 segments, même buffer urbain et même draw call. Tests CPU de déterminisme et budget, WebGL étendu. Océans a410855 CPU/WebGL verts; villes b92882f CPU vert, WebGL en cours au début de cette édition. Aucun changement main/Supabase. Modèles Blender, zones industrielles et croissance restent à faire; CI et iPhone à confirmer.
+
+## Relais ChatGPT — V10 — croissance urbaine par phases
+Ordre déterministe des bâtiments (centres, quartiers, périphéries), paramètre growth avec rendu partiel du même tampon, volumes industriels schématiques aux sites portuaires/fluviaux, curseur labo. Test de monotonie et ordre entre villes, dessin WebGL à trois états. Villes b92882f CPU/WebGL verts; infrastructures 3b80714 CPU vert, WebGL en cours au début du chantier. Aucun changement main/Supabase. CI et iPhone à vérifier; progression persistante et modèles Blender non branchés.

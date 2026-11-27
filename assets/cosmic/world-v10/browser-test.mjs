@@ -73,7 +73,7 @@ try{
  const planet=renderer.upload({type:'earth',size,terrain,climate,bytes:48*size*size,natural:{grid:8,cities:[{cell:1,dir:[0,0,-1]}],roads:[{cells:[0,1,2]}],bridges:[{cell:1}]}});
  const mvp=new Float32Array([.8,0,0,0,0,.8,0,0,0,0,.5,0,0,0,0,1]);
  gl.viewport(0,0,256,256);gl.enable(gl.DEPTH_TEST);
- try{renderer.draw(planet,{mvp,tier:2,eye:[0,0,-3],light:[0,0,-1]});return {buildings:planet.cityMesh?.buildings,roads:planet.cityMesh?.roads,bridges:planet.cityMesh?.bridges,error:gl.getError()};}finally{planet.dispose();renderer.dispose();}
+ try{for(const growth of [0,.5,1])renderer.draw(planet,{mvp,tier:2,eye:[0,0,-3],light:[0,0,-1],growth});return {buildings:planet.cityMesh?.buildings,roads:planet.cityMesh?.roads,bridges:planet.cityMesh?.bridges,error:gl.getError()};}finally{planet.dispose();renderer.dispose();}
  });
  assert.deepEqual(cityCheck,{buildings:9,roads:2,bridges:2,error:0});
  assert.deepEqual(errors,[]);
