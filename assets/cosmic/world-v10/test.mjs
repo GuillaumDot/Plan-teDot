@@ -167,6 +167,17 @@ console.log('WebGL2 shader compatibility verified');
 import {sceneFrame,sceneRect,SCENE_TARGET_CAP} from './scene-bridge.mjs';
 const scene=sceneFrame({basis:[[1,0,0],[0,1,0],[0,0,1]],light:[0,0,1]});assert.deepEqual(scene.eye,[0,0,3]);assert.deepEqual(scene.light,[0,0,1]);assert.ok(Math.abs(scene.mvp[10]+.5)<1e-6);assert.equal(SCENE_TARGET_CAP,1024);
 const rect=sceneRect({x:50,y:50,r:23},100,100);assert.ok(rect.every((x,i)=>Math.abs(x-[-.5,-.5,.5,.5][i])<1e-9));assert.equal(sceneRect({x:0,y:0,r:0},100,100),null);
+const solarFrame=sceneFrame({basis:[[0,1,0],[-1,0,0],[0,0,1]],light:[1,0,0],sunIntensity:1.1,sunColor:[1,.8,.6]});
+assert.deepEqual(solarFrame.light,[0,-1,0]);
+assert.deepEqual(solarFrame.viewLight,[1,0,0]);
+assert.equal(solarFrame.sunIntensity,1.1);
+assert.deepEqual(solarFrame.sunColor,[1,.8,.6]);
+const bridgeSource=readFileSync(new URL('./scene-bridge.mjs',import.meta.url),'utf8');
+assert.doesNotMatch(bridgeSource,/gl\.getError\s*\(/);
+assert.match(bridgeSource,/uHalo/);
+const rendererSource=readFileSync(new URL('./renderer.mjs',import.meta.url),'utf8');
+assert.match(rendererSource,/gl\.uniform1f\(u\.uSunIntensity/);
+assert.match(rendererSource,/gl\.uniform3fv\(u\.uSunColor/);
 console.log('Scene projection contracts verified');
 
 import {legacyDescriptor,createFocusedHost} from './focused-host.mjs';
@@ -180,6 +191,10 @@ assert.equal(createFocusedHost(null).draw(hostFrame),false);console.log('Focused
 
 import {Script} from 'node:vm';
 const legacyIndex=readFileSync(new URL('../../../index.html',import.meta.url),'utf8');
+const recoverySource=legacyIndex.slice(legacyIndex.indexOf('function drawBody(o){'),legacyIndex.indexOf('function pdAdvancedBody(o){'));
+assert.ok(recoverySource.length>100);
+assert.doesNotMatch(recoverySource,/readPixels|getError/);
+assert.match(legacyIndex,/name="pd-version" content="10\.0\.3"/);
 const inlineScripts=[...legacyIndex.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)].filter(m=>!m[1].includes('src='));
 assert.ok(inlineScripts.length>0);for(const m of inlineScripts)new Script(m[2],{filename:'index.html:inline'});
 assert.ok(legacyIndex.includes("PD10_QUERY.get('world10') !== '0'")&&legacyIndex.includes("PD10_QUERY.get('world10preview') === '1'"));
