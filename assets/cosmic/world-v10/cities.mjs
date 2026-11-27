@@ -1,0 +1,50 @@
+import {cellOf} from '../natural-world-v22/world.mjs';
+import {assertTextureGL} from './texture-guard.mjs';
+const dot=(a,b)=>a.reduce((s,x,i)=>s+x*b[i],0);
+const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+const norm=a=>{const l=Math.hypot(...a);return a.map(x=>x/l);};
+const shift=(a,b,k)=>a.map((x,i)=>x+b[i]*k);
+export function cityGeometry(world){
+ const vertices=[];let buildings=0;
+ if(world.type!=='earth'||!world.natural?.cities)return {vertices:new Float32Array(),buildings};
+ const size=world.size,area=size*size;
+ function onLand(dir){
+  const c=cellOf(dir,size),face=Math.floor(c/area),i=(c%area)*4;
+  const data=world.terrain[face];return data&&data[i+1]<64&&data[i+2]<128;
+ }
+ for(const city of world.natural.cities.slice(0,16)){
+  if(!Array.isArray(city.dir)||city.dir.length!==3||!city.dir.every(Number.isFinite)||Math.hypot(...city.dir)<.1)continue;
+  const n=norm(city.dir),t=norm(cross(Math.abs(n[1])>.9?[1,0,0]:[0,1,0],n)),b=cross(n,t);
+  for(let j=0;j<9;j++){
+   const x=(j%3-1)*.007,y=(Math.floor(j/3)-1)*.007;
+   const d=norm(shift(shift(n,t,x),b,y));if(!onLand(d))continue;
+   const u=norm(shift(t,d,-dot(t,d))),v=cross(d,u);
+   const width=.0017+((city.cell+j*13)%5)*.00017;
+   const height=.004+((city.cell+j*17)%7)*.001+(j===4?.007:0);
+   const point=(a,c,z)=>shift(shift(d.map(q=>q*(1+z)),u,a*width),v,c*width);
+   const q=[point(-1,-1,-.0006),point(1,-1,-.0006),point(1,1,-.0006),point(-1,1,-.0006),point(-1,-1,height),point(1,-1,height),point(1,1,height),point(-1,1,height)];
+   const face=(ids,normal,tone)=>{for(const i of [0,1,2,0,2,3])vertices.push(...q[ids[i]],...normal,tone);};
+   face([4,5,6,7],d,.75);face([0,1,5,4],v.map(x=>-x),.54);face([1,2,6,5],u,.63);face([2,3,7,6],v,.54);face([3,0,4,7],u.map(x=>-x),.63);
+   buildings++;
+  }
+ }
+ return {vertices:new Float32Array(vertices),buildings};
+}
+export function uploadCities(gl,world){
+ const {vertices,buildings}=cityGeometry(world);if(!buildings)return null;
+ const old=gl.getParameter(gl.ARRAY_BUFFER_BINDING);let buffer;
+ try{buffer=gl.createBuffer();if(!buffer)throw Error('City allocation failed');gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);assertTextureGL(gl,'City mesh');}
+ catch(e){if(buffer)gl.deleteBuffer(buffer);throw e;}finally{gl.bindBuffer(gl.ARRAY_BUFFER,old);}
+ return {buffer,count:vertices.length/7,buildings,dispose(){if(buffer){gl.deleteBuffer(buffer);buffer=null;}}};
+}
+export function createCityProgram(gl){
+ const shaders=[];let program;
+ try{
+  for(const [type,source] of [[gl.VERTEX_SHADER,'attribute vec3 aPosition;attribute vec3 aNormal;attribute float aTone;uniform mat4 uMVP;varying vec3 vNormal;varying vec3 vRadial;varying float vTone;void main(){vNormal=aNormal;vRadial=normalize(aPosition);vTone=aTone;gl_Position=uMVP*vec4(aPosition,1.); }'],[gl.FRAGMENT_SHADER,'precision mediump float;uniform vec3 uLight;varying vec3 vNormal;varying vec3 vRadial;varying float vTone;void main(){vec3 l=normalize(uLight);float day=max(dot(normalize(vNormal),l),0.);float night=1.-smoothstep(-.18,.1,dot(normalize(vRadial),l));vec3 c=vec3(.55,.59,.65)*vTone*(.12+.88*day)+vec3(.95,.52,.15)*night*.19;gl_FragColor=vec4(c,1.); }']]){
+   const s=gl.createShader(type);if(!s)throw Error('City shader allocation failed');shaders.push(s);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));
+  }
+  program=gl.createProgram();if(!program)throw Error('City program allocation failed');for(const s of shaders)gl.attachShader(program,s);gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(program));
+  const attrs=['aPosition','aNormal','aTone'].map(n=>gl.getAttribLocation(program,n));const m=gl.getUniformLocation(program,'uMVP'),l=gl.getUniformLocation(program,'uLight');
+  return {draw(mesh,mvp,light){gl.useProgram(program);gl.bindBuffer(gl.ARRAY_BUFFER,mesh.buffer);for(let i=0;i<3;i++){gl.enableVertexAttribArray(attrs[i]);gl.vertexAttribPointer(attrs[i],i===2?1:3,gl.FLOAT,false,28,[0,12,24][i]);}gl.uniformMatrix4fv(m,false,mvp);gl.uniform3fv(l,light);gl.drawArrays(gl.TRIANGLES,0,mesh.count);for(const i of attrs)gl.disableVertexAttribArray(i);},dispose(){if(program){gl.deleteProgram(program);program=null;}}};
+ }catch(e){if(program)gl.deleteProgram(program);throw e;}finally{for(const s of shaders)gl.deleteShader(s);}
+}

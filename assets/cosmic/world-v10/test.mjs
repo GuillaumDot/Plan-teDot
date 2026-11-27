@@ -58,3 +58,12 @@ assert.equal(visualAudio(.5,1,0),.5);
 assert.equal(visualAudio(NaN,Infinity,-1),0);
 assert.ok(visualAudio(0,10,10)<=1);
 console.log('Bounded visual audio envelope verified');
+
+import {cityGeometry} from './cities.mjs';
+const size=8,land=Array.from({length:6},()=>new Uint8Array(size*size*4));
+const cityWorld={type:'earth',size,terrain:land,natural:{cities:[{cell:1,dir:[0,0,-1]}]}};
+const cityMesh=cityGeometry(cityWorld);assert.equal(cityMesh.buildings,9);assert.equal(cityMesh.vertices.length,9*30*7);
+assert.deepEqual(cityMesh,cityGeometry(cityWorld));assert.ok(cityMesh.vertices.every(Number.isFinite));
+assert.equal(cityGeometry({...cityWorld,type:'gas'}).buildings,0);
+const ocean=land.map(a=>a.map((x,i)=>i%4===1?255:0));assert.equal(cityGeometry({...cityWorld,terrain:ocean}).buildings,0);
+console.log('Deterministic city geometry and land exclusion verified');

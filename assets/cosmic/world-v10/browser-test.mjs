@@ -65,5 +65,16 @@ try{
  }finally{planet.dispose();renderer.dispose();}
  });
  assert.deepEqual(waterCheck,{changed:true,error:0,energy:true});
+ const cityCheck=await page.evaluate(async()=>{
+ const {createPlanetRenderer}=await import('./renderer.mjs');
+ const canvas=document.createElement('canvas');canvas.width=canvas.height=256;
+ const gl=canvas.getContext('webgl',{preserveDrawingBuffer:true}),renderer=await createPlanetRenderer(gl),size=8;
+ const terrain=Array.from({length:6},()=>new Uint8Array(size*size*4)),climate=terrain.map(a=>a.slice());
+ const planet=renderer.upload({type:'earth',size,terrain,climate,bytes:48*size*size,natural:{cities:[{cell:1,dir:[0,0,-1]}]}});
+ const mvp=new Float32Array([.8,0,0,0,0,.8,0,0,0,0,.5,0,0,0,0,1]);
+ gl.viewport(0,0,256,256);gl.enable(gl.DEPTH_TEST);
+ try{renderer.draw(planet,{mvp,tier:2,eye:[0,0,-3],light:[0,0,-1]});return {buildings:planet.cityMesh?.buildings,error:gl.getError()};}finally{planet.dispose();renderer.dispose();}
+ });
+ assert.deepEqual(cityCheck,{buildings:9,error:0});
  assert.deepEqual(errors,[]);
 }finally{await browser.close();}

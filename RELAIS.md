@@ -68,3 +68,6 @@ Ajout d'une occlusion directionnelle bornée (trois lectures de la cube map, niv
 
 ## Relais ChatGPT — V10 — océans, atmosphère et enveloppe musicale
 Normales animées de l'eau liquide, reflets modulés, dérive des nuages et bandes gazeuses, réutilisation de l'enveloppe audio V2.2 avec entrée externe. Test GPU de variation des images et test CPU des bornes. L'atlas c32350b a passé CPU/WebGL; les ombres fab6305 ont passé CPU, WebGL en cours au début du chantier. Aucun changement main, audio réel ni sauvegardes. CI du nouveau commit et iPhone à vérifier.
+
+## Relais ChatGPT — V10 — premiers volumes urbains
+Module cities.mjs : géométrie déterministe en repère tangent sur les sites Natural World, exclusion eau/glace via carte rendue, budget 144 bâtiments, shader jour/nuit et libération des buffers. Rendu aux tiers 2/3, test CPU et test WebGL. Les ombres fab6305 ont passé CPU/WebGL; océans a410855 CPU réussi, WebGL en cours au début du chantier. Les volumes ne sont pas encore les modèles Blender; aucune route géométrique ni croissance intégrée. Aucun changement main ni Supabase, CI et iPhone à confirmer.

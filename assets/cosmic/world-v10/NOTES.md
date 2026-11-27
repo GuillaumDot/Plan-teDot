@@ -28,3 +28,6 @@ Sondage de l'horizon en trois échantillons de la cube map dans la direction de 
 
 ## Océans et atmosphère animés
 Pentes analytiques de trois trains d'ondes, projetées sur le plan tangent sans couture, réservées à l'eau liquide; variations bornées de rugosité et de force des vagues. Nuages et bandes gazeuses à vitesses différentielles selon latitude. L'enveloppe audio V2.2 est réutilisée avec delta borné, sans moteur audio supplémentaire ni modification du terrain. Le banc d'essai n'est pas encore alimenté par la musique réelle de l'application. Pause de l'horloge d'animation dans l'aperçu. Tests de variation des pixels et de l'enveloppe; pas une simulation hydrodynamique.
+
+## Géométrie urbaine initiale
+Sites Natural World terrestres uniquement, neuf volumes simples par ville (144 maximum), repère tangent local, exclusion des cellules d'eau et glace, hauteur déterministe. Un seul tampon et appel de dessin, niveaux 2/3 uniquement, éclairage jour/nuit. Les volumes sont des proxies à échelle visuelle, pas des modèles Blender ni une simulation de croissance; routes, ports, ponts et détails architecturaux restent à intégrer. Repli sur les points lumineux si le programme ou le tampon échoue.
