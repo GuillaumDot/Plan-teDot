@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#010208">
 <title>planèteDot · ton univers musical</title>
-<meta name="pd-version" content="9.8">
+<meta name="pd-version" content="10.0-alpha.1">
 <meta name="description" content="PlanèteDot · l’album de GuillaumDot et ton univers musical en 3D : chaque planète est un morceau.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PlanèteDot">
@@ -4120,7 +4120,100 @@ function pdFrameW(x, y){ pdFrame(x, y); const V = PDB_VW; return [[V[0], V[1], V
 /* V9 · U replié dans le repère de vue de l'astre : chaque colonne c (axe de vue exprimé dans le monde) devient U·c */
 const PDB_VQ = new Float32Array(9), PDBR = {k: 1, tx: 0};   // V9 : force des souffles, texture Figma des souffles prête (unité 14)
 function pdVWq(q, V){ for (let c = 0; c < 9; c += 3){ const r = qRot(q, [V[c], V[c + 1], V[c + 2]]); PDB_VQ[c] = r[0]; PDB_VQ[c + 1] = r[1]; PDB_VQ[c + 2] = r[2]; } return PDB_VQ; }
+// V9.6.2: independent Canvas2D recovery for actual projected bodies.
+const PD_REC_ADV = false;
+let PD_REC_ACTIVE = new URLSearchParams(location.search).get('safe')==='1', PD_REC_PROBE=0, PD_REC_FAIL=0, PD_REC_LAST=-100, PD_REC_STATE=-1;
+const PD_REC_CACHE=new Map();
+window.__pdRecovery=()=>({active:PD_REC_ACTIVE,failed:PD_REC_FAIL,checks:PD_REC_PROBE,textures:PDTX.on});
+const PD_REC_BODIES = [];
+const PD_REC_CANVAS = document.createElement('canvas');
+PD_REC_CANVAS.id='pdRecoveryBodies'; PD_REC_CANVAS.setAttribute('aria-hidden','true');
+PD_REC_CANVAS.style.cssText='position:fixed;inset:0;width:100%;height:100%;pointer-events:none;display:none';
+cv.after(PD_REC_CANVAS);
+const PD_REC_CTX=PD_REC_CANVAS.getContext('2d');
+function pdSafeBody(o){
+ if(PD_REC_ADV||!PD_REC_ACTIVE||!PD_REC_CTX||(mode!=='system'&&mode!=='planet')||![0,1].includes(o.kind))return false;
+ if(![o.x,o.y,o.r].every(Number.isFinite)||o.r<=0)return false;
+ PD_REC_BODIES.push(o);return true;
+}
+// Bounded CPU fallback: deterministic spherical terrain, not the original material shader.
+function pdRecoverySprite(o,r){
+ const n=r>100?128:r>28?64:32,seed=Number(o.seed)||0,type=o.type||0,ang=Math.round((o.ang||0)*2)/2;
+ const c1=o.c1||[.6,.7,.9],c2=o.c2||c1,l=o.L||[.4,.5,1];
+ const key=[n,seed,type,ang,...c1,...c2,...l.map(v=>Math.round(v*3))].join(':');
+ if(PD_REC_CACHE.has(key)){const v=PD_REC_CACHE.get(key);PD_REC_CACHE.delete(key);PD_REC_CACHE.set(key,v);return v;}
+ const c=document.createElement('canvas');c.width=c.height=n;const g=c.getContext('2d'),im=g.createImageData(n,n),d=im.data;
+ const sat=x=>Math.max(0,Math.min(1,x));
+ const h=(x,y,z)=>{let v=Math.imul(x,374761393)^Math.imul(y,668265263)^Math.imul(z,1274126177)^Math.floor(seed*9137);v=Math.imul(v^(v>>>13),1274126177);return ((v^(v>>>16))>>>0)/4294967295;};
+ const noise=(x,y,z)=>{const ix=Math.floor(x),iy=Math.floor(y),iz=Math.floor(z),a=x-ix,b=y-iy,c=z-iz,u=a*a*(3-2*a),v=b*b*(3-2*b),w=c*c*(3-2*c);let q=0;for(let i=0;i<2;i++)for(let j=0;j<2;j++)for(let k=0;k<2;k++)q+=h(ix+i,iy+j,iz+k)*(i?u:1-u)*(j?v:1-v)*(k?w:1-w);return q;};
+ const fb=(x,y,z)=>.53*noise(x*3,y*3,z*3)+.27*noise(x*7,y*7,z*7)+.13*noise(x*16,y*16,z*16)+.07*noise(x*34,y*34,z*34);
+ const ll=Math.hypot(...l)||1;
+ for(let y=0;y<n;y++)for(let x=0;x<n;x++){
+ const nx=(x+.5)/n*2-1,ny=1-(y+.5)/n*2,rr=nx*nx+ny*ny;if(rr>=1)continue;
+ const nz=Math.sqrt(1-rr),sx=nx*Math.cos(ang)+nz*Math.sin(ang),sz=nz*Math.cos(ang)-nx*Math.sin(ang),f=fb(sx,ny,sz),fine=noise(sx*70,ny*70,sz*70);
+ let mix=sat((f-.25)*2),base=c1.map((v,i)=>v*(1-mix)+c2[i]*mix);
+ if(type===11||type===1){const land=f>.51&&type!==1;const polar=Math.abs(ny)>.83;const water=[.025,.15,.32];const earth=polar?[.79,.88,.94]:[.16+f*.22,.26+f*.25,.09+f*.13];base=land?earth:water;const cloud=fb(sx+4,ny+3,sz-2);if(cloud>.59)base=base.map(v=>v*.62+.38);}
+ else if(type===2){const band=.5+.5*Math.sin(ny*37+f*8);base=c1.map((v,i)=>v*(.25+.75*band)+c2[i]*(.75-.75*band));}
+ else if(type===4){const crack=1-Math.abs(f-.5)*15;if(crack>.65)base=[.95,.16+.35*crack,.035];else base=base.map(v=>v*.46);}
+ else if(type===3){base=base.map(v=>v*.45+.45+fine*.08);}
+ const diffuse=type===8?.95:.24+.76*Math.max(0,(nx*l[0]+ny*l[1]+nz*l[2])/ll),relief=.72+fine*.24+f*.24,edge=Math.pow(1-nz,3)*(o.atmo||0)*.22;
+ const i=(y*n+x)*4;for(let k=0;k<3;k++)d[i+k]=Math.round(sat(base[k]*diffuse*relief+edge*(o.at||c2)[k])*255);d[i+3]=Math.round(255*sat((1-Math.sqrt(rr))*n*.8));
+ }
+ g.putImageData(im,0,0);PD_REC_CACHE.set(key,c);while(PD_REC_CACHE.size>24)PD_REC_CACHE.delete(PD_REC_CACHE.keys().next().value);return c;
+}
+function pdRecoveryPaint(){
+ const g=PD_REC_CTX;if(!g)return;
+ if(!PD_REC_BODIES.length){PD_REC_CANVAS.style.display='none';return;}
+ try{
+ const cw=Math.max(1,Math.round(W)),ch=Math.max(1,Math.round(H));
+ if(PD_REC_CANVAS.width!==cw)PD_REC_CANVAS.width=cw;
+ if(PD_REC_CANVAS.height!==ch)PD_REC_CANVAS.height=ch;
+ PD_REC_CANVAS.style.display='block';g.clearRect(0,0,cw,ch);
+ const col=(c,k)=>'rgb('+[0,1,2].map(i=>Math.round(Math.max(0,Math.min(1,(Number.isFinite(c?.[i])?c[i]:.6)*k))*255)).join(',')+')';
+ for(const o of PD_REC_BODIES){
+ const r=Math.max(2.5*(RS||1),o.r),x=o.x,y=o.y;
+ if(x+r<0||x-r>cw||y+r<0||y-r>ch)continue;
+ const alpha=Number.isFinite(o.alpha)?Math.max(0,Math.min(1,o.alpha)):1;if(alpha<=.005)continue;
+ g.save();g.globalAlpha=alpha;
+ const l=o.L||[.4,.5,1],lx=Number.isFinite(l[0])?l[0]:.4,ly=Number.isFinite(l[1])?l[1]:.5;
+ const c1=o.c1||[.6,.7,.9],c2=o.c2||c1;
+ g.drawImage(pdRecoverySprite(o,r),x-r,y-r,r*2,r*2);
+ if(o.rk&&r>4){g.strokeStyle=col(o.rc||c1,.85);g.lineWidth=Math.max(1,r*.09);g.beginPath();g.ellipse(x,y,r*(o.rk[1]||1.7),r*.44,o.roll||0,0,Math.PI*2);g.stroke();}
+ g.restore();
+ }
+ }catch(e){console.warn('[PlaneteDot] recovery paint',e);g.globalAlpha=1;}
+}
+
+// V10 laboratory: sampler-free, deterministic spherical material renderer.
+const PD10_QUERY=new URLSearchParams(location.search);
+const PD10_ORIGINAL=PD10_QUERY.get('legacy')==='1';
+const PD10_SHADER=pdTry(()=>compile("#version 300 es\nin vec2 a;uniform vec2 res,center;uniform float radius,reach;out vec2 p;\nvoid main(){p=vec2(a.x,-a.y)*reach;vec2 q=(center+a*radius*reach)/res*2.-1.;gl_Position=vec4(q.x,-q.y,0.,1.);}","#version 300 es\nprecision highp float;\nin vec2 p;out vec4 outColor;\nuniform vec3 c1,c2,at,light;\nuniform mat3 viewBasis;\nuniform float seed,ang,tilt,tm,alpha,atmo,stage,beat,weather,quality,identity,ringS,roll;\nuniform vec2 ringK;\nuniform int kind,type,album;\nfloat hash(vec3 q){q=fract(q*.1031+seed*.013);q+=dot(q,q.yzx+33.33);return fract((q.x+q.y)*q.z);}\nfloat noise(vec3 q){vec3 i=floor(q),f=fract(q);f=f*f*(3.-2.*f);return mix(mix(mix(hash(i),hash(i+vec3(1,0,0)),f.x),mix(hash(i+vec3(0,1,0)),hash(i+vec3(1,1,0)),f.x),f.y),mix(mix(hash(i+vec3(0,0,1)),hash(i+vec3(1,0,1)),f.x),mix(hash(i+vec3(0,1,1)),hash(i+vec3(1,1,1)),f.x),f.y),f.z);}\nfloat fbm(vec3 q){float f=.55*noise(q)+.28*noise(q*2.03)+.12*noise(q*4.13);if(quality>.35)f+=.05*noise(q*8.21);return f;}\nvec3 ry(vec3 q,float a){return vec3(cos(a)*q.x+sin(a)*q.z,q.y,-sin(a)*q.x+cos(a)*q.z);}\nvec3 rz(vec3 q,float a){return vec3(cos(a)*q.x-sin(a)*q.y,sin(a)*q.x+cos(a)*q.y,q.z);}\nvoid main(){\n float r=length(p),a=0.;vec3 col=vec3(0.);\n if(ringK.y>ringK.x){vec2 t=mat2(cos(roll),-sin(roll),sin(roll),cos(roll))*p;t.y/=max(.08,ringS);float rr=length(t);float rk=smoothstep(ringK.x,ringK.x+.04,rr)*(1.-smoothstep(ringK.y-.04,ringK.y,rr));a=rk*(.28+.45*noise(vec3(rr*30.,0.,0.)));col=mix(c1,c2,.6)*a;}\n if(r<=1.){\n vec3 n=vec3(p,sqrt(max(0.,1.-r*r)));\n vec3 q=ry(rz(viewBasis*n,tilt),ang);\n float continental=fbm(q*3.2),ridge=1.-abs(2.*fbm(q*8.)-1.),h=continental*.76+ridge*.24;\n float land=smoothstep(.45,.52,h),temperature=clamp(1.-abs(q.y)*.85-max(0.,h-.52)*.95,0.,1.),humidity=fbm(q*4.+vec3(7.,3.,2.));\n float forest=smoothstep(.42,.63,humidity)*smoothstep(.18,.45,temperature),desert=(1.-smoothstep(.31,.52,humidity))*smoothstep(.45,.7,temperature),snow=1.-smoothstep(.12,.3,temperature);\n float fine=noise(q*62.),crag=fbm(q*19.);\n vec3 base=mix(c1,c2,smoothstep(.22,.78,h));float ocean=0.;\n if(type==11){vec3 ground=mix(vec3(.32,.40,.17),vec3(.085,.24,.10),forest);ground=mix(ground,vec3(.65,.44,.24),desert);ground=mix(ground,vec3(.41,.40,.38),smoothstep(.65,.78,h));ground=mix(ground,vec3(.83,.90,.96),snow);base=mix(vec3(.018,.10,.26),ground,land);ocean=1.-land;}\n else if(type==1){base=mix(c1*.45,c2,smoothstep(.3,.7,continental));ocean=1.;}\n else if(type==2){base=mix(c1,c2,.5+.5*sin(q.y*35.+continental*10.));}\n else if(type==3){base=mix(base,vec3(.72,.85,.93),.5+.35*ridge);}\n else if(type==4){float lava=1.-smoothstep(.012,.044,abs(fbm(q*11.)-.46));base=mix(base*.35,vec3(1.,.16,.015),lava);}\n else if(type==5){base=mix(base,at,smoothstep(.65,.88,ridge)*.6);}\n else if(type==6||type==7){base=mix(base,at,smoothstep(.35,.75,fbm(q*8.+tm*.035)));}\n if(album==1){float hemisphere=smoothstep(-.3,.3,q.x+(humidity-.5)*.35);base=mix(base,base.bgr,identity*hemisphere*.75);}\n vec3 L=normalize(light+vec3(.0001));float day=max(0.,dot(n,L));\n float relief=.72+.24*crag+.14*fine;\n vec3 lit=base*(.23+.77*day)*mix(relief,1.,ocean*.65);\n float city=smoothstep(.68,.83,noise(floor(q*75.)))*smoothstep(.55,.72,humidity)*smoothstep(.2,1.,stage/5.)*land;\n if(type==11||type==0)lit+=vec3(1.,.65,.24)*city*(1.-smoothstep(0.,.3,day))*.55;\n if(type==1||type==11||type==2){float cloud=smoothstep(.52-weather*.07,.71,fbm(ry(q,tm*.012)*7.+vec3(2.,9.,1.)));lit=mix(lit,vec3(.75,.84,.92)*(.35+.65*day),cloud*(type==2?.19:.64));}\n if(type==8||kind==1)lit=mix(c1,c2,continental)*(.78+.3*beat+.24*fine);\n if(type==4)lit+=max(vec3(0.),base-vec3(.45,.12,.04))*.4;\n if(ocean>.1)lit+=vec3(.75,.88,1.)*pow(max(0.,dot(n,normalize(L+vec3(0.,0.,1.)))),55.)*ocean*.4;\n lit+=at*pow(1.-n.z,3.)*atmo*(.14+.22*day);\n a=1.-smoothstep(.985,1.,r);col=lit*a+col*(1.-a);\n }else{float halo=exp(-(r-1.)*20.)*atmo*.14;col+=at*halo;a=max(a,halo);}\n outColor=vec4(col*alpha,a*alpha);\n}"),'V10 Living World');
+let PD10_ERROR=0,PD10_CHECKS=0;
+function pd10Draw(o){
+ if(PD10_ORIGINAL||![0,1].includes(o.kind))return false;
+ if(![o.x,o.y,o.r].every(Number.isFinite)||o.r<=0)return false;
+ if(!PD10_SHADER||PD10_ERROR>=2||PD_REC_ACTIVE){PD_REC_ACTIVE=true;return pdSafeBody(o);}
+ const g=gl,u=PD10_SHADER.u;
+ try{
+ const probe=PD10_CHECKS<3&&o.r>8&&(mode==='planet'||mode==='system');
+ if(probe){glowFlush();for(let i=0;i<8&&g.getError()!==g.NO_ERROR;i++){}}
+ g.useProgram(PD10_SHADER.p);g.bindVertexArray(quad);
+ const fr=pdFrame(o.x,o.y),basis=o.uq?pdVWq(o.uq,PDB_VW):PDB_VW;
+ const L=pdInF(fr,o.L||[0,0,1],PDB_L,0);
+ g.uniformMatrix3fv(u.viewBasis,false,basis);g.uniform2f(u.res,W,H);g.uniform2f(u.center,o.x,o.y);
+ g.uniform1f(u.radius,o.r);g.uniform1f(u.reach,Math.max(1.2,o.q||1));g.uniform3fv(u.c1,o.c1||[.6,.7,.8]);g.uniform3fv(u.c2,o.c2||o.c1||[.4,.5,.6]);g.uniform3fv(u.at,o.at||o.c1||[.5,.6,.8]);g.uniform3fv(u.light,L);
+ for(const [k,x] of Object.entries({seed:o.seed||0,ang:o.ang||0,tilt:o.tilt||0,tm:time,alpha:o.alpha??1,atmo:o.atmo??.3,stage:o.stage||0,beat:o.beat||0,weather:o.wx||0,quality:QUAL,identity:PD10_QUERY.get('identity')==='preview'?1:0,ringS:o.ringS||.3,roll:o.roll||0}))g.uniform1f(u[k],Number.isFinite(x)?x:0);
+ g.uniform2f(u.ringK,o.rk?.[0]||0,o.rk?.[1]||0);g.uniform1i(u.type,o.type||0);g.uniform1i(u.kind,o.kind);g.uniform1i(u.album,o.pd9?.gd?1:0);
+ if(o.pd9)pd9Seen(o,basis);if(o.r>1.5&&(o.alpha??1)>.5)pd9OccAdd(o);
+ g.drawArrays(g.TRIANGLE_STRIP,0,4);
+ if(probe){PD10_CHECKS++;if(g.getError()!==g.NO_ERROR)PD10_ERROR++;}
+ useSP();return true;
+ }catch(e){PD10_ERROR=2;PD_REC_ACTIVE=true;useSP();return pdSafeBody(o);}
+}
+window.__pd10Status=()=>({renderer:PD_REC_ACTIVE?'canvas':PD10_ORIGINAL?'legacy':'living-world',compiled:!!PD10_SHADER,checks:PD10_CHECKS,errors:PD10_ERROR});
+
 function drawBody(o){
+  if(pd10Draw(o))return;
   const u = SP.u;
   if (o.kind === 2){ if (!(o.alpha > .004) || !(o.r > .3)) return; if (GB.on){ glowAdd(o); return; } gl.uniform1i(u.uKind, 2); gl.uniform2f(u.uC, o.x, o.y); gl.uniform1f(u.uR, o.r); gl.uniform1f(u.uQ, o.q); gl.uniform1f(u.uAsp, 1); gl.uniform1f(u.uIrr, 0);
     gl.uniform3fv(u.uC1, o.c1); gl.uniform1f(u.uAtmo, o.atmo ?? 1); gl.uniform1f(u.uAlpha, o.alpha ?? 1); gl.uniform1f(u.uHi, o.hi || 0); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); return; }
@@ -5029,7 +5122,7 @@ setInterval(() => { if (PD93Z.on || performance.now() - PD93Z.t < 4200) return; 
 function fade(dt){ const f = $('#flash'); const fo = parseFloat(f.style.opacity || 0); if (fo > 0) f.style.opacity = Math.max(0, fo - dt * 1.6); }
 function frame(now, once){
   if (!running && !once) return;
-  if (!once){ const iv = 1000 / pdCap(); if (now - lastDraw < iv - 3){ pdQueueFrame(); return; } lastDraw = now - lastDraw < iv * 1.5 ? lastDraw + iv : now; } else lastDraw = now; SHOT_PT = null; ambTick(Math.min(.05, (now - last) / 1000));
+  if (!once){ const iv = 1000 / pdCap(); if (now - lastDraw < iv - 3){ pdQueueFrame(); return; } lastDraw = now - lastDraw < iv * 1.5 ? lastDraw + iv : now; } else lastDraw = now; PD_REC_BODIES.length=0; SHOT_PT = null; ambTick(Math.min(.05, (now - last) / 1000));
   const rawDt = Math.min(.25, (now - last) / 1000); const dt = Math.min(.05, rawDt); last = now; time = now / 1000 - T0;
   FDT = rawDt; perf(dt); readAudio(dt); scLevels(); pdMsTick(); pdPhTick(dt); listenTick(dt); ambUpdate(dt); radioSpatial(dt); POST.begin();
   if (mode !== 'splash' && !cine) FOV = lerp(FOV, FOV0, 1 - Math.exp(-dt * 2.2));
@@ -5057,7 +5150,7 @@ function frame(now, once){
   if (MENU.open && mode !== 'system') closeMenu(true);
   if (tutoI >= 0){ if (mode === 'splash' || (mode !== 'system' && TUTO_ACT === TUTO)) endTuto(); else tutoTick(); }
   if (cine && cine.album) albumFocus(dt); if (cine && cine.dir) pdDirPost(); if (OUTRO) outroTick(); if (INTRO.on) introTick(dt);
-  glowFlush(); pdShkTick(); POST.end(); shotTick(); pd9Draw(); if (INTRO.on && PDWARM.done && !PD9.wd) pd9Warm(); if (STORY) storyTick();
+  glowFlush(); pdShkTick(); POST.end(); pdRecoveryPaint(); shotTick(); pd9Draw(); if (INTRO.on && PDWARM.done && !PD9.wd) pd9Warm(); if (STORY) storyTick();
   if (!once) pdQueueFrame();
 }
 let FERR = 0;
