@@ -1,1 +1,0 @@
-export function chooseReaction(entry, previous=-1, random=Math.random){const n=entry.variants.length;const choices=entry.variants.map((v,i)=>i).filter(i=>i!==previous);const index=choices.length?choices[Math.floor(random()*choices.length)]:0;return {...entry.variants[index],index,id:entry.id,message:entry.message};}

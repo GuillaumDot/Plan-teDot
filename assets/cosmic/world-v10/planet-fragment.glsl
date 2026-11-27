@@ -102,9 +102,10 @@ void main(){
  }
  m.emission*=1.+.15*clamp(uAudio,0.,1.);
  float visibility=1.;
- if(uFamily!=5 && uShadowQuality>.5){
+ if(uFamily!=5 && uShadowQuality>0.){
   float land=(uFamily==0||uFamily==1)?1.-terrain.g:1.;
-  visibility=mix(1.,worldTerrainShadow(uTerrain,n,l,terrain.r,uRelief,uTexel),land);
+  float shadow=uShadowQuality>.5?worldTerrainShadow(uTerrain,n,l,terrain.r,uRelief,uTexel):worldTerrainShadowLite(uTerrain,n,l,terrain.r,uRelief,uTexel);
+  visibility=mix(1.,shadow,land);
  }
  vec3 color=shadeWorld(m,normal,l,v,visibility);
  if(uFamily==0||uFamily==1){
