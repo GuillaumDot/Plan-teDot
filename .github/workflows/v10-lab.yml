@@ -1,0 +1,26 @@
+name: V10 laboratory GPU tests
+on:
+  push:
+    branches: [dev/chatgpt-v10, dev/v10-restauration-v9]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  gpu:
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      PD_BROWSER: ${{ matrix.browser }}
+      LIBGL_ALWAYS_SOFTWARE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save playwright
+      - run: npx playwright install --with-deps ${{ matrix.browser }}
+      - run: node --test tests/v10-render.test.cjs tests/render-audio.test.cjs tests/v10-app.test.cjs
