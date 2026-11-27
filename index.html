@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#010208">
 <title>planèteDot · ton univers musical</title>
-<meta name="pd-version" content="10.0-alpha.6">
+<meta name="pd-version" content="10.0-alpha.7">
 <meta name="description" content="PlanèteDot · l’album de GuillaumDot et ton univers musical en 3D : chaque planète est un morceau.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PlanèteDot">
@@ -4138,9 +4138,9 @@ function pdSafeBody(o){
 }
 // Bounded CPU fallback: deterministic spherical terrain, not the original material shader.
 function pdRecoverySprite(o,r){
- const n=r>100?128:r>28?64:32,seed=Number(o.seed)||0,type=o.type||0,ang=Math.round((o.ang||0)*2)/2;
- const c1=o.c1||[.6,.7,.9],c2=o.c2||c1,l=o.L||[.4,.5,1];
- const key=[n,seed,type,ang,...c1,...c2,...l.map(v=>Math.round(v*3))].join(':');
+ const n=r>100?128:r>28?64:32,seed=Number(o.seed)||0,type=o.kind===1?8:(o.type||0),ang=Math.round((o.ang||0)*4)/4,tilt=Math.round((o.tilt||0)*8)/8;
+ const c1=o.c1||[.6,.7,.9],c2=o.c2||c1,l=Array.from(o.L||[.4,.5,1],v=>Math.round(v*4)/4),at=Array.from(o.at||c2,v=>Math.round(v*16)/16),atmo=Math.round((o.atmo||0)*16)/16;
+ const key=[n,seed,type,ang,tilt,...c1,...c2,...l,...at,atmo].join(':');
  if(PD_REC_CACHE.has(key)){const v=PD_REC_CACHE.get(key);PD_REC_CACHE.delete(key);PD_REC_CACHE.set(key,v);return v;}
  const c=document.createElement('canvas');c.width=c.height=n;const g=c.getContext('2d'),im=g.createImageData(n,n),d=im.data;
  const sat=x=>Math.max(0,Math.min(1,x));
@@ -4150,14 +4150,21 @@ function pdRecoverySprite(o,r){
  const ll=Math.hypot(...l)||1;
  for(let y=0;y<n;y++)for(let x=0;x<n;x++){
  const nx=(x+.5)/n*2-1,ny=1-(y+.5)/n*2,rr=nx*nx+ny*ny;if(rr>=1)continue;
- const nz=Math.sqrt(1-rr),sx=nx*Math.cos(ang)+nz*Math.sin(ang),sz=nz*Math.cos(ang)-nx*Math.sin(ang),f=fb(sx,ny,sz),fine=noise(sx*70,ny*70,sz*70);
+ const nz=Math.sqrt(1-rr),tx=nx*Math.cos(tilt)-ny*Math.sin(tilt),ty=nx*Math.sin(tilt)+ny*Math.cos(tilt),sx=tx*Math.cos(ang)+nz*Math.sin(ang),sz=nz*Math.cos(ang)-tx*Math.sin(ang),f=fb(sx,ty,sz),fine=noise(sx*24,ty*24,sz*24);
  let mix=sat((f-.25)*2),base=c1.map((v,i)=>v*(1-mix)+c2[i]*mix);
  if(type===11||type===1){const land=f>.51&&type!==1;const polar=Math.abs(ny)>.83;const water=[.025,.15,.32];const earth=polar?[.79,.88,.94]:[.16+f*.22,.26+f*.25,.09+f*.13];base=land?earth:water;const cloud=fb(sx+4,ny+3,sz-2);if(cloud>.59)base=base.map(v=>v*.62+.38);}
  else if(type===2){const band=.5+.5*Math.sin(ny*37+f*8);base=c1.map((v,i)=>v*(.25+.75*band)+c2[i]*(.75-.75*band));}
  else if(type===4){const crack=1-Math.abs(f-.5)*15;if(crack>.65)base=[.95,.16+.35*crack,.035];else base=base.map(v=>v*.46);}
  else if(type===3){base=base.map(v=>v*.45+.45+fine*.08);}
- const diffuse=type===8?.95:.35+.65*Math.max(0,(nx*l[0]+ny*l[1]+nz*l[2])/ll),relief=.72+fine*.24+f*.24,edge=Math.pow(1-nz,3)*(o.atmo||0)*.22;
- const i=(y*n+x)*4;for(let k=0;k<3;k++)d[i+k]=Math.round(Math.pow(sat(base[k]*diffuse*relief+edge*(o.at||c2)[k]),type===8?1:.76)*255);d[i+3]=Math.round(255*sat((1-Math.sqrt(rr))*n*.8));
+ else if(type===0){const dune=.5+.5*Math.sin(ty*28+f*18);base=base.map(v=>v*(.65+.48*dune));}
+ else if(type===5){const facet=Math.pow(sat(1-Math.abs(f-.52)*5),3);base=base.map((v,i)=>v*(1-facet*.55)+at[i]*facet*.55);}
+ else if(type===6){const fog=sat((fb(sx+3,ty-2,sz+1)-.35)*2.3);base=base.map((v,i)=>v*(1-fog*.65)+at[i]*fog*.65);}
+ else if(type===7){const a=Math.atan2(sz,sx),vortex=.5+.5*Math.sin(a*3+ty*13+f*7);base=base.map((v,i)=>v*(1-vortex*.8)+at[i]*vortex*.8);}
+ else if(type===8){base=base.map((v,i)=>(v*.72+c2[i]*.28)*(.8+f*.4));}
+ else if(type===9){const ridge=sat(1-Math.abs(f-.5)*3);base=base.map((v,i)=>v*.5+[.42,.48,.53][i]*ridge*.65);}
+ else if(type===10){const strata=.5+.5*Math.sin(f*48+ty*8);base=base.map(v=>v*(.55+.65*strata));}
+ const diffuse=type===8?.95:.35+.65*Math.max(0,(nx*l[0]+ny*l[1]+nz*l[2])/ll),relief=.72+fine*.24+f*.24,edge=Math.pow(1-nz,3)*atmo*.22;
+ const i=(y*n+x)*4;for(let k=0;k<3;k++)d[i+k]=Math.round(Math.pow(sat(base[k]*diffuse*relief+edge*at[k]),type===8?1:.76)*255);d[i+3]=Math.round(255*sat((1-Math.sqrt(rr))*n*.8));
  }
  g.putImageData(im,0,0);PD_REC_CACHE.set(key,c);while(PD_REC_CACHE.size>24)PD_REC_CACHE.delete(PD_REC_CACHE.keys().next().value);return c;
 }

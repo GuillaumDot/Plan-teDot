@@ -7,7 +7,7 @@ const match=html.match(/const PD10_SHADER=pdTry\(\(\)=>compile\(("(?:\\.|[^"\\])
 assert.ok(match,'extract the actual shipped shader');
 const vs=JSON.parse(match[1]),frag=JSON.parse(match[2]);
 test('V10 source and isolation',()=>{
- assert.match(html,/name="pd-version" content="10\.0-alpha\.[123456]"/);
+ assert.match(html,/name="pd-version" content="10\.0-alpha\.[1234567]"/);
  assert.doesNotMatch(frag,/\bsampler\w*\b/);
  assert.match(html,/function pd10Draw\(o\)/);
  assert.match(html,/if\(pd10Draw\(o\)\)return/);
@@ -75,4 +75,18 @@ test('production probe resolves MSAA pixels and restores framebuffer bindings',a
  },source);
  assert.equal(result.first,true,JSON.stringify(result));assert.equal(result.second,true,JSON.stringify(result));assert.equal(result.restored,true,JSON.stringify(result));assert.equal(result.error,0,JSON.stringify(result));assert.ok(result.b[0]-result.a[0]>100,JSON.stringify(result));
  }finally{await browser.close();}
+});
+
+test('actual CPU recovery distinguishes all 12 planet materials and caches deterministic sprites',()=>{
+ const source=html.slice(html.indexOf('function pdRecoverySprite('),html.indexOf('function pdRecoveryPaint('));
+ assert.ok(source.includes('PD_REC_CACHE'));
+ const cache=new Map(),doc={createElement(){return {getContext(){return {createImageData(w,h){return {data:new Uint8ClampedArray(w*h*4)};},putImageData(im){this.owner.pixels=im.data;},owner:this};}};}};
+ const build=new Function('document','PD_REC_CACHE',source+';return pdRecoverySprite;')(doc,cache);
+ const palette={kind:0,seed:7.7,ang:.4,tilt:.2,c1:[.35,.55,.75],c2:[.7,.4,.22],at:[.45,.6,1],atmo:.5,L:[.3,.5,1]};
+ const signatures=new Set();
+ for(let type=0;type<12;type++){const o={...palette,type},c=build(o,50);assert.equal(c,build(o,50));let hash=2166136261;const colors=new Set();for(let i=0;i<c.pixels.length;i+=4){if(c.pixels[i+3]<220)continue;for(let k=0;k<3;k++)hash=Math.imul(hash^c.pixels[i+k],16777619);colors.add(c.pixels.slice(i,i+3).join(','));}assert.ok(colors.size>30,'type '+type);signatures.add(hash);}
+ assert.equal(signatures.size,12);
+ const p=build({...palette,type:11},50);assert.notEqual(p,build({...palette,type:11,atmo:.9},50));
+ for(let i=0;i<30;i++)build({...palette,seed:i,type:0},10);
+ assert.ok(cache.size<=24);
 });
