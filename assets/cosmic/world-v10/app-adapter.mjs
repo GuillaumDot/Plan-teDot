@@ -11,8 +11,8 @@ export function eligibleWorld(descriptor){
  (typeof descriptor.seed==='string'||Number.isFinite(descriptor.seed));
 }
 export function createWorldAdapter({enabled=WORLD_CONFIG.enabled,createCache=createWorldCache,createRenderer=createPlanetRenderer,onFallback=()=>{}}={}){
- let cache=null,renderer=null,initializing=null,planet=null,controller=null,revision=0,closed=false,failed=false,activeKey=null,pending=null;
- function release(){controller?.abort();controller=null;planet?.dispose();planet=null;activeKey=null;}
+ let cache=null,renderer=null,initializing=null,planet=null,controller=null,revision=0,closed=false,failed=false,activeKey=null,pending=null,detailReady=false;
+ function release(){detailReady=false;controller?.abort();controller=null;planet?.dispose();planet=null;activeKey=null;}
  function fallback(error){failed=true;release();try{onFallback(error);}catch(_){}}
  async function init(gl){
   if(closed||!enabled||failed)return false;
@@ -31,7 +31,8 @@ export function createWorldAdapter({enabled=WORLD_CONFIG.enabled,createCache=cre
    if(closed||id!==revision||abort.signal.aborted)return false;
    const next=renderer.upload(world);planet=next;activeKey=key;
    // Optional visual resources must never prevent base geometry from appearing.
-   for(const load of [()=>next.loadDetail(world.natural?.detailBiome,{signal:abort.signal,maxSize:256}),()=>next.loadLandmarks({signal:abort.signal}),()=>next.loadVegetation({signal:abort.signal})]){
+   void Promise.resolve().then(()=>next.loadDetail(world.natural?.detailBiome,{signal:abort.signal,maxSize:256})).then(()=>{if(id===revision&&!abort.signal.aborted)detailReady=true;},e=>{if(id===revision&&!abort.signal.aborted){detailReady=true;console.warn('[PlanèteDot V10] detail fallback',e);}});
+   for(const load of [()=>next.loadLandmarks({signal:abort.signal}),()=>next.loadVegetation({signal:abort.signal})]){
     try{Promise.resolve(load()).catch(e=>{if(!abort.signal.aborted)console.warn('[PlanèteDot V10] optional asset:',e?.message||e);});}catch(e){if(!abort.signal.aborted)console.warn('[PlanèteDot V10] optional asset:',e?.message||e);}
    }
    return true;
@@ -42,6 +43,6 @@ export function createWorldAdapter({enabled=WORLD_CONFIG.enabled,createCache=cre
   draw(frame){if(!planet||closed||failed)return false;try{renderer.draw(planet,frame);return true;}catch(e){fallback(e);return false;}},
   contextLost(){if(!closed){revision++;pending=null;fallback(new Error('V10 context lost'));}},
   dispose(){if(closed)return;closed=true;revision++;pending=null;release();cache?.dispose();renderer?.dispose();cache=renderer=null;},
-  get ready(){return !!planet&&!closed&&!failed;},get failed(){return failed;}
+  get ready(){return !!planet&&!closed&&!failed;},get detailReady(){return detailReady;},get failed(){return failed;}
  };
 }
