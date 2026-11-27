@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#010208">
 <title>planèteDot · ton univers musical</title>
-<meta name="pd-version" content="10.0-alpha.3">
+<meta name="pd-version" content="10.0-alpha.4">
 <meta name="description" content="PlanèteDot · l’album de GuillaumDot et ton univers musical en 3D : chaque planète est un morceau.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PlanèteDot">
@@ -4191,15 +4191,36 @@ const PD10_SHADER=pdTry(()=>compile("#version 300 es\nin vec2 a;uniform vec2 res
 let PD10_ERROR=0,PD10_CHECKS=0,PD10_LAST_PROBE=-100,PD10_PROBE_MODE='',PD10_MISSES=0;
 const PD10_PIX_BEFORE=new Uint8Array(16),PD10_PIX_AFTER=new Uint8Array(16);
 function pd10PixelDelta(a,b){let d=0;for(let i=0;i<16;i++)if(i%4!==3)d+=Math.abs(a[i]-b[i]);return d;}
-function pd10ProbePixels(o,out){const x=Math.floor(o.x),y=Math.floor(H-o.y-1);gl.readPixels(x-1,y-1,2,2,gl.RGBA,gl.UNSIGNED_BYTE,out);}
+// Resolve only the sampled 2x2 region; reading a multisampled FBO directly is invalid in WebGL2.
+let PD10_PROBE_TARGET=null,PD10_PROBE_UNAVAILABLE=false;
+function pd10ProbePixels(o,out){
+ const g=gl,x=Math.floor(o.x)-1,y=Math.floor(H-o.y-1)-1;
+ const read=g.getParameter(g.READ_FRAMEBUFFER_BINDING),draw=g.getParameter(g.DRAW_FRAMEBUFFER_BINDING);
+ if(!read||!POST.on||!POST.ms||read!==POST.ms.f){g.readPixels(x,y,2,2,g.RGBA,g.UNSIGNED_BYTE,out);return g.getError()===g.NO_ERROR;}
+ try{
+  if(!PD10_PROBE_TARGET){
+   const f=g.createFramebuffer(),rb=g.createRenderbuffer(),prev=g.getParameter(g.RENDERBUFFER_BINDING);
+   try{g.bindFramebuffer(g.DRAW_FRAMEBUFFER,f);g.bindRenderbuffer(g.RENDERBUFFER,rb);g.renderbufferStorage(g.RENDERBUFFER,g.RGBA8,2,2);g.framebufferRenderbuffer(g.DRAW_FRAMEBUFFER,g.COLOR_ATTACHMENT0,g.RENDERBUFFER,rb);
+    if(g.checkFramebufferStatus(g.DRAW_FRAMEBUFFER)!==g.FRAMEBUFFER_COMPLETE)throw Error('probe framebuffer incomplete');
+    PD10_PROBE_TARGET={f,rb};
+   }catch(e){g.deleteFramebuffer(f);g.deleteRenderbuffer(rb);throw e;}
+   finally{g.bindRenderbuffer(g.RENDERBUFFER,prev);}
+  }
+  g.bindFramebuffer(g.DRAW_FRAMEBUFFER,PD10_PROBE_TARGET.f);
+  g.blitFramebuffer(x,y,x+2,y+2,0,0,2,2,g.COLOR_BUFFER_BIT,g.NEAREST);
+  g.bindFramebuffer(g.READ_FRAMEBUFFER,PD10_PROBE_TARGET.f);g.readPixels(0,0,2,2,g.RGBA,g.UNSIGNED_BYTE,out);
+  return g.getError()===g.NO_ERROR;
+ }finally{g.bindFramebuffer(g.READ_FRAMEBUFFER,read);g.bindFramebuffer(g.DRAW_FRAMEBUFFER,draw);}
+}
+function pd10TryProbe(o,out){try{return pd10ProbePixels(o,out);}catch(e){console.warn('[PlanèteDot] pixel probe unavailable',e);return false;}}
 function pd10Draw(o){
  if(PD10_ORIGINAL||![0,1].includes(o.kind))return false;
  if(![o.x,o.y,o.r].every(Number.isFinite)||o.r<=0)return false;
  if(!PD10_SHADER||PD10_ERROR>=2||PD_REC_ACTIVE){PD_REC_ACTIVE=true;return pdSafeBody(o);}
  const g=gl,u=PD10_SHADER.u;
  try{
- const probe=o.kind===0&&o.r>10&&(o.alpha??1)>.85&&o.x>3&&o.y>3&&o.x<W-3&&o.y<H-3&&(mode==='planet'||mode==='system')&&time-PD10_LAST_PROBE>.4&&(PD10_CHECKS<4||PD10_PROBE_MODE!==mode||time-PD10_LAST_PROBE>12);
- if(probe){PD10_LAST_PROBE=time;PD10_PROBE_MODE=mode;glowFlush();for(let i=0;i<8&&g.getError()!==g.NO_ERROR;i++){}pd10ProbePixels(o,PD10_PIX_BEFORE);}
+ const probe=!PD10_PROBE_UNAVAILABLE&&o.kind===0&&o.r>10&&(o.alpha??1)>.85&&o.x>3&&o.y>3&&o.x<W-3&&o.y<H-3&&(mode==='planet'||mode==='system')&&time-PD10_LAST_PROBE>.4&&(PD10_CHECKS<4||PD10_PROBE_MODE!==mode||time-PD10_LAST_PROBE>12);
+ let beforeOK=false;if(probe){PD10_LAST_PROBE=time;PD10_PROBE_MODE=mode;glowFlush();for(let i=0;i<8&&g.getError()!==g.NO_ERROR;i++){}beforeOK=pd10TryProbe(o,PD10_PIX_BEFORE);if(!beforeOK)PD10_PROBE_UNAVAILABLE=true;}
  g.useProgram(PD10_SHADER.p);g.bindVertexArray(quad);
  const fr=pdFrame(o.x,o.y),basis=o.uq?pdVWq(o.uq,PDB_VW):PDB_VW;
  const L=pdInF(fr,o.L||[0,0,1],PDB_L,0);
@@ -4209,11 +4230,11 @@ function pd10Draw(o){
  g.uniform2f(u.ringK,o.rk?.[0]||0,o.rk?.[1]||0);g.uniform1i(u.type,o.type||0);g.uniform1i(u.kind,o.kind);g.uniform1i(u.album,o.pd9?.gd?1:0);
  if(o.pd9)pd9Seen(o,basis);if(o.r>1.5&&(o.alpha??1)>.5)pd9OccAdd(o);
  g.drawArrays(g.TRIANGLE_STRIP,0,4);
- if(probe){PD10_CHECKS++;const drawError=g.getError();pd10ProbePixels(o,PD10_PIX_AFTER);const readError=g.getError();if(drawError!==g.NO_ERROR||readError!==g.NO_ERROR)PD10_ERROR++;else if(pd10PixelDelta(PD10_PIX_BEFORE,PD10_PIX_AFTER)<12)PD10_MISSES++;else PD10_MISSES=0;}
+ if(probe){const drawError=g.getError();if(drawError!==g.NO_ERROR)PD10_ERROR++;else if(beforeOK){const afterOK=pd10TryProbe(o,PD10_PIX_AFTER);if(!afterOK)PD10_PROBE_UNAVAILABLE=true;else{PD10_CHECKS++;if(pd10PixelDelta(PD10_PIX_BEFORE,PD10_PIX_AFTER)<12)PD10_MISSES++;else PD10_MISSES=0;}}}
  useSP();if(PD10_ERROR>=2||PD10_MISSES>=3){PD_REC_ACTIVE=true;return pdSafeBody(o);}return true;
  }catch(e){PD10_ERROR=2;PD_REC_ACTIVE=true;useSP();return pdSafeBody(o);}
 }
-window.__pd10Status=()=>({renderer:PD_REC_ACTIVE?'canvas':PD10_ORIGINAL?'legacy':'living-world',compiled:!!PD10_SHADER,checks:PD10_CHECKS,errors:PD10_ERROR,misses:PD10_MISSES});
+window.__pd10Status=()=>({renderer:PD_REC_ACTIVE?'canvas':PD10_ORIGINAL?'legacy':'living-world',compiled:!!PD10_SHADER,checks:PD10_CHECKS,errors:PD10_ERROR,misses:PD10_MISSES,probeAvailable:!PD10_PROBE_UNAVAILABLE});
 
 function drawBody(o){
   if(pd10Draw(o))return;

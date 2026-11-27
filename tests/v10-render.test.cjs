@@ -7,7 +7,7 @@ const match=html.match(/const PD10_SHADER=pdTry\(\(\)=>compile\(("(?:\\.|[^"\\])
 assert.ok(match,'extract the actual shipped shader');
 const vs=JSON.parse(match[1]),frag=JSON.parse(match[2]);
 test('V10 source and isolation',()=>{
- assert.match(html,/name="pd-version" content="10\.0-alpha\.[123]"/);
+ assert.match(html,/name="pd-version" content="10\.0-alpha\.[1234]"/);
  assert.doesNotMatch(frag,/\bsampler\w*\b/);
  assert.match(html,/function pd10Draw\(o\)/);
  assert.match(html,/if\(pd10Draw\(o\)\)return/);
@@ -50,4 +50,28 @@ test('pixel watchdog distinguishes absent output from changed RGB',()=>{
  const line=html.split('\n').find(l=>l.startsWith('function pd10PixelDelta('));assert.ok(line);
  const c=vm.createContext({});vm.runInContext(line,c);
  const a=new Uint8Array(16),b=new Uint8Array(16);assert.equal(c.pd10PixelDelta(a,b),0);b[3]=255;assert.equal(c.pd10PixelDelta(a,b),0);b[4]=50;assert.equal(c.pd10PixelDelta(a,b),50);
+});
+
+test('production probe resolves MSAA pixels and restores framebuffer bindings',async()=>{
+ const {chromium,webkit}=require('playwright');
+ const browser=process.env.PD_BROWSER==='webkit'?await webkit.launch({headless:true}):await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+ try{
+ const page=await browser.newPage();
+ const source=html.slice(html.indexOf('let PD10_PROBE_TARGET='),html.indexOf('function pd10TryProbe('));
+ assert.ok(source.includes('function pd10ProbePixels'));
+ const result=await page.evaluate(source=>{
+ const c=document.createElement('canvas');c.width=c.height=32;
+ const gl=c.getContext('webgl2');if(!gl)throw Error('WebGL2 unavailable');
+ const f=gl.createFramebuffer(),rb=gl.createRenderbuffer();gl.bindFramebuffer(gl.FRAMEBUFFER,f);gl.bindRenderbuffer(gl.RENDERBUFFER,rb);
+ const samples=Math.min(4,gl.getParameter(gl.MAX_SAMPLES));if(samples<2)throw Error('MSAA unavailable');
+ gl.renderbufferStorageMultisample(gl.RENDERBUFFER,samples,gl.RGBA8,32,32);gl.framebufferRenderbuffer(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.RENDERBUFFER,rb);
+ if(gl.checkFramebufferStatus(gl.FRAMEBUFFER)!==gl.FRAMEBUFFER_COMPLETE)throw Error('MSAA incomplete');
+ const POST={on:true,ms:{f}},H=32,probe=new Function('gl','POST','H',source+';return pd10ProbePixels;')(gl,POST,H);
+ const a=new Uint8Array(16),b=new Uint8Array(16);
+ gl.clearColor(.1,.2,.3,1);gl.clear(gl.COLOR_BUFFER_BIT);const first=probe({x:16,y:16},a);
+ gl.clearColor(.8,.5,.2,1);gl.clear(gl.COLOR_BUFFER_BIT);const second=probe({x:16,y:16},b);
+ return {first,second,a:Array.from(a),b:Array.from(b),restored:gl.getParameter(gl.READ_FRAMEBUFFER_BINDING)===f&&gl.getParameter(gl.DRAW_FRAMEBUFFER_BINDING)===f,error:gl.getError()};
+ },source);
+ assert.equal(result.first,true);assert.equal(result.second,true);assert.equal(result.restored,true);assert.equal(result.error,0);assert.ok(result.b[0]-result.a[0]>100,JSON.stringify(result));
+ }finally{await browser.close();}
 });
