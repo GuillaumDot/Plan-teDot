@@ -50,3 +50,11 @@ assert.ok(smallWorld.natural.cities.every(c=>c.cell>=0&&c.cell<6*NATURAL_GRID*NA
 assert.equal(naturalDetailBiome({desert:.2,rainforest:.1}), 'desert');
 assert.equal(bakeWorld('gas',7,8).natural,null);
 console.log('Natural World geography and biome routing verified');
+
+import {visualAudio} from './visual-audio.mjs';
+let energy=visualAudio(0,1,.016);assert.ok(energy>0&&energy<1);
+const peak=energy;energy=visualAudio(energy,0,.016);assert.ok(energy<peak&&energy>0);
+assert.equal(visualAudio(.5,1,0),.5);
+assert.equal(visualAudio(NaN,Infinity,-1),0);
+assert.ok(visualAudio(0,10,10)<=1);
+console.log('Bounded visual audio envelope verified');

@@ -65,3 +65,6 @@ Quatre matériaux V1.9 dans une seule texture 256 px, mélange local par climat 
 
 ## Relais ChatGPT — V10 — ombres locales du relief
 Ajout d'une occlusion directionnelle bornée (trois lectures de la cube map, niveaux 2/3 uniquement), séparation de l'émission et de la lumière directe, test des deux niveaux sur terrain synthétique. Les tests du raccordement Natural World 646aaeb sont verts (45995104314 et 45995104412); l'atlas c32350b a passé les contrats CPU, WebGL à confirmer au moment de l'édition. Nouveau commit CI à vérifier. Aucun changement main ni Supabase. Validation visuelle iPhone et ombres des bâtiments encore nécessaires.
+
+## Relais ChatGPT — V10 — océans, atmosphère et enveloppe musicale
+Normales animées de l'eau liquide, reflets modulés, dérive des nuages et bandes gazeuses, réutilisation de l'enveloppe audio V2.2 avec entrée externe. Test GPU de variation des images et test CPU des bornes. L'atlas c32350b a passé CPU/WebGL; les ombres fab6305 ont passé CPU, WebGL en cours au début du chantier. Aucun changement main, audio réel ni sauvegardes. CI du nouveau commit et iPhone à vérifier.

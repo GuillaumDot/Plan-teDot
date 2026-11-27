@@ -49,5 +49,21 @@ try{
   return results;
  });
  assert.deepEqual(qualityCheck,[{error:0,visible:true},{error:0,visible:true}]);
+ const waterCheck=await page.evaluate(async()=>{
+ const {createPlanetRenderer}=await import('./renderer.mjs');
+ const canvas=document.createElement('canvas');canvas.width=canvas.height=64;
+ const gl=canvas.getContext('webgl',{preserveDrawingBuffer:true});
+ const renderer=await createPlanetRenderer(gl),size=8;
+ const terrain=Array.from({length:6},()=>{const a=new Uint8Array(size*size*4);for(let i=0;i<a.length;i+=4){a[i]=96;a[i+1]=255;}return a;});
+ const climate=Array.from({length:6},()=>new Uint8Array(size*size*4));
+ const planet=renderer.upload({type:'aquatic',size,terrain,climate,bytes:48*size*size});
+ const mvp=new Float32Array([.8,0,0,0,0,.8,0,0,0,0,.5,0,0,0,0,1]);
+ gl.viewport(0,0,64,64);gl.enable(gl.DEPTH_TEST);
+ const frames=[];
+ try{for(const time of [0,2]){gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);renderer.draw(planet,{mvp,tier:0,time,eye:[0,0,-3],light:[.3,.2,-1],audio:1,delta:.016});const pixels=new Uint8Array(64*64*4);gl.readPixels(0,0,64,64,gl.RGBA,gl.UNSIGNED_BYTE,pixels);frames.push(pixels);}
+ return {changed:frames[0].some((v,i)=>v!==frames[1][i]),error:gl.getError(),energy:planet.audioEnergy>0&&planet.audioEnergy<1};
+ }finally{planet.dispose();renderer.dispose();}
+ });
+ assert.deepEqual(waterCheck,{changed:true,error:0,energy:true});
  assert.deepEqual(errors,[]);
 }finally{await browser.close();}

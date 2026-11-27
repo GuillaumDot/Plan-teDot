@@ -35,6 +35,11 @@ float detailLuma(vec3 n,vec2 tile){
 void main(){
  vec3 n=normalize(vDirection),l=normalize(uLight),v=normalize(uEye-n);
  vec4 terrain=textureCube(uTerrain,n),climate=textureCube(uClimate,n);
+ // Gas bands move at different angular speeds according to latitude.
+ if(uFamily==5){
+  float drift=.018+.028*sin(n.y*12.);
+  climate.b=textureCube(uClimate,rotateAtmosphere(n,uTime*drift)).b;
+ }
  WorldMaterial m=worldMaterial(uFamily,terrain,climate);
  if(uFamily!=5 && uDetailStrength>0.){
  float mask=(uFamily==0||uFamily==1)?(1.-terrain.g)*(1.-terrain.b):1.;
@@ -58,6 +63,11 @@ void main(){
  }
  vec3 normal=n;
  if(uFamily!=5)normal=worldReliefNormal(uTerrain,n,uRelief*(1.-terrain.g),uTexel);
+ if(uFamily==0||uFamily==1){
+  float openWater=terrain.g*(1.-terrain.b);
+  normal=normalize(mix(normal,worldOceanNormal(n,uTime,uAudio),openWater));
+  m.roughness=mix(m.roughness,.12+.07*clamp(uAudio,0.,1.),openWater);
+ }
  m.emission*=1.+.15*clamp(uAudio,0.,1.);
  float visibility=1.;
  if(uFamily!=5 && uShadowQuality>.5){
@@ -66,8 +76,8 @@ void main(){
  }
  vec3 color=shadeWorld(m,normal,l,v,visibility);
  if(uFamily==0||uFamily==1){
- float a=uTime*.015;
- vec3 q=vec3(cos(a)*n.x+sin(a)*n.z,n.y,-sin(a)*n.x+cos(a)*n.z);
+ float a=uTime*(.015+.008*cos(n.y*6.));
+ vec3 q=rotateAtmosphere(n,a);
  float cloud=smoothstep(.48,.82,textureCube(uClimate,q).b);
  color*=worldCloudShadow(uClimate,q,l,.7);
  color=mix(color,vec3(.85)*(.08+.92*max(dot(n,l),0.)),cloud*.55);

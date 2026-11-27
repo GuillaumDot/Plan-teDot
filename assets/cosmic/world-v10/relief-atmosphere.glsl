@@ -41,3 +41,17 @@ float worldTerrainShadow(samplerCube terrainMap,vec3 n,vec3 l,float height,float
  }
  return 1.-.72*occlusion;
 }
+
+// Analytic wave slopes in world space: no UV seams, no persistent displacement.
+vec3 worldOceanNormal(vec3 n,float time,float energy){
+ vec3 d1=normalize(vec3(.71,.18,.55)),d2=normalize(vec3(-.32,.85,.39)),d3=normalize(vec3(.23,-.48,.86));
+ vec3 slope=d1*cos(dot(n,d1)*44.+time*.9)*.032+
+            d2*cos(dot(n,d2)*69.-time*1.3)*.021+
+            d3*cos(dot(n,d3)*103.+time*1.7)*.011;
+ slope-=n*dot(slope,n);
+ return normalize(n-slope*(1.+.65*clamp(energy,0.,1.)));
+}
+vec3 rotateAtmosphere(vec3 n,float angle){
+ float c=cos(angle),s=sin(angle);
+ return vec3(c*n.x+s*n.z,n.y,-s*n.x+c*n.z);
+}

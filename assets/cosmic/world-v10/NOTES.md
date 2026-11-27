@@ -25,3 +25,6 @@ Quatre tuiles V1.9 (tropical, désert, alpin, polaire) dans un atlas unique 256 
 
 ## Ombres du relief
 Sondage de l'horizon en trois échantillons de la cube map dans la direction de la lumière. Atténuation bornée de la lumière directe et du spéculaire, sans assombrir l'émission des volcans et villes. Désactivé aux niveaux 0 et 1, sur les géantes gazeuses et atténué sur les surfaces aquatiques. Aucun changement des altitudes enregistrées ni nouveau tampon GPU. Approximation locale, pas d'ombres géométriques des bâtiments ni de mesure de performance iPhone.
+
+## Océans et atmosphère animés
+Pentes analytiques de trois trains d'ondes, projetées sur le plan tangent sans couture, réservées à l'eau liquide; variations bornées de rugosité et de force des vagues. Nuages et bandes gazeuses à vitesses différentielles selon latitude. L'enveloppe audio V2.2 est réutilisée avec delta borné, sans moteur audio supplémentaire ni modification du terrain. Le banc d'essai n'est pas encore alimenté par la musique réelle de l'application. Pause de l'horloge d'animation dans l'aperçu. Tests de variation des pixels et de l'enveloppe; pas une simulation hydrodynamique.
