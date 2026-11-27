@@ -177,3 +177,11 @@ const host=createFocusedHost(null,{enabled:true,makeAdapter:()=>({ready:true,asy
 const hostFrame={planet:hostPlanet,body:{x:64,y:64,r:40},basis:[[1,0,0],[0,1,0],[0,0,1]],light:[0,0,1],width:128,height:128};
 assert.equal(host.draw(hostFrame),false);assert.equal(host.draw(hostFrame),false);await new Promise(r=>setTimeout(r,0));assert.equal(host.state,'ready');assert.equal(host.draw(hostFrame),true);assert.equal(hostInits,1);assert.equal(hostSelects,1);assert.equal(hostDraws,1);host.leave();assert.equal(host.state,'idle');assert.equal(host.draw({...hostFrame,planet:{type:11,seed:42}}),false);assert.equal(hostSelects,2);host.contextLost();assert.equal(host.state,'fallback');assert.equal(hostFallbacks,1);host.dispose();assert.equal(hostDisposals,2);
 assert.equal(createFocusedHost(null).draw(hostFrame),false);console.log('Focused host opt-in and lifecycle verified');
+
+import {Script} from 'node:vm';
+const legacyIndex=readFileSync(new URL('../../../index.html',import.meta.url),'utf8');
+const inlineScripts=[...legacyIndex.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)].filter(m=>!m[1].includes('src='));
+assert.ok(inlineScripts.length>0);for(const m of inlineScripts)new Script(m[2],{filename:'index.html:inline'});
+assert.ok(legacyIndex.includes("PD10_QUERY.get('world10') === '1'")&&legacyIndex.includes("PD10_QUERY.get('world10preview') === '1'"));
+assert.ok(legacyIndex.includes('b.pd9===p&&pd10FocusDraw(p,b,dt)')&&legacyIndex.includes('if(PD10Host&&(mode!==\'planet\'||AF))PD10Host.leave()'));
+console.log('Main index inline JavaScript syntax and opt-in integration verified');

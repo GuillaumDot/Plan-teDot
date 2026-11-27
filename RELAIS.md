@@ -122,3 +122,6 @@ focused-host.mjs prépare le branchement de renderPlanet avec conversion explici
 
 ## Relais ChatGPT — V10 — correction sentinelles WebGL2
 Correctif cdf2bfa : compilation et rendu WebGL2 visibles, assertion rouge sur index et erreur 1282 (job 140501658186). Test corrigé avec deux buffers indépendants et contrôle GL avant dessin. Contrôleur focus 325ab40 ajouté. Nouveau CI requis; composition non encore validée. Main/index/Supabase/audio inchangés.
+
+## Relais ChatGPT — V10 — raccordement index expérimental
+9cc4b83 CPU/WebGL verts (45998086053/45998086030), composition et états restaurés. Index V9.8.2 de branche raccordé au focused-host dans renderPlanet, import paresseux sous world10=1 et version 10 requise. world10preview=1 opt-in supplémentaire pour apercevoir une planète existante sans mutation ni sauvegarde. Repli immédiat historique, une seule boucle, aucun changement audio/Supabase/main. Contrat syntaxe index ajouté. Avant fusion : réconcilier index main V9.8.3 (5197e2a), tester parcours authentifié et iPhone, MP3 et écran verrouillé, états GLR/POST en conditions réelles.

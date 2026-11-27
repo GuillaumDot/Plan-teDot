@@ -4677,6 +4677,37 @@ function seedDir(t){ const la = t.lat, lo = t.lon; return [Math.cos(la) * Math.c
 function viewOf(p, s){ const w = pdUt(p, rz(-p.tilt, ry(-(p._ang || 0), s))); if (curP && curP.p === p){ const F = pdFrameW(curP.x, curP.y); return [dot(w, F[0]), dot(w, F[1]), dot(w, F[2])]; } const z = [-CF[0], -CF[1], -CF[2]]; return [dot(w, CR), dot(w, CU), dot(w, z)]; }
 function surfOf(p, n){ if (curP && curP.p === p){ const F = pdFrameW(curP.x, curP.y); return ry(p._ang || 0, rz(p.tilt, pdU(p, [0, 1, 2].map(k => F[0][k] * n[0] + F[1][k] * n[1] + F[2][k] * n[2])))); }
   const w = [CR[0] * n[0] + CU[0] * n[1] - CF[0] * n[2], CR[1] * n[0] + CU[1] * n[1] - CF[1] * n[2], CR[2] * n[0] + CU[2] * n[1] - CF[2] * n[2]]; return ry(p._ang || 0, rz(p.tilt, pdU(p, w))); }
+// V10 opt-in: no persistence, no extra animation loop; legacy remains default.
+const PD10_QUERY = new URLSearchParams(location.search);
+const PD10_ENABLED = PD10_QUERY.get('world10') === '1';
+const PD10_PREVIEW = PD10_ENABLED && PD10_QUERY.get('world10preview') === '1';
+let PD10Host = null, PD10Loading = false, PD10Failed = false, PD10Closed = false;
+function pd10Status(){return PD10Failed?'fallback':PD10Host?PD10Host.state:PD10Loading?'loading':PD10_ENABLED?'idle':'disabled';}
+if(PD10_ENABLED){
+  window.__pdWorld10=()=>({state:pd10Status(),preview:PD10_PREVIEW});
+  cv.addEventListener('webglcontextlost',()=>{PD10Failed=true;PD10Host?.contextLost();});
+  addEventListener('pagehide',e=>{if(e.persisted){PD10Host?.leave();return;}PD10Closed=true;PD10Host?.dispose();PD10Host=null;});
+}
+function pd10FocusDraw(p,b,dt){
+  if(!PD10_ENABLED||PD10Failed||PD10Closed||PD_REC_ACTIVE||!p||b.kind!==0||(!PD10_PREVIEW&&p.generatorVersion!==10))return false;
+  if(![0,1,2,3,4,6,9,10,11].includes(p.type))return false;
+  if(!PD10Host){
+    if(!PD10Loading){PD10Loading=true;import('./assets/cosmic/world-v10/focused-host.mjs').then(m=>{
+      if(PD10Closed||PD10Failed)return;
+      PD10Host=m.createFocusedHost(gl,{enabled:true,onFallback:e=>{PD10Failed=true;console.warn('[PlanèteDot V10] repli historique',e.message);}});
+    }).catch(e=>{PD10Failed=true;console.warn('[PlanèteDot V10] chargement indisponible',e.message);});}
+    return false;
+  }
+  try{
+    const descriptor=PD10_PREVIEW&&p.generatorVersion!==10?{type:p.type,seed:p.seed,generatorVersion:10}:p;
+    const basis=[[1,0,0],[0,1,0],[0,0,1]].map(axis=>viewOf(p,axis));
+    const light=Array.from(pdInF(pdFrame(b.x,b.y),b.L||[0,0,1],new Float32Array(3),0));
+    glowFlush();
+    const ok=PD10Host.draw({planet:descriptor,body:b,basis,light,width:W,height:H,audio:Math.max(0,Math.min(1,b.lv||0)),time,delta:dt,tier:Math.max(0,Math.min(3,TIER)),growth:1});
+    if(ok)pd9OccAdd(b);
+    return ok;
+  }catch(e){PD10Failed=true;PD10Host?.dispose();console.warn('[PlanèteDot V10] repli historique',e.message);return false;}
+}
 let mapA = 0, angT = null;
 function renderPlanet(dt){ PASS.clear();
   const sys = VIEW; const i = sys.planets.findIndex(x => x.id === focus); if (i < 0){ backToSystem(); return; }
@@ -4705,7 +4736,7 @@ function renderPlanet(dt){ PASS.clear();
   }
   hlTick(dt);
   labsEnd();
-  bodies.sort((a, b) => b.w - a.w); useSP(); bodies.forEach(drawBody);
+  bodies.sort((a, b) => b.w - a.w); useSP(); bodies.forEach(b=>{if(b.pd9===p&&pd10FocusDraw(p,b,dt))return;drawBody(b);});
 }
 function tapPlanet(x, y){
   if (!curP) return false; const {p, r} = curP; const dx = (x - curP.x) / r, dy = -(y - curP.y) / r; const d2 = dx * dx + dy * dy; if (d2 > 1) return false;
@@ -5132,6 +5163,7 @@ function frame(now, once){
   if (ECL < .45 && !eclOn){ eclOn = true; POST.flash = Math.max(POST.flash, .1); if (actx && SND.bus && SND.amb){ const t = actx.currentTime; tone(58, t, 3.2, .06, 'sine', true, 44); swell(t, 1.6, .02, 900, 200); } }
   else if (ECL > .8 && eclOn){ eclOn = false; POST.flash = Math.max(POST.flash, .22); if (actx && SND.bus && SND.amb){ const t = actx.currentTime; tone(1568, t, 1.4, .008); tone(2093, t + .05, 1.2, .006); } }
   const AF = !!(cine && cine.album && cine.t > 1.6);
+  if(PD10Host&&(mode!=='planet'||AF))PD10Host.leave();
   if (mode === 'splash'){
     if (warpT >= 0){ warpT += rawDt / 4.2; const f = $('#flash'); f.style.opacity = clamp((warpT - .86) / .14, 0, 1) * .8; }
     if (INTRO.gl) introGL(); else renderSplash(dt); if (warpT < 0) fade(dt);
