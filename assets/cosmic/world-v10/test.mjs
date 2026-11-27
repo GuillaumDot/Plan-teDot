@@ -40,3 +40,13 @@ for(const entry of worldCatalog()){
  for(const t of entry.terrain)for(const lod of [0,1,2]){const resolved=resolveTerrain(entry.type,t.biome,lod);catalogAssert.equal(resolved.fallback,false);catalogAssert.equal(resolved.mesh,t.lods[lod].mesh);}
 }
 console.log('Terrain fallback contracts verified');
+
+import {NATURAL_GRID,naturalDetailBiome} from './bake.mjs';
+const smallWorld=bakeWorld('earth',7,8),largeWorld=bakeWorld('earth',7,32);
+assert.equal(smallWorld.natural.grid,NATURAL_GRID);
+assert.deepEqual(smallWorld.natural,largeWorld.natural,'Geography must be independent of GPU resolution');
+assert.equal(smallWorld.natural.gen,22);
+assert.ok(smallWorld.natural.cities.every(c=>c.cell>=0&&c.cell<6*NATURAL_GRID*NATURAL_GRID));
+assert.equal(naturalDetailBiome({desert:.2,rainforest:.1}), 'desert');
+assert.equal(bakeWorld('gas',7,8).natural,null);
+console.log('Natural World geography and biome routing verified');

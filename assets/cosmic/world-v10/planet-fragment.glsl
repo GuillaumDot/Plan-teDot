@@ -33,6 +33,11 @@ void main(){
  // Preserve the procedural climate colors, oceans and emission.
  m.color*=mix(1.,mix(.65,1.35,detailLuma(n)),clamp(uDetailStrength*mask,0.,1.));
  }
+ // Earth-only channels: climate.a = river, terrain.a = city site.
+ if(uFamily==0){
+ m.color=mix(m.color,vec3(.018,.075,.095),climate.a*(1.-terrain.g)*.24);
+ m.emission+=vec3(1.,.56,.19)*pow(terrain.a,3.)*.22*(1.-terrain.g)*(1.-smoothstep(-.15,.15,dot(n,l)));
+ }
  vec3 normal=n;
  if(uFamily!=5)normal=worldReliefNormal(uTerrain,n,uRelief*(1.-terrain.g),uTexel);
  m.emission*=1.+.15*clamp(uAudio,0.,1.);

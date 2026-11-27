@@ -56,3 +56,6 @@ Branche dev/chatgpt-world-v10. Les chargeurs de cube maps et d'albedo rejettent 
 
 ## Relais ChatGPT — V10 — textures de détail dans le rendu labo
 Connexion du catalogue albedo au shader de surface via projection triplanaire, modulation bornée, texture neutre de repli et libération/annulation par planète. Aperçu V10 uniquement : test de chargement pour les six familles solides, exclusion gaz. Tests CI du nouveau commit à confirmer, aucun changement main ni Supabase, aucune validation iPhone. Natural World V2.2 et mélange local des biomes restent à intégrer.
+
+## Relais ChatGPT — V10 — Natural World V2.2 cohérent
+Grille géographique terrestre fixée à N=64 indépendamment de la résolution GPU, métadonnées des sites/réseaux préservées, signal de rivières et points urbains nocturnes dans le shader labo, sélection de texture par biome terrestre dominant. Test de cohérence des métadonnées entre deux résolutions. Aucun changement main ni sauvegardes. CI et iPhone à confirmer; mélange local et modèles 3D encore à faire.

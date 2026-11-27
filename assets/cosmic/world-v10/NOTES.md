@@ -16,3 +16,6 @@ Comparer mêmes graines et caméras sur iPhone, vérifier compilation GLSL princ
 
 ## Détail de surface V10
 Le rendu labo utilise une troisième texture (albedo de terrain, 256 px maximum en aperçu), projetée en triplanaire avec répétition miroir. Elle module uniquement la luminosité de la surface, avec masquage des océans et glaces terrestres; aucune modification de la géographie. Le matériau procédural reste visible si le téléchargement échoue. Les requêtes d'aperçu sont annulées en changeant de planète et les ressources sont libérées avec leur planète. Un seul matériau de détail par famille pour cette étape; le mélange des biomes et les normales restent à faire.
+
+## Natural World V2.2 — géographie stable
+La simulation terre utilise désormais N=64 indépendamment de la taille des cube maps d'affichage. Les données de villes, routes, ponts, ports et volcans sont conservées dans le résultat CPU; le shader utilise un signal de rivière et des points urbains nocturnes discrets. Le matériau de détail terrestre est choisi selon le biome terrestre dominant, avec correspondances temporaires faute de tuiles tempérées. Ce n'est pas un mélange de textures local ni une implantation de bâtiments 3D. Les planètes historiques de l'application ne sont pas migrées.
