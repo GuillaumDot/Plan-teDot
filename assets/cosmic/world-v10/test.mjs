@@ -191,7 +191,10 @@ assert.equal(createFocusedHost(null).draw(hostFrame),false);console.log('Focused
 
 import {Script} from 'node:vm';
 const legacyIndex=readFileSync(new URL('../../../index.html',import.meta.url),'utf8');
-const recoverySource=legacyIndex.slice(legacyIndex.indexOf('function drawBody(o){'),legacyIndex.indexOf('function pdAdvancedBody(o){'));
+const recoveryStart=legacyIndex.indexOf('function drawBody(o){');
+const recoveryEnd=legacyIndex.indexOf('function pdAdvancedBody(o', recoveryStart+1);
+const recoverySource=legacyIndex.slice(recoveryStart, recoveryEnd);
+assert.ok(recoveryEnd>recoveryStart);
 assert.ok(recoverySource.length>100);
 assert.doesNotMatch(recoverySource,/readPixels|getError/);
 assert.match(legacyIndex,/name="pd-version" content="10\.0\.3"/);
@@ -201,7 +204,6 @@ assert.ok(legacyIndex.includes("PD10_QUERY.get('world10') !== '0'")&&legacyIndex
 assert.ok(legacyIndex.includes('b.pd9===p&&pd10FocusDraw(p,b,dt)')&&legacyIndex.includes('if(PD10Host&&(mode!==\'planet\'||AF))PD10Host.leave()'));
 console.log('Main index inline JavaScript syntax and opt-in integration verified');
 
-assert.match(legacyIndex,/name="pd-version" content="10\.\d+\.\d+"/);
 assert.ok(legacyIndex.includes('name, type, generatorVersion: 10, size: 1'));
 assert.ok(legacyIndex.includes('p.generatorVersion=pd10MigrationVersion(p)')&&legacyIndex.includes('generatorVersion:pd10MigrationVersion(p)'));
 console.log('V10 default for new planets; explicit rollback and legacy version preservation');
@@ -213,3 +215,8 @@ for(const type of [0,1,2,3,4,6,9,10,11]){const p=Object.freeze({type,seed:7.7,tr
 for(const type of [5,7,8])assert.equal(migrate({type,seed:7}),0);
 assert.equal(migrate({type:11,seed:NaN}),0);assert.equal(migrate({type:11,seed:7,generatorVersion:42}),42);
 console.log('Existing world migration preserves seed and payload; unsupported families retain legacy');
+
+assert.ok(legacyIndex.includes("get('pbr')==='0'")&&legacyIndex.includes("get('envComposite')==='1'"));
+assert.ok(!legacyIndex.includes('textures 8.2 coupées, rendu V8.0'));
+assert.ok(legacyIndex.includes('entry.atlas!==PDTX.t?.arr')&&legacyIndex.includes('float ga=uT*.075+uSeed;'));
+console.log('Authored atlas preservation, local normal maps, direct environment and galaxy motion contracts');
