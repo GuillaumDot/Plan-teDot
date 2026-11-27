@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#010208">
 <title>planèteDot · ton univers musical</title>
-<meta name="pd-version" content="9.7">
+<meta name="pd-version" content="9.8-essai">
 <meta name="description" content="PlanèteDot · l’album de GuillaumDot et ton univers musical en 3D : chaque planète est un morceau.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PlanèteDot">
@@ -1818,166 +1818,345 @@ float pxK(float f){ return smoothstep(3.,7.,uR*gFs/(f*1.6)); }
 float pxN(vec3 p,float f){ return mix(.5,n3(p),pxK(f)); }
 `;
 const PD97 = `
-/* V9.7 · la PlanèteDot devient une simulation de villes (demande du fondateur du 26/11, capture d'un jeu de construction de villes à l'appui).
-   Chaque ville est une grille de lots : des îlots de 4 × 4 lots entre des rues, des maisons et leurs jardins en banlieue, des immeubles
-   puis des tours au centre, des parcs, des zones d'activité ; autour, des champs en damier, des fermes, des haies et des routes de campagne.
-   Les bâtiments sont de vrais volumes : depuis chaque pixel, on remonte le rayon de la caméra à travers la grille et on tombe sur une façade,
-   un toit ou le sol (ombres portées selon le soleil, fenêtres, lumières la nuit). Le détail suit la taille à l'écran : rien de plus petit
-   que quelques pixels (de loin, la ville devient une mosaïque de quartiers, puis une seule teinte). */
-float gSh97=0.; vec3 gN97=vec3(0.,0.,1.);   // ombre des immeubles au point vu, normale (repère vue) de ce qu'on voit
+/* V9.8 · des villes qui poussent maison par maison (demande du fondateur du 26/11 : villes plus naturelles, vraie croissance, grande variété
+   de bâtiments à l'échelle de la zone). Tout part d'un carrefour : une première maison sort de terre au bord de la route, puis deux, trois,
+   quatre… le long des routes ; le village se remplit (îlots allongés bordés de maisons tournées vers la rue, jardins à l'arrière) et son
+   église apparaît ; il devient une ville (place et mairie, maisons de ville en rangées, immeubles autour de cours, écoles, parcs, activités,
+   stade) ; des villes naissent plus loin sur les routes et grandissent à leur tour (un pays), jusqu'à la métropole et ses tours au cœur
+   d'un continent de villes, de villages et de fermes. La taille des bâtiments suit celle de la zone. Les rues ondulent doucement ; autour,
+   les champs gagnent sur la nature. Chaque bâtiment est un vrai volume (on remonte le rayon de la caméra à travers la grille des lots), et
+   le détail suit la taille à l'écran. */
+float gSh97=0.; vec3 gN97=vec3(0.,0.,1.);   // ombre des bâtiments au point vu, normale (repère vue) de ce qu'on voit
 float gCl97=0., gCs97=0.; vec3 gCc97=vec3(1.);   // nuages de la PlanèteDot : posés après les villes (couverture, ombre, couleur)
-vec2 gO97[4]; float gA97[4]; int gK97=1; float gW97=.5, gSd97=0., gEf97=3., gHc97=6.; mat2 gM97=mat2(1.);
 const float L97=.0125;   // un lot (rayon de la planète = 1)
-bool rd97(vec2 c){ vec2 r=c-floor(c/5.)*5.; return r.x<.5||r.y<.5; }   // une rangée de lots sur cinq est une rue
-float den97(vec2 q){   // densité de la ville en q (repère de la zone) : < 0 campagne, 1 au centre ; elle s'éteint avant le bord de la zone
-  float m=-2.; for(int j=0;j<4;j++){ if(j>=gK97) break; m=max(m,1.-length(q-gO97[j])/gA97[j]); }
-  float st=(sqrt(max(1.-dot(q,q),0.))-gW97)/max(1.-gW97,.001);
-  return m+(n93(q*gEf97+gSd97)-.5)*.55+(n93(q*gEf97*2.7+gSd97+7.)-.5)*.22-(1.-smoothstep(.04,.35,st))*1.3; }
-// îlot B : x = densité, y = sorte (0 prés, 1 maisons, 2 immeubles, 3 tours, 4 parc, 5 activités, 6 ferme), z = taille des lots, w = hauteur max (en lots)
-vec4 blk97(vec2 B){
-  float D=den97(((B*5.+3.)*L97)*gM97), h=h93(B+gSd97), h2=h93(B.yx*1.31+gSd97+3.);
-  if(D<0.) return vec4(D,h<.42?6.:0.,4.,h<.42?.3:0.);
-  if(h<.06+.07*(1.-D)&&D<.92) return vec4(D,4.,4.,0.);
-  if(n93(B*.23+gSd97+40.)>.68&&D>.12&&D<.78) return vec4(D,5.,2.,.7);
-  float Dc=D+(h2-.5)*.3;
-  if(Dc>.7&&gHc97>2.3) return vec4(D,3.,h2>.62?4.:2.,h2>.62?gHc97+2.:gHc97);
-  if(Dc>.36&&gHc97>.5) return vec4(D,2.,h2<.5?1.:2.,min(2.3,gHc97));
-  return vec4(D,1.,1.,.45); }
-// bâtiment du lot qui contient la case c : boîte (x0,y0,x1,y1) en lots, hauteur en lots (0 = pas de bâtiment), tirage du lot
-float lot97(vec2 c,vec2 B,vec4 I,out vec4 bx,out float lh){
-  float LS=I.z; vec2 o=B*5.+1.+floor((c-B*5.-1.)/LS)*LS;
-  lh=h93(o*1.37+gSd97); float h2=fract(lh*13.7), D=clamp(I.x,0.,1.), h=0., ins=.5;
-  if(I.y==1.){ h=step(.2*(1.-D*1.6),h2)*(.2+.17*lh); ins=.16+.13*fract(lh*5.3); }
-  else if(I.y==2.){ h=LS<1.5?.35+.5*lh*(.5+D):.45+(.45+1.2*D)*(.3+.7*lh); ins=LS<1.5?.1+.06*h2:.08+.09*h2; }
-  else if(I.y==3.){ h=LS>3.?2.4+(gHc97-.4)*D*(.45+.55*lh):1.5+(gHc97-1.5)*pow(D,1.5)*(.25+.75*lh*lh); ins=LS>3.?1.+.45*h2:.17+.15*h2; }
-  else if(I.y==5.){ h=.26+.42*lh; ins=.05+.05*h2; }
-  else if(I.y==6.){ vec2 f=floor(vec2(h2,fract(lh*3.7))*2.); vec2 a=o+.35+f*2.5; bx=vec4(a,a+vec2(.75,.5)); lh=fract(lh*7.7); return .24*step(.35,h2); }
-  bx=vec4(o+ins,o+LS-ins); return min(h,I.w); }
-// le point q (en lots) est-il à l'ombre d'un bâtiment ? (on remonte vers le soleil)
-float shd97(vec2 q,float h,vec2 sg,float tE,vec2 B0,vec4 I0){
-  float o=0.; vec2 cB=B0; vec4 I=I0;
-  for(int k=1;k<=4;k++){ float t=float(k*k)*.22+.08; vec2 p=q+sg*t; vec2 c=floor(p); if(rd97(c)) continue; vec2 B=floor(c/5.);
-    if(B!=cB){ cB=B; I=blk97(B); } float hr=h+t*tE; if(I.w<=hr) continue;
-    vec4 bx; float lh; float hb=lot97(c,B,I,bx,lh); vec2 ib=step(bx.xy,p)*step(p,bx.zw); o=max(o,ib.x*ib.y*smoothstep(0.,.12,hb-hr)); }
+float gZC98=0.; vec4 gS98[6]; int gN98=1;   // agglomérations utiles au pixel : centre (repère de la grille, en lots), rayon bâti, sorte (0 capitale, 1 ville, 2 village, 5 hameau)
+float gSd98=0., gFb98=3., gHx98=1., gZr98=10.; mat2 gM98=mat2(1.); vec2 gW98=vec2(0.), gAp98=vec2(1e3);   // gAp98 : la case de l'aéroport (continent)
+// rayon bâti (en lots) de la capitale de la zone selon sa croissance g : un campement (une maison) → un village → … → une métropole
+float rC98(float g){ return g<1.?.85+3.55*pow(max(g,0.),.8):4.4*exp2(.6*(g-1.)); }
+// les rues ondulent : déplacement doux de la grille (en lots), plus faible au cœur des métropoles (les tours restent droites)
+vec2 wp98(vec2 q){ vec2 a=q*.042+gSd98, b=q*.011+gSd98*.7; float R=gS98[0].z;   // deux ondulations : rues qui s'incurvent, quartiers qui tournent à grande échelle
+  return ((vec2(n93(a),n93(a.yx+17.3))-.5)*3.4+(vec2(n93(b+5.1),n93(b.yx+31.7))-.5)*11.)*mix(1.,.3,smoothstep(12.,22.,R)*(1.-smoothstep(.25,.6,length(q)/R))); }
+float nd98(vec2 p){ return 1.+.42*(n93(p*.06+gSd98+40.)-.5)+.22*(n93(p*.17+gSd98+60.)-.5); }   // contour irrégulier des villes (elles avancent plus vite d'un côté)
+// largeur de la chaussée (en lots) : rue de quartier ou grand axe, plus large dans une grande ville ; au hameau, une route étroite
+float rw98(bool tw,bool ax,float R){ float k=smoothstep(2.5,11.,R); return tw?(ax?mix(.46,.94,k):mix(.4,.8,k)):ax?mix(.36,.58,smoothstep(2.,8.,gS98[0].z)):.32; }
+vec2 gp98(vec2 q){ return q+wp98(q)-gW98+.5; }   // q : lots autour du centre de la zone → repère de la grille (le carrefour de départ est la case 0,0)
+// les agglomérations proches du pixel : la capitale ; les deux villes voisines les plus proches (une place de ville par case de 18 × 28 lots,
+// sur un carrefour des routes de campagne) ; le village ou le hameau le plus proche (un carrefour des routes de campagne sur deux). Chacune
+// naît quand la zone s'étend jusqu'à elle (plus ou moins tôt selon le tirage), puis grandit : des hameaux et des villages autour du bourg,
+// puis des villes dans la campagne (un pays), puis une métropole qui rejoint ses voisines au cœur d'un continent.
+void set98(vec2 G,float g){
+  vec2 q=G-.5, i0=floor(q/vec2(18.,28.)); float b1=-1e3, b2=-1e3; vec4 T1=vec4(0.), T2=vec4(0.);
+  if(g>2.3) for(int k=0;k<4;k++){ vec2 ij=i0+vec2(float(k%2),float(k/2)); float h=h93(ij*1.31+gSd98+7.); if(h>.85) continue;
+    vec2 O=ij*vec2(18.,28.)+vec2(floor(fract(h*5.3)*1.99)*9.,floor(fract(h*8.9)*1.99)*14.)+.5; float ds=length(O-.5), a=gZr98-ds-3.-7.*fract(h*3.7); if(a<=0.||ds<22.) continue;
+    float Rt=3.2+4.8*fract(h*13.1)+6.*smoothstep(4.,5.,g)*fract(h*2.9), R=.85+(Rt-.85)*(1.-exp(-a/8.)), d=R-length(G-O);
+    if(d>b1){ b2=b1; T2=T1; b1=d; T1=vec4(O,R,1.); } else if(d>b2){ b2=d; T2=vec4(O,R,1.); } }
+  if(b1>-999.){ gS98[gN98]=T1; gN98++; } if(b2>-999.){ gS98[gN98]=T2; gN98++; }
+  vec2 V=floor(q/vec2(9.,14.)+.5)*vec2(9.,14.)+.5; float hv=h93(V*.37+gSd98), dV=length(V-.5), av=gZr98-dV-2.5-9.*fract(hv*7.1);
+  if(g>.75&&hv<.5&&av>0.&&dV>5.){ float Rv=1.1+2.7*fract(hv*3.3); gS98[gN98]=vec4(V,.85+(Rv-.85)*(1.-exp(-av/3.)),Rv>2.4?2.:5.); gN98++; } }
+// développement au point p (en lots) : > 0 bâti ; si = agglomération dominante ; il s'éteint avant le bord de la zone
+float dv98(vec2 p,out int si){ float m=-1e3, nz=nd98(p); si=0; for(int i=0;i<6;i++){ if(i>=gN98) break; float d=gS98[i].z-length(p-gS98[i].xy)*nz; if(d>m){ m=d; si=i; } }
+  return m-max(length(p-.5)-gZr98+4.,0.)*1.5; }
+float tw98(float R,float rr){ return min(1.9+.4*(R-15.),6.2)*(1.15-1.4*rr); }   // hauteur des tours (en lots) : elle suit la taille de la ville, plus haut au centre
+// îlot B : 2 lots de large, 6 de long, entre les rues (une colonne de lots sur 3, une rangée sur 7). Deux îlots voisins peuvent n'en faire qu'un
+// (5 × 6 lots, sans la rue entre eux) pour les grands bâtiments. I = (développement au centre, sorte, rayon de l'agglomération, hauteur max) ;
+// K = (centre de l'agglomération, 1 si fusionné + 2 si hameau, tirage). Sortes : 0 nature, 1 maisons, 2 immeubles autour d'une cour, 3 tours,
+// 4 parc, 5 activités, 6 champs, 7 maisons de ville, 8 stade, 9 école, 10 centre commercial, 11 hôpital
+vec4 blk98(vec2 B,out vec4 K){
+  int si; float Px=floor(B.x*.5), dP=dv98(vec2(Px*6.+3.5,B.y*7.+4.),si); vec4 S=gS98[si];
+  float R=S.z, rr=1.-dP/max(R,.5), hP=h93(vec2(Px,B.y)*1.7+gSd98);
+  vec2 o=S.xy-.5, rb=B-floor(o/vec2(3.,7.)+.5);
+  float sw=S.w>4.5?0.:(rb.x==-1.&&rb.y==0.&&R>=2.4)?1.4+1.4*smoothstep(9.,14.,R):(rb.x==0.&&rb.y==-1.&&R>=5.)?1.15+.04*R:0.;   // clocher, beffroi de la mairie, monument
+  K=vec4(S.xy,S.w>4.5?2.:0.,h93(B*1.3+gSd98+5.));
+  if(S.w<4.5&&dP>.5){ float ty=-1.;
+    if(R>=9.&&rr<.5&&hP<.72&&!(R>=15.&&rr<.3)) ty=2.;
+    else if(R>=8.&&rr>.45&&rr<.85&&hP>.95) ty=8.;
+    else if(R>=6.&&rr>.45&&hP>.85) ty=5.;
+    else if(R>=5.&&hP>.77&&hP<.81) ty=4.;
+    else if(R>=6.&&hP>.81&&hP<.835) ty=9.;
+    else if(R>=12.&&rr>.3&&hP>.72&&hP<.77) ty=10.;
+    else if(R>=10.&&rr>.25&&hP>.835&&hP<.85) ty=11.;
+    if(ty>=0.&&R>=15.&&abs(rb.x)<1.5&&abs(rb.y)<1.5) ty=-1.;
+    if(ty>=0.){ K.z=1.; return vec4(dP,ty,R,max(ty==2.?(.95+.07*R)*1.2:ty==5.?2.:ty==8.?.5+.02*R:ty==11.?.8+.03*R:.6,sw)); } }
+  float dB=dv98(vec2(B.x*3.+2.,B.y*7.+4.),si); S=gS98[si]; R=S.z; rr=1.-dB/max(R,.5); K.xy=S.xy; K.z=S.w>4.5?2.:0.; o=S.xy-.5;
+  bool ax=abs(B.x*3.-o.x)<.5||abs(B.x*3.+3.-o.x)<.5||abs(B.y*7.-o.y)<.5||abs(B.y*7.+7.-o.y)<.5;   // l'îlot borde un axe de son village
+  vec2 bq=max(abs(S.xy-vec2(B.x*3.+2.,B.y*7.+4.))-vec2(1.,3.),0.);   // du centre du village au lot le plus proche de l'îlot
+  if(dB>-(ax?.68*R+1.2:1.)||R-length(bq)*(ax?.6:1.)*1.2>0.){
+    if(S.w<4.5&&R>=15.&&rr<.3) return vec4(dB,3.,R,tw98(R,rr)*(R>=20.&&B==floor(o/vec2(3.,7.)+.5)?2.9:1.55));
+    if(S.w<4.5&&R>=5.&&rr<.55) return vec4(dB,7.,R,max(.62+.02*R,sw));
+    return vec4(dB,1.,R,max(.45,sw)); }
+  return vec4(dB,dB>-gFb98*(S.w>4.5?.6:1.)||floor(B/vec2(3.,2.))==gAp98?6.:0.,R,.86); }
+// la case c est-elle une route ? rues des quartiers bâtis, grands axes de la capitale, routes de campagne (une colonne sur 9, une rangée sur 14)
+bool rd98(vec2 c,vec2 B,vec4 I,vec4 K){ vec2 l=c-B*vec2(3.,7.); if(l.x>.5&&l.y>.5) return false;
+  bool tw=I.y>.5&&I.y!=6.&&I.z-length(c+.5-K.xy)>-1.8;
+  return (l.x<.5&&!(mod(K.z,2.)>.5&&l.y>.5&&mod(B.x,2.)>.5)&&(tw||c.x==0.||(mod(c.x,9.)<.5&&I.y>.5)))||(l.y<.5&&(tw||c.y==0.||(mod(c.y,14.)<.5&&I.y>.5))); }
+// le lot (case) c de l'îlot B : boîtes a et b (x0,y0,x1,y1, en lots) et leurs hauteurs (0 : rien) ; lh : tirage ; renvoie la sorte du lot :
+// 1 maison, 2 immeuble, 3 tour, 4 parc, 5 activités, 6 ferme, 7 maison de ville, 8 stade, 9 école, 10 centre commercial, 12 église,
+// 13 mairie, 14 place, 15 terrain libre ou cour, 16 champ, 17 aéroport, 0 nature. Un bâtiment neuf sort de terre (sa hauteur suit l'avancée de la ville).
+float lot98(vec2 c,vec2 B,vec4 I,vec4 K,out vec4 ba,out float ha,out vec4 bb,out float hb,out float lh){
+  ba=vec4(0.); bb=vec4(0.); ha=0.; hb=0.; lh=h93(c*1.37+gSd98); float h2=fract(lh*13.7), h3=fract(lh*7.31), ty=I.y, R=I.z;
+  vec2 o=floor(K.xy), rl=c-o; bool tw=K.z<1.5;
+  if(tw&&R>=2.4&&rl.x==-1.&&(rl.y==2.||rl.y==3.)){ float k=smoothstep(2.4,3.,R), ct=smoothstep(9.,14.,R);   // l'église (une cathédrale dans une grande ville)
+    ba=vec4(o.x-.84,o.y+2.12,o.x-.2,o.y+3.9); ha=(.48+.5*ct)*k; bb=vec4(o.x-.71,o.y+2.05,o.x-.33,o.y+2.43); hb=(1.35+1.4*ct)*k; return 12.; }
+  if(tw&&R>=5.&&rl.x>.5&&rl.x<2.5&&rl.y<-.5&&rl.y>-6.5){ float k=smoothstep(5.,5.6,R);   // la place, sa mairie et son monument
+    if(rl.y<-4.5){ ba=vec4(o.x+1.1,o.y-5.9,o.x+2.9,o.y-4.85); ha=(.5+.02*R)*k; bb=vec4(o.x+1.8,o.y-5.05,o.x+2.2,o.y-4.65); hb=(1.05+.04*R)*k; return 13.; }
+    bb=vec4(o.x+1.86,o.y-2.14,o.x+2.14,o.y-1.86); hb=(R>=12.?1.+.05*R:.22)*k; return 14.; }
+  float ly=c.y-B.y*7., lx=c.x-B.x*3.;
+  if(mod(K.z,2.)>.5){ vec2 p0=vec2(floor(B.x*.5)*6.,B.y*7.); float px=c.x-p0.x, rr=1.-I.x/max(R,.5);   // deux îlots fusionnés
+    if(ty==2.){ if(px>1.5&&px<4.5&&ly>1.5&&ly<5.5) return 15.;   // la cour
+      ba=vec4(c,c+1.); if(ly>1.5&&ly<5.5){ if(px<1.5) ba.z=c.x+.9; else ba.x=c.x+.1; } else if(px>1.5&&px<4.5){ if(ly<1.5) ba.w=c.y+.9; else ba.y=c.y+.1; }
+      ha=(.95+.07*R)*(.82+.36*lh)*clamp((.5-rr)*14.,0.,1.); return 2.; }
+    if(ty==5.){ vec2 a=p0+vec2(1.,ly<3.5?1.:4.); float hq=h93(a*.71+gSd98), hk=clamp((.95-rr)*8.,0.,1.); lh=hq;   // deux hangars ; une cheminée ou une cuve
+      ba=vec4(a+vec2(.25,.28),a+vec2(4.75,2.72)); ha=(.3+.2*hq)*hk;
+      if(hq<.45){ ba.z=a.x+3.9; bb=vec4(a.x+4.25,a.y+1.9,a.x+4.55,a.y+2.2); hb=(1.3+.6*fract(hq*9.))*hk; }
+      else if(hq<.75){ ba.z=a.x+3.5; bb=vec4(a.x+3.8,a.y+.7,a.x+4.7,a.y+1.6); hb=.42*hk; }
+      return 5.; }
+    float hk=clamp((.85-rr)*8.,0.,1.);
+    if(ty==8.){ ba=vec4(p0+1.3,p0+vec2(5.7,6.7)); ha=(.4+.018*R)*hk; return 8.; }
+    if(ty==9.){ ba=vec4(p0+vec2(1.2,5.15),p0+vec2(5.8,6.8)); ha=.38*hk; bb=vec4(p0+vec2(1.2,3.45),p0+vec2(2.75,4.9)); hb=.33*hk; return 9.; }
+    if(ty==10.){ ba=vec4(p0+vec2(1.35,3.6),p0+vec2(5.65,6.7)); ha=.36*hk; return 10.; }
+    if(ty==11.){ ba=vec4(p0+vec2(1.3,1.4),p0+vec2(4.7,3.9)); ha=(.7+.025*R)*hk; bb=vec4(p0+vec2(2.2,3.9),p0+vec2(3.8,6.5)); hb=(.45+.015*R)*hk; return 11.; }   // l'hôpital et son héliport
+    return 4.; }
+  if(ty==0.) return 0.;
+  if(ty==6.){ vec2 F=floor(c/vec2(9.,14.)), fc=c-F*vec2(9.,14.); float fh=h93(F*2.3+gSd98+11.);   // champs ; parfois une ferme au carrefour des routes
+    if(F==gAp98){ vec2 a=F*vec2(9.,14.); lh=.37;   // l'aéroport (au stade du continent) : piste, aérogare vitrée, tour de contrôle
+      if(fc.x>5.5&&fc.x<7.5&&fc.y>4.5&&fc.y<8.5){ ba=vec4(a.x+6.12,a.y+5.25,a.x+7.88,a.y+8.75); ha=.36; }
+      if(fc.x==6.&&fc.y==3.){ bb=vec4(a.x+6.35,a.y+3.35,a.x+6.65,a.y+3.65); hb=.8; }
+      return 17.; }
+    if(fh<.42&&fc.x>.5&&fc.x<2.5&&fc.y>.5&&fc.y<2.5){ vec2 a=F*vec2(9.,14.)+1.; float hk=clamp((I.x+gFb98*.9)*.7,0.,1.); lh=fh;
+      if(fc.y<1.5){ ba=vec4(a+vec2(.12,.18),a+vec2(1.88,.8)); ha=.34*hk; }   // la grange
+      else { ba=vec4(a+vec2(.18,1.22),a+vec2(.82,1.78)); ha=.3*hk; bb=vec4(a+vec2(1.32,1.28),a+vec2(1.64,1.6)); hb=(fh<.24?.85:0.)*hk; }   // la ferme, le silo
+      return 6.; }
+    return 16.; }
+  if(ty==3.){ float q=floor((ly-1.)*.5); vec2 a=vec2(B.x*3.+1.,B.y*7.+1.+2.*q); float th=h93(a*.53+gSd98), rr=1.-I.x/max(R,.5), st=fract(th*7.7), i=.18+.12*fract(th*3.3);   // les tours
+    float H=tw98(R,rr)*(.6+.6*th)*clamp((.3-rr)*12.,0.,1.); ba=vec4(a+i,a+2.-i); ha=H; lh=th;
+    if(R>=20.&&a==floor(K.xy)+1.){ H=tw98(R,0.)*2.*smoothstep(20.,21.5,R); ba=vec4(a+.28,a+1.72); ha=H; bb=vec4(a+.93,a+1.07); hb=H*1.32; lh=.97; return 3.; }   // la tour emblématique de la métropole
+    if(st<.28){ bb=vec4(a+.08,a+1.92); hb=min(.45+.25*fract(th*5.),H); ba=vec4(a+.45,a+1.55); }   // un socle large, la tour au-dessus
+    else if(st<.5){ bb=vec4(a+.93,a+1.07); hb=H*1.28; }   // une flèche
+    else if(st<.7){ bb=vec4(a+i+.3,a+2.-i-.3); hb=H*1.16; ha=H*.84; }   // la tour se resserre en haut
+    else if(st<.84){ ba=vec4(a.x+.14,a.y+.2,a.x+.92,a.y+1.8); bb=vec4(a.x+1.08,a.y+.2,a.x+1.86,a.y+1.8); hb=H*(.7+.3*fract(th*11.)); }   // tours jumelles
+    return 3.; }
+  // maisons et maisons de ville : un lot se bâtit quand la ville l'atteint, d'abord le long des grands axes
+  // la toute première maison sort de terre au coin du carrefour dès la naissance de la zone, puis la deuxième, la troisième, la quatrième
+  // aux trois autres coins ; ensuite le village s'étire le long des routes
+  float rib=(abs(c.x+.5-K.x)<1.5||abs(c.y+.5-K.y)<1.5)?.6:1.;
+  float dl=min(R-length(c+.5-K.xy)*rib*(1.+.3*(h2-.5))*nd98(c+.5)-.4*h3,(R-1.42)*2.);
+  if(abs(rl.x)==1.&&abs(rl.y)==1.) dl=(R-.85-.15*mod(floor(h93(o*.71+gSd98)*4.)+(rl.x>0.?0.:2.)+(rl.y>0.?0.:1.),4.))*1.6;
+  if(ty==1.&&dl<=-.22) return 0.;
+  if(ty==1.&&dl<=0.) return 15.;
+  float hk=smoothstep(0.,.3,dl);
+  if(ty==7.){ float d=.5+.12*h3; ha=(.46+.02*R+.14*h2)*clamp((.55-(1.-I.x/max(R,.5)))*14.,0.,1.); ba=lx<1.5?vec4(c.x+.04,c.y,c.x+.04+d,c.y+1.):vec4(c.x+.96-d,c.y,c.x+.96,c.y+1.); return 7.; }
+  float fy=(ly<1.5&&abs(c.y-1.-o.y)<.5)?-1.:(ly>5.5&&abs(c.y+1.-o.y)<.5)?1.:0.;   // au bout de l'îlot, la maison se tourne vers l'axe
+  float w=.48+.2*h2, d=.36+.14*h3, s=.13+.1*fract(lh*5.3), j=(fract(lh*3.1)-.5)*(1.-w)*.6;
+  if(fy==0.){ float x0=lx<1.5?c.x+s:c.x+1.-s-d; ba=vec4(x0,c.y+.5+j-w*.5,x0+d,c.y+.5+j+w*.5);
+    if(fract(lh*4.7)<.35){ float y0=j<0.?ba.w+.03:ba.y-.27, gx=lx<1.5?x0:x0+d-.24; if(y0>c.y+.02&&y0<c.y+.74){ bb=vec4(gx,y0,gx+.24,y0+.24); hb=.15*hk; } } }   // le garage
+  else { float y0=fy<0.?c.y+s:c.y+1.-s-d; ba=vec4(c.x+.5+j-w*.5,y0,c.x+.5+j+w*.5,y0+d); }
+  ha=(.24+.12*fract(lh*9.1)+.05*min(R,8.)/8.)*hk; return 1.; }
+// le rayon (de gs à gs+d, de la hauteur H0 au sol) contre une boîte : paramètre du point touché (2 : manquée), face (1 toit, 2 façade x, 3 façade y)
+float box98(vec2 gs,vec2 id,float H0,vec4 bx,float h,out float fc){ fc=0.; if(h<=.001) return 2.;
+  vec2 a0=(bx.xy-gs)*id, a1=(bx.zw-gs)*id, tn=min(a0,a1), tf=max(a0,a1); float u0=max(tn.x,tn.y), u1=min(min(tf.x,tf.y),1.);
+  if(u0>=u1||u1<=0.||h<H0*(1.-u1)) return 2.;
+  if(u0>=0.&&h>=H0*(1.-u0)){ fc=tn.x>tn.y?2.:3.; return u0; }
+  fc=1.; return max(1.-h/H0,0.); }
+// le point q (en lots, à la hauteur h) est-il à l'ombre d'un bâtiment ? (on remonte vers le soleil)
+float shd98(vec2 q,float h,vec2 sg,float tE,vec2 B0,vec4 I0,vec4 K0){
+  float o=0.; vec2 cB=B0; vec4 I=I0, K=K0;
+  for(int k=1;k<=4;k++){ float t=float(k*k)*.22+.08; vec2 p=q+sg*t, c=floor(p), B=floor(c/vec2(3.,7.));
+    if(B!=cB){ cB=B; I=blk98(B,K); } float hr=h+t*tE; if(I.w<=hr||rd98(c,B,I,K)) continue;
+    vec4 ba,bb; float ha,hb,lh; float lt=lot98(c,B,I,K,ba,ha,bb,hb,lh); vec2 ia=step(ba.xy,p)*step(p,ba.zw), ib=step(bb.xy,p)*step(p,bb.zw);
+    o=max(o,max(ia.x*ia.y*smoothstep(0.,.12,ha-hr),ib.x*ib.y*smoothstep(0.,.12,hb-hr))); }
   return o; }
-vec3 roof97(float ty,float lh){ float a=fract(lh*7.31);
-  if(ty==1.) return a<.3?vec3(.58,.26,.17):a<.52?vec3(.42,.36,.34):a<.7?vec3(.31,.35,.42):a<.86?vec3(.62,.47,.31):vec3(.7,.68,.64);
-  if(ty==5.) return a<.45?vec3(.57,.55,.52):a<.75?vec3(.38,.4,.43):vec3(.62,.46,.3);
-  if(ty==6.) return a<.5?vec3(.58,.23,.15):vec3(.44,.41,.38);
-  return a<.2?vec3(.62,.62,.6):a<.4?vec3(.42,.43,.45):a<.55?vec3(.6,.54,.45):a<.7?vec3(.3,.33,.37):a<.8?vec3(.55,.37,.28):a<.9?vec3(.34,.42,.3):vec3(.5,.5,.54); }
-vec3 wall97(float ty,float lh){ float a=fract(lh*11.3);
-  if(ty==1.) return a<.4?vec3(.9,.86,.76):a<.7?vec3(.82,.7,.54):vec3(.74,.78,.8);
-  if(ty==5.||ty==6.) return a<.5?vec3(.62,.6,.56):vec3(.64,.37,.27);
-  if(ty==3.) return a<.24?vec3(.28,.45,.62):a<.42?vec3(.84,.6,.57):a<.6?vec3(.88,.84,.75):a<.76?vec3(.2,.27,.35):a<.88?vec3(.66,.4,.29):vec3(.58,.7,.76);
-  return a<.28?vec3(.86,.64,.58):a<.52?vec3(.88,.8,.66):a<.72?vec3(.62,.35,.26):a<.86?vec3(.76,.78,.8):vec3(.63,.74,.69); }
-// champs (deux par îlot), prés et bois, haies ; la zone garde la couleur de son climat
-vec3 fld97(vec2 g,vec2 B,float ty,vec3 gr,float bio,float tp){ float dl=smoothstep(2.5,6.,tp);
-  vec2 fq=floor((g-B*5.)/vec2(2.5,5.)); float fh=h93(fq+B*3.1+gSd97);
-  vec3 fc=ty==0.?mix(gr,vec3(.4,.5,.2),.4):fh<.25?vec3(.7,.6,.32):fh<.5?vec3(.38,.5,.18):fh<.72?vec3(.47,.36,.23):fh<.9?vec3(.46,.55,.23):vec3(.78,.71,.27);
-  if(bio>5.5&&bio<6.5) fc=mix(fc,vec3(.66,.55,.3),.45); if(bio>.5&&bio<1.5) fc=mix(fc,vec3(.58,.35,.21),.4); if(bio>3.5&&bio<4.5) fc=mix(fc,vec3(.74,.78,.76),.5);
-  float row=.5+.5*sin((fh<.5?g.x:g.y)*18.85); fc*=1.-.14*row*smoothstep(8.,14.,tp); vec3 r=fc*(.95+.1*h93(fq+B));
-  if(ty==0.){ float wd=smoothstep(.52,.62,n93(g*.21+gSd97+5.)); r=mix(r,vec3(.08,.19,.07)*(.85+.3*mix(.5,n93(g*2.3),dl)),wd); }   // bois entre les prés
-  vec2 fl=fract((g-B*5.)/vec2(2.5,5.)); vec2 eb=min(fl,1.-fl)*vec2(2.5,5.); float hw=max(.06,1./max(tp,1.)); float hg=(1.-smoothstep(hw*.5,hw,min(eb.x,eb.y)))*smoothstep(3.,6.,tp);
-  return mix(r,vec3(.11,.21,.08),hg*.75); }
-// sol d'un lot ou d'une rue : couleur de jour ; em = lumières de la nuit
-vec3 gnd97(vec2 g,vec2 c,vec2 B,vec4 I,vec4 bx,float bh,float tp,float bio,vec3 cc,out vec3 em,out float sp){
-  em=vec3(0.); sp=0.; vec2 f=fract(g); float dl=smoothstep(2.5,6.,tp), d2=smoothstep(5.,10.,tp);
-  vec2 r5=c-floor(c/5.)*5.;
-  if(r5.x<.5||r5.y<.5){   // rue : asphalte, trottoirs, ligne au milieu ; avenues tous les trois îlots ; la nuit, réverbères et phares
-    bool vx=r5.x<.5, vy=r5.y<.5, xr=vx&&vy; float cx=vx?f.x:f.y, al=vx?g.y:g.x; bool av=vx?(c.x-floor(c.x/15.)*15.<.5):(c.y-floor(c.y/15.)*15.<.5);
-    vec3 r=vec3(.27,.27,.285)*(.92+.16*h93(B*.7+gSd97)); float ed=min(cx,1.-cx);
-    if(I.y==0.||I.y==6.){ r=mix(vec3(.47,.44,.36),vec3(.36,.35,.34),step(.5,h93(B*1.3)));   // à la campagne : un chemin entre les champs, une route tous les trois îlots
-      if(!av&&!xr){ vec3 gr=mix(vec3(.33,.46,.16),vec3(.43,.51,.2),n93(g*.9+gSd97))*cc; return mix(fld97(g+(vx?vec2(.5,0.):vec2(0.,.5)),B,I.y,gr,bio,tp),r,(1.-smoothstep(.3,.36,ed))*smoothstep(2.,4.,tp)*.8); } }
-    r=mix(r,vec3(.56,.55,.52),(1.-smoothstep(.08,.13,ed))*dl*(xr?0.:1.));
-    if(av&&!xr) r=mix(r,vec3(.25,.4,.17),(1.-smoothstep(.04,.08,abs(cx-.5)))*dl);
-    else if(!xr) r=mix(r,vec3(.78,.74,.6),(1.-smoothstep(.015,.035,abs(cx-.5)))*step(.5,fract(al*1.5))*d2);
-    float lp=(1.-smoothstep(.0,.1,length(vec2(ed-.1,(fract(al*2.)-.5)*.5))))*d2; em=vec3(1.,.78,.45)*(lp*1.6+.2*(1.-d2)+(av?.12:0.))*(I.y==0.||I.y==6.?.3:1.);
-    if(av){ float car=step(.82,fract(al*.9+(cx>.5?1.:-1.)*uT*.35+h93(c)*3.))*(1.-smoothstep(.12,.2,abs(abs(cx-.5)-.25))); em+=mix(vec3(1.,.95,.85),vec3(1.,.15,.05),step(.5,cx))*car*1.2*dl; }
-    return r; }
-  float ty=I.y, ins=bh>0.?max(max(bx.x-g.x,g.x-bx.z),max(bx.y-g.y,g.y-bx.w)):1.;   // distance au bâtiment (en lots)
-  float ao=bh>0.?1.-.3*exp(-max(ins,0.)*14.)*min(bh*3.,1.):1.;
-  vec3 gr=mix(vec3(.33,.46,.16),vec3(.43,.51,.2),n93(g*.9+gSd97))*cc;   // herbe (la zone garde un peu de sa teinte)
-  if(bio>3.5&&bio<4.5) gr=mix(gr,vec3(.62,.66,.6),.45); if(bio>5.5&&bio<6.5) gr=mix(gr,vec3(.56,.5,.26),.4); if(bio>.5&&bio<1.5) gr=mix(gr,vec3(.5,.36,.22),.35);
-  vec3 r;
-  if(ty==1.){ r=gr*(.92+.16*h93(c+gSd97)); vec2 tq=f-vec2(.2+.6*h93(c+1.),.2+.6*h93(c+2.)); float tr=smoothstep(.2,.1,length(tq))*step(.4,h93(c+5.))*dl;
-    r=mix(r,vec3(.09,.19,.07),tr*.85); r*=1.-.25*smoothstep(.2,.1,length(tq-vec2(.06)))*step(.4,h93(c+5.))*dl*(1.-tr); }
-  else if(ty==4.){ r=gr*1.04; float tc=n93(g*1.7+gSd97*3.); r=mix(r,vec3(.08,.19,.07)*(.8+.4*mix(.5,n93(g*6.),dl)),smoothstep(.5,.6,tc)*.9);
-    float pth=1.-smoothstep(.03,.07,abs(n93(g*.6+gSd97)-.5)); r=mix(r,vec3(.68,.64,.54),pth*dl*.8);
-    float pd=smoothstep(.62,.66,n93(g*.37+gSd97+9.)); r=mix(r,vec3(.1,.32,.45),pd*.9); sp=pd*.9; }
-  else if(ty==5.){ r=mix(vec3(.48,.47,.44),vec3(.47,.41,.32),n93(g*1.3+gSd97)); }
-  else if(ty==6.||ty==0.) r=fld97(g,B,ty,gr,bio,tp);
-  else { r=mix(vec3(.45,.45,.43),vec3(.4,.4,.39),n93(g*2.+gSd97)); if(h93(c+7.)<(ty==2.?.38:.2)) r=mix(r,gr,.85);
-    float pk=step(h93(c*1.7+gSd97),.22)*step(bh,.01); r=mix(r,vec3(.3,.3,.31),pk); r=mix(r,vec3(.82,.82,.78),pk*(1.-smoothstep(.02,.05,abs(fract(g.x*3.)-.5)))*d2*.6); }
+// les champs : chaque carré entre les routes de campagne (9 × 14 lots) est partagé en 2 à 4 parcelles (blé, colza, maïs, labours, prés, bois),
+// bordées de haies ; la zone garde la couleur de son climat
+vec3 fld98(vec2 G,float tp,float bio,vec3 gr){ vec2 F=floor(G/vec2(9.,14.)), f=G-F*vec2(9.,14.); float fh=h93(F*1.9+gSd98+3.);
+  vec2 sp=vec2(fh<.5?3.:6.,7.), pi=step(sp,f); float id=h93(F*4.1+pi*vec2(1.3,2.7)+gSd98);
+  vec3 fc=id<.16?vec3(.74,.66,.33):id<.3?vec3(.4,.52,.19):id<.42?vec3(.46,.35,.23):id<.52?vec3(.53,.6,.27):id<.6?vec3(.84,.77,.24):id<.72?vec3(.3,.43,.15):id<.84?mix(gr,vec3(.44,.53,.22),.5):vec3(.62,.58,.36);
+  if(bio>5.5&&bio<6.5) fc=mix(fc,vec3(.68,.57,.32),.45); if(bio>.5&&bio<1.5) fc=mix(fc,vec3(.58,.36,.22),.35); if(bio>3.5&&bio<4.5) fc=mix(fc,vec3(.74,.78,.76),.5);
+  float row=.5+.5*sin((fract(id*7.)<.5?G.x:G.y)*18.85); fc*=(1.-.13*row*smoothstep(7.,13.,tp))*(.94+.12*n93(G*.6+id*9.));
+  float big=gS98[0].z;
+  if(id>.86&&id<.93){ vec2 o2=fract(G*vec2(2.5,3.)+id*7.)-.5; fc=mix(vec3(.47,.41,.28),vec3(.14,.28,.09),mix(.45,smoothstep(.3,.16,length(o2)),smoothstep(2.,5.,tp))); }   // vergers et vignes en rangs
+  else if(id>.8&&id<.86&&big>=6.) fc=mix(vec3(.84,.87,.88),vec3(.66,.72,.75),step(.5,fract(G.x*4.)))*(.92+.08*step(.85,fract(G.y*.9)));   // serres
+  else if(id>.74&&id<.8&&big>=16.) fc=mix(vec3(.1,.14,.26),vec3(.55,.58,.6),step(.75,fract(G.y*3.)));   // centrale solaire
+  if(id>.93) fc=vec3(.09,.2,.08)*(.8+.4*mix(.5,n93(G*2.3),smoothstep(2.5,6.,tp)));   // un bois
+  vec2 e=min(abs(f-sp),min(f,vec2(9.,14.)-f)); float hw=max(.07,.8/max(tp,1.)), hg=(1.-smoothstep(hw*.5,hw,min(e.x,e.y)))*smoothstep(2.,5.,tp);
+  return mix(fc,vec3(.11,.21,.08),hg*.7); }
+// le sol d'une case : rue, jardin, cour, place, parc, champ… (couleur de jour) ; em : lumières de la nuit ; sp : reflets
+vec3 gnd98(vec2 G,vec2 c,vec2 B,vec4 I,vec4 K,float lt,vec4 ba,float ha,vec4 bb,float hb,float lh,float tp,float bio,vec3 gr,vec3 fl,out vec3 em,out float sp){
+  em=vec3(0.); sp=0.; vec2 f=fract(G), l=c-B*vec2(3.,7.); float dl=smoothstep(2.5,6.,tp), d2=smoothstep(5.,10.,tp), aw=.6/max(tp,.5), ty=I.y;
+  bool tw=ty>.5&&ty!=6.&&I.z-length(c+.5-K.xy)>-1.8, mg=mod(K.z,2.)>.5&&mod(B.x,2.)>.5;
+  bool rx=l.x<.5&&!(mg&&l.y>.5)&&(tw||c.x==0.||(mod(c.x,9.)<.5&&ty>.5)), ry=l.y<.5&&(tw||c.y==0.||(mod(c.y,14.)<.5&&ty>.5));
+  if(rx||ry){   // une route : chaussée large en ville, étroite au village ; trottoirs, bas-côtés en herbe plantés d'arbres (pavés au centre-ville) ;
+               // à la campagne, une route étroite entre les champs
+    bool ma=(rx&&c.x==0.)||(ry&&c.y==0.), xr=rx&&ry; float dn=tw?smoothstep(.5,.2,1.-I.x/max(I.z,.5))*smoothstep(7.,12.,I.z):0.;
+    float wx=rw98(tw,c.x==0.,I.z), wy=rw98(tw,c.y==0.,I.z); vec2 e=abs(f-.5);
+    float m=max(rx?1.-smoothstep(wx*.5-aw,wx*.5+aw,e.x):0.,ry?1.-smoothstep(wy*.5-aw,wy*.5+aw,e.y):0.);
+    float sk=tw?max(rx?1.-smoothstep(wx*.5+.08-aw,wx*.5+.08+aw,e.x):0.,ry?1.-smoothstep(wy*.5+.08-aw,wy*.5+.08+aw,e.y):0.):0.;
+    vec3 r=vec3(.27,.27,.285)*(.92+.16*h93(B*.7+gSd98)); if(!tw&&!ma) r=mix(vec3(.38,.37,.35),vec3(.5,.45,.36),step(.6,h93(floor(c/vec2(9.,14.))+gSd98)));
+    float cx=rx&&!ry?f.x:f.y, al=rx&&!ry?G.y:G.x, ww=rx&&!ry?wx:wy, ed=min(cx,1.-cx), vw=.5-ww*.5-(tw?.08:0.);
+    if(!xr&&(tw||ma)&&ww>.55) r=mix(r,ma?vec3(.86,.8,.52):vec3(.78,.74,.6),(1.-smoothstep(.015,.035,abs(cx-.5)))*step(.5,fract(al*1.5))*d2);   // ligne au milieu
+    vec3 o=mix(ty==6.||ty==0.||lt>=15.?fl:gr,vec3(.6,.59,.56)*(.95+.1*h93(floor(G*5.))),dn);   // bas-côté
+    if((tw||ma)&&!xr&&vw>.06){ float tz=min(vw*.5,.13), tr=smoothstep(tz+.02,tz-.03,length(vec2(ed-vw*.5,(fract(al*2.)-.5)*.5)))*dl*step(.3,h93(vec2(floor(al*2.),c.x+c.y)))*(1.-dn*.5);
+      o=mix(o,vec3(.09,.2,.08)*(.85+.3*fract(al*7.3)),tr*.85); }   // arbres d'alignement
+    o=mix(o,vec3(.6,.59,.55),sk*dl*(1.-dn*.3)); o=mix(o,r,m);
+    float lp=(1.-smoothstep(.0,.1,length(vec2(ed-max(vw,.05),(fract(al*2.)-.5)*.5))))*d2;
+    em=vec3(1.,.78,.45)*((tw?lp*1.6+.2*(1.-d2)+(ma?.15:0.):ma?.08:0.)*m+(tw?lp*.8:0.)*(1.-m));   // réverbères
+    if((ma||(tw&&(mod(c.x,9.)<.5||mod(c.y,14.)<.5)))&&!xr){ float car=step(.84,fract(al*.9+(cx>.5?1.:-1.)*uT*.35+h93(c)*3.))*(1.-smoothstep(ww*.1,ww*.17,abs(abs(cx-.5)-ww*.25))); em+=mix(vec3(1.,.95,.85),vec3(1.,.15,.05),step(.5,cx))*car*1.2*dl*m; }   // phares, feux arrière
+    return o; }
+  float ins=9.; if(ha>0.) ins=max(max(ba.x-G.x,G.x-ba.z),max(ba.y-G.y,G.y-ba.w)); if(hb>0.) ins=min(ins,max(max(bb.x-G.x,G.x-bb.z),max(bb.y-G.y,G.y-bb.w)));
+  float ao=1.-.3*exp(-max(ins,0.)*14.)*step(ins,8.);
+  vec3 r=gr*(.92+.16*h93(c+gSd98)); vec2 tq=f-vec2(.2+.6*h93(c+1.),.2+.6*h93(c+2.)); float te=step(.4,h93(c+5.));   // un arbre (s'il y en a un sur ce lot)
+  if(lt==1.){ float bk=l.x<1.5?f.x:1.-f.x;   // le jardin : pelouse, allée du garage, haie, arbres et parfois une piscine au fond
+    if(hb>0.){ float gf=l.x<1.5?bb.x-c.x:c.x+1.-bb.z; r=mix(r,vec3(.52,.51,.48),step(bb.y,G.y)*step(G.y,bb.w)*step(bk,gf)*dl); }
+    float pq=step(.85,fract(lh*2.3))*step(.7,bk)*step(bk,.9)*step(.3,f.y)*step(f.y,.7); r=mix(r,vec3(.25,.62,.75),pq*dl); sp=pq*.8;
+    te*=step(.55,bk)*(1.-pq); r*=1.-.22*(1.-smoothstep(.015,.04,min(min(f.y,1.-f.y),1.-bk)))*d2; }
+  else if(lt==7.){ float bk=l.x<1.5?f.x:1.-f.x; r=mix(r,vec3(.56,.55,.52),(1.-smoothstep(.03,.06,bk))*dl); r=mix(r,mix(gr,vec3(.5,.42,.3),step(.5,h93(c*3.1))),step(.62,bk)*.3); te*=step(.65,bk); }   // petits jardins derrière la rangée
+  else if(lt==15.&&ty==2.){ float pth=1.-smoothstep(.04,.08,min(abs(f.x-.5),abs(f.y-.5))); r=mix(r*1.02,vec3(.62,.6,.55),pth*dl*.8); te*=1.-pth; }   // la cour des immeubles
+  else if(lt==2.){ r=mix(r,vec3(.55,.54,.5),.6); te*=.4; }
+  else if(lt==3.||lt==13.||lt==14.){ r=mix(vec3(.62,.6,.55),vec3(.55,.53,.5),step(.5,h93(floor(G*4.))));   // dalles, place
+    if(lt==14.){ float fo=length(G-(bb.xy+bb.zw)*.5); float bs=(1.-smoothstep(.3,.34,fo))*step(.16,fo)*step(hb,.5); r=mix(r,vec3(.32,.52,.62),bs); sp=bs*.8; te*=step(.42,max(abs(f.x-.5),abs(f.y-.5))); }
+    else te*=lt==3.?.35:0.; em=vec3(1.,.8,.5)*.25*step(ins,8.5); }
+  else if(lt==5.){ r=mix(vec3(.5,.5,.48),vec3(.46,.44,.4),n93(G*1.3+gSd98)); te=0.; vec2 tk=floor(G*vec2(4.,2.)); r=mix(r,vec3(.85,.85,.82),step(.82,h93(tk+3.))*step(.18,abs(fract(G.y*2.)-.5))*step(.12,abs(fract(G.x*4.)-.5))*d2); em=vec3(1.,.6,.25)*.12; }   // cour d'usine et camions
+  else if(lt==4.){ r=gr*1.05; float tc=n93(G*1.7+gSd98*3.); r=mix(r,vec3(.08,.19,.07)*(.8+.4*mix(.5,n93(G*6.),dl)),smoothstep(.5,.6,tc)*.9);   // parc : bosquets, allées, étang
+    float pth=1.-smoothstep(.03,.07,abs(n93(G*.6+gSd98)-.5)); r=mix(r,vec3(.68,.64,.54),pth*dl*.8); float pd=smoothstep(.62,.66,n93(G*.37+gSd98+9.)); r=mix(r,vec3(.1,.32,.45),pd*.9); sp=pd*.9; te=0.; }
+  else if(lt==17.){ vec2 p=G-floor(c/vec2(9.,14.))*vec2(9.,14.); te=0.;   // l'aéroport : piste et ses marques, voie de circulation, tarmac, avions
+    float rw=step(2.8,p.x)*step(p.x,4.2)*step(1.3,p.y)*step(p.y,12.7), tx=step(4.95,p.x)*step(p.x,5.35)*step(2.,p.y)*step(p.y,12.), ap=step(5.35,p.x)*step(p.x,8.7)*step(2.8,p.y)*step(p.y,11.2);
+    r=mix(gr*.95,vec3(.43,.43,.44),max(tx,ap)); r=mix(r,vec3(.29,.29,.31),rw);
+    float ml=(1.-smoothstep(.02,.05,abs(p.x-3.5)))*step(.5,fract(p.y*1.2))*rw, eg=(1.-smoothstep(.02,.05,min(abs(p.x-2.86),abs(p.x-4.14))))*rw;
+    r=mix(r,vec3(.92),max(max(ml,eg),step(abs(p.y-1.8),.25)*step(.5,fract(p.x*5.))*rw)*d2);
+    float pk=floor((p.y-5.1)/1.25); vec2 q2=vec2(p.x-5.95,p.y-5.7-1.25*pk), q3=vec2(p.x-3.5,p.y-1.6-fract(uT*.035)*10.8);
+    float pn=min(step(abs(q2.y),.06)*step(abs(q2.x),.45)+step(abs(q2.x+.05),.07)*step(abs(q2.y),.4),1.)*step(0.,pk)*step(pk,2.)+min(step(abs(q3.x),.06)*step(abs(q3.y),.45)+step(abs(q3.y+.05),.07)*step(abs(q3.x),.4),1.)*rw;
+    r=mix(r,vec3(.93,.94,.96),min(pn,1.)*dl); em=vec3(1.,.85,.5)*eg*.7+vec3(.5,.75,1.)*step(.6,fract(p.y*2.))*(1.-smoothstep(.02,.05,abs(p.x-5.15)))*tx*.6; }
+  else if(lt==8.||lt==10.||lt==11.){ vec2 pk=floor(G*vec2(3.,6.)); r=vec3(.33,.33,.34); r=mix(r,vec3(.75,.75,.7),(1.-smoothstep(.02,.05,abs(fract(G.x*3.)-.5)))*d2*.6);   // parking
+    float car=step(.55,h93(pk+lh))*step(.14,abs(fract(G.x*3.)-.5))*step(.16,abs(fract(G.y*6.)-.5)); r=mix(r,mix(vec3(.72,.18,.14),vec3(.86,.86,.9),step(.5,h93(pk))),car*d2*.8); te=0.; em=vec3(1.,.85,.6)*.12; }
+  else if(lt==9.){ vec2 p0=vec2(floor(B.x*.5)*6.,B.y*7.); float e=length((G-p0-vec2(3.5,2.2))/vec2(2.1,1.05));   // école : piste et terrain de sport
+    r=e<1.?(e<.78?vec3(.28,.5,.22):vec3(.68,.32,.24)):vec3(.42,.42,.43); r=mix(r,vec3(.9),(1.-smoothstep(.0,.03,abs(e-.78)))*d2*.6); te*=step(1.05,e)*.5; }
+  else if(lt==12.){ r*=.95; vec2 gq=fract(G*vec2(5.,6.))-.5; r=mix(r,vec3(.62,.62,.6),step(max(abs(gq.x)*1.4,abs(gq.y)),.15)*step(.4,h93(floor(G*vec2(5.,6.))))*d2*step(.06,ins)); te*=.5; }   // cimetière
+  else if(lt==6.){ r=mix(fl,vec3(.5,.44,.34),1.-smoothstep(.1,.35,ins)); te*=step(.3,ins)*.6; }   // cour de ferme
+  else if(lt==15.){ r=ty==1.?mix(vec3(.47,.37,.27),gr,.2)*(.9+.2*n93(G*4.+lh*9.)):mix(fl,gr,.35); te=0.; }   // terrain libre ; au village, la terre retournée juste avant la maison
+  else { r=fl; te=0.; }
+  float tr=smoothstep(.17,.08,length(tq))*dl*te; r=mix(r,vec3(.09,.19,.07),tr*.85); r*=1.-.25*smoothstep(.17,.08,length(tq-vec2(.05)))*te*dl*(1.-tr);   // l'arbre et son ombre
   return r*ao; }
-// la ville d'une zone de la PlanèteDot ; renvoie la part du point couverte par la ville (bâtiments, rues, champs)
-float city97(vec2 uv,vec3 t1,vec3 t2,vec3 n0,mat3 RM,float r0,float cnt,float ph,float zw,vec3 Lo,float Lz,float lit,float nn,
-             float e4,float w2,float w3,vec3 lc,float lw,float km,float Bl,float pxr,float bio,vec3 hc,inout vec3 col,inout vec3 emi,inout float spec){
+// les toits : tuiles et ardoises à deux pans (le pan au soleil plus clair), toits plats avec édicules, stade (gradins et pelouse), clocher, silo
+vec3 roof98(float lt,float sb,float lh,vec4 bx,vec2 p,float h,float tp,vec2 sg,out float sp){
+  vec2 ce=(bx.xy+bx.zw)*.5, hs=max((bx.zw-bx.xy)*.5,vec2(.01)), dq=p-ce; float a=fract(lh*7.31), dt=smoothstep(4.,8.,tp), rim=min(hs.x-abs(dq.x),hs.y-abs(dq.y)); sp=.08;
+  vec3 r;
+  if((lt==1.&&sb<.5)||lt==7.||(lt==6.&&sb<.5)||((lt==12.||lt==13.)&&sb<.5)){
+    r=lt==12.||lt==13.?vec3(.34,.36,.4):lt==6.?(hs.x>.5?vec3(.55,.2,.14):vec3(.5,.3,.22)):lt==7.?(a<.35?vec3(.56,.28,.19):a<.6?vec3(.36,.36,.38):a<.8?vec3(.5,.34,.26):vec3(.43,.41,.39))
+      :(a<.3?vec3(.6,.27,.17):a<.5?vec3(.41,.37,.36):a<.66?vec3(.3,.34,.41):a<.82?vec3(.63,.47,.3):vec3(.53,.26,.2));
+    bool lg=hs.x>hs.y; float s=lg?dq.y:dq.x;
+    r*=mix(.8,1.1,step(0.,s*(lg?sg.y:sg.x)))*(1.-.22*(1.-smoothstep(0.,.05,abs(s)))*dt)*(1.-.25*(1.-smoothstep(0.,.05,rim))*dt);
+    if(lt==7.) r*=.9+.2*h93(floor(p)+3.); }
+  else if(lt==8.){ vec2 e=abs(dq)-(hs-vec2(.7,.8)); float inr=max(e.x,e.y);   // stade : gradins autour de la pelouse
+    if(inr>0.) r=mix(vec3(.55,.55,.57),a<.5?vec3(.72,.22,.2):vec3(.22,.36,.7),.55)*(.85+.15*(.5+.5*sin(inr*40.))*dt);
+    else { r=vec3(.25,.48,.2)*(.92+.08*step(.5,fract(dq.x*4.))); float ln=min(min(abs(-inr-.05),abs(dq.x)),abs(length(dq)-.35)); r=mix(r,vec3(.9),(1.-smoothstep(.015,.035,ln))*dt); r*=.75+.25*smoothstep(0.,.25,-inr); } sp=.05; }
+  else if((lt==12.||lt==13.)&&sb>.5) r=(lt==12.?vec3(.3,.44,.39):vec3(.34,.35,.4))*(1.-.3*(1.-smoothstep(0.,.04,rim))*dt);   // clocher en cuivre, beffroi
+  else if(lt==14.) r=h>.5?vec3(.76,.73,.66):vec3(.6,.6,.62);   // monument, statue
+  else if(lt==6.&&sb>.5){ r=vec3(.7,.7,.68)*(1.-.4*smoothstep(.6,1.,length(dq/hs))); sp=.2; }   // silo
+  else if(lt==5.&&sb>.5&&hs.x<.2) r=mix(vec3(.62,.6,.58),vec3(.12),1.-smoothstep(.04,.08,length(dq)));   // cheminée
+  else if(lt==5.&&sb>.5){ r=vec3(.8,.8,.78)*(1.-.35*smoothstep(.7,1.,length(dq/hs))); sp=.3; }   // cuve
+  else {   // toits plats : gravier, édicules, acrotère ; héliport sur quelques tours
+    r=lt==3.?(a<.3?vec3(.36,.38,.42):a<.55?vec3(.55,.55,.53):a<.75?vec3(.3,.33,.3):vec3(.45,.42,.4)):lt==5.?vec3(.55,.56,.57):lt==10.?vec3(.63,.63,.6):lt==11.?vec3(.86,.87,.88):lt==9.?vec3(.56,.4,.34):(a<.4?vec3(.5,.49,.46):a<.7?vec3(.42,.42,.44):vec3(.56,.47,.4));
+    if(lt==5.) r*=.82+.24*step(.5,fract((hs.x>hs.y?dq.x:dq.y)*3.));   // sheds en dents de scie
+    vec2 gq=fract(p*3.+lh*7.)-.5; r=mix(r,r*.72,step(max(abs(gq.x),abs(gq.y)),.14)*step(.55,h93(floor(p*3.+lh*7.)))*step(.12,rim)*dt);
+    r=mix(r,r*1.2,(1.-smoothstep(.0,.06,rim))*dt);
+    if((lt==3.&&a>.85||lt==11.)&&sb<.5) r=mix(r,vec3(.85,.8,.3),(1.-smoothstep(.02,.04,abs(length(dq)-min(hs.x,hs.y)*.55))*dt));
+    sp=lt==3.?.25:.1; }
+  return r; }
+vec3 wall98(float lt,float sb,float lh){ float a=fract(lh*11.3);
+  if(lt==1.) return a<.4?vec3(.9,.86,.76):a<.7?vec3(.82,.7,.54):vec3(.74,.78,.8);
+  if(lt==7.) return a<.2?vec3(.86,.5,.4):a<.4?vec3(.9,.82,.62):a<.55?vec3(.55,.64,.72):a<.7?vec3(.62,.36,.28):a<.85?vec3(.78,.84,.74):vec3(.92,.9,.86);   // façades de couleurs
+  if(lt==6.) return sb>.5?vec3(.74,.74,.72):fract(lh*3.)<.5?vec3(.62,.22,.16):vec3(.82,.76,.64);
+  if(lt==5.) return sb>.5?vec3(.76,.75,.73):a<.5?vec3(.62,.6,.56):vec3(.64,.37,.27);
+  if(lt==12.) return vec3(.78,.74,.64);
+  if(lt==13.||lt==14.) return vec3(.86,.82,.72);
+  if(lt==3.) return a<.24?vec3(.28,.45,.62):a<.42?vec3(.84,.6,.57):a<.6?vec3(.88,.84,.75):a<.76?vec3(.2,.27,.35):a<.88?vec3(.66,.4,.29):vec3(.58,.7,.76);
+  if(lt==8.) return vec3(.82,.82,.84);
+  if(lt==11.) return vec3(.9,.9,.92);
+  if(lt==17.) return sb>.5?vec3(.86,.86,.84):vec3(.5,.64,.74);
+  if(lt==9.||lt==10.) return a<.5?vec3(.86,.8,.68):vec3(.72,.74,.78);
+  return a<.28?vec3(.86,.64,.58):a<.52?vec3(.88,.8,.66):a<.72?vec3(.62,.35,.26):a<.86?vec3(.76,.78,.8):vec3(.63,.74,.69); }
+// la ville d'une zone de la PlanèteDot (croissance g) ; renvoie la part du point couverte par la ville (bâtiments, rues, champs)
+float city98(vec2 uv,vec3 t1,vec3 t2,vec3 n0,mat3 RM,float g,float ph,float zw,vec3 Lo,float Lz,float lit,float nn,
+             vec3 lc,float lw,float km,float Bl,float pxr,float bio,vec3 hc,inout vec3 col,inout vec3 emi,inout float spec){
   gSh97=0.; gN97=n0; if(km<.003||lw<.003) return 0.;
-  float ca=cos(ph*2.3), sa=sin(ph*2.3); gM97=mat2(ca,-sa,sa,ca); gSd97=fract(ph*.173)*97.; gW97=zw; gEf97=min(1.3/r0,40.);
-  gK97=0; for(int j=0;j<4;j++){ float aj=j==0?1.:clamp(cnt-float(j),0.,1.); if(aj<=0.) break; float an=ph+float(j)*2.094; gO97[j]=j==0?vec2(0.):vec2(cos(an),sin(an))*r0*1.25; gA97[j]=r0*sqrt(aj)*1.15; gK97=j+1; }
-  gHc97=.45+1.85*w2+3.9*w3*e4;
-  vec2 g0=gM97*uv/L97; float tp=L97/pxr;   // tp : pixels par lot
-  vec2 c0=floor(g0), B0=floor(c0/5.); vec4 I0=blk97(B0);
-  float kb=smoothstep(1.4,2.6,tp);   // îlots visibles à l'écran (au moins 7 pixels)
-  float Dx=den97(uv), Dp=mix(Dx,I0.x,kb);
-  float urb=mix(smoothstep(-.12,.12,Dx),step(0.,I0.x),kb), frm=smoothstep(-.85,-.5,Dx)*(1.-urb);   // la ville (îlots entiers), puis les champs autour, au bord doux
-  float cov=(urb+frm*.82)*km*lw; if(cov<.003) return 0.;
-  vec3 cc=mix(vec3(1.),hc,.18);
-  // de loin : une teinte par îlot, puis une seule teinte pour la ville (gris clair au centre, banlieue verte, champs)
-  float ty0=I0.y; vec3 avg=ty0==0.?vec3(.4,.49,.2):ty0==6.?vec3(.52,.5,.27):ty0==4.?vec3(.29,.42,.17):ty0==1.?vec3(.42,.42,.27):ty0==5.?vec3(.46,.44,.4):ty0==2.?vec3(.46,.45,.41):vec3(.43,.44,.45);
-  avg*=.95+.1*h93(B0+gSd97*.3);
-  float fv=mix(.5,n93(uv/L97*.22+gSd97),smoothstep(.3,.9,tp)), fw=mix(.5,n93(uv/L97*.07+gSd97+3.),smoothstep(.1,.35,tp));   // de loin : quartiers en taches douces
-  vec3 far=mix(mix(vec3(.47,.52,.26),vec3(.4,.47,.21),smoothstep(0.,-.4,Dp)),mix(vec3(.4,.43,.3),vec3(.43,.43,.42),smoothstep(.2,.8,Dp)),smoothstep(-.12,.12,Dp))*(.9+.2*fv)*(.93+.14*fw);
-  avg=mix(avg,far,.35);
+  float ca=cos(ph*2.3), sa=sin(ph*2.3); gM98=mat2(ca,-sa,sa,ca); gSd98=fract(ph*.173)*97.; gZr98=sqrt(max(1.-zw*zw,0.))/L97;
+  float R0=rC98(g); gS98[0]=vec4(.5,.5,R0,0.); gN98=1; gW98=wp98(vec2(0.));
+  vec2 q0=gM98*uv/L97, G0=gp98(q0); set98(G0,g);
+  { float aa=gSd98*2.39+1.3; vec2 ap=vec2(cos(aa),sin(aa))*27.; gAp98=R0>=16.&&length(ap)<gZr98-8.?floor(ap/vec2(9.,14.)):vec2(1e3); }
+  gFb98=(2.5+.35*R0+4.*max(g-2.,0.))*smoothstep(.12,.45,g); gHx98=R0>=20.?tw98(R0,0.)*2.7:R0>=15.?tw98(R0,0.)*1.55:R0>=9.?2.9:R0>=5.?2.1:1.5;
+  float tp=L97/pxr;   // pixels par lot
+  vec2 c0=floor(G0), B0=floor(c0/vec2(3.,7.)); vec4 K0; vec4 I0=blk98(B0,K0);
+  int si; float Dx=dv98(G0,si), Rs=gS98[si].z, rr=1.-Dx/max(Rs,.5), ty0=I0.y;
+  float kb=smoothstep(1.4,2.6,tp), k2=smoothstep(3.,4.5,tp)*step(.4,uQual), k3=smoothstep(4.5,6.,tp)*step(.55,uQual)*smoothstep(.1,.2,n0.z);   // îlots, lots vus de dessus, volumes
+  vec4 ba0=vec4(0.), bb0=vec4(0.); float ha0=0., hb0=0., lh0=0., lt0=-1.; bool rd0=false; if(kb>.01){ rd0=rd98(c0,B0,I0,K0); if(!rd0) lt0=lot98(c0,B0,I0,K0,ba0,ha0,bb0,hb0,lh0); }
+  // part couverte : de loin, la tache de la ville ; de plus près, lot par lot (un lot que la ville n'a pas encore atteint reste nature, les routes la traversent)
+  float urb=mix(smoothstep(-.7,.5,Dx),rd0||(lt0>.5&&lt0!=6.&&lt0!=16.)?1.:0.,kb), frm=mix(smoothstep(-gFb98-.8,-gFb98+.8,Dx)*step(.1,gFb98),!rd0&&(lt0==6.||lt0==16.)?1.:0.,kb)*(1.-urb);
+  if((urb+frm)*km*lw<.003&&(k3<.01||Dx<-3.)) return 0.;
+  vec3 cc=mix(vec3(1.),hc,.18), gr=mix(vec3(.33,.46,.16),vec3(.43,.51,.2),n93(G0*.9+gSd98))*cc;   // herbe (la zone garde un peu de sa teinte)
+  if(bio>3.5&&bio<4.5) gr=mix(gr,vec3(.62,.66,.6),.45); if(bio>5.5&&bio<6.5) gr=mix(gr,vec3(.56,.5,.26),.4); if(bio>.5&&bio<1.5) gr=mix(gr,vec3(.5,.36,.22),.35);
+  gr=mix(gr,col*1.08,.28); vec3 fl=mix(fld98(G0,tp,bio,gr),col,.12);   // jardins et champs prennent un peu de la couleur du sol (climat de la zone)
+  // de loin : les champs en damier, la ville en taches (gris clair au centre, toits et jardins en banlieue, tours bleutées)
+  float fv=mix(.5,n93(G0*.22+gSd98),smoothstep(.3,.9,tp)), fw=mix(.5,n93(G0*.07+gSd98+3.),smoothstep(.1,.35,tp));
+  vec3 cu=mix(vec3(.52,.5,.46),vec3(.44,.42,.38),smoothstep(.2,.65,rr)); cu=mix(cu,vec3(.4,.43,.3),smoothstep(.55,1.05,rr)*.6); if(Rs>=15.&&rr<.3) cu=vec3(.45,.47,.51);
+  vec3 C=mix(fl,cu*(.9+.2*fv)*(.94+.12*fw),smoothstep(-.7,.5,Dx));
   lc=mix(lc,vec3(1.,.74,.4),.55);   // les lumières de la ville sont chaudes (un peu de la teinte de la zone)
-  float spk=mix(.7+.6*smoothstep(.45,.85,n93(g0*.9+gSd97)),.3+1.4*step(.55,h93(c0+gSd97*.7)),smoothstep(4.,7.,tp));   // la nuit : des points de lumière quand ils font plusieurs pixels
-  vec3 E=lc*smoothstep(-.1,.6,Dp)*mix(.28,.55,smoothstep(.4,1.,Dp))*(.55+.9*fv*fw), C=mix(far,avg,kb); float sp0=0.;
-  { vec2 rq=abs(fract((g0-.5)/5.+.5)-.5)*5., rv=abs(fract((g0-.5)/15.+.5)-.5)*15.; float aw=.6/max(tp,.5);   // de mi-distance : le quadrillage des rues, net au pixel près
-    vec2 rw=1.-smoothstep(.5-aw,.5+aw,rq), rx=1.-smoothstep(.32-aw,.32+aw,rv); bool tw=I0.x>=0.; float rdc=tw?max(rw.x,rw.y):max(rx.x,rx.y)*.8;
-    vec3 rcl=tw?vec3(.27,.27,.285):vec3(.47,.44,.36); C=mix(C,mix(C,rcl,rdc),kb);
-    E=mix(E,lc*(ty0==1.?.22:ty0==2.?.4:ty0==3.?.6:ty0==5.?.3:ty0==6.?.03:ty0==4.?.04:.0)*spk*(1.-rdc)+vec3(1.,.66,.3)*rdc*(tw?(.16+.42*smoothstep(-.1,.9,I0.x))*(1.+.8*max(1.-smoothstep(.5-aw,.5+aw,rv.x),1.-smoothstep(.5-aw,.5+aw,rv.y)))*(.6+.8*fv):.08),kb); }   // la nuit : fenêtres dans les îlots, réverbères le long des rues
-  float k2=smoothstep(3.,4.5,tp)*step(.4,uQual), k3=smoothstep(4.5,6.,tp)*step(.55,uQual)*smoothstep(.1,.2,n0.z);   // lots visibles, puis volumes
-  vec2 lt=vec2(dot(Lo,t1),dot(Lo,t2))-Lz*uv; float ll=max(length(lt),1e-3); vec2 sg=gM97*(lt/ll); float tE=Lz/ll;
+  vec3 E=lc*smoothstep(-.6,.8,Dx)*mix(.2,.55,smoothstep(.75,.1,rr))*(.55+.9*fv*fw); float sp0=0.;
+  if(kb>.01){   // de mi-distance : une teinte par lot (toits et jardins, champs), puis les rues, nettes au pixel près
+    vec3 av=lt0==1.?vec3(.48,.41,.33):lt0==7.?vec3(.53,.43,.37):lt0==2.?vec3(.52,.49,.45):lt0==3.?vec3(.44,.47,.52):lt0==4.?vec3(.27,.41,.17):lt0==5.?vec3(.52,.51,.48)
+      :lt0==8.?vec3(.42,.5,.36):lt0==9.?vec3(.5,.45,.4):lt0==10.?vec3(.56,.56,.54):lt0==11.?vec3(.66,.66,.66):lt0==17.?vec3(.42,.45,.38):lt0==12.||lt0==13.||lt0==14.?vec3(.58,.56,.52):lt0==15.?(ty0==2.?gr:mix(fl,gr,.35)):lt0==6.?mix(fl,vec3(.5,.42,.32),.4):fl;
+    float dn0=smoothstep(.5,.2,rr)*smoothstep(7.,12.,Rs);
+    if(rd0) av=(ty0==6.||ty0==0.)?fl:mix(gr,vec3(.6,.59,.56),dn0);
+    bool tw=ty0>.5&&ty0!=6.&&I0.z-length(G0-K0.xy)>-1.8; float nx=floor((G0.x-.5)/3.+.5)*3., ny=floor((G0.y-.5)/7.+.5)*7.;
+    vec2 hw=vec2(rw98(tw,nx==0.,I0.z),rw98(tw,ny==0.,I0.z))*.5;
+    vec2 rq=abs(fract((G0-.5)/vec2(3.,7.)+.5)-.5)*vec2(3.,7.), rw=1.-smoothstep(hw-.6/max(tp,.5),hw+.6/max(tp,.5),rq);
+    float sx=tw?1.:nx==0.?.85:(mod(nx,9.)<.5&&ty0>.5)?.6:0., sy=tw?1.:ny==0.?.85:(mod(ny,14.)<.5&&ty0>.5)?.6:0.; if(mod(K0.z,2.)>.5&&mod(nx/3.,2.)>.5) sx=0.;
+    float rdc=max(rw.x*sx,rw.y*sy); vec3 cb=mix(av,tw||max(sx,sy)>.8?vec3(.28,.28,.3):vec3(.42,.4,.36),rdc);
+    float spk=mix(.7+.6*smoothstep(.45,.85,n93(G0*.9+gSd98)),.3+1.4*step(.55,h93(c0+gSd98*.7)),smoothstep(4.,7.,tp));   // la nuit : fenêtres en points de lumière, réverbères le long des rues
+    vec3 eb=lc*(lt0==1.?.22:lt0==7.?.32:lt0==2.?.45:lt0==3.?.65:lt0==5.?.3:lt0>=12.&&lt0<14.5?.35:lt0==8.?.5:lt0==10.?.35:.0)*spk*(1.-rdc)+vec3(1.,.66,.3)*rdc*(tw?.16+.42*smoothstep(-.1,.9,1.-rr):.06)*(.6+.8*fv);
+    C=mix(C,cb,kb); E=mix(E,eb,kb); }
+  vec2 lsv=vec2(dot(Lo,t1),dot(Lo,t2))-Lz*uv; float ll=max(length(lsv),1e-3); vec2 sg=gM98*(lsv/ll); float tE=Lz/ll;   // le soleil dans la grille
   if(k2>.01&&k3<.99){   // vue du dessus : toits et sol, chaque lot à sa couleur
-    vec4 bx=vec4(0.); float lh=0., bh=0.; if(!rd97(c0)) bh=lot97(c0,B0,I0,bx,lh); vec3 em; float sp;
-    vec2 ib=bh>0.?step(bx.xy,g0)*step(g0,bx.zw):vec2(0.); vec3 c2;
-    if(ib.x*ib.y>.5){ c2=roof97(I0.y,lh)*(.95+.1*fract(lh*31.)); float rim=min(min(g0.x-bx.x,bx.z-g0.x),min(g0.y-bx.y,bx.w-g0.y)); c2*=1.-.25*(1.-smoothstep(.0,.08,rim))*smoothstep(4.,8.,tp);
-      if(I0.y==1.||I0.y==6.){ vec2 ce=(bx.xy+bx.zw)*.5; bool rx=fract(lh*3.3)>.5; c2*=mix(.8,1.08,step(0.,(rx?g0.y-ce.y:g0.x-ce.x)*(rx?sg.y:sg.x))); }
-      em=lc*step(.45,fract(lh*17.))*.35*min(bh,2.); sp=.1; }
-    else { c2=gnd97(g0,c0,B0,I0,bx,bh,tp,bio,cc,em,sp); c2*=1.-shd97(g0,0.,sg,tE,B0,I0)*.5*lit*step(.01,I0.w); }
+    vec3 c2, em; float sp;
+    vec2 ia=step(ba0.xy,G0)*step(G0,ba0.zw), ib=step(bb0.xy,G0)*step(G0,bb0.zw); bool A=ha0>.001&&ia.x*ia.y>.5, Bq=hb0>.001&&ib.x*ib.y>.5;
+    if(A||Bq){ bool ua=A&&(!Bq||ha0>=hb0); c2=roof98(lt0,ua?0.:1.,lh0,ua?ba0:bb0,G0,ua?ha0:hb0,tp,sg,sp)*(.95+.1*fract(lh0*31.)); em=lc*step(.45,fract(lh0*17.))*.35*min(ua?ha0:hb0,2.)*step(1.5,lt0)*step(lt0,3.5); }
+    else c2=gnd98(G0,c0,B0,I0,K0,lt0,ba0,ha0,bb0,hb0,lh0,tp,bio,gr,fl,em,sp);
     C=mix(C,c2,k2); E=mix(E,em,k2); sp0=mix(sp0,sp,k2); }
+  float hit=0.;
   if(k3>.01){   // de près : les volumes (le rayon de la caméra traverse la grille des lots)
-    vec3 Vo=RM*vec3(0.,0.,1.); float vz=max(n0.z,.12); vec2 k=gM97*((vec2(dot(Vo,t1),dot(Vo,t2))-n0.z*uv)/vz);
-    float H0=min(gHc97+.02,(uQual>.85?15.5:10.5)/max(abs(k.x)+abs(k.y),.05)); int N=uQual>.85?18:13;
-    vec2 gs=g0+k*H0, d=-k*H0; vec2 c=floor(gs), st=sign(d); st=mix(vec2(1.),st,abs(st)); vec2 id=st/max(abs(d),vec2(1e-5));
-    vec2 tM=(c+max(st,0.)-gs)*id, tD=abs(id); vec2 cB=vec2(-1e6); vec4 I=vec4(0.);
-    float hit=0., hh=0., hl=0.; vec2 gh=g0, hB=B0; vec4 hbx=vec4(0.), hI=I0; float u=0.;
+    vec3 Vo=RM*vec3(0.,0.,1.); float vz=max(n0.z,.12); vec2 k=gM98*((vec2(dot(Vo,t1),dot(Vo,t2))-n0.z*uv)/vz);
+    float Hs=min(gHx98,2.5); vec2 kG=(gp98(q0+k*Hs)-G0)/Hs;   // le rayon dans la grille (les rues ondulent)
+    float H0=min(gHx98+.02,(uQual>.85?15.5:10.5)/max(abs(kG.x)+abs(kG.y),.05)); int N=uQual>.85?18:13;
+    vec2 gs=G0+kG*H0, d=-kG*H0; vec2 c=floor(gs), st=sign(d); st=mix(vec2(1.),st,abs(st)); vec2 id=st/max(abs(d),vec2(1e-5));
+    vec2 tM=(c+max(st,0.)-gs)*id, tD=abs(id); vec2 cB=vec2(-1e6); vec4 I=vec4(0.), K=vec4(0.);
+    float hh=0., hH=0., hl=0., ht=0., hs=0.; vec2 gh=G0, hB=B0; vec4 hbx=vec4(0.), hI=I0, hK=K0; float u=0.;
     for(int i=0;i<18;i++){ if(i>=N||u>1.) break; float uo=min(min(tM.x,tM.y),1.);
-      if(!rd97(c)){ vec2 B=floor(c/5.); if(B!=cB){ cB=B; I=blk97(B); }
-        if(I.w>H0*(1.-uo)){ vec4 bx; float lh; float h=lot97(c,B,I,bx,lh);
-          if(h>H0*(1.-uo)){ vec2 a0=(bx.xy-gs)*id, a1=(bx.zw-gs)*id; vec2 tn=min(a0,a1), tf=max(a0,a1); float u0=max(tn.x,tn.y), u1=min(min(tf.x,tf.y),1.);
-            if(u0<u1&&u1>0.&&h>=H0*(1.-u1)){ hbx=bx; hl=lh; hI=I; hB=B; float ha=H0*(1.-u0);
-              if(h>=ha&&u0>=0.){ gh=gs+d*u0; hh=ha; hit=tn.x>tn.y?2.:3.; } else { float ur=max(1.-h/H0,0.); gh=gs+d*ur; hh=min(h,H0); hit=1.; } break; } } } }
+      vec2 B=floor(c/vec2(3.,7.)); if(B!=cB){ cB=B; I=blk98(B,K); }
+      if(I.w>H0*(1.-uo)&&!rd98(c,B,I,K)){ vec4 ba,bb; float ha,hb,lh; float lt=lot98(c,B,I,K,ba,ha,bb,hb,lh);
+        float fa, fb; float ua=box98(gs,id,H0,ba,ha,fa), ub=box98(gs,id,H0,bb,hb,fb);
+        if(min(ua,ub)<1.5){ bool A=ua<=ub; float uh=A?ua:ub; hit=A?fa:fb; hbx=A?ba:bb; hH=A?ha:hb; hh=hit>1.5?H0*(1.-uh):hH; gh=gs+d*uh; hl=lh; ht=lt; hs=A?0.:1.; hI=I; hK=K; hB=B; break; } }
       if(tM.x<tM.y){ u=tM.x; tM.x+=tD.x; c.x+=st.x; } else { u=tM.y; tM.y+=tD.y; c.y+=st.y; } }
     vec3 c3, e3=vec3(0.); float s3=0., sh=0.; vec3 nv=n0;
-    if(hit<.5){ vec4 bx=vec4(0.); float lh=0., bh=0.; if(!rd97(c0)) bh=lot97(c0,B0,I0,bx,lh); c3=gnd97(g0,c0,B0,I0,bx,bh,tp,bio,cc,e3,s3); sh=shd97(g0,0.,sg,tE,B0,I0); }
-    else if(hit<1.5){ c3=roof97(hI.y,hl)*(.95+.1*fract(hl*31.)); float rim=min(min(gh.x-hbx.x,hbx.z-gh.x),min(gh.y-hbx.y,hbx.w-gh.y)); vec2 ce=(hbx.xy+hbx.zw)*.5, hs=(hbx.zw-hbx.xy)*.5;
-      c3*=1.-.22*(1.-smoothstep(.0,.07,rim))*smoothstep(5.,9.,tp);
-      if(hI.y==3.||hI.y==2.){ vec2 pq=abs(gh-ce)-hs*.42; c3=mix(c3,c3*.78,step(max(pq.x,pq.y),0.)*step(.6,hh)); }
-      if(hI.y==1.||hI.y==6.){ bool rx=fract(hl*3.3)>.5; c3*=mix(.8,1.08,step(0.,(rx?gh.y-ce.y:gh.x-ce.x)*(rx?sg.y:sg.x))); }
-      s3=hI.y==3.?.35:.08; sh=shd97(gh,hh,sg,tE,hB,hI); e3=lc*step(.6,fract(hl*17.))*.2*step(.6,hh);
-      if(hI.y==3.&&hh>2.) e3+=vec3(1.,.1,.05)*step(.5,fract(uT*.6+hl*9.))*(1.-smoothstep(.0,.12,length(gh-ce)))*1.5; }
+    if(hit<.5){ c3=gnd98(G0,c0,B0,I0,K0,lt0,ba0,ha0,bb0,hb0,lh0,tp,bio,gr,fl,e3,s3); sh=shd98(G0,0.,sg,tE,B0,I0,K0); }
+    else if(hit<1.5){ c3=roof98(ht,hs,hl,hbx,gh,hh,tp,sg,s3)*(.95+.1*fract(hl*31.)); sh=shd98(gh,hh,sg,tE,hB,hI,hK);
+      e3=lc*step(.6,fract(hl*17.))*.2*step(.6,hh)*step(1.5,ht)*step(ht,3.5);
+      if(ht==3.&&hh>2.) e3+=vec3(1.,.1,.05)*step(.5,fract(uT*.6+hl*9.))*(1.-smoothstep(.0,.12,length(gh-(hbx.xy+hbx.zw)*.5)))*1.5;   // feu d'obstacle en haut des tours
+      if(ht==8.){ vec2 e=abs(gh-(hbx.xy+hbx.zw)*.5)-((hbx.zw-hbx.xy)*.5-vec2(.7,.8)); e3+=vec3(.85,.9,1.)*.55*step(max(e.x,e.y),0.); } }   // le stade éclairé le soir
     else { bool fx=hit<2.5; float a=fx?gh.y:gh.x; vec2 fn=fx?vec2(-st.x,0.):vec2(0.,-st.y);   // façade : la face tournée vers la caméra
-      vec3 wc=wall97(hI.y,hl); float wa=fract(hl*11.3), gl=hI.y==3.&&(wa<.24||(wa>.6&&wa<.76))?1.:0.;
-      float fh=hI.y==1.?.3:.27, cw=hI.y==1.?.33:.22, fl=hh/fh, cl=a/cw; vec2 wi=vec2(fract(cl),fract(fl));
-      float win=step(.22,wi.x)*step(wi.x,.78)*step(.3,wi.y)*step(wi.y,.82)*step(.6,fl), vk=smoothstep(2.5,5.,fh*tp);
+      vec3 wc=wall98(ht,hs,hl); float wa=fract(hl*11.3), gl=ht==3.&&hs<.5&&(wa<.24||(wa>.6&&wa<.76))?1.:0.;
+      float fh=ht==1.?.3:ht==3.?.21:ht==12.?.5:ht==6.?.34:.27, cw=ht==1.?.33:ht==3.?.19:ht==12.?.26:.22, fl2=hh/fh, cl=a/cw; vec2 wi=vec2(fract(cl),fract(fl2));
+      float nw=(ht==8.||ht==5.||ht==14.||(ht==6.&&hs>.5)||((ht==12.||ht==13.)&&hs>.5&&hh<hH*.7))?1.:0.;
+      float win=step(.22,wi.x)*step(wi.x,.78)*step(.3,wi.y)*step(wi.y,ht==12.?.92:.82)*step(.6,fl2)*(1.-nw), vk=smoothstep(2.5,5.,fh*tp);
       vec3 wcol=mix(vec3(.13,.17,.23),vec3(.34,.46,.58),gl);
-      c3=mix(wc,mix(wc,wcol,.38),1.-vk); c3=mix(c3,wcol,win*vk*(1.-gl*.6)); c3*=.72+.28*smoothstep(0.,.5,hh);
-      s3=gl*.9+.05; float lw2=step(.45,h93(floor(vec2(cl,fl))+hl*50.))*win;
-      e3=mix(vec3(1.,.78,.48),vec3(.85,.9,1.),step(.7,fract(hl*5.)))*mix(.3,lw2*1.3,vk)*step(.15,hh);
-      vec2 fnu=fn*gM97; vec3 fo=t1*fnu.x+t2*fnu.y; nv=normalize(fo*RM+n0*.25);
-      sh=shd97(gh+fn*.02,hh,sg,tE,hB,hI); }
-    C=mix(C,c3,k3); E=mix(E,e3,k3); sp0=mix(sp0,s3,k3); gN97=normalize(mix(n0,nv,k3)); gSh97=sh*k3*lit; }
+      c3=mix(wc,mix(wc,wcol,.38),(1.-vk)*(1.-nw)); c3=mix(c3,wcol,win*vk*(1.-gl*.6)); c3*=.72+.28*smoothstep(0.,.5,hh);
+      if(ht==5.||ht==8.) c3*=.9+.1*step(.5,fract(a*(ht==5.?9.:5.)));   // bardage, piliers
+      if(ht==5.&&hs>.5&&hbx.z-hbx.x<.4) c3=mix(c3,mix(vec3(.78,.2,.15),vec3(.92),step(.5,fract(hh*4.))),step(hH*.72,hh));   // cheminée rayée
+      if(ht==6.&&hs>.5) c3*=.85+.15*step(.5,fract(hh*6.));   // silo cerclé
+      s3=gl*.9+.05; float lw2=step(.45,h93(floor(vec2(cl,fl2))+hl*50.))*win;
+      e3=mix(vec3(1.,.78,.48),vec3(.85,.9,1.),step(.7,fract(hl*5.)))*mix(.3,lw2*1.3,vk)*step(.15,hh)*(1.-nw);
+      vec2 fnu=fn*gM98; vec3 fo=t1*fnu.x+t2*fnu.y; nv=normalize(fo*RM+n0*.25);
+      sh=shd98(gh+fn*.02,hh,sg,tE,hB,hI,hK); }
+    C=mix(C,c3,k3); E=mix(E,e3,k3); sp0=mix(sp0,s3,k3); gN97=normalize(mix(n0,nv,k3)); gSh97=sh*k3*lit;
+    if(hit>.5) urb=max(urb,k3); }
+  float cov=(urb+frm)*km*lw;
   col=mix(col,C,cov); emi+=E*nn*(1.+Bl*uBeat*.6)*cov+C*vec3(.1,.12,.15)*lit*cov*(1.-nn)*urb; spec=mix(spec,sp0,cov);   // la lumière du ciel éclaire aussi les façades à l'ombre
   return (urb+frm*.75)*km*lw; }   // les champs gardent un peu du relief du sol
 `;
@@ -2378,8 +2557,11 @@ ${PD93}
 ${PD97}
 vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){ gFs=max(n.z,.12);
   vec3 sp=s*1.6+uSeed*7.; vec4 cwvG=cloudWave(s); wvG=min(wvG,1.5);
-  gZL97=0.; gZM97=0.; if(uGD>.5&&uType==11){ for(int i=0;i<16;i++){ if(i>=uTkN) break; float cz=dot(s,uTk[i].xyz), gt=min(uTkB[i].w,4.999); if(cz<.2||gt<.3) continue;   /* V9.7 : le cœur de chaque ville est sur la terre ferme */
-      float r0=.047*pow(2.1,max(floor(gt),1.)-1.)*(gt<1.?sqrt(gt):1.), dz=sqrt(max(1.-cz*cz,0.)); gZL97=max(gZL97,smoothstep(r0*1.45,r0*.95,dz+(n3(s*6.+float(i)*3.1)-.5)*r0*.6)); float zw=uTk[i].w; gZM97=max(gZM97,smoothstep(zw,zw+(1.-zw)*.3,cz)); } }   // plus de montagnes sous les villes
+  gZL97=0.; gZM97=0.; gZC98=0.; if(uGD>.5&&uType==11){ for(int i=0;i<16;i++){ if(i>=uTkN) break; float cz=dot(s,uTk[i].xyz), gt=min(uTkB[i].w,4.999); if(cz<.2) continue;   /* V9.7 : le cœur de chaque ville est sur la terre ferme (V9.8 : dès la première maison) */
+      float zw=uTk[i].w, r0=mix(max(rC98(gt)*1.75,3.4)*L97,sqrt(max(1.-zw*zw,0.))*.92,smoothstep(.6,3.2,gt)), dz=sqrt(max(1.-cz*cz,0.)), nf=1.6/r0;   // V9.8 : côte découpée,
+      float rc=r0*(1.075+.52*(n3(s*nf+float(i)*3.1)-.5)+.23*(n3(s*nf*2.7+float(i)*7.7)-.5)); { float lv=mod(uTkB[i].z,2.), rk=min(rc*1.5,14.*L97); if(lv>.01) gZC98=max(gZC98,smoothstep(rk,rk*.55,dz)*lv); } if(gt<.002) continue;   // V9.8 : ciel dégagé au-dessus de la ville jouée (on la voit pousser)
+      gZL97=max(gZL97,smoothstep(rc*1.06,rc*.94,dz));   // la terre gagne toute la zone (pays, continent)
+      gZM97=max(gZM97,smoothstep(zw,zw+(1.-zw)*.3,cz)); } }   // plus de montagnes sous les villes
   TXR=0.; TXK=0.; if(uTxOn>.5){ gW=pow(abs(s),vec3(4.)); gW/=dot(gW,vec3(1.)); gW=max(gW-.03,0.); gW/=dot(gW,vec3(1.)); gMu=max(n.z,.22); gS=s; gLo=RM*L; gE=clamp(1.6/max(uR,1.),.0015,.03); }
   bool sT=uTxOn>.5&&uR>3.&&(uType==10||uType==9||uType==4); gST=sT;   /* V8.4 : rocheuse, métallique ou volcanique faite par solid84 */
   float det=clamp((uR-14.)/95.,0.,1.)*uQual; vec3 n0=n, nb=n; float gh=.5; float tF=.5,tM=0.,tV=.5,tS=.5; bool tOk=false;
@@ -2419,7 +2601,7 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){ gFs=max(n.z,.12);
       float tcs=txT(7.,(cq+L*.05)*.72,tlc+.5).r; cs=clamp(mix(cs,cs*(.3+1.25*tcs),.75),0.,1.); }
     float cy=.4+.6*uWx, ck=uGD>.5?0.:1.; cl=max(cl,cyclone(s,cy)*ck); cs=max(cs,cyclone(normalize(s+L*.03),cy)*ck); { float bc=0.; if(brF>.01) bc=uBreath.z>.5?brRev(brTx(rotY(uT*.02)*s*2.2+uSeed,s,0.,brL(2.2)).r,brF,.5)*min(1.,brF*1.5):brF*smoothstep(.4,.75,fbm3(cq*1.3+brT*uT*.05+vec3(7.))); cl=max(cl,bc*.8); cs=max(cs,bc*.45); }
     vec3 ccol=mix(vec3(.97),vec3(.58,.62,.68),smoothstep(.6,1.,cl)*uWx*.7); ccol+=vec3(1.,.95,.86)*smoothstep(.02,.18,cl)*(1.-smoothstep(.2,.5,cl))*smoothstep(0.,.5,dot(n0,L))*.18;
-    ccol*=clamp(.82+(cl-cs)*.9,.55,1.15)*(.9+.2*n3(cq*22.)); if(uGD>.5){ gCl97=cl; gCs97=cs; gCc97=ccol; } else { col*=1.-cs*.5*(1.-cl); col=mix(col,ccol,cl); spec*=1.-cl; } cloudA=cl; }   /* V9.7 : sur la PlanèteDot, les nuages passent au-dessus des villes (posés plus bas) */
+    ccol*=clamp(.82+(cl-cs)*.9,.55,1.15)*(.9+.2*n3(cq*22.)); if(uGD>.5){ gCl97=cl*(1.-.92*gZC98); gCs97=cs*(1.-.92*gZC98); gCc97=ccol; } else { col*=1.-cs*.5*(1.-cl); col=mix(col,ccol,cl); spec*=1.-cl; } cloudA=cl; }   /* V9.7 : sur la PlanèteDot, les nuages passent au-dessus des villes (posés plus bas) */
   else if(uType==10){ float f=fbm(sp*2.); float cr=n3(sp*5.); float ring=smoothstep(.56,.6,cr)-smoothstep(.6,.67,cr); float bowl=smoothstep(.6,.75,cr);
     col=mix(uC2*.35,uC1*.75,f)*(.8+fbm3(sp*14.)*.4); col*=1.-bowl*.35; col+=vec3(.08)*ring; land=1.; }
   else if(uType==2&&uTxOn>.5&&uR>3.){ land=0.; }   /* V8.3 : géante gazeuse faite par gasV83 */
@@ -2508,7 +2690,7 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){ gFs=max(n.z,.12);
         float vl=smoothstep(.5,.85,n3(sp*3.1+vec3(uT*.05,-uT*.03,uT*.04))*.62+pxN(sp*6.3-vec3(uT*.07,0.,uT*.05),6.3)*.38);
         emi+=mix(hc,vec3(1.),.45)*vl*Bl*km*smoothstep(10.,30.,uR)*(.05+.09*uLv+.06*uBeat+.05*uBs)*(.35+night*1.1);
         emi+=hc*Bl*km*(.02+night*(.035+.05*uLv+.025*uBeat))*(.55+.45*pxN(sp*12.+uT*.3,12.)); }
-      if(lv>.02&&uR>8.){ vec3 c0=uTk[bi].xyz; vec3 t1=normalize(cross(c0,vec3(0.,1.,.001))); vec3 t2=cross(c0,t1);
+      if(lv>(uGD>.5?.002:.02)&&uR>8.){ vec3 c0=uTk[bi].xyz; vec3 t1=normalize(cross(c0,vec3(0.,1.,.001))); vec3 t2=cross(c0,t1);
         vec2 uv=vec2(dot(s,t1),dot(s,t2)); float gt=min(lv,4.999); float tier=max(floor(gt),1.); float cnt=gt<1.?1.:pow(4.,fract(gt));
         float r0=max(.047*pow(2.1,tier-1.)*(gt<1.?sqrt(gt):1.),2.4/uR);   /* V9.5 : villes 35 % plus étendues */ float ph=B.y*40.+uSeed;
         float ef=min(.8/r0,uR*.22); float bn=n3(sp*ef*2.2+2.); float en=(n3(sp*ef)-.5)*.55+(bn-.5)*.25;
@@ -2536,8 +2718,8 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){ gFs=max(n.z,.12);
           vec3 lc=mix(vec3(1.,.5,.16),vec3(1.,.84,.58),e2); lc=mix(lc,vec3(.95,.97,1.),e4*.6); lc=mix(hc,lc,.65); lc=mix(lc,mix(hc,vec3(.4,.95,1.),.5),e5*.5);
           if(uType==3){ roof=mix(roof,vec3(.72,.82,.92),.55); lc=mix(lc,vec3(.7,.9,1.),.4); } if(uType==5){ roof=mix(roof,vec3(.5,.36,.8),.6); lc=mix(lc,vec3(.65,.9,1.),.5); }
           /* V9.3 · une vraie ville : quartiers, rues, immeubles et leurs ombres, lumières de nuit, trafic (city93) */
-          /* V9.7 · sur la PlanèteDot : des villes en volumes, façon simulation de villes (city97) */
-          float bt=uGD>.5?city97(uv,t1,t2,n0,RM,r0,cnt,ph,uTk[bi].w,lB2,dot(n0,L),lit,nn,max(e4,uGD),w2,w3,lc,lw3,km*smoothstep(0.,.08,dot(s,c0)),Bl,pxr,B.x,hc,col,emi,spec)
+          /* V9.7 · sur la PlanèteDot : des villes en volumes, façon simulation de villes ; V9.8 : elles poussent maison par maison depuis un carrefour (city98) */
+          float bt=uGD>.5?city98(uv,t1,t2,n0,RM,gt,ph,uTk[bi].w,lB2,dot(n0,L),lit,nn,lc,lw3,km*smoothstep(0.,.08,dot(s,c0)),Bl,pxr,B.x,hc,col,emi,spec)
                           :city93(uv,dv,m,rb,ph,w2,w3,lt,dot(n0,L),lit,nn,e1,e2,e3,e4,e5,roof,lc,lw3,km*smoothstep(0.,.08,dot(s,c0)),Bl,pxr,col,emi,spec); gCity93=max(gCity93,uGD>.5?bt:ft*lw3);
           if(bt>.01&&uGD>.5){ n=normalize(mix(n,gN97,bt)); ndl=dot(n,L); shd=mix(shd,shd/max(mix(1.,rSh,land),.05),bt); dif=lam(ndl)*shd*(1.-gSh97*.62*bt)*mix(1.,smoothstep(-.07,.07,dot(n0,L)),bt); TXR*=1.-bt; gCK93=max(gCK93,bt); }   // soleil couché : les façades aussi sont dans la nuit
           else if(bt>.01){ float fz=bt*.7; n=normalize(mix(n,n0,fz)); ndl=dot(n,L); dif=lam(ndl)*shd; TXR*=1.-bt*.9; }   // la ville aplanit le grain du sol (elle reste sur ses collines)
@@ -2671,7 +2853,7 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){ gFs=max(n.z,.12);
   float night=pow(clamp(1.-dif*1.6,0.,1.),2.);
   if(uStage>=4.5&&uType!=8&&uType!=2){ float lr=1.-smoothstep(0.,.012+1./max(uR,1.),abs(fbm3(sp*1.6+5.)-.5)); emi+=uLC*lr*(.05+.5*night)*.4*((uType==1||uType==11)?land:1.); }
   float civ=clamp((uStage-.8)/4.2,0.,1.);
-  if(civ>0.&&uType!=8&&uGD<.5){   // V9.7 : sur la PlanèteDot, les villes des zones s'en chargent (city97)
+  if(civ>0.&&uType!=8&&uGD<.5){   // V9.7 : sur la PlanèteDot, les villes des zones s’en chargent (city98 depuis la V9.8)
     float mask=uPath.y==1.?smoothstep(.55,.7,fbm3(sp*1.4+5.)):smoothstep(.42,.6,fbm3(sp*2.6));
     mask=mix(mask,1.,.55)*setl*(1.-gCity93);
     if(uType==1||uType==11) mask*=(1.-gTRk)*(1.-gTSn)*smoothstep(.22,.36,gTT)*(.35+.65*smoothstep(.12,.32,gTMo))*(1.-smoothstep(.1,.24,gTAl));   /* V9.5 : villes là où l'on peut vivre (ni neige, ni roche, ni haute montagne ; peu au désert) */
@@ -3824,7 +4006,20 @@ function conquest(p){ const c0 = CQ.get(p); if (c0 && time - c0.t < 1) return hl
     x.live = (x.sc && SCP && SCP.playing && SCP.pid === p.id && SCP.u === x.u) || (liveId && x.id === liveId) || (ln && ln.pid === p.id && x.title === ln.t) ? 1 : 0;
     tk.set([x.dir[0], x.dir[1], x.dir[2], 1 - 2 * x.share], i * 4); tkB.set([x.biome, x.hue, x.live + 2 * x.ev, x.g], i * 4);
     const zu = ZUP.find(z => z.pid === p.id && z.id === x.id); tkG.set([zu ? zu.t : -100, x.gr || 0], i * 2); });
-  const r = {t: time, items, all, cover, tk, tkB, tkG, n: items.length, map: new Map(items.map(x => [x.id, x])), sel: -1, hi: 0}; CQ.set(p, r); return hlApply(p, r); }
+  const r = {t: time, items, all, cover, tk, tkB, tkG, n: items.length, map: new Map(items.map(x => [x.id, x])), sel: -1, hi: 0}; CQ.set(p, r);
+  if (c0 && time - c0.t < 2.5){ r.tk0 = c0.tk; r.tkB0 = c0.tkB; }   // V9.8 : état précédent, pour que la croissance avance en douceur (pdZoneLerp)
+  return hlApply(p, r); }
+/* V9.8 · la croissance des zones avance image par image, et non plus par sauts d'une seconde : une maison sort de terre en douceur */
+const PDZL = {tk: new Float32Array(64), tkB: new Float32Array(64)};
+// pendant le plan « la croissance » du film, la zone jouée rejoue sa croissance en accéléré (cine.gOv : de la première maison à sa taille actuelle)
+const pdShare = g => (1 - Math.cos(clamp(.05 + 1.9 * regR(g), .075, 1))) / 2;
+function pdZoneLerp(cq, p){ const ov = cine && cine.gOv && p && cine.gOv.pid === p.id ? cine.gOv : null, u = clamp(time - cq.t, 0, 1);
+  if (!ov && (!cq.tk0 || !cq.tkB0 || u >= 1)) return cq;
+  PDZL.tk.set(cq.tk); PDZL.tkB.set(cq.tkB);
+  if (cq.tk0 && cq.tkB0 && u < 1) for (let i = 0; i < cq.n; i++){ const k = i * 4; if (cq.tk0[k] !== cq.tk[k] || cq.tk0[k + 1] !== cq.tk[k + 1] || cq.tk0[k + 2] !== cq.tk[k + 2]) continue;
+    PDZL.tk[k + 3] = cq.tk0[k + 3] + (cq.tk[k + 3] - cq.tk0[k + 3]) * u; PDZL.tkB[k + 3] = cq.tkB0[k + 3] + (cq.tkB[k + 3] - cq.tkB0[k + 3]) * u; }
+  if (ov){ const i = cq.items.findIndex(x => x.id === ov.id); if (i >= 0){ PDZL.tkB[i * 4 + 3] = ov.g; PDZL.tk[i * 4 + 3] = 1 - 2 * pdShare(ov.g); } }
+  return PDZL; }
 /* touching a track reveals its zone: the planet turns it toward you, the rest dims */
 let HL = null;
 const trackCss = x => x.hue == null ? '#5a6074' : css([0, 4, 2].map(o => clamp(Math.abs(((x.hue * 6 + o) % 6) - 3) - 1, 0, 1) * .8 + .2));
@@ -3944,7 +4139,7 @@ function drawBody(o){
   if (o.terN){ gl.uniform4fv(u.uTer, o.ter); gl.uniform4fv(u.uTerB, o.terB); }
   const vwU = o.uq ? pdVWq(o.uq, fr ? PDB_VW : (o.vw || VWM)) : (fr ? PDB_VW : (o.vw || VWM)); gl.uniformMatrix3fv(u.uVW, false, vwU); if (u.uBreath) gl.uniform4f(u.uBreath, PDBR.k * PDMS.k, 0, PDBR.tx * PDTX.on, 0); if (o.pd9) pd9Seen(o, vwU); gl.uniform1i(u.uOccN, o.occN || 0); if (o.occN){ OCC12.fill(0); for (let i = 0; i < 12 && i < o.occ.length; i++) OCC12[i] = o.occ[i]; if (fr) for (let k = 0; k < 12; k += 4) pdInF(fr, OCC12, OCC12, k); gl.uniform4fv(u.uOcc, OCC12); }
   gl.uniform1f(u.uArch, o.arch || 0); gl.uniform1f(u.uQual, QUAL); if (u.uGD) gl.uniform1f(u.uGD, o.gd ?? (o.pd9 && o.pd9.gd ? 1 : 0));   // V9.7 : la PlanèteDot (monde des villes) gl.uniform1f(u.uEvo, o.evo || 0); if (o.evo) gl.uniform3fv(u.uEvoD, o.evoD); gl.uniform1f(u.uWx, o.wx || 0); gl.uniform1f(u.uFlash, o.flash || 0);
-  gl.uniform1i(u.uTkN, o.cq ? o.cq.n : 0); gl.uniform1i(u.uTkSel, o.cq ? o.cq.sel : -1); gl.uniform1f(u.uTkHi, o.cq ? o.cq.hi : 0); if (o.cq && o.cq.n){ gl.uniform4fv(u.uTk, o.cq.tk); gl.uniform4fv(u.uTkB, o.cq.tkB); if (u.uTkG) gl.uniform4fv(u.uTkG, o.cq.tkG || TKG0); }
+  gl.uniform1i(u.uTkN, o.cq ? o.cq.n : 0); gl.uniform1i(u.uTkSel, o.cq ? o.cq.sel : -1); gl.uniform1f(u.uTkHi, o.cq ? o.cq.hi : 0); if (o.cq && o.cq.n){ { const zq = pdZoneLerp(o.cq, o.pd9); gl.uniform4fv(u.uTk, zq.tk); gl.uniform4fv(u.uTkB, zq.tkB); } if (u.uTkG) gl.uniform4fv(u.uTkG, o.cq.tkG || TKG0); }
   if (o.kind === 3){ const hb = o.r * .26, y0 = Math.floor(H - o.y - hb); gl.enable(gl.SCISSOR_TEST); gl.scissor(0, y0, W, Math.max(0, Math.ceil(H - o.y + hb) - y0)); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); gl.disable(gl.SCISSOR_TEST); return; }   // V9 · fluidité : la traînée n'éclaire qu'une bande, le reste de l'écran n'est plus calculé pour rien
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 }
@@ -4891,7 +5086,7 @@ function pdPivotHeld(p){ return !!(cine && PDPIV.on && PDPIV.pid === p.id); }   
 /* V9 · plans qui font pivoter la planète comme au doigt : « tournant » (un tour complet sur un axe incliné, pôles compris)
    et « vinyle » (le pôle vient face à nous, la planète tourne comme un disque au tempo, puis se redresse) */
 const PDPIV = {on: false, pid: null, key: -1, q0: null, ax: null, rt: null, fw: null, t0: 0};
-function pdDirPivot(X, name, u, side, key, f){ const p = X.p; if (name !== 'turn' && name !== 'vinyl'){ PDPIV.on = false; return; }
+function pdDirPivot(X, name, u, side, key, f){ const p = X.p; if (name !== 'turn' && name !== 'vinyl'){ if (name !== 'grow') PDPIV.on = false; return; }
   if (PDPIV.key !== key || PDPIV.pid !== p.id){ PDPIV.key = key; PDPIV.pid = p.id; PDPIV.q0 = p._q ? p._q.slice() : [0, 0, 0, 1]; PDPIV.t0 = time; const a = .45 * side;
     const cp = Math.cos(f.pitch), z = [cp * Math.sin(f.yaw), Math.sin(f.pitch), cp * Math.cos(f.yaw)], x = norm(cross([0, 1, 0], z)), y = cross(z, x);
     PDPIV.ax = norm([x[0] * Math.cos(a) + y[0] * Math.sin(a), x[1] * Math.cos(a) + y[1] * Math.sin(a), x[2] * Math.cos(a) + y[2] * Math.sin(a)]); PDPIV.rt = x; PDPIV.fw = z; }
@@ -7501,12 +7696,27 @@ const PDD = {
   // V9 · la spirale : de tout le système jusqu'à la planète, en tournant autour d'elle
   spiral: (X, e, s) => { const q = Math.pow(e, .9); return {t: mix3([0, 0, 0], X.pos, sstep(0, .75, q)), yaw: X.ly + s * TAU * .75 * (1 - q), pitch: lerp(.72, X.zp + .08, sstep(0, .9, q)), dist: Math.exp(lerp(Math.log(X.sd * .95), Math.log(pdFit(X.R, 38, .86)), q)), fov: lerp(58, 38, q)}; },
   dive: (X, e, s) => { const q = Math.pow(e, .85); return {t: mix3([0, 0, 0], X.pos, sstep(0, .7, q)), yaw: X.ly + s * 1.4 * (1 - q), pitch: lerp(.56, X.zp + .06, sstep(0, .85, q)), dist: Math.exp(lerp(Math.log(X.sd * .92), Math.log(pdFit(X.R, 36, .8)), q)), fov: lerp(55, 36, q)}; },
+  // V9.8 · la naissance : tant que la zone jouée est jeune (de la première maison au gros village), la caméra descend tout près et la regarde
+  // de trois quarts : on voit chaque maison sortir de terre
+  // V9.8 · la croissance : en accéléré, la zone jouée repart de sa première maison et grandit jusqu'à sa taille actuelle (village, ville, pays,
+  // continent) ; la caméra part de tout près et recule avec la ville
+  // (caméra loin, longue focale : la planète reste juste à l'écran, la zone au centre ; pdAim)
+  grow: (X, e, s) => { const k = sstep(.25, .95, X.zaT), fov = lerp(clamp(X.zaT * 75, 6, 30), 36, k), yaw = X.zy0 + s * (.42 - .3 * e), pitch = clamp(lerp(X.zp0 + (X.zp0 > .35 ? -.48 : .48), X.zp0 + .06, k), -.6, 1.12);
+    const dist = lerp(pdFit(X.R * X.zaT, fov, 1.2), pdFit(X.R, 36, .9), k); return {t: mix3(pdAim(X, yaw, pitch, dist), X.pos, k), k, yaw, pitch, dist, fov}; },
+  birth: (X, e, s) => { const fov = clamp(X.za * 75, 6, 30), yaw = X.zy0 + s * (.42 - .22 * e), pitch = clamp(X.zp0 + (X.zp0 > .35 ? -.48 : .48), -.6, 1.12);
+    const dist = pdFit(X.R * X.za, fov, 1.2 - .12 * e); return {t: pdAim(X, yaw, pitch, dist), k: 0, yaw, pitch, dist, fov}; },
 };
 function mix3(a, b, k){ return [lerp(a[0], b[0], k), lerp(a[1], b[1], k), lerp(a[2], b[2], k)]; }
+// V9.8 : le point visé pour que la zone jouée soit au centre de l'image. La planète est dessinée en disque (rayon pxR, vue du centre le long
+// du rayon œil → centre) : la zone y tombe en C + R·(w − (w·v) v), v = direction œil → centre (pdZoneP). L'œil dépend du point visé : 3 passes.
+function pdZoneP(X, E){ const C = X.pos, R = X.R / 1.05, w = X.zw, v = norm(sub(C, E)), k = dot(w, v); return [C[0] + R * (w[0] - k * v[0]), C[1] + R * (w[1] - k * v[1]), C[2] + R * (w[2] - k * v[2])]; }
+function pdAim(X, yaw, pitch, dist){ const cp = Math.cos(pitch), z = [cp * Math.sin(yaw), Math.sin(pitch), cp * Math.cos(yaw)];
+  const on = P => { const q = dot(sub(P, X.pos), z); return [P[0] - q * z[0], P[1] - q * z[1], P[2] - q * z[2]]; };
+  let t = on(X.zs); for (let i = 0; i < 3; i++) t = on(pdZoneP(X, [t[0] + dist * z[0], t[1] + dist * z[1], t[2] + dist * z[2]])); return t; }
 /* V9 · cadrages sans étoile gênante : un plan rapproché tourne autour de la planète, du plus petit angle possible, pour que l'étoile
    ne la cache jamais et que la caméra ne passe jamais dedans. La foule, le tournant et le vinyle sortent aussi son disque du champ
    (au plus de n × 3,75°, sinon seule la règle de base s'applique). Le côté choisi est gardé jusqu'à la fin du plan. */
-const PDSUN = {zone: 0, graze: 0, planet: 0, moons: 0, orbit: 0, ringside: 0, vertigo: 0, crowd: 16, turn: 32, vinyl: 32};
+const PDSUN = {zone: 0, birth: 0, grow: 0, graze: 0, planet: 0, moons: 0, orbit: 0, ringside: 0, vertigo: 0, crowd: 16, turn: 32, vinyl: 32};
 function pdSunGap(X, f, yaw, strict){ const cp = Math.cos(f.pitch), z = [cp * Math.sin(yaw), Math.sin(f.pitch), cp * Math.cos(yaw)];
   const E = [f.t[0] + f.dist * z[0], f.t[1] + f.dist * z[1], f.t[2] + f.dist * z[2]], es = Math.hypot(E[0], E[1], E[2]) || 1e-6;
   if (es < X.rs * 1.2) return -1;
@@ -7530,22 +7740,36 @@ function pdDirCtx(sys){ const c = cine, i = sys.planets.findIndex(p => p.id === 
   let zy = c.zy ?? Math.atan2(pos[0], pos[2]) + .9, zp = c.zp ?? .2; const lr = conquest(p).items.find(x => x.live);
   if (lr && lr.dir && !(PDPIV.on && PDPIV.pid === p.id)){ const w = pdUt(p, rz(-(p.tilt || 0), ry(-(p._ang || 0), lr.dir))); zy = Math.atan2(w[0], w[2]); zp = clamp(Math.asin(clamp(w[1], -1, 1)) * .8, -.35, .9); }
   c.zy = zy; c.zp = zp; const pd = Math.hypot(pos[0], pos[2]) || 1, sun = Math.atan2(-pos[0], -pos[2]), dA = ((sun - zy + Math.PI) % TAU + TAU) % TAU - Math.PI;
-  return {p, pos, R, zy, zp, pd, ly: zy + dA * .42, sy: Math.atan2(pos[0], pos[2]), sd: pdSysD(sys), rs: starR(sys) * (sys.gd ? 2 : 1.25)}; }
+  const X = {p, pos, R, zy, zp, pd, ly: zy + dA * .42, sy: Math.atan2(pos[0], pos[2]), sd: pdSysD(sys), rs: starR(sys) * (sys.gd ? 2 : 1.25), zg: 9};
+  if (lr && lr.dir && p.gd){ X.zg = lr.g || 0; X.zid = lr.id; X.zdir = lr.dir; X.za = Math.max(Math.acos(clamp(1 - 2 * (lr.share || 0), -1, 1)), .075); pdZoneX(X); }   // V9.8 : la zone jouée (plans de la croissance et de la naissance)
+  return X; }
+function pdZoneX(X){ const p = X.p, w = pdUt(p, rz(-(p.tilt || 0), ry(-(p._ang || 0), X.zdir))), r0 = X.R / 1.05;
+  X.zw = w; X.zs = [X.pos[0] + w[0] * r0, X.pos[1] + w[1] * r0, X.pos[2] + w[2] * r0]; X.zy0 = Math.atan2(w[0], w[2]); X.zp0 = Math.asin(clamp(w[1], -1, 1)); }
+// V9.8 · pendant la croissance, la planète a tourné (sous le noir de la coupe) pour que la zone soit au jour, éclairée de biais (ombres longues)
+function pdSunPivot(X, key){ const p = X.p;
+  if (PDPIV.key !== key || PDPIV.pid !== p.id){ PDPIV.key = key; PDPIV.pid = p.id; PDPIV.q0 = p._q ? p._q.slice() : [0, 0, 0, 1]; PDPIV.t0 = time;
+    const sd = norm(sub([0, 0, 0], X.pos)), u0 = sub([0, 1, 0], [sd[0] * sd[1], sd[1] * sd[1], sd[2] * sd[1]]), up = Math.hypot(u0[0], u0[1], u0[2]) > .05 ? norm(u0) : [1, 0, 0];
+    const tg = norm([sd[0] * .77 + up[0] * .64, sd[1] * .77 + up[1] * .64, sd[2] * .77 + up[2] * .64]), w = X.zw, ax = cross(w, tg), an = Math.acos(clamp(dot(w, tg), -1, 1));
+    PDPIV.g = Math.hypot(ax[0], ax[1], ax[2]) > 1e-4 ? qAx(ax, an) : [0, 0, 0, 1]; }
+  PDPIV.on = true; const g = PDPIV.g, q = qMul(PDPIV.q0, [-g[0], -g[1], -g[2], g[3]]), l = Math.hypot(q[0], q[1], q[2], q[3]) || 1; p._q = [q[0] / l, q[1] / l, q[2] / l, q[3] / l]; pdZoneX(X); }
 function pdSysD(sys){ const n = Math.max(sys.planets.length, 1), maxR = orbitR(n - 1) + 1.8; return clamp(maxR / (Math.tan(55 * Math.PI / 360) * clamp(W / H, .6, 1.25)) * .95, 12, 500); }
 function pdDirCam(dt, sys){ const c = cine; if (readonly){ const v = pdVisitPid(); if (v && v !== c.pid){ c.pid = v; c.zy = null; } } const X = pdDirCtx(sys); if (!X){ exitCine(); return; }
   const bc = beatClock(), barS = bc ? 240 / bc.bpm : 1.75; const B = bc ? bc.beat / 4 : (time - c.t0) / barS;   // position en mesures
   const st = c.dir; let k = Math.floor(B / PDSEQ_T), r = B - k * PDSEQ_T, j = 0; while (j < PDSEQ.length - 1 && r >= PDSEQ[j][1]){ r -= PDSEQ[j][1]; j++; }
-  const sh = PDART.on ? ['planet', 2, 'cut'] : PDSEQ[j], u = PDART.on ? .5 : clamp(r / sh[1], 0, 1), e = u * u * (3 - 2 * u), side = (k % 2) ? -1 : 1, key = k * 100 + j;
+  let sh = PDART.on ? ['planet', 2, 'cut'] : PDSEQ[j], rr = r, jj = j;
+  if (!PDART.on && X.zs){ if (j <= 1){ sh = ['grow', 8, 'glide']; rr = j ? 4 + r : r; jj = 0; } else if (sh[0] === 'zone' && X.zg < 1.6) sh = ['birth', sh[1], sh[2]]; }   // V9.8 : la croissance en accéléré, puis la naissance si la zone est jeune
+  const u = PDART.on ? .5 : clamp(rr / sh[1], 0, 1), e = u * u * (3 - 2 * u), side = (k % 2) ? -1 : 1, key = k * 100 + jj;
+  if (sh[0] === 'grow'){ pdSunPivot(X, key); const ug = clamp((u - .06) / .88, 0, 1); X.gT = X.zg * Math.pow(ug, 2.2); X.zaT = Math.max(Math.acos(clamp(1 - 2 * pdShare(X.gT), -1, 1)), .075); c.gOv = {pid: X.p.id, id: X.zid, g: X.gT}; } else c.gOv = null;
   const f = PDD[sh[0]](X, sh[0] === 'pullout' || sh[0] === 'dive' || sh[0] === 'spiral' ? e : u * .35 + e * .65, side);
-  const sn = PDART.on ? undefined : PDSUN[sh[0]]; if (sn !== undefined){ if (st.sk !== key){ st.sk = key; st.sg = 0; } f.yaw = pdSunSafe(X, f, sn, st); }
-  if (st.key !== key){ const prev = st.key === undefined ? null : PDSEQ[st.j]; const tr = prev ? prev[2] : 'first'; st.key = key; st.j = j;
+  const sn = PDART.on ? undefined : PDSUN[sh[0]]; if (sn !== undefined){ if (st.sk !== key){ st.sk = key; st.sg = 0; } f.yaw = pdSunSafe(X, f, sn, st); if (f.k !== undefined) f.t = mix3(pdAim(X, f.yaw, f.pitch, f.dist), X.pos, f.k); }
+  if (st.key !== key){ const prev = st.key === undefined ? null : PDSEQ[st.j]; const tr = prev ? prev[2] : 'first'; st.key = key; st.j = jj;
     if (tr === 'cut' || tr === 'fade'){ cam.g.t = [...f.t]; cam.g.yaw = wrapA(f.yaw, cam.yaw); cam.g.pitch = f.pitch; cam.g.dist = f.dist; cam.yaw = cam.g.yaw; cam.pitch = cam.g.pitch; cam.dist = cam.g.dist; cam.t = [...f.t]; CV.yaw = CV.pitch = CV.dist = 0; CV.t = [0, 0, 0]; FOV = f.fov * Math.PI / 180 * (tr === 'cut' ? 1.035 : 1);
       if (tr === 'cut'){ POST.flash = Math.max(POST.flash, .12); POST.ca = Math.max(POST.ca, .25); } }
     else if (tr === 'whip'){ st.whip = .42; POST.ca = Math.max(POST.ca, .9); camSpeed = Math.max(camSpeed, 2.4); POST.flash = Math.max(POST.flash, .06); }
     if (tr === 'fade') st.fin = time + .45; if (sh[0] === 'crowd') pd9Burst(X.p); }
   pdDirPivot(X, PDART.on ? '' : sh[0], u, side, key, f);
   // fondu au noir avant une transition « fade » (dessiné dans le rendu : il apparaît aussi dans la story)
-  const rem = (sh[1] - r) * barS; st.fk = sh[2] === 'fade' ? sstep(.42, 0, rem) : 0; if (st.fin > time) st.fk = Math.max(st.fk, (st.fin - time) / .45);
+  const rem = (sh[1] - rr) * barS; st.fk = sh[2] === 'fade' ? sstep(.42, 0, rem) : 0; if (st.fin > time) st.fk = Math.max(st.fk, (st.fin - time) / .45);
   if (st.whip > 0) st.whip -= dt; c.whip = st.whip > 0 ? 1 : 0; if (st.whip > 0){ const k = Math.sin(Math.PI * clamp(st.whip / .42, 0, 1)); POST.mb[0] = side * .011 * k; }
   if (PDART.on){ camSpeed = 0; st.fk = 0; }
   cam.g.t = [...f.t]; cam.g.yaw = wrapA(f.yaw + Math.sin(time * .23) * .015, cam.yaw); cam.g.pitch = clamp(f.pitch + Math.sin(time * .17) * .01, -.7, 1.2); cam.g.dist = f.dist * (1 - bassLvl * .012 - beatLvl * .004);
@@ -7554,7 +7778,7 @@ function pdDirCam(dt, sys){ const c = cine; if (readonly){ const v = pdVisitPid(
   c.X = X; c.shot = sh[0]; }
 // après le rendu : fondu + point de cadrage (story, écran verrouillé)
 function pdDirPost(){ const c = cine; if (!c || !c.dir || !c.X) return; const st = c.dir; if (st.fk > .001) glDarken(st.fk);
-  const pr = project(c.X.pos); const zoomed = PDZOOM.includes(c.shot);
+  const pr = project((c.shot === 'birth' || c.shot === 'grow') && c.X.zs ? pdZoneP(c.X, EYE) : c.X.pos); const zoomed = PDZOOM.includes(c.shot);
   SHOT_PT = pr && zoomed ? {x: clamp(pr.x, W * .2, W * .8), y: clamp(pr.y, H * .2, H * .8), r: Math.max(40, pxR(c.X.R, pr.w)), t: time} : {x: W / 2, y: H * .47, r: Math.min(W, H) * .42, t: time}; }
 // le film commence : quelle planète, et pour l'album, la planète de l'album (ou sa copie) au lieu du logo
 function pdCinePid(pidO){ if (pidO) return {pid: pidO};
@@ -7589,7 +7813,7 @@ function pdShkTick(){ const S = PDSHK; S.u0.fill(0); S.u1.fill(0); if (!POST.on)
 
 /* ================= V7.3 · toujours la dernière version, et l'écran verrouillé de l'album ================= */
 const PD_VER = (document.querySelector('meta[name="pd-version"]') || {}).content || '';
-const PDZOOM = ['zone', 'graze', 'planet', 'moons', 'orbit', 'silhouette', 'horizon', 'ringside', 'vertigo', 'crowd', 'turn', 'vinyl'];
+const PDZOOM = ['zone', 'birth', 'grow', 'graze', 'planet', 'moons', 'orbit', 'silhouette', 'horizon', 'ringside', 'vertigo', 'crowd', 'turn', 'vinyl'];
 async function pdCheckUpdate(){ try {
   const r = await fetch(location.pathname + '?pdcheck=' + Date.now(), {cache: 'no-store'}); if (!r.ok) return;
   const m = (await r.text()).slice(0, 8000).match(/name="pd-version" content="([^"]+)"/); if (!m || m[1] === PD_VER) return;
