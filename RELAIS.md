@@ -98,3 +98,6 @@ Couleurs originales COLOR_0 et facteur de base, rugosité des matériaux conserv
 
 ## Relais ChatGPT — V10 — microrelief des matériaux planétaires
 Cartes de hauteur V1.9 raccordées au même routage que les albedos; normales perturbées par différences finies triplanaires, qualité 2/3 et transition atténuée entre biomes. Une texture supplémentaire bornée, repli albedo seul. Tests WebGL de chargement/libération et variation des pixels. Vent a142b2b CPU/WebGL verts; matériaux 7c176e4 CPU vert, WebGL en cours au début du chantier. Aucun changement main, données ni audio. CI du nouveau commit et iPhone à confirmer; displacement et textures GLB restent distincts.
+
+## Relais ChatGPT — V10 — navigation immersive V1
+Caméra orbitale bornée, rotation tactile, pincement, zoom et recentrage dans l'aperçu; lissage et mouvement réduit, un RAF. Tests CPU et navigateur ajoutés. Matériaux 7c176e4 CPU/WebGL verts; microrelief 4f51e5d CPU vert, WebGL en cours au début du chantier. Le zoom est orthographique et non un vol jusqu'au sol. Aucun changement main/Supabase/audio; CI et gestes iPhone à confirmer. Prochaine étape: gouverneur qualité et adaptateur de l'application.

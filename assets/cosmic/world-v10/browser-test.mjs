@@ -103,5 +103,7 @@ try{
  try{await planet.loadDetail('desert',{maxSize:128});const frames=[];for(const microStrength of [0,1]){gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);renderer.draw(planet,{mvp,tier:2,eye:[0,0,-3],light:[.8,.2,-.5],microStrength});const p=new Uint8Array(128*128*4);gl.readPixels(0,0,128,128,gl.RGBA,gl.UNSIGNED_BYTE,p);frames.push(p);}return {height:!!planet.heightDetail,changed:frames[0].some((v,i)=>v!==frames[1][i]),error:gl.getError()};}finally{planet.dispose();renderer.dispose();}
  });
  assert.deepEqual(microCheck,{height:true,changed:true,error:0});
+ await page.locator('#zoomin').click();await page.waitForFunction(()=>Number(document.querySelector('canvas').dataset.zoom)>1.15);
+ await page.locator('#resetview').click();await page.waitForFunction(()=>Math.abs(Number(document.querySelector('canvas').dataset.zoom)-1)<.02);
  assert.deepEqual(errors,[]);
 }finally{await browser.close();}

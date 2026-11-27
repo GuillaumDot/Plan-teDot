@@ -58,3 +58,6 @@ Lecture de COLOR_0 normalisé (octets, shorts ou float) et facteur de couleur, r
 
 ## Microreliefs V1
 Chargement des cartes de hauteur V1.9 existantes, même atlas que les albedos ou tuile unique de secours. Perturbation des normales par différences finies triplanaires, bornée et limitée aux tiers 2/3; atténuée près des transitions de biome, absente des océans et glaces terrestres. Échec de hauteur sans perte de l'albedo. Une texture 256² RGBA8 supplémentaire maximum dans l'aperçu (256 Kio), neuf lectures supplémentaires dans la branche active, à mesurer sur iPhone. Ne change ni maillage, ni géographie ni altitude sauvegardée. Tests navigateur chargement/libération et différence de pixels. Pas de véritable déplacement géométrique.
+
+## Navigation immersive V1
+Caméra orbitale yaw/pitch et zoom orthographique borné 0,8–3,2, lissage exponentiel réutilisant transitions.mjs, boutons/roue/clavier et gestes pointeurs à un ou deux doigts. Rotation automatique suspendue pendant le geste; mode mouvement réduit sans interpolation. Une seule boucle RAF dans l'aperçu. Le zoom rapproche la vue sans vol au sol, sans nouvelle géométrie ni déplacement de caméra en perspective. Tests CPU des limites et navigateur des boutons; gestes iPhone non vérifiés.

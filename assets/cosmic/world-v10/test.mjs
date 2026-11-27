@@ -130,3 +130,11 @@ const shades=new Set();for(let i=0;i<model.vertices.length;i+=MODEL_VERTEX_STRID
 assert.equal(placed.vertices.length,model.vertices.length);
 assert.deepEqual(placed.vertices.slice(7,11),model.vertices.slice(7,11));
 console.log('GLB vertex colors and roughness preserved through placement');
+
+import {cameraTarget,cameraStep,cameraFrame,CAMERA_LIMITS} from './camera.mjs';
+const start={yaw:0,pitch:0,zoom:1},goal=cameraTarget(start,{yaw:1,pitch:9,zoom:99});
+assert.equal(goal.pitch,CAMERA_LIMITS.maxPitch);assert.equal(goal.zoom,CAMERA_LIMITS.maxZoom);
+assert.equal(cameraTarget(start,{zoom:0}).zoom,CAMERA_LIMITS.minZoom);
+const step=cameraStep(start,goal,.016);assert.ok(step.zoom>1&&step.zoom<goal.zoom);assert.deepEqual(cameraStep(start,goal,0,true),goal);
+const view=cameraFrame(start);assert.deepEqual(Array.from(view.mvp),Array.from(new Float32Array([.83,0,0,0,0,.83,0,0,0,0,.5,0,0,0,0,1])));assert.ok(cameraFrame(goal).mvp.every(Number.isFinite));assert.ok(Math.abs(Math.hypot(...cameraFrame(goal).eye)-3)<1e-9);
+console.log('Camera bounds and smoothing verified');
