@@ -1283,7 +1283,7 @@ async function pd96Get(file, kb, kt){ const r = await fetch(file + '?v=' + encod
 const PD_RING = '//nnLf/55S//+OQ0//nkOP/55Tz/+ONB//XfTv/z3lz/7tqA//Hc5f/y3u7/8d2+//PesP/04aj/8+Gh//bmqv/36aj/+e21//nuqf/4643/9uiH//Xldv/042T/9+l8//TeRv/03nb/+O////ju///26f//9ejl//fu///16v7/9ur4//Xm+v/36eH/9+3///jw///68f//9+f//+/ctv/05P//+vD///ju///68P//8tz6//Ha8//v18r/9eSy//fq///t0Mj/79Pv/+3N3v/tyPH/89P///PV///76f//67/X//Hb///y4Pz/8NzM//Hbrf/y2dD/9eDq//fqrP/05Ov/9ebj//Xmi//35Lv/9NzK//npkv/253X/9N/Q//jo///454P/9eO8//biof7/8X//++Np//HZv//25LD/+Oi6//np2v/04eL/9uXO//jrrv/45lr/9ePL//ntmf/04KX/9ODS//rtuv/68bv/+vHl//310fH//Qv/7tkt//fs/v/89sv/9OYH/+zZCv/25wz//e0K//XpC//w4wv/9uwK//XmCv7/6gr/8ugK/+XeCf/y6gn/9uEJ/+/cCf/u2Qj/8OMI//LcCP/w3Qj/4c0I/+/iCv7/5Qr//OsL/+3aC//q4gz/8OoM//LdDP/1zQz/78oM//jvD//43Q3/99MO/v/ZDv/12g//+PHF//frhP/78dn/+++5//HgDf/05Av/+eoK//feDf/66pv/+Ov///jq0//35sX/9N3d//fncv/35///9N/r//Te0v/03v3/9eCm//Pd6P/z25z/9uA1//Lb1P/w1qH/89+Z//Tj8P/039j/893i//Pd7f/z3uX/8dr///Lb3f/w2f//8Nj///PZ///pwtn/++r//+zJ///syv//6cTc/+jC6P/owtX/68ip//DW+f/z2cT/8NXl/+/T7f/t0s//8Nn///Xf///x2P//8NP///DTn//qzLv/7dH///Tg///25///9+r///Pcq//79M7/+PP5//bq3v/16LP/9OX1//Tgyv/15uD/9N7//+/Qgf/nxyH/7N0G/+bOBv/n0QX/8tuL//LZiv/x2dP/9d/6//Pc5P/z3dv/79XY/+7Sxv/x2ez/89z///Xg///04eb/9OL///Ph9P/14v//892b//Pd///y3e//79nA//HZ0//x2rj/89/q//Ph6f/x2bb/8NWW/+/Uaf/z3Hf/9OBo//Xia//143L/9eR8//blhv/25IP/9uST//Thif/03pb/8tmW//HWnf/x06r/8Nbf/+/V0P/v1Iz/8txX//XgSP/34kH/+OU6//flNv/45DX/+OUy//jnLv/46Cj/+Osl/+3cBQ==';
 const PD_TXN = ['s0_terrain', 's1_moon', 's2_lava', 's3_ice', 's4_desert', 's5_metal', 's6_crystal', 's7_clouds', 's8_sun', 's9_gas', 's10_forest', 's11_savanna', 's12_prairie',
   's13_mercury', 's14_basalt', 's15_canyon', 's16_metalflow', 's17_sulfur', 's18_lavariver', 's19_obsidian'];   // V8.4 · sols rocheux, métalliques et volcaniques
-function pdCompile2(vs, fs, fb){ try { const r = compile(vs, fs); r.v82 = true; return r; } catch(e){ console.warn('[PlanèteDot] rendu 8.2 refusé par ce téléphone, rendu V8.0 gardé', e); PDTX.bad = 1; return compile(vs, fb); } }
+function pdCompile2(vs, fs, fb){ try { const r = compile(vs, fs); r.v82 = true; return r; } catch(e){ console.warn('[PlanèteDot] rendu 8.2 refusé par ce téléphone, rendu V8.0 gardé', e); PDTX.shaderErr = String(e && e.message || e); PDTX.bad = 1; return compile(vs, fb); } }
 function pdTxMk(unit, tg, ws, wt, mip){ const G = gl, t = G.createTexture(), au = G.getParameter(G.ACTIVE_TEXTURE); G.activeTexture(G.TEXTURE0 + unit); G.bindTexture(tg, t);
   G.texParameteri(tg, G.TEXTURE_MIN_FILTER, mip ? G.LINEAR_MIPMAP_LINEAR : G.LINEAR); G.texParameteri(tg, G.TEXTURE_MAG_FILTER, G.LINEAR);
   G.texParameteri(tg, G.TEXTURE_WRAP_S, ws); G.texParameteri(tg, G.TEXTURE_WRAP_T, wt);
@@ -1408,7 +1408,7 @@ function pdDebugTick(){
   if(!pdDebugLast){pdDebugLast=now;return;}
   pdDebugFrames++;
   const elapsed=now-pdDebugLast;
-  if(elapsed<500)return;
+  if(elapsed<1000)return;
   const fps=Math.round(pdDebugFrames*1000/elapsed);
   pdDebugFrames=0;pdDebugLast=now;
   if(!pdDebugEl){
@@ -1417,7 +1417,7 @@ function pdDebugTick(){
     pdDebugEl.style.cssText='position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;z-index:2147483647;background:rgba(0,0,0,.82);color:#fff;font:11px/1.4 monospace;padding:4px 8px;white-space:pre-wrap;overflow-wrap:anywhere;pointer-events:none;text-align:left;';
     document.body.appendChild(pdDebugEl);
   }
-  pdDebugEl.textContent='FPS: '+fps+' | TIER: '+TIER+' | DPR: '+DPR+' | world10: '+Number(PD10_ENABLED)+'\nPDTX.on: '+PDTX.on+' | ready: '+PDTX.ready+' | bad: '+PDTX.bad+' | fail: '+PDTX.fail+' | sz: '+PDTX.sz+'\nPDTX.failure: '+(PDTX.failure||'—');
+  pdDebugEl.textContent='FPS: '+fps+' | TIER: '+TIER+' | DPR: '+DPR+' | world10: '+Number(PD10_ENABLED)+'\nPDTX.on: '+PDTX.on+' | ready: '+PDTX.ready+' | bad: '+PDTX.bad+' | fail: '+PDTX.fail+' | sz: '+PDTX.sz+'\nPDTX.failure: '+(PDTX.failure||'—')+'\nPDTX.shaderErr: '+(PDTX.shaderErr||'—');
 }
 function pdTxTick(){ pdDebugTick(); window.__pdF = (window.__pdF || 0) + 1; pd9BrTick(); if (!PDTX.st && !INTRO.on && time > 2.5) pdTxSoon(600);   // no opening animation (or it is over): start anyway
   for (let i = pd96Up(); i > 0 && PDTX.q.length && !PDTX.off; i--) pdTxPut(PDTX.q.shift());
