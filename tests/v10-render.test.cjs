@@ -6,8 +6,9 @@ const html=fs.readFileSync('index.html','utf8');
 const match=html.match(/const PD10_SHADER=pdTry\(\(\)=>compile\(("(?:\\.|[^"\\])*"),("(?:\\.|[^"\\])*")\)/);
 assert.ok(match,'extract the actual shipped shader');
 const vs=JSON.parse(match[1]),frag=JSON.parse(match[2]);
+const detailLine=html.split('\n').find(l=>l.startsWith('function pd10DetailSource('));assert.ok(detailLine);const detailFrag=new Function(detailLine+';return pd10DetailSource;')()(frag);
 test('V10 source and isolation',()=>{
- assert.match(html,/name="pd-version" content="10\.0-alpha\.[1234567]"/);
+ assert.match(html,/name="pd-version" content="10\.0-alpha\.[12345678]"/);
  assert.doesNotMatch(frag,/\bsampler\w*\b/);
  assert.match(html,/function pd10Draw\(o\)/);
  assert.match(html,/if\(pd10Draw\(o\)\)return/);
@@ -24,7 +25,7 @@ test('actual WebGL2 compiles and draws all 12 planet types',async()=>{
  const browser=process.env.PD_BROWSER==='webkit'?await webkit.launch({headless:true}):await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
  try{
  const page=await browser.newPage();
- const result=await page.evaluate(({vs,frag})=>{
+ const result=await page.evaluate(({vs,frag,detailFrag})=>{
  const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('webgl2');if(!g)throw Error('WebGL2 unavailable');
  const shader=(type,src)=>{const x=g.createShader(type);g.shaderSource(x,src);g.compileShader(x);if(!g.getShaderParameter(x,g.COMPILE_STATUS))throw Error(g.getShaderInfoLog(x));return x;};
  const p=g.createProgram();g.attachShader(p,shader(g.VERTEX_SHADER,vs));g.attachShader(p,shader(g.FRAGMENT_SHADER,frag));g.bindAttribLocation(p,0,'a');g.linkProgram(p);if(!g.getProgramParameter(p,g.LINK_STATUS))throw Error(g.getProgramInfoLog(p));g.useProgram(p);
@@ -39,8 +40,9 @@ test('actual WebGL2 compiles and draws all 12 planet types',async()=>{
  for(let n=0;n<buf.length;n+=4)if(buf[n+3]>220){pixels++;for(let k=0;k<3;k++)signature=Math.imul(signature^buf[n+k],16777619);colors.add(buf[n]+','+buf[n+1]+','+buf[n+2]);}
  output.push({type,pixels,colors:colors.size,signature,error:g.getError()});
  }
+ const dp=g.createProgram();g.attachShader(dp,shader(g.VERTEX_SHADER,vs));g.attachShader(dp,shader(g.FRAGMENT_SHADER,detailFrag));g.bindAttribLocation(dp,0,'a');g.linkProgram(dp);if(!g.getProgramParameter(dp,g.LINK_STATUS))throw Error(g.getProgramInfoLog(dp));
  return output;
- },{vs,frag});
+ },{vs,frag,detailFrag});
  for(const r of result){assert.equal(r.error,0,JSON.stringify(r));assert.ok(r.pixels>3500,JSON.stringify(r));assert.ok(r.colors>30,JSON.stringify(r));}
  assert.notEqual(result[6].signature,result[7].signature,'spectral and vortex worlds must look distinct');console.log(result);
  }finally{await browser.close();}
