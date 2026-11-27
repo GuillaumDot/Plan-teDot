@@ -4233,8 +4233,15 @@ function pdRecoveryPaint(){
  g.save();g.globalAlpha=alpha;
  const l=o.L||[.4,.5,1],lx=Number.isFinite(l[0])?l[0]:.4,ly=Number.isFinite(l[1])?l[1]:.5;
  const c1=o.c1||[.6,.7,.9],c2=o.c2||c1;
- g.drawImage(pdRecoverySprite(o,r),x-r,y-r,r*2,r*2);
- if(o.rk&&r>4){g.strokeStyle=col(o.rc||c1,.85);g.lineWidth=Math.max(1,r*.09);g.beginPath();g.ellipse(x,y,r*(o.rk[1]||1.7),r*.44,o.roll||0,0,Math.PI*2);g.stroke();}
+ // Cheap radial glow for explicit 2D recovery, even with POST disabled.
+ if(o.kind===1){const halo=g.createRadialGradient(x,y,r*.65,x,y,r*2.3);halo.addColorStop(0,col(c1,1));halo.addColorStop(.27,col(c1,.75));halo.addColorStop(1,'transparent');g.save();g.globalAlpha*=.45;g.fillStyle=halo;g.fillRect(x-r*2.3,y-r*2.3,r*4.6,r*4.6);g.restore();}
+ // Draw the far and near halves separately so the globe occludes its rings.
+ const ringHalf=near=>{if(!o.rk||r<=4)return;const inner=r*o.rk[0],outer=r*o.rk[1];if(!(outer>inner))return;
+  g.save();g.translate(x,y);g.rotate(-(o.roll||0));g.scale(1,Math.max(.06,Math.min(1,o.ringS||.3)));
+  const start=near?0:Math.PI,end=start+Math.PI;
+  for(let j=0;j<8;j++){const lo=inner+(outer-inner)*j/8,hi=inner+(outer-inner)*(j+.82)/8;g.beginPath();g.arc(0,0,hi,start,end);g.arc(0,0,lo,end,start,true);g.closePath();g.fillStyle=col(o.rc||c1,(near?.83:.52)*(j%3===0?.64:1));g.fill();}
+  g.restore();};
+ ringHalf(false);g.drawImage(pdRecoverySprite(o,r),x-r,y-r,r*2,r*2);ringHalf(true);
  g.restore();
  }
  }catch(e){console.warn('[PlaneteDot] recovery paint',e);g.globalAlpha=1;}
@@ -4545,6 +4552,7 @@ function renderSystem(dt, flyIn){ { const kT = 1 + Math.max(0, starR(VIEW) - .55
   let starPx = 0; ECL = 1; const PP = sys.planets.map((p, i) => planetPos(p, i));
   if (sp) STAR_PT = {x: sp.x, y: sp.y};
   if (sp){ const r = pxR(lerp(sR * (1 + lvl * .09 + beatLvl * .025) * (.2 + .8 * starIgnite), sl0 ? sl0.r * .5 : 1, sl0 ? mE : 0), sp.w); starPx = r; passTrack('star', sp.x, sp.y, r * 1.6);
+    if(!POST.on&&!sys.gd&&starIgnite>.01)bodies.push({w:sp.w+.01,kind:2,x:sp.x,y:sp.y,r:r*2.35,q:1,c1:sc,atmo:.6,alpha:.36*starIgnite});
     if (sys.gd){ bodies.push({w: sp.w + .02, kind: 2, x: sp.x, y: sp.y, r: Math.max(r * 4.2, 60 * RS), q: 1, c1: [.28, .5, 1], atmo: .5, alpha: (.5 + beatLvl * .15) * starIgnite}); bodies.push({w: sp.w + .01, kind: 2, x: sp.x, y: sp.y, r: r * 1.5, q: 1, c1: [.7, .85, 1], atmo: .4, alpha: .5 * starIgnite}); }
     else bodies.push({w: sp.w, kind: 1, x: sp.x, y: sp.y, r, q: 2.8, c1: sc, seed: 3, audio: Math.min(2.1, lvl * 1.6 + beatLvl * .5 + bassLvl * .5), atmo: (.25 + .75 * starIgnite) * (1 + (1 - ECLs) * 1.3), alpha: BIRTH ? clamp(starIgnite * 3, 0, 1) : 1, ecl: 1});
     picks.push({x: sp.x, y: sp.y, r: Math.max(r * (sys.gd ? 1.8 : 1.2), 30 * RS), w: sp.w, act: () => sys.gd ? openAlbum() : openStar()});
