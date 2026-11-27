@@ -13,5 +13,19 @@ try{
  assert.equal(result.error,0,type);assert.ok(result.pixel.slice(0,3).some((v,i)=>Math.abs(v-[6,9,18][i])>4),type+' appears blank');
  await page.screenshot({path:'v10-'+type+'.png'});
  }
+ const textureCheck=await page.evaluate(async()=>{
+ const {loadTerrainAlbedo}=await import('./terrain-texture.mjs');
+ const {assertTextureGL}=await import('./texture-guard.mjs');
+ const gl=document.querySelector('canvas').getContext('webgl');
+ const asset=await loadTerrainAlbedo(gl,'earth','alpine',{maxSize:64});
+ const valid=gl.isTexture(asset.texture)&&asset.width<=64&&asset.height<=64;
+ const texture=asset.texture;asset.dispose();asset.dispose();
+ const released=!gl.isTexture(texture);
+ const gas=await loadTerrainAlbedo(gl,'gas','alpine');
+ gl.enable(0);
+ let rejected=false;try{assertTextureGL(gl,'Injected failure')}catch(e){rejected=e.message.includes('WebGL error');}
+ return {valid,released,gas:gas===null,rejected,error:gl.getError()};
+ });
+ assert.deepEqual(textureCheck,{valid:true,released:true,gas:true,rejected:true,error:0});
  assert.deepEqual(errors,[]);
 }finally{await browser.close();}
