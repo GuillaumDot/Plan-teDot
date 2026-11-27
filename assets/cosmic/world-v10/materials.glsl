@@ -8,7 +8,12 @@ WorldMaterial worldMaterial(int family, vec4 terrain, vec4 climate) {
  WorldMaterial m=WorldMaterial(rock,.85,0.,vec3(0.));
  if(family==0 || family==1){
  vec3 land=mix(vec3(.48,.33,.15),vec3(.035,.19,.055),smoothstep(.25,.75,wet)*smoothstep(.15,.5,heat));
- land=mix(land,rock,smoothstep(.62,.86,h));
+ float alpine=smoothstep(.65,.9,h);
+ land=mix(land,rock,alpine);
+ float frost=(1.-smoothstep(.18,.42,heat))*smoothstep(.4,.75,h);
+ land=mix(land,vec3(.68,.79,.85),frost);
+ float arid=(1.-smoothstep(.12,.38,wet))*smoothstep(.4,.7,heat);
+ land=mix(land,vec3(.56,.36,.16),arid*(1.-alpine));
  vec3 sea=mix(vec3(.008,.035,.12),vec3(.025,.32,.29),smoothstep(.32,.52,h));
  m.color=mix(land,sea,water);m.roughness=mix(.82,.13,water);
  m.color=mix(m.color,vec3(.76,.87,.94),ice);
