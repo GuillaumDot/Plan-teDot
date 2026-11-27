@@ -25,12 +25,12 @@ export function createSceneCompositor(gl){
  function dispose(){if(closed)return;closed=true;if(program)gl.deleteProgram(program);if(vao)gl.deleteVertexArray(vao);if(texture)gl.deleteTexture(texture);if(fbo)gl.deleteFramebuffer(fbo);if(depth)gl.deleteRenderbuffer(depth);}
  try{
  const vs=compile(gl.VERTEX_SHADER,'#version 300 es\nuniform vec4 uRect;out vec2 uv;void main(){vec2 p=vec2(float(gl_VertexID%2),float(gl_VertexID/2));uv=p;gl_Position=vec4(mix(uRect.xy,uRect.zw,p),0.,1.);}');
- const fs=compile(gl.FRAGMENT_SHADER,'#version 300 es\nprecision mediump float;in vec2 uv;uniform sampler2D uImage;out vec4 color;void main(){color=texture(uImage,uv);if(color.a<.01)discard;}');
+ const fs=compile(gl.FRAGMENT_SHADER,'#version 300 es\nprecision mediump float;in vec2 uv;uniform sampler2D uImage;uniform vec4 uHalo;uniform vec3 uViewLight;out vec4 color;void main(){color=texture(uImage,uv);if(color.a<.01){vec2 p=uv*2.-1.;float radius=length(p);if(radius<.915||radius>1.)discard;float h=max(0.,radius-.92);vec3 n=vec3(p/max(radius,.001),0.);float day=smoothstep(-.2,.5,dot(n,normalize(uViewLight)));float a=exp(-h*46.)*(1.-smoothstep(.965,1.,radius))*uHalo.a*(.035+.65*day);if(a<.005)discard;color=vec4(uHalo.rgb,a);}}');
  program=gl.createProgram();vao=gl.createVertexArray();texture=gl.createTexture();fbo=gl.createFramebuffer();depth=gl.createRenderbuffer();
  if(!program||!vao||!texture||!fbo||!depth)throw Error('Composite allocation failed');
  gl.attachShader(program,vs);gl.attachShader(program,fs);gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(program));
  }catch(e){dispose();throw e;}finally{for(const s of shaders)gl.deleteShader(s);}
- const rectLoc=gl.getUniformLocation(program,'uRect'),imageLoc=gl.getUniformLocation(program,'uImage');
+ const rectLoc=gl.getUniformLocation(program,'uRect'),imageLoc=gl.getUniformLocation(program,'uImage'),haloLoc=gl.getUniformLocation(program,'uHalo'),viewLightLoc=gl.getUniformLocation(program,'uViewLight');
  // Hardware limits are immutable for this context; query once, not per frame.
  const targetLimit=Math.min(gl.getParameter(gl.MAX_TEXTURE_SIZE),gl.getParameter(gl.MAX_RENDERBUFFER_SIZE));
  let allocated=0;
@@ -50,7 +50,7 @@ export function createSceneCompositor(gl){
  gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LESS);gl.depthMask(true);gl.colorMask(true,true,true,true);gl.viewport(0,0,size,size);gl.clearColor(0,0,0,0);gl.clearDepth(1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
  if(!adapter.draw(frame))return false;
  gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,old.draw);gl.viewport(...old.viewport);gl.disable(gl.DEPTH_TEST);gl.depthMask(false);gl.enable(gl.BLEND);gl.blendEquation(gl.FUNC_ADD);gl.blendFuncSeparate(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA,gl.ONE,gl.ONE_MINUS_SRC_ALPHA);gl.colorMask(...old.color);
- gl.useProgram(program);gl.bindVertexArray(vao);gl.activeTexture(gl.TEXTURE0);gl.bindSampler(0,null);gl.bindTexture(gl.TEXTURE_2D,texture);gl.uniform1i(imageLoc,0);gl.uniform4fv(rectLoc,rect);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);return !gl.isContextLost();
+ gl.useProgram(program);gl.bindVertexArray(vao);gl.activeTexture(gl.TEXTURE0);gl.bindSampler(0,null);gl.bindTexture(gl.TEXTURE_2D,texture);gl.uniform1i(imageLoc,0);gl.uniform4fv(rectLoc,rect);const tint=valid3(body.at)?body.at:[.25,.5,1];gl.uniform4f(haloLoc,tint[0],tint[1],tint[2],Math.max(0,Math.min(1,Number(body.atmo)||0)));gl.uniform3fv(viewLightLoc,frame.viewLight??[0,0,1]);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);return !gl.isContextLost();
  }finally{
  gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,old.draw);gl.bindFramebuffer(gl.READ_FRAMEBUFFER,old.read);gl.bindRenderbuffer(gl.RENDERBUFFER,old.renderbuffer);gl.viewport(...old.viewport);gl.useProgram(old.program);gl.bindVertexArray(old.vao);gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,oldTex);gl.bindSampler(0,oldSampler);gl.activeTexture(old.unit);
  gl.colorMask(...old.color);gl.depthMask(old.depthMask);gl.depthFunc(old.depthFunc);gl.clearColor(...old.clearColor);gl.clearDepth(old.clearDepth);gl.blendFuncSeparate(old.srcRGB,old.dstRGB,old.srcA,old.dstA);gl.blendEquationSeparate(old.eqRGB,old.eqA);for(const [flag,enabled] of flags)enabled?gl.enable(flag):gl.disable(flag);
