@@ -60,3 +60,7 @@ Relief optique renforcé à proximité via depth=1, principal et secours V9. Omb
 ## Relais ChatGPT — alpha.17
 
 Détails urbains city=1 : façades, toits, panneaux solaires, voirie, filtrage selon la distance. Moteur city98 conservé, croissance et géométrie des villes inchangées. Tests source et présence du paramètre GPU ; validation visuelle et fluidité à faire. Main et Supabase inchangés.
+
+## Relais ChatGPT — alpha.18
+
+weather=1 : vagues directionnelles, reflets modulés par la musique, écume littorale et cyclones avec œil et bandes spiralées, shaders V9 principal et secours. Géographie conservée. Aucun nouveau simulateur de fluides. Main et Supabase inchangés. Validation navigateur et iPhone requise.

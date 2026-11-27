@@ -47,3 +47,7 @@ The normal maps now require `?pbr=1` in the original renderer, and the new albed
 ## Alpha.17 — urban close-up experiment
 
 `?city=1` enables distance-filtered facade frames, sill and story shading, roof tiles, solar-panel material details and road markings in the existing city98 renderer. Lot placement, city growth, building dimensions and saved worlds remain unchanged. The fallback renderer retains its previous city93 visuals. Source and integration checks cover flag isolation and uniform availability, not a visual city close-up or performance benchmark. Browser CI and physical iPhone review remain open.
+
+## Alpha.18 — ocean and weather experiment
+
+`?weather=1` adds three distance-filtered directional wave slopes in planet coordinates, bounded music/weather modulation of reflection roughness, shore foam, and cyclone spiral bands with eye and eyewall in both V9 shader variants. Corrected cyclone shadow offset to planet coordinates in preview. Existing cloud and city policies, planet geometry and saved geography are unchanged; no fluid simulation is introduced. Tests cover flag isolation and uniform availability, not actual weather appearance. Browser and physical device validation pending.

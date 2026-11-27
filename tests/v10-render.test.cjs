@@ -115,3 +115,11 @@ test('urban preview is isolated behind an explicit flag',()=>{
  assert.match(html,/if\(u\.uCity10\)gl\.uniform1f\(u\.uCity10,PD10_CITY\)/);
  assert.match(html,/float cityDetail10\(float pixelsPerUnit\)/);
 });
+
+
+test('weather preview stays opt-in and covers both sphere shaders',()=>{
+ assert.match(html,/const PD10_WEATHER=PD10_QUERY\.get\('weather'\)==='1'\?1:0;/);
+ assert.equal((html.match(/vec3 oceanSlope10\(/g)||[]).length,2);
+ assert.equal((html.match(/uDepth10,uWeather10;/g)||[]).length,2);
+ assert.match(html,/if\(u\.uWeather10\)gl\.uniform1f\(u\.uWeather10,PD10_WEATHER\)/);
+});
