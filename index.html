@@ -4155,7 +4155,8 @@ const PDB_VQ = new Float32Array(9), PDBR = {k: 1, tx: 0};   // V9 : force des so
 function pdVWq(q, V){ for (let c = 0; c < 9; c += 3){ const r = qRot(q, [V[c], V[c + 1], V[c + 2]]); PDB_VQ[c] = r[0]; PDB_VQ[c + 1] = r[1]; PDB_VQ[c + 2] = r[2]; } return PDB_VQ; }
 // V9.6.2: independent Canvas2D recovery for actual projected bodies.
 const PD_REC_ADV = new URLSearchParams(location.search).get('advanced')==='1';
-let PD_REC_ACTIVE = new URLSearchParams(location.search).get('safe')==='1', PD_REC_PROBE=0, PD_REC_FAIL=0, PD_REC_LAST=-100, PD_REC_STATE=-1;
+const PD_REC_FORCED = new URLSearchParams(location.search).get('safe')==='1';
+let PD_REC_ACTIVE = PD_REC_FORCED, PD_REC_PROBE=0, PD_REC_FAIL=0, PD_REC_LAST=-100, PD_REC_STATE=-1;
 const PD_REC_CACHE=new Map();
 window.__pdRecovery=()=>({active:PD_REC_ACTIVE,failed:PD_REC_FAIL,checks:PD_REC_PROBE,textures:PDTX.on,atlasSize:PDTX.sz,atlasLayers:PDTX.got||0,atlasFailure:PDTX.failure||null});
 const PD_REC_BODIES = [];
@@ -4181,15 +4182,23 @@ function pdRecoverySprite(o,r){
  const noise=(x,y,z)=>{const ix=Math.floor(x),iy=Math.floor(y),iz=Math.floor(z),a=x-ix,b=y-iy,c=z-iz,u=a*a*(3-2*a),v=b*b*(3-2*b),w=c*c*(3-2*c);let q=0;for(let i=0;i<2;i++)for(let j=0;j<2;j++)for(let k=0;k<2;k++)q+=h(ix+i,iy+j,iz+k)*(i?u:1-u)*(j?v:1-v)*(k?w:1-w);return q;};
  const fb=(x,y,z)=>.53*noise(x*3,y*3,z*3)+.27*noise(x*7,y*7,z*7)+.13*noise(x*16,y*16,z*16)+.07*noise(x*34,y*34,z*34);
  const ll=Math.hypot(...l)||1;
+ // Screen-space terrain slopes reuse the previous samples without extra noise evaluations.
+ const heights=new Float32Array(n).fill(NaN);
  for(let y=0;y<n;y++)for(let x=0;x<n;x++){
- const nx=(x+.5)/n*2-1,ny=1-(y+.5)/n*2,rr=nx*nx+ny*ny;if(rr>=1)continue;
+ const nx=(x+.5)/n*2-1,ny=1-(y+.5)/n*2,rr=nx*nx+ny*ny;if(rr>=1){heights[x]=NaN;continue;}
  const nz=Math.sqrt(1-rr),sx=nx*Math.cos(ang)+nz*Math.sin(ang),sz=nz*Math.cos(ang)-nx*Math.sin(ang),f=fb(sx,ny,sz),fine=noise(sx*70,ny*70,sz*70);
  let mix=sat((f-.25)*2),base=c1.map((v,i)=>v*(1-mix)+c2[i]*mix);
  if(type===11||type===1){const land=f>.51&&type!==1;const polar=Math.abs(ny)>.83;const water=[.025,.15,.32];const earth=polar?[.79,.88,.94]:[.16+f*.22,.26+f*.25,.09+f*.13];base=land?earth:water;const cloud=fb(sx+4,ny+3,sz-2);if(cloud>.59)base=base.map(v=>v*.62+.38);}
  else if(type===2){const band=.5+.5*Math.sin(ny*37+f*8);base=c1.map((v,i)=>v*(.25+.75*band)+c2[i]*(.75-.75*band));}
  else if(type===4){const crack=1-Math.abs(f-.5)*15;if(crack>.65)base=[.95,.16+.35*crack,.035];else base=base.map(v=>v*.46);}
  else if(type===3){base=base.map(v=>v*.45+.45+fine*.08);}
- const diffuse=type===8?.95:.24+.76*Math.max(0,(nx*l[0]+ny*l[1]+nz*l[2])/ll),relief=.72+fine*.24+f*.24,edge=Math.pow(1-nz,3)*(o.atmo||0)*.22;
+ const height=type===1||type===2||type===8?0:type===11?Math.max(0,f-.51):f;
+ const above=heights[x],left=x?heights[x-1]:NaN;
+ heights[x]=height;
+ const dx=Number.isFinite(left)?(height-left)*n*.08:0;
+ const dy=Number.isFinite(above)?(height-above)*n*.08:0;
+ const bx=nx-dx,by=ny+dy,normalLength=Math.hypot(bx,by,nz);
+ const diffuse=type===8?.95:.24+.76*Math.max(0,(bx*l[0]+by*l[1]+nz*l[2])/(ll*normalLength)),relief=.72+fine*.24+f*.24,edge=Math.pow(1-nz,3)*(o.atmo||0)*.22;
  const i=(y*n+x)*4;for(let k=0;k<3;k++)d[i+k]=Math.round(sat(base[k]*diffuse*relief+edge*(o.at||c2)[k])*255);d[i+3]=Math.round(255*sat((1-Math.sqrt(rr))*n*.8));
  }
  g.putImageData(im,0,0);PD_REC_CACHE.set(key,c);while(PD_REC_CACHE.size>24)PD_REC_CACHE.delete(PD_REC_CACHE.keys().next().value);return c;
@@ -4708,7 +4717,7 @@ if(PD10_ENABLED){
   addEventListener('pagehide',e=>{if(e.persisted){PD10Host?.leave();return;}PD10Closed=true;PD10Host?.dispose();PD10Host=null;});
 }
 function pd10FocusDraw(p,b,dt){
-  if(!PD10_ENABLED||PD10Failed||PD10Closed||PD_REC_ACTIVE||!p||b.kind!==0||(!PD10_PREVIEW&&p.generatorVersion!==10))return false;
+  if(!PD10_ENABLED||PD10Failed||PD10Closed||PD_REC_FORCED||!p||b.kind!==0||(!PD10_PREVIEW&&p.generatorVersion!==10))return false;
   if(![0,1,2,3,4,6,9,10,11].includes(p.type))return false;
   if(!PD10Host){
     if(!PD10Loading){PD10Loading=true;import('./assets/cosmic/world-v10/focused-host.mjs').then(m=>{
@@ -4873,7 +4882,7 @@ function renderGalaxy(dt){
   gl.uniform2f(LN.u.uArc, 0, 0);
   for (let r = 20; r <= 120; r += 20){ gl.uniform4f(LN.u.uC, .45, .65, 1, .018); gl.uniform1f(LN.u.uRad, r); gl.drawArrays(gl.LINE_LOOP, 0, 256); }
   gl.useProgram(PT.p); gl.bindVertexArray(galaxy.vao); gl.uniformMatrix4fv(PT.u.uVP, false, VP); gl.uniform1f(PT.u.uT, time); gl.uniform1f(PT.u.uDpr, RS);
-  gl.uniform1f(PT.u.uScale, .55 * (H / 2) * P5); gl.uniform1f(PT.u.uRot, .003); gl.uniform3f(PT.u.uC, .62, .58, 1); gl.uniform1f(PT.u.uA, .85); gl.drawArrays(gl.POINTS, 0, galaxy.n);
+  gl.uniform1f(PT.u.uScale, .55 * (H / 2) * P5); gl.uniform1f(PT.u.uRot, .025); gl.uniform3f(PT.u.uC, .62, .58, 1); gl.uniform1f(PT.u.uA, .85); gl.drawArrays(gl.POINTS, 0, galaxy.n);
   gl.bindVertexArray(gdust.vao); gl.uniform1f(PT.u.uScale, 1.3 * (H / 2) * P5); gl.uniform3f(PT.u.uC, .85, .5, .75); gl.uniform1f(PT.u.uA, .22); gl.drawArrays(gl.POINTS, 0, gdust.n);
   gl.bindVertexArray(gyoung.vao); gl.uniform1f(PT.u.uScale, .9 * (H / 2) * P5); gl.uniform3f(PT.u.uC, .55, .75, 1); gl.uniform1f(PT.u.uA, 1); gl.drawArrays(gl.POINTS, 0, gyoung.n);
   { const gl2 = galaxyList(), P = new Map(gl2.map(o => [o.id, sysPos(o.id)])), br = [], add = (a, b) => { if (a && b && br.length < 1014) br.push(...a, ...b); };
