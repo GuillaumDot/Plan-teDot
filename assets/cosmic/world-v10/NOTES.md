@@ -70,3 +70,6 @@ Module app-adapter.mjs désactivé par défaut. Contrat explicite generatorVersi
 
 ## Compatibilité WebGL2
 Conversion contrôlée des shaders V10 en GLSL ES 3.00 à la compilation, chemin WebGL1 conservé. VAO dédié en WebGL2 et restauration des programmes, buffers, VAO, unités 0–3, textures et samplers après dessin; attribut générique de matériau restauré. Le client reste responsable du framebuffer, viewport, profondeur, mélange, scissor, masques, états d'upload et composition. Pas encore de branchement dans index.html. Tests CPU de conversion et navigateur sur contexte WebGL2 avec états sentinelles et modèles. Coût des lectures d'état à mesurer sur iPhone.
+
+## Pont de composition de scène
+scene-bridge.mjs traduit les trois axes viewOf du moteur historique et ses coordonnées écran vers le moteur V10. Une cible WebGL2 RGBA8 + profondeur 16 bits, 512² maximum (1,5 Mio théoriques), rend la planète avec transparence avant composition dans le framebuffer du client. Un seul contexte et aucune nouvelle boucle. Restauration des états utilisés, rendu en arrière-plan et erreurs à gérer par le client. Test CPU de projection et navigateur de composition et restauration. Le pont n'est pas encore appelé dans index.html; ordre des satellites, post-traitements, cache d'états GLR, restauration de contexte et iPhone restent à valider.

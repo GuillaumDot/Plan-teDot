@@ -110,3 +110,6 @@ App-adapter.mjs : interface pilotée par le client, flag désactivé par défaut
 
 ## Relais ChatGPT — V10 — compatibilité WebGL2
 Shaders GLSL ES 3.00 générés depuis les sources existantes, VAO isolé et restauration des états de dessin partagés. WebGL1 conservé. Tests CPU et WebGL2 ajoutés; host doit encore gérer composition, états framebuffer/viewport et upload. Gouverneur 624ebf5 CPU/WebGL verts; adaptateur c96e88c CPU vert, WebGL en cours au début du chantier. Aucun changement index/main/Supabase/audio. CI et iPhone à confirmer.
+
+## Relais ChatGPT — V10 — pont de composition de scène
+Projection basée sur les axes viewOf et coordonnées écran de renderPlanet, cible RGBA8/profondeur bornée, composition alpha sur le framebuffer hôte et restauration des états. Un contexte WebGL2, pas de RAF supplémentaire. Test CPU et navigateur ajouté. Adaptateur c96e88c CPU/WebGL verts; WebGL2 9b50752 CPU vert, WebGL en cours au début du chantier. Index de branche V9.8.2, main V9.8.3 : aucun changement index ni main. Le pont doit encore être raccordé au chemin drawBody et testé avec GLR/POST et iPhone.

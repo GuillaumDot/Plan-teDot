@@ -132,5 +132,12 @@ try{
  }finally{planet.dispose();renderer.dispose();gl.deleteVertexArray(vao);gl.deleteBuffer(buf);gl.deleteTexture(tex);gl.deleteSampler(sampler);}
  });
  assert.deepEqual(sharedCheck,{visible:true,vao:true,array:true,index:true,active:true,texture:true,sampler:true,city:true,landmarks:true,error:0});
+ const composition=await page.evaluate(async()=>{
+ const {createWorldAdapter}=await import('./app-adapter.mjs');const {createSceneCompositor,sceneFrame}=await import('./scene-bridge.mjs');
+ const canvas=document.createElement('canvas');canvas.width=canvas.height=128;const gl=canvas.getContext('webgl2',{preserveDrawingBuffer:true});
+ const adapter=createWorldAdapter({enabled:true}),compositor=createSceneCompositor(gl);
+ try{await adapter.init(gl);await adapter.select({type:'rock',seed:42,generatorVersion:10});gl.viewport(0,0,128,128);gl.clearColor(.1,.2,.3,1);gl.clear(gl.COLOR_BUFFER_BIT);gl.disable(gl.DEPTH_TEST);gl.activeTexture(gl.TEXTURE5);const frame=sceneFrame({basis:[[1,0,0],[0,1,0],[0,0,1]],light:[0,0,1],tier:0});const ok=compositor.draw(adapter,{x:64,y:64,r:40},frame,128,128);const center=new Uint8Array(4),corner=new Uint8Array(4);gl.readPixels(64,64,1,1,gl.RGBA,gl.UNSIGNED_BYTE,center);gl.readPixels(0,0,1,1,gl.RGBA,gl.UNSIGNED_BYTE,corner);return {ok,center:center.some((v,i)=>v!==corner[i]),corner:Math.abs(corner[0]-26)<=1&&Math.abs(corner[1]-51)<=1,active:gl.getParameter(gl.ACTIVE_TEXTURE)===gl.TEXTURE5,depth:!gl.isEnabled(gl.DEPTH_TEST),error:gl.getError()};}finally{compositor.dispose();adapter.dispose();}
+ });
+ assert.deepEqual(composition,{ok:true,center:true,corner:true,active:true,depth:true,error:0});
  assert.deepEqual(errors,[]);
 }finally{await browser.close();}

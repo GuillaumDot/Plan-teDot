@@ -163,3 +163,8 @@ assert.ok(shaderSource('attribute vec3 p; varying vec3 v;','vertex',true).includ
 const modern=shaderSource('precision mediump float; varying vec3 v; void main(){gl_FragColor=textureCube(t,v);}','fragment',true);
 assert.ok(modern.startsWith('#version 300 es\n')&&modern.includes('out vec4 pdFragment;')&&modern.includes('pdFragment=texture(t,v)'));
 console.log('WebGL2 shader compatibility verified');
+
+import {sceneFrame,sceneRect,SCENE_TARGET_CAP} from './scene-bridge.mjs';
+const scene=sceneFrame({basis:[[1,0,0],[0,1,0],[0,0,1]],light:[0,0,1]});assert.deepEqual(scene.eye,[0,0,3]);assert.deepEqual(scene.light,[0,0,1]);assert.ok(Math.abs(scene.mvp[10]+.5)<1e-6);assert.equal(SCENE_TARGET_CAP,512);
+const rect=sceneRect({x:50,y:50,r:23},100,100);assert.ok(rect.every((x,i)=>Math.abs(x-[-.5,-.5,.5,.5][i])<1e-9));assert.equal(sceneRect({x:0,y:0,r:0},100,100),null);
+console.log('Scene projection contracts verified');
