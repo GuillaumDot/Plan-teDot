@@ -1,3 +1,5 @@
+import {bakeWorld as bakeNatural,worldSample} from '../natural-world-v22/world.mjs';
+import {baseWorld} from './base-worlds.mjs';
 import {makeSurface} from './surface.mjs';
 import {WORLD_CONFIG} from './config.mjs';
 // WebGL cube face order +X,-X,+Y,-Y,+Z,-Z; rows follow texture t.
@@ -5,7 +7,9 @@ export function cubeDirection(face,u,v){switch(face){case 0:return [1,-v,-u];cas
 const byte=x=>Math.round(Math.max(0,Math.min(1,x))*255);
 export function bakeWorld(type,seed,size=WORLD_CONFIG.bakeResolution){
  if(!Number.isInteger(size)||size<8||size>128)throw new RangeError('Resolution 8..128');
- const sample=makeSurface(type,seed),terrain=[],climate=[];
+ const fallback=makeSurface(type,seed),terrain=[],climate=[];
+ const natural=type==='earth'?bakeNatural({seed:baseWorld(type,seed).seed,N:Math.max(32,size),landFraction:.3}):null;
+ const sample=(x,y,z)=>{const p=fallback(x,y,z);if(!natural)return p;const w=worldSample([x,y,z],natural.seed,natural);return {...p,height:w.elevation,water:w.water===1||w.water===2?1:0,heat:w.temperature,humidity:w.humidity,ice:Math.max(w.weights.ice||0,0)};};
  for(let face=0;face<6;face++){const a=new Uint8Array(size*size*4),b=new Uint8Array(a.length);
  for(let y=0;y<size;y++)for(let x=0;x<size;x++){const p=sample(...cubeDirection(face,2*(x+.5)/size-1,2*(y+.5)/size-1)),i=4*(y*size+x);a[i]=byte(p.height);a[i+1]=byte(p.water);a[i+2]=byte(p.ice);a[i+3]=byte(p.metal);b[i]=byte(p.heat);b[i+1]=byte(p.humidity);b[i+2]=byte(p.cloud);b[i+3]=byte(p.emission);}
  terrain.push(a);climate.push(b);}
