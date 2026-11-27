@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#010208">
 <title>planèteDot · ton univers musical</title>
-<meta name="pd-version" content="10.0.4">
+<meta name="pd-version" content="10.0.5">
 <meta name="description" content="PlanèteDot · l’album de GuillaumDot et ton univers musical en 3D : chaque planète est un morceau.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PlanèteDot">
@@ -1168,6 +1168,11 @@ async function initAccount(){
 /* ================= quality / GL ================= */
 const QKEY = 'planetedot.quality';
 function pdInApp(){ return /Instagram|FBAN|FBAV|FB_IAB|TikTok|musical_ly|BytedanceWebview|Snapchat|Line\//i.test(navigator.userAgent || ''); }   // V10.0.4 · test partagé : palier (detectTier) et atlas (pdAtlasCandidates)
+/* V10fp · données de la planète pour les villes et le son (ère, avancée de l'ère, écoute en cours, réduire les animations) ; lu seulement avec ?world10=1 */
+function pd10Extra(p){ let E = {e: 5, pc: 1}; try { E = eraInfo(p); } catch(e){} let red = false; try { red = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch(e){}
+  const tr = !au.paused && Q.length ? Q[qi] : null;
+  return {era: ST_OF[E.e] ?? 5, eraPc: E.e >= 6 ? 1 : E.pc, playing: !!tr && Array.isArray(p.tracks) && p.tracks.includes(tr), reducedMotion: red, inApp: pdInApp(),
+    audioIn: {bass: bassLvl, mid: SPB[1], high: SPB[3], level: audioLvl, kick: beatLvl, kickAge: time - beatT, live: !au.paused ? 1 : 0}}; }
 function detectTier(){
   const forced = LS.get(QKEY); if (forced === 0 || forced === 1 || forced === 2) return forced;
   let t = 2; const mem = navigator.deviceMemory || 4, cores = navigator.hardwareConcurrency || 4;
@@ -4741,9 +4746,9 @@ function pd10FocusDraw(p,b,dt){
   if(!PD10_ENABLED||PD10Failed||PD10Closed||PD_REC_ACTIVE||!p||b.kind!==0||(!PD10_PREVIEW&&p.generatorVersion!==10))return false;
   if(![0,1,2,3,4,6,9,10,11].includes(p.type))return false;
   if(!PD10Host){
-    if(!PD10Loading){PD10Loading=true;import('./assets/cosmic/world-v10/focused-host.mjs?v=10.0.4').then(m=>{
+    if(!PD10Loading){PD10Loading=true;import('./assets/cosmic/world-v10/focused-host.mjs?v=10.0.5').then(m=>{
       if(PD10Closed||PD10Failed)return;
-      PD10Host=m.createFocusedHost(gl,{enabled:true,onFallback:e=>{PD10Failed=true;console.warn('[PlanèteDot V10] repli historique',e.message);}});
+      PD10Host=m.createFocusedHost(gl,{enabled:true,search:location.search,onFallback:e=>{PD10Failed=true;console.warn('[PlanèteDot V10] repli historique',e.message);}});
     }).catch(e=>{PD10Failed=true;console.warn('[PlanèteDot V10] chargement indisponible',e.message);});}
     return false;
   }
@@ -4752,7 +4757,7 @@ function pd10FocusDraw(p,b,dt){
     const basis=[[1,0,0],[0,1,0],[0,0,1]].map(axis=>viewOf(p,axis));
     const light=Array.from(pdInF(pdFrame(b.x,b.y),b.L||[0,0,1],new Float32Array(3),0));
     glowFlush();
-    const ok=PD10Host.draw({planet:descriptor,body:b,basis,light,width:W,height:H,audio:Math.max(0,Math.min(1,b.lv||0)),time,delta:dt,tier:Math.max(0,Math.min(3,TIER)),growth:1});
+    const ok=PD10Host.draw({planet:descriptor,body:b,basis,light,width:W,height:H,audio:Math.max(0,Math.min(1,b.lv||0)),time,delta:dt,tier:Math.max(0,Math.min(3,TIER)),growth:1,appTier:TIER,mobile:PD_MOBILE,px:2*b.r/Math.max(RS,.01),gesture:dragging||!!pinch,...pd10Extra(p)});
     if(ok)pd9OccAdd(b);
     return ok;
   }catch(e){PD10Failed=true;PD10Host?.dispose();console.warn('[PlanèteDot V10] repli historique',e.message);return false;}
