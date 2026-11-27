@@ -76,3 +76,6 @@ scene-bridge.mjs traduit les trois axes viewOf du moteur historique et ses coord
 
 ## Correctif WebGL2 bloquant
 Le journal du job 140500487670 (commit 9b50752) confirme que `active` est réservé en GLSL ES 3.00. Renommage en stormActivity dans le shader source commun. Le test de composition 1ed6c0c a passé les contrats CPU; le rendu WebGL2 doit repasser avant insertion dans index.html. Aucun changement fonctionnel aux cyclones ni aux sauvegardes.
+
+## Contrôleur de scène principale
+focused-host.mjs relie la typologie numérique historique aux familles V10 seulement si generatorVersion vaut explicitement 10. Étoiles, cristallines et mystiques restent historiques (pas de correspondance validée). Initialisation paresseuse, déduplication des sélections, annulation lors de la sortie, composition au rythme de l'appelant et repli permanent de la session sur erreur. Aucun RAF, compte, audio ou sauvegarde. Tests de contrat avec doublures; le module n'est pas encore appelé depuis index.html. Le raccordement doit conserver l'ordre drawBody, les labels et GLR/POST, et attendre validation WebGL2.

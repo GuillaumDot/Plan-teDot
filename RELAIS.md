@@ -116,3 +116,6 @@ Projection basée sur les axes viewOf et coordonnées écran de renderPlanet, ci
 
 ## Relais ChatGPT — V10 — correctif de compilation WebGL2
 Le journal CI 140500487670 identifie précisément le mot réservé GLSL 300 `active`. Remplacé par stormActivity. Pont 1ed6c0c CPU vert, WebGL en cours au début de l'étape; compatibilité 9b50752 CPU vert/WebGL rouge. Ne pas raccorder index avant le nouveau CI vert. Aucun changement main/Supabase/audio.
+
+## Relais ChatGPT — V10 — contrôleur focus
+focused-host.mjs prépare le branchement de renderPlanet avec conversion explicite de types, generatorVersion 10 uniquement, gestion du cycle de vie et repli. Tests CPU ajoutés. Correctif cdf2bfa CPU vert, WebGL en cours au début du chantier; pont 1ed6c0c WebGL rouge pour le même mot réservé corrigé. Aucun changement index/main/Supabase/audio. Attendre CI WebGL2 vert avant branchement; iPhone non validé.
