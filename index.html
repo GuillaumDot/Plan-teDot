@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#010208">
 <title>planèteDot · ton univers musical</title>
-<meta name="pd-version" content="10.0-alpha.12">
+<meta name="pd-version" content="10.0-alpha.13">
 <meta name="description" content="PlanèteDot · l’album de GuillaumDot et ton univers musical en 3D : chaque planète est un morceau.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PlanèteDot">
@@ -4286,9 +4286,93 @@ function pd10ProbePixels(o,out){
  }finally{g.bindFramebuffer(g.READ_FRAMEBUFFER,read);g.bindFramebuffer(g.DRAW_FRAMEBUFFER,draw);}
 }
 function pd10TryProbe(o,out){try{return pd10ProbePixels(o,out);}catch(e){console.warn('[PlanèteDot] pixel probe unavailable',e);return false;}}
+// Recovery for devices where the full program links but produces no visible bodies.
+// Reuse the V9 surface atlas, ring profile, planet palette, view basis and stellar light.
+let pdAtlasMode=PD10_QUERY.get('surface')==='compact';
+let pdAtlasProgram=null;
+const pdAtlasLayers=[0,0,9,3,2,6,7,6,8,5,14,0];
+function pdAtlasBody(o){
+  if(!pdAtlasProgram)pdAtlasProgram=pdTry(()=>compile(`#version 300 es
+    in vec2 a; uniform vec2 center,res; uniform float radius,reach; out vec2 p;
+    void main(){p=vec2(a.x,-a.y)*reach;vec2 xy=(center+a*radius*reach)/res*2.-1.;gl_Position=vec4(xy.x,-xy.y,0,1);}`,
+    `#version 300 es
+    precision highp float; precision highp sampler2DArray;
+    in vec2 p; out vec4 color;
+    uniform sampler2DArray atlas; uniform sampler2D profile;
+    uniform vec3 aColor,bColor,air,ringColor,light; uniform mat3 basis;
+    uniform vec2 ring; uniform float opening,roll,spin,tilt,layer,ready,star,alpha,radius,atmo;
+    mat2 turn(float x){return mat2(cos(x),sin(x),-sin(x),cos(x));}
+    void main(){
+      float r=length(p),aa=min(.12,1./max(radius,1.));
+      vec2 q=turn(-roll)*p;
+      float rr=length(vec2(q.x,q.y/max(.065,opening)));
+      vec4 band=vec4(0.);
+      if(ring.y>ring.x&&rr>ring.x&&rr<ring.y){
+        float k=(rr-ring.x)/(ring.y-ring.x);
+        float coverage=texture(profile,vec2(.03+.94*k,.5)).a*smoothstep(0.,.035,k)*(1.-smoothstep(.96,1.,k));
+        band=vec4(ringColor*(.7+.3*cos(45.*k))*coverage,coverage);
+      }
+      float halo=exp(-max(r-1.,0.)*(star>.5?3.8:13.))*min(1.,atmo+.12);
+      vec4 body=vec4((star>.5?mix(aColor,vec3(1),.36):air)*halo*(star>.5?.67:.24),0.);
+      if(r<1.){
+        vec3 n=vec3(p,sqrt(max(0.,1.-r*r))),s=normalize(basis*n);
+        s.xy=turn(tilt)*s.xy;s.xz=turn(spin)*s.xz;
+        vec3 w=abs(s);w*=w;w/=max(dot(w,vec3(1)),.001);
+        vec3 t=texture(atlas,vec3(s.yz*1.15,layer)).rgb*w.x
+              +texture(atlas,vec3(s.zx*1.15,layer)).rgb*w.y
+              +texture(atlas,vec3(s.xy*1.15,layer)).rgb*w.z;
+        float tone=mix(.5+.22*sin(s.y*15.+sin(s.x*8.)),dot(t,vec3(.25,.62,.13)),ready);
+        vec3 albedo=mix(bColor,aColor,smoothstep(.15,.78,tone))*(.63+.82*tone);
+        if(layer==0.)albedo=mix(albedo,t,.36*ready);
+        float day=max(dot(n,normalize(light)),0.);
+        vec3 lit=albedo*(.18+.91*day)+air*pow(1.-n.z,3.)*(.1+.28*day)*atmo;
+        if(star>.5)lit=mix(aColor,vec3(1.),.35+.47*n.z)*(.85+.38*tone);
+        float a=1.-smoothstep(1.-aa,1.,r);body=vec4(mix(body.rgb,lit,a),a);
+      }
+      color=(q.y<0.?band+body*(1.-band.a):body+band*(1.-body.a))*alpha;
+    }`),'surface compacte');
+  if(!pdAtlasProgram){PD_REC_ACTIVE=true;return pdSafeBody(o);}
+  const g=gl,u=pdAtlasProgram.u,star=o.kind===1||o.type===8;
+  const fr=pdFrame(o.x,o.y),basis=o.uq?pdVWq(o.uq,PDB_VW):PDB_VW;
+  glowFlush();g.useProgram(pdAtlasProgram.p);g.bindVertexArray(quad);
+  g.uniformMatrix3fv(u.basis,false,basis);g.uniform3fv(u.light,pdInF(fr,o.L||[0,0,1],PDB_L,0));
+  g.uniform2f(u.center,o.x,o.y);g.uniform2f(u.res,W,H);
+  g.uniform1f(u.radius,o.r);g.uniform1f(u.reach,Math.max(star?2.8:1.18,o.q||1));
+  g.uniform3fv(u.aColor,o.c1);g.uniform3fv(u.bColor,o.c2||o.c1);g.uniform3fv(u.air,o.at||o.c1);
+  g.uniform3fv(u.ringColor,o.rc||o.c1);g.uniform2f(u.ring,o.rk?.[0]||0,o.rk?.[1]||0);
+  g.uniform1f(u.opening,o.ringS??.3);g.uniform1f(u.roll,o.roll||0);g.uniform1f(u.spin,o.ang||0);g.uniform1f(u.tilt,o.tilt||0);
+  g.uniform1i(u.atlas,8);g.uniform1i(u.profile,9);
+  g.uniform1f(u.layer,star?8:pdAtlasLayers[o.type||0]);g.uniform1f(u.ready,PDTX.on);
+  g.uniform1f(u.star,star?1:0);g.uniform1f(u.alpha,o.alpha??1);g.uniform1f(u.atmo,o.atmo??.4);
+  if(o.pd9)pd9Seen(o,basis);if(o.r>1.5&&(o.alpha??1)>.5)pd9OccAdd(o);
+  g.drawArrays(g.TRIANGLE_STRIP,0,4);useSP();return true;
+}
+const pdBodyChecks=[{misses:0,last:-100},{misses:0,last:-100}];
+function pdV9Before(o){
+  if(!PD10_ORIGINAL||PD10_PROBE_UNAVAILABLE||(mode!=='system'&&mode!=='planet')||
+     (o.kind!==0&&o.kind!==1)||o.r<4||(o.alpha??1)<.95||
+     !(o.x>3&&o.y>3&&o.x<W-3&&o.y<H-3))return null;
+  const check=pdBodyChecks[o.kind];
+  if(time-check.last<((check.misses||check.last<0) ? .35 : 6))return null;
+  check.last=time;glowFlush();
+  gl.getError(); // A stale error from an unrelated pass is not a framebuffer probe failure.
+  if(!pd10TryProbe(o,PD10_PIX_BEFORE)){PD10_PROBE_UNAVAILABLE=true;return null;}
+  return check;
+}
+function pdV9After(o,check){
+  if(!check)return;
+  const drawError=gl.getError();
+  if(!pd10TryProbe(o,PD10_PIX_AFTER)){PD10_PROBE_UNAVAILABLE=true;return;}
+  PD10_CHECKS++;
+  if(drawError)PD10_ERROR++;
+  check.misses=(drawError||pd10PixelDelta(PD10_PIX_BEFORE,PD10_PIX_AFTER)===0)?check.misses+1:0;
+  if(check.misses>=3)pdAtlasMode=true;
+}
+
 function pd10Draw(o){
  if(![0,1].includes(o.kind))return false;
  if(PD_REC_ACTIVE)return pdSafeBody(o);
+ if(pdAtlasMode&&(mode==='system'||mode==='planet'))return pdAtlasBody(o);
  if(PD10_ORIGINAL)return false;
  if(![o.x,o.y,o.r].every(Number.isFinite)||o.r<=0)return false;
  if(!PD10_SHADER||PD10_ERROR>=2||PD_REC_ACTIVE){PD_REC_ACTIVE=true;return pdSafeBody(o);}
@@ -4310,7 +4394,7 @@ function pd10Draw(o){
  useSP();if(PD10_ERROR>=2||PD10_MISSES>=3){PD_REC_ACTIVE=true;return pdSafeBody(o);}return true;
  }catch(e){PD10_ERROR=2;PD_REC_ACTIVE=true;useSP();return pdSafeBody(o);}
 }
-window.__pd10Status=()=>({renderer:PD_REC_ACTIVE?'canvas':PD10_ORIGINAL?'v9':'living-world',albumWorld:!!pdAlbumMap,worldDraws:pdWorldDraws,atlasActive:!!PDTX.on,atlasSize:PDTX.sz,atlasLayers:PDTX.got||0,atlasFailure:!!PDTX.fail,atlasWhy:pdTxWhy(),compiled:PD10_ORIGINAL?!!SP.v82:!!PD10_SHADER,checks:PD10_CHECKS,errors:PD10_ERROR,misses:PD10_MISSES,probeAvailable:!PD10_PROBE_UNAVAILABLE,normalFamilies:[...PD9PBR.maps.keys()],albedoFamilies:[...PD9PBR.albedo.keys()],blenderMaps:PD9PBR.maps.size,blenderDraws:PD10_DETAIL_DRAWS,albedoMaps:PD9PBR.albedo.size,albedoDraws:PD10_ALBEDO_DRAWS});
+window.__pd10Status=()=>({renderer:PD_REC_ACTIVE?'canvas':pdAtlasMode?'v9-compact':PD10_ORIGINAL?'v9':'living-world',albumWorld:!!pdAlbumMap,worldDraws:pdWorldDraws,atlasActive:!!PDTX.on,atlasSize:PDTX.sz,atlasLayers:PDTX.got||0,atlasFailure:!!PDTX.fail,atlasWhy:pdTxWhy(),compiled:PD10_ORIGINAL?!!SP.v82:!!PD10_SHADER,checks:PD10_CHECKS,errors:PD10_ERROR,misses:PD10_MISSES,probeAvailable:!PD10_PROBE_UNAVAILABLE,normalFamilies:[...PD9PBR.maps.keys()],albedoFamilies:[...PD9PBR.albedo.keys()],blenderMaps:PD9PBR.maps.size,blenderDraws:PD10_DETAIL_DRAWS,albedoMaps:PD9PBR.albedo.size,albedoDraws:PD10_ALBEDO_DRAWS});
 
 function drawBody(o){
   if(pd10Draw(o))return;
@@ -4343,7 +4427,9 @@ function drawBody(o){
   gl.uniform1f(u.uEvo, o.evo || 0); if (o.evo && o.evoD) gl.uniform3fv(u.uEvoD, o.evoD); gl.uniform1f(u.uWx, o.wx || 0); gl.uniform1f(u.uFlash, o.flash || 0);
   gl.uniform1i(u.uTkN, o.cq ? o.cq.n : 0); gl.uniform1i(u.uTkSel, o.cq ? o.cq.sel : -1); gl.uniform1f(u.uTkHi, o.cq ? o.cq.hi : 0); if (o.cq && o.cq.n){ { const zq = pdZoneLerp(o.cq, o.pd9); gl.uniform4fv(u.uTk, zq.tk); gl.uniform4fv(u.uTkB, zq.tkB); } if (u.uTkG) gl.uniform4fv(u.uTkG, o.cq.tkG || TKG0); }
   if (o.kind === 3){ const hb = o.r * .26, y0 = Math.floor(H - o.y - hb); gl.enable(gl.SCISSOR_TEST); gl.scissor(0, y0, W, Math.max(0, Math.ceil(H - o.y + hb) - y0)); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); gl.disable(gl.SCISSOR_TEST); return; }   // V9 · fluidité : la traînée n'éclaire qu'une bande, le reste de l'écran n'est plus calculé pour rien
+  const check=pdV9Before(o);
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  pdV9After(o,check);
 }
 function planetBody(p, pos, pr, r, lvl, extra){
   const b = planetBody0(p, pos, pr, r, lvl, extra); const st = stage(p); b.arch = p.arch || 0;
@@ -4800,7 +4886,7 @@ function renderPlanet(dt){ PASS.clear();
   if (pr){
     const r = pxR(bodyR(p), pr.w); const isP = p.id === playingPlanet();
     const b = planetBody(p, pos, pr, r, isP ? audioLvl * .6 : 0, terrUniforms(p, ease(mapA)));
-    b.alpha = 1; b.rk = null; b.q = 1 + p.atmo * .55 + .12; b.L = norm(b.L.map((v, k) => v * .9 + [-.55, .42, .72][k] * .18)); b.sunI = 1.1; bodies.push(b); satellites(p, pos, bodyR(p), bodies); 
+    b.alpha = 1; b.q = Math.max(b.q,1 + p.atmo * .55 + .12); b.L = norm(b.L.map((v, k) => v * .9 + [-.55, .42, .72][k] * .18)); b.sunI = 1.1; bodies.push(b); satellites(p, pos, bodyR(p), bodies);
     curP = {p, x: pr.x, y: pr.y, r};
     p.terr.slice(0, 12).forEach((t, k) => { const v = viewOf(p, seedDir(t)); if (v[2] < .12) return;
       const x = pr.x + v[0] * r, y = pr.y - v[1] * r; const fl = flagsOn(p, t);
@@ -5081,6 +5167,8 @@ function jumpTo(o){ PDA.nav('jump'); $('#gp').classList.add('off'); jump = {o, t
 function enterSystem(sys, ro, owner){
   if (ro && owner && owner !== GD_ID && !MYSIG.some(x => x.type === 'visit' && x.to === owner && Date.now() - x.ts < 6 * 3600e3)) pushSignal({id: uid(), type: 'visit', to: owner, fromName: SYS.user, fromSys: SYS.name, ts: Date.now()});
   if (radio) stopRadio();
+  if(ro && sys!==SYS)starIgnite=1;
+  for(const check of pdBodyChecks){check.last=-100;check.misses=0;}
   VIEW = sys; readonly = ro; ownerId = owner || null; mode = 'system'; focus = null; selT = -1; overview(); transFx(.8);
   cam.dist = cam.g.dist * 3.2; cam.t = [0,0,0]; flyT = 0; closeSheet(); setRail(false); updUI(); renderFilters(); $('#gp').classList.add('off'); PDA.nav('system');
   if (ro) pdArrival(sys, owner);
