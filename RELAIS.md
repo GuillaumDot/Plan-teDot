@@ -157,3 +157,54 @@ Normalisation des dimensions avant upload, galaxies limitées à min(512, atlas)
 
 ## V10.0.4 — compléments à la V10.0.3 (audit Grok, 27/11/2026)
 Branche locale fix/grok-v10.0.4-on-1003 (depuis main f120720, PR #5 conservée en entier). Ajouts : rendu V10 au zoom en opt-in (`?world10=1`), la planète V9 texturée revient par défaut ; atlas 512 px au palier 1 (256 px seulement au palier 0) ; galaxies en 512 px ; mode économie d'énergie iOS détecté (30 images/s sans perte de netteté) ; file de décodage mobile 6 et image libérée après envoi ; cartes V10 cuites en 128 px ; navigateurs intégrés (Instagram, TikTok…) en atlas 256 px avec rendu au palier 1 (décision Dot Design) ; atterrissage cadré côté jour (comme focusOn) et léger biais de lumière V9.6 sur le rendu V9 par défaut. Le tone mapping Reinhard et l'éclairage V10 de la PR #5 sont conservés tels quels. À vérifier sur iPhone : images/s de la vue planète V9, mémoire, écran verrouillé.
+
+## V10 « plein potentiel » — inventaire (Grok, 27/11/2026, branche locale feature/v10-full-potential depuis 39862e4)
+Tout reste derrière `?world10=1` (V10 opt-in). Coûts GPU estimés à la main (RGBA8, +1/3 pour les mipmaps), à confirmer sur iPhone.
+
+| Élément | Branché ? | Taille | Stabilité | Coût GPU |
+|---|---|---|---|---|
+| world-v10/bake.mjs + bake-worker.mjs (cube-sphère 128) | oui, Worker, toutes familles | 2,7 Ko + 0,3 Ko | stable (tests CPU) | 2 cubes × 6 × 128² ≈ 0,5 Mio avec mips |
+| natural-world-v22 (hydrologie, biomes Whittaker, villes, routes) | oui, **Terre seulement** (`bakeNatural` grille 64) | 252 Ko | stable | inclus dans les cubes |
+| gpu-maps.mjs (cubes terrain/climat, mipmaps PR #5) | oui | 2,4 Ko | stable | voir bake |
+| materials.glsl / planet-fragment.glsl / relief-atmosphere.glsl | oui | 2,3 / 6,0 / 3,7 Ko | stable ; palettes fixes par famille (c1/c2 ignorés) | 1 passe plein écran planète, 4 échantillonneurs |
+| renderer.mjs (sphère UV LOD 24×12 → 128×64) | oui | 7,6 Ko | stable | 1 draw + villes + monuments + végétation |
+| scene-bridge.mjs (cible hors écran + halo) | oui | 7,6 Ko | stable | cible ≤ 1024² RGBA8 + profondeur 16 bits ≈ 6 Mio |
+| cities.mjs + infrastructure.mjs (bâtiments, routes, ponts) | oui, Terre, palier ≥ 1, `growth` figé à 1 | 7,4 + 2,4 Ko | stable | ≈ 0,1–0,3 Mio de sommets |
+| landmarks.mjs + static-glb.mjs (monuments GLB) | oui, Terre, palier ≥ 2 | 3,0 + 5,9 Ko | stable | < 0,2 Mio |
+| vegetation.mjs (3 GLB expansion-v14) | oui, Terre, palier ≥ 2 | 4,7 Ko | stable | < 0,3 Mio |
+| terrain-texture.mjs (procedural-v19 albédo + hauteur 512, atlas Terre) | oui, sauf gazeuses | 6,0 Ko | stable | 2 × 512² ≈ 2,7 Mio |
+| procedural-v19 (biomes GLB LOD, height, albedo, normals) | albédo + hauteur seulement ; GLB et normales objet non utilisés | 5,3 Mo | stable | — |
+| blender/pbr-512 (basalte, désert, gaz, glace, océan ; normales, rugosité) | V9 seulement en `?pbr=1` ; **pas en V10** | 1,9 Mo (512×256, UV sphère) | stable | 512×256 ≈ 0,5 Mio par paquet |
+| visual-audio.mjs (enveloppe V2.2) | oui, un seul nombre `b.lv` relissé 0,8 s | 0,4 Ko | stable | 1 uniforme |
+| weather.mjs (cyclone) | oui | 0,4 Ko | stable | analytique |
+| transitions.mjs, camera.mjs, surface.mjs | surface oui (repli procédural) ; camera non branché ; transitions tests seulement | 1,8 / 1,2 / 2,0 Ko | — | — |
+| world/expansion-v14 (Living Infrastructure, 192 GLB, `living.mjs`) | 3 modèles de végétation seulement | 7,0 Mo | prototypes low-poly | ≤ 720 triangles par GLB |
+| world/volume-v17 (atmosphère volumétrique GLSL ES 3.00) | non | 20 Ko | prototype | passe supplémentaire, à réserver aux paliers 2–3 |
+| world/performance-v18 (budgets communs) | non (budgets repris dans full-potential.mjs) | 140 Ko | doc + helpers | — |
+| world/world-v10, world-v11 (GLB gros plans), universe-v13, chemistry-v12 | non | 8,8 / 11 Mo / 16 Ko | prototypes | à instancier plus tard |
+
+## V10 « plein potentiel » — villes procédurales vivantes (Grok, 27/11/2026, branche locale feature/v10-full-potential, commit c04c696, rien poussé)
+Cadre : vision de Guillaume copiée dans `docs/VISION_PACK_COSMIQUE.md` (référence de tout le chantier V10).
+- **Fichiers** : `assets/cosmic/world-v10/living-cities.mjs` (nouveau), `renderer.mjs`, `focused-host.mjs`, `app-adapter.mjs`, `scene-bridge.mjs`, `full-potential.mjs`, `index.html` (fonction `pd10Extra` + appel V10 seulement), `tests/living-cities.test.mjs` (nouveau).
+- **Ressources exploitées** : `world/expansion-v14/models/*.glb` (18 familles d'infrastructure sur 24 ; arbres, arches, flèches de glace et évents laissés à `vegetation.mjs` / Phase 2), `expansion-v14/living.mjs` (`eligible`, filtrage par biome), données `natural-world-v22` (villes, ports, rivières, routes, ponts, température, précipitations). Textures intégrées aux GLB **non chargées** (le décodeur ne lit que géométrie + couleurs de sommets) : 6,5 Mo sur disque, mais seuls les modèles placés sont téléchargés (≈ 25 Ko chacun).
+- **Décisions** : placement déterministe (seed) autour de chaque ville (marché, château d'eau, serre ; phare, grues, cargo pour les ports ; gare ; éoliennes ou panneaux solaires selon le climat ; stade, monument, observatoire, paraboles, pas de tir, balise pour les grandes villes) ; ponts aux franchissements du générateur ; véhicules et trains seulement entre deux cellules d'une route existante. Ère minimale par famille (ST_OF 1→5) puis fraction selon l'écoute (`cityGrowth` : plancher 0,5 + 0,5 × avancée de l'ère, croît quand le morceau de la planète joue). Un `drawArraysInstanced` par famille/variante, VAO dédié par lot, élimination de la face cachée dans le vertex shader. Lumières la nuit seulement, sodium `#ffb35a` / LED `#dfe8ff` ; gain basse via `cityLightGain` (≤ +20 %). Trafic : deux horloges continues mélangées selon jour/nuit (plus lent la nuit, règle `activity` de living.mjs).
+- **Paliers** (`LIVING_TIER`) : 0 = rien (ni chargement ni dessin) ; 1 = 1 variante/famille, ≤ 96 instances, ≤ 5 000 triangles ; 2 = 2 variantes, ≤ 192 instances, ≤ 12 000 triangles ; 3 = 4 variantes, ≤ 320, ≤ 24 000. Chargement au premier gros plan (LOD ≥ 2) seulement. Repli : toute erreur coupe la couche (`livingBroken`) sans toucher la planète.
+- **Rollback** : `?v10city=0`. V9 sans `?world10=1` : code de rendu inchangé (diff d'index.html limité à `pd10Extra` et à l'appel `PD10Host.draw`).
+- **Tests réels** : `node --test tests/living-cities.test.mjs` 9/9 (déterminisme, 0 au palier 0, plafonds par palier, 7 types sans villes, véhicules sur routes, ères, budget triangles/mémoire avec les vrais GLB, couleurs, rollback) ; `tests/render-audio.test.cjs` 18/18 ; `world-v10/test.mjs` OK ; les 144 GLB des 18 familles se décodent.
+- **Mesures réelles (Chromium SwiftShader, pas un iPhone)** : Terre seed 12345, palier V10 2 : 24–25 appels instanciés, 144 instances ; mémoire GPU suivie par compteur JS 3,00 → 3,43 Mio (+≈ 0,43 Mio pour la couche). Placement CPU 6–12 ms une fois par planète. **Aucune mesure de fps iPhone.**
+- **Captures** : `preuves/v10fp-villes-avant-*.png` (main 39862e4) / `v10fp-villes-apres-*.png`, planche `v10fp-villes-planche.png`, gros plan `v10fp-villes-apres-zoom-ville.png`, V9 sans flag `v10fp-v9-avant*.png` / `v10fp-v9-apres-v9.png`.
+- **Problèmes / reste** : au gros plan, les structures restent petites et floues car la cible hors écran est plafonnée par palier et le monde est cuit à 128 px par face ; le côté nuit n'a pas été atteint dans le banc (lumières de nuit non vérifiées à l'image) ; écart V9 mesuré au niveau du bruit d'animation (21,2 contre 19,3 de bruit entre deux captures de main), donc pas une preuve pixel à pixel : à refaire avec le temps figé. Interactions (tap ville, panneau ancré) : ébauche hors commit (`patches-v10fp/wip-interactions-index.diff`), le côté module est déjà commité derrière `?v10act=1` (éteint par défaut). Inventaire complet Phase A et registre central : à faire ensuite.
+
+## V10 « plein potentiel » — netteté, lumières de nuit, contrôle V9 (Grok, 27/11/2026, commits ea5d52d et b58a775, rien poussé)
+- **Cause des continents en blocs** : la Terre V10 lisait la grille naturelle 64 × 64 par face au plus proche (`cellOf`), avec une eau binaire : chaque cellule devenait un carré de texels, quelle que soit la cuisson. Correctif dans `bake.mjs` : lecture bilinéaire des champs du générateur et côte découpée par un bruit fin. La part de terres reste à ±3 points (test). Cuisson à 256 px par face dès le palier 2. Rollback : `?v10smooth=0` (retour à la cuisson 128 d'origine).
+- **Cause du flou au gros plan** : la cible hors écran était un carré de la planète entière plafonné à 1024 px, donc étiré ≈ ×3 au zoom. Correctif dans `scene-bridge.mjs` : seule la partie visible de la planète est rendue, à la résolution du canevas, dans le budget de pixels du palier. Rollback : `?v10win=0`. Budgets estimés : palier 2 ≈ 14,3 Mio sur 16. Mesure SwiftShader au palier 2 : cible 384 × 832, compteur GPU 6,4 Mio (contre 3,4 Mio avant).
+- **Captures** : `preuves/v10fp-nettete-ville-avant-apres.png` (jour) et `v10fp-nettete-nuit-avant-apres.png` (nuit) ; gros plan sur les lumières de nuit (sodium et LED) : `v10fp-nuit-lumieres-zoom.png`.
+- **Contrôle V9 sans flag, à temps figé** (horloge et `Math.random` simulés, état caméra et orbite remis à zéro, 8 images au pas fixe) : écart moyen main/branche de 2,06 sur 255. Entre deux passes de main seules, il est de 2,64 : le banc n'est pas encore déterministe (inertie de caméra, gouverneur de résolution), donc **pas de preuve pixel à pixel à 0**. Le diff de code d'`index.html` sur le chemin V9 reste nul (seuls `pd10Extra` et l'appel V10 ont changé).
+- **Tests** : `tests/v10-sharpness.test.mjs` 4/4, `living-cities` 9/9, `render-audio` 18/18, `world-v10/test.mjs` OK.
+
+## 10.0.5 — préparation publication (local, non poussée) — 27/11/2026 21h45 (Paris)
+- Version 10.0.4 → 10.0.5 : `index.html` (meta `pd-version`, import `focused-host.mjs?v=`) + attente de `assets/cosmic/world-v10/test.mjs`.
+- Flags éteints par défaut : V10 seulement avec `?world10=1` (ou `world10preview=1`) ; interactions `?v10act=1` en plus. Sans flag, aucune requête `world-v10` n'est faite (vérifié dans le log serveur).
+- Tests : render-audio 18/18, living-cities 9/9, v10-sharpness 4/4, world-v10/test.mjs OK, app-smoke OK (SwiftShader, copie locale du script avec playwright-core).
+- Smoke sans flag : 0 pageerror, 0 erreur shader ; les 6 `ERR_FAILED` viennent des ressources externes de la sandbox et sont identiques sur main 39862e4.
+- Diff V9 accepté par le chef (branche vs main 2.06 < main vs main 2.64). Rien poussé, rien fusionné.
