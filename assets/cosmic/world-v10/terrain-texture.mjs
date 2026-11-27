@@ -1,8 +1,9 @@
 import {resolveTerrain} from './catalog.mjs';
 import {assertTextureGL} from './texture-guard.mjs';
-export async function loadTerrainAlbedo(gl,type,biome,{maxSize=512,signal}={}){
+export async function loadTerrainAlbedo(gl,type,biome,{maxSize=512,signal,channel='albedo'}={}){
  const asset=resolveTerrain(type,biome);if(!asset)return null;
- const url=new URL('../../../'+asset.albedo,import.meta.url);
+ if(!['albedo','height'].includes(channel))throw new RangeError('Invalid terrain channel');
+ const url=new URL('../../../'+asset[channel],import.meta.url);
  const response=await fetch(url,{signal});if(!response.ok)throw new Error('Terrain HTTP '+response.status);
  const bitmap=await createImageBitmap(await response.blob());
  let texture=null;
@@ -24,7 +25,8 @@ export async function loadTerrainAlbedo(gl,type,biome,{maxSize=512,signal}={}){
 // A single bounded atlas for four terrestrial detail materials. Canvas rows
 // are uploaded without Y flipping: the first row corresponds to v=0.
 export const EARTH_DETAIL_TILES=Object.freeze(['tropical','desert','alpine','polar']);
-export async function loadEarthDetailAtlas(gl,{maxSize=256,signal}={}){
+export async function loadEarthDetailAtlas(gl,{maxSize=256,signal,channel='albedo'}={}){
+ if(!['albedo','height'].includes(channel))throw new RangeError('Invalid atlas channel');
  const cap=Math.min(maxSize,gl.getParameter(gl.MAX_TEXTURE_SIZE));
  if(!Number.isFinite(cap)||cap<2)throw new RangeError('Invalid atlas cap');
  const tile=Math.floor(cap/2),size=tile*2;
@@ -33,7 +35,7 @@ export async function loadEarthDetailAtlas(gl,{maxSize=256,signal}={}){
  for(const [i,biome] of EARTH_DETAIL_TILES.entries()){
   if(signal?.aborted)throw new DOMException('Aborted','AbortError');
   const asset=resolveTerrain('earth',biome);
-  const response=await fetch(new URL('../../../'+asset.albedo,import.meta.url),{signal});
+  const response=await fetch(new URL('../../../'+asset[channel],import.meta.url),{signal});
   if(!response.ok)throw Error('Atlas '+biome+' HTTP '+response.status);
   const bitmap=await createImageBitmap(await response.blob());
   try{ctx.drawImage(bitmap,(i%2)*tile,Math.floor(i/2)*tile,tile,tile);}finally{bitmap.close?.();}
@@ -51,4 +53,9 @@ export async function loadEarthDetailAtlas(gl,{maxSize=256,signal}={}){
   assertTextureGL(gl,'Earth detail atlas');
   return {texture,atlas:true,width:size,height:size,bytes:size*size*4,dispose(){if(texture){gl.deleteTexture(texture);texture=null;}}};
  }catch(e){if(texture)gl.deleteTexture(texture);throw e;}finally{gl.bindTexture(gl.TEXTURE_2D,old);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,flip);}
+}
+
+// Same layout as the corresponding albedo texture, with independent ownership.
+export function loadTerrainHeight(gl,type,biome,{atlas=false,...options}={}){
+ return atlas&&type==='earth'?loadEarthDetailAtlas(gl,{...options,channel:'height'}):loadTerrainAlbedo(gl,type,biome,{...options,channel:'height'});
 }

@@ -95,3 +95,6 @@ Animation vertex des végétaux sans nouveau buffer, amplitude bornée et envelo
 
 ## Relais ChatGPT — V10 — matériaux GLB
 Couleurs originales COLOR_0 et facteur de base, rugosité des matériaux conservée dans les sommets des GLB. Reflets directs selon rugosité et éclairage des vitrages, format 44 octets réservé aux modèles; proxies inchangés. Tests CPU sur six ressources et WebGL du format. Phénomènes 0e4bf8c CPU/WebGL verts, vent a142b2b CPU vert, WebGL en cours au début du chantier. Textures et normal maps embarquées pas encore exploitées. Nouveau CI et iPhone à confirmer; aucun changement main, sauvegarde, Supabase ni audio.
+
+## Relais ChatGPT — V10 — microrelief des matériaux planétaires
+Cartes de hauteur V1.9 raccordées au même routage que les albedos; normales perturbées par différences finies triplanaires, qualité 2/3 et transition atténuée entre biomes. Une texture supplémentaire bornée, repli albedo seul. Tests WebGL de chargement/libération et variation des pixels. Vent a142b2b CPU/WebGL verts; matériaux 7c176e4 CPU vert, WebGL en cours au début du chantier. Aucun changement main, données ni audio. CI du nouveau commit et iPhone à confirmer; displacement et textures GLB restent distincts.

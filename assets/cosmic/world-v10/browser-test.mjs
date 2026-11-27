@@ -17,7 +17,7 @@ try{
  await page.screenshot({path:'v10-'+type+'.png'});
  }
  const textureCheck=await page.evaluate(async()=>{
- const {loadTerrainAlbedo,loadEarthDetailAtlas}=await import('./terrain-texture.mjs');
+ const {loadTerrainAlbedo,loadEarthDetailAtlas,loadTerrainHeight}=await import('./terrain-texture.mjs');
  const {assertTextureGL}=await import('./texture-guard.mjs');
  const gl=document.querySelector('canvas').getContext('webgl');
  const asset=await loadTerrainAlbedo(gl,'earth','alpine',{maxSize:64});
@@ -26,11 +26,12 @@ try{
  const released=!gl.isTexture(texture);
  const gas=await loadTerrainAlbedo(gl,'gas','alpine');
  const atlas=await loadEarthDetailAtlas(gl,{maxSize:64});const atlasValid=atlas.atlas&&atlas.width===64&&atlas.bytes===16384&&gl.isTexture(atlas.texture);const atlasTexture=atlas.texture;atlas.dispose();const atlasReleased=!gl.isTexture(atlasTexture);
+ const height=await loadTerrainHeight(gl,'earth','alpine',{atlas:true,maxSize:64});const heightValid=height.atlas&&height.width===64&&gl.isTexture(height.texture);const heightTexture=height.texture;height.dispose();const heightReleased=!gl.isTexture(heightTexture);
  gl.enable(0);
  let rejected=false;try{assertTextureGL(gl,'Injected failure')}catch(e){rejected=e.message.includes('WebGL error');}
- return {valid,released,atlasValid,atlasReleased,gas:gas===null,rejected,error:gl.getError()};
+ return {valid,released,atlasValid,atlasReleased,heightValid,heightReleased,gas:gas===null,rejected,error:gl.getError()};
  });
- assert.deepEqual(textureCheck,{valid:true,released:true,atlasValid:true,atlasReleased:true,gas:true,rejected:true,error:0});
+ assert.deepEqual(textureCheck,{valid:true,released:true,atlasValid:true,atlasReleased:true,heightValid:true,heightReleased:true,gas:true,rejected:true,error:0});
  // Draw the same synthetic terrain at both tiers and inspect GL errors.
 // This checks both branches; visual shadow fidelity requires device review.
  const qualityCheck=await page.evaluate(async()=>{
@@ -91,5 +92,16 @@ try{
  }}finally{renderer.dispose();}return results;
  });
  assert.deepEqual(weatherCheck,[{type:'gas',changed:true,error:0},{type:'volcanic',changed:true,error:0}]);
+ const microCheck=await page.evaluate(async()=>{
+ const {createPlanetRenderer}=await import('./renderer.mjs');
+ const canvas=document.createElement('canvas');canvas.width=canvas.height=128;
+ const gl=canvas.getContext('webgl',{preserveDrawingBuffer:true}),renderer=await createPlanetRenderer(gl),size=8;
+ const terrain=Array.from({length:6},()=>new Uint8Array(size*size*4)),climate=terrain.map(a=>a.slice());
+ const planet=renderer.upload({type:'rock',size,terrain,climate,bytes:48*size*size});
+ const mvp=new Float32Array([.8,0,0,0,0,.8,0,0,0,0,.5,0,0,0,0,1]);
+ gl.viewport(0,0,128,128);gl.enable(gl.DEPTH_TEST);
+ try{await planet.loadDetail('desert',{maxSize:128});const frames=[];for(const microStrength of [0,1]){gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);renderer.draw(planet,{mvp,tier:2,eye:[0,0,-3],light:[.8,.2,-.5],microStrength});const p=new Uint8Array(128*128*4);gl.readPixels(0,0,128,128,gl.RGBA,gl.UNSIGNED_BYTE,p);frames.push(p);}return {height:!!planet.heightDetail,changed:frames[0].some((v,i)=>v!==frames[1][i]),error:gl.getError()};}finally{planet.dispose();renderer.dispose();}
+ });
+ assert.deepEqual(microCheck,{height:true,changed:true,error:0});
  assert.deepEqual(errors,[]);
 }finally{await browser.close();}
