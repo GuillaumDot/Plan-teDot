@@ -8,6 +8,8 @@ try{
  for(const type of ['earth','aquatic','rock','volcanic','ice','gas','spectralMetallic']){
  await page.selectOption('#family',type);
  await page.waitForFunction(()=>document.querySelector('#status').textContent==='Planète chargée');
+ await page.waitForFunction(()=>['ready','none','fallback'].includes(document.querySelector('canvas').dataset.detail));
+ assert.equal(await page.locator('canvas').getAttribute('data-detail'),type==='gas'?'none':'ready',type+' detail texture');
  await page.waitForTimeout(200);
  const result=await page.evaluate(()=>{const c=document.querySelector('canvas'),gl=c.getContext('webgl');return new Promise(resolve=>requestAnimationFrame(()=>{const pixel=new Uint8Array(4);gl.readPixels(c.width>>1,c.height>>1,1,1,gl.RGBA,gl.UNSIGNED_BYTE,pixel);resolve({error:gl.getError(),pixel:[...pixel]});}));});
  assert.equal(result.error,0,type);assert.ok(result.pixel.slice(0,3).some((v,i)=>Math.abs(v-[6,9,18][i])>4),type+' appears blank');

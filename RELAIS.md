@@ -53,3 +53,6 @@ Branche dev/chatgpt-world-v10. Modules dans assets/cosmic/world-v10 : profils, s
 
 ## Relais ChatGPT — V10 — protection des textures GPU
 Branche dev/chatgpt-world-v10. Les chargeurs de cube maps et d'albedo rejettent désormais les erreurs WebGL au lieu de renvoyer une texture incomplète. Test navigateur ajouté : chargement réel alpine, plafond de résolution, libération idempotente, exclusion des géantes gazeuses et erreur GPU injectée. Les tests du commit précédent c8154d9 étaient verts (45992914509 et 45992914466). Nouveau commit à vérifier par CI. Aucune modification main, Supabase, audio ou données. Le chargeur albedo n'est pas encore raccordé au rendu de production.
+
+## Relais ChatGPT — V10 — textures de détail dans le rendu labo
+Connexion du catalogue albedo au shader de surface via projection triplanaire, modulation bornée, texture neutre de repli et libération/annulation par planète. Aperçu V10 uniquement : test de chargement pour les six familles solides, exclusion gaz. Tests CI du nouveau commit à confirmer, aucun changement main ni Supabase, aucune validation iPhone. Natural World V2.2 et mélange local des biomes restent à intégrer.

@@ -11,7 +11,7 @@ export async function loadPlanetProgram(gl){
  const vs=compile(gl.VERTEX_SHADER,vertex),fs=compile(gl.FRAGMENT_SHADER,'precision '+precision+' float;\n'+sources.join('\n'));
  program=gl.createProgram();if(!program)throw new Error('Program allocation failed');gl.attachShader(program,vs);gl.attachShader(program,fs);gl.linkProgram(program);
  if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(program)||'Program link failed');
- const uniforms=Object.fromEntries(['uMVP','uTerrain','uClimate','uFamily','uLight','uEye','uAtmosphereTint','uAtmosphereDensity','uRelief','uTexel','uTime','uAudio'].map(n=>[n,gl.getUniformLocation(program,n)]));
+ const uniforms=Object.fromEntries(['uMVP','uTerrain','uClimate','uDetail','uDetailStrength','uFamily','uLight','uEye','uAtmosphereTint','uAtmosphereDensity','uRelief','uTexel','uTime','uAudio'].map(n=>[n,gl.getUniformLocation(program,n)]));
  return {program,uniforms,position:gl.getAttribLocation(program,'aPosition'),dispose(){if(program){gl.deleteProgram(program);program=null;}}};
  }catch(e){if(program)gl.deleteProgram(program);throw e;}finally{for(const s of shaders)gl.deleteShader(s);}
 }
