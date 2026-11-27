@@ -1,17 +1,17 @@
 # RELAIS PlanèteDot : à lire en premier quand Claude est indisponible
 
-Mis à jour le 27/11/2026 à 3 h 10 (Paris) par Claude. Claude reprend à son retour (quota réinitialisé le mercredi 2/12 à 10 h).
+Mis à jour le 27/11/2026 à 3 h 40 (Paris) par Claude. Claude reprend à son retour (quota réinitialisé le mercredi 2/12 à 10 h).
 
 **Règle automatique** : chaque mise en ligne ou étape importante met à jour ce fichier dans le même commit (Claude comme ChatGPT), pour que l'autre puisse toujours reprendre à jour.
 
 ## En ligne
-- **V9.8.1 = commit b18fd7f sur main** (site guillaumdot.github.io/Plan-teDot, balise meta `pd-version` = 9.8.1).
-- Contenu : V9.8 (villes qui poussent maison par maison jusqu'au continent) + correctif : évolution, météo et éclairs de nouveau envoyés au rendu.
-- Retour arrière : V9.8 = d0916f8, V9.7 = 0d3e938. Revenir = reprendre index.html d'un de ces commits dans un nouveau commit sur main (jamais de réécriture d'historique).
+- **V9.6 = index.html du commit ac887a0**, remis sur main par ChatGPT le 27/11 à 3 h 27 (commit dccf066) après la disparition des planètes sur iPhone. Balise meta `pd-version` = 9.6.
+- V9.7, V9.8 et V9.8.1 (villes dans le shader, b18fd7f) sont suspendues : diagnostic iOS à faire sur une branche avant toute remise en ligne.
+- Retour arrière possible : V9.8.1 = b18fd7f, V9.8 = d0916f8, V9.7 = 0d3e938, V9.6 = ac887a0. Revenir = reprendre index.html d'un de ces commits dans un nouveau commit sur main (jamais de réécriture d'historique).
 
 ## Branches
-- main : version stable publiée + bibliothèque assets/cosmic/ (V1.8 a7d6823, V1.9 9df5744, NATURAL_WORLD_V20.md 4b5d68e).
-- dev/claude-v99 : V9.9, en pause, pas encore de code (= b18fd7f).
+- main : version stable publiée + bibliothèque assets/cosmic/ (V1.8 a7d6823, V1.9 9df5744, NATURAL_WORLD_V20.md 4b5d68e, natural-world-v21 de ChatGPT 92004b4, natural-world-v22 de Claude). Aucun de ces modules n'est branché au rendu.
+- dev/claude-v99 : V9.9, en pause, pas encore de code (part de b18fd7f, à refaire depuis la version stable une fois le souci iOS compris).
 - ChatGPT : branches dev/chatgpt-sujet, créées depuis main.
 
 ## Règles absolues
@@ -37,7 +37,9 @@ Mis à jour le 27/11/2026 à 3 h 10 (Paris) par Claude. Claude reprend à son re
 - Dual Identity : un champ de transition déterministe (géodésique, modulé par le relief et le climat) mélange palettes et atmosphère, sans changer la géométrie. L'identité Face cachée n'est envoyée aux appareils qu'après la date de sortie, par le serveur (demande l'accord de Guillaume pour Supabase). Palettes définitives tirées des deux pochettes, gardées hors dépôt.
 - Musique : modulation lissée et bornée (vagues, lumière, particules), jamais de changement permanent du terrain.
 
-Prochaines étapes, dans l'ordre : 1) `uGen` et relief génération 1 derrière `?gen=1` ; 2) Worker des champs et cube map ; 3) biomes issus du climat ; 4) villes adaptées au terrain (ponts, ports, fondations) ; 5) Dual Identity en labo avec des palettes provisoires.
+**Natural World V2.2** (assets/cosmic/natural-world-v22/, Claude, 27/11) : analyse de la V2.1 de ChatGPT et base de données du monde (vents, pluies orographiques, drainage, lacs, érosion, biomes de Whittaker, villes, routes, ponts, ports, front Dual Identity, chunks LOD). Le README donne la comparaison, les mesures et le branchement prévu.
+
+Prochaines étapes, dans l'ordre : 1) brancher la V2.2 derrière `?gen=22` (Worker, 2 cube maps, version de générateur par planète) ; 2) shader guidé par les cube maps (climat, rivières, lacs, biomes) ; 3) villes de la V9.8 posées sur les sites, routes, ponts et ports ; 4) Dual Identity en labo avec des palettes provisoires ; 5) tuiles tempérées V1.9 (mission ChatGPT).
 
 ## Ce que ChatGPT peut faire en relais
 - Ressources et documents dans assets/cosmic/, comme avant.
