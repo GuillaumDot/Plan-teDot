@@ -6,6 +6,8 @@ import {loadTerrainAlbedo,loadEarthDetailAtlas} from './terrain-texture.mjs';
 import {assertTextureGL} from './texture-guard.mjs';
 import {visualAudio} from './visual-audio.mjs';
 import {createCityProgram,uploadCities} from './cities.mjs';
+import {loadCityModel} from './static-glb.mjs';
+import {uploadLandmarks} from './landmarks.mjs';
 const families=Object.keys(ARCHETYPES);
 const tints=[[.18,.45,1],[.12,.65,1],[.45,.38,.3],[1,.25,.08],[.4,.7,1],[.9,.65,.4],[.5,.3,1]];
 // Dedicated context or caller-managed GL state. No animation loop is created.
@@ -20,7 +22,12 @@ export async function createPlanetRenderer(gl){
  return {
  upload(world){if(disposed)throw new Error('Renderer disposed');const profile=planetProfile(world.type),maps=uploadWorldMaps(gl,world);let alive=true,revision=0,cityMesh=null;
  if(cityProgram)try{cityMesh=uploadCities(gl,world);}catch(e){console.warn('City mesh fallback:',e.message);}
- const planet={maps,profile,type:world.type,family:families.indexOf(world.type),size:world.size,detail:null,audioEnergy:0,cityMesh,
+ const planet={maps,profile,type:world.type,family:families.indexOf(world.type),size:world.size,detail:null,audioEnergy:0,cityMesh,landmarks:null,
+ async loadLandmarks(options){
+ if(!alive||disposed||world.type!=='earth'||!cityProgram)return false;
+ const model=await loadCityModel(options);if(!alive||disposed||options?.signal?.aborted)return false;
+ const next=uploadLandmarks(gl,world,model);planet.landmarks?.dispose();planet.landmarks=next;return !!next;
+ },
  async loadDetail(biome,options){
  if(!alive||disposed)return false;
  const id=++revision;
@@ -31,7 +38,7 @@ export async function createPlanetRenderer(gl){
  if(!alive||disposed||id!==revision){asset?.dispose();return false;}
  planet.detail?.dispose();planet.detail=asset;return !!asset;
  },
- dispose(){if(!alive)return;alive=false;revision++;planet.detail?.dispose();planet.detail=null;cityMesh?.dispose();planet.cityMesh=null;maps.dispose();}
+ dispose(){if(!alive)return;alive=false;revision++;planet.detail?.dispose();planet.detail=null;cityMesh?.dispose();planet.cityMesh=null;planet.landmarks?.dispose();planet.landmarks=null;maps.dispose();}
  };return planet;},
  draw(planet,{mvp,eye=[0,0,3],light=[-.45,.35,.82],tier=2,time=0,audio=0,delta=1/60,detailStrength=.8,growth=1}){
  if(disposed||gl.isContextLost())return;
@@ -44,6 +51,7 @@ export async function createPlanetRenderer(gl){
  gl.uniformMatrix4fv(u.uMVP,false,mvp);gl.uniform3fv(u.uEye,eye);gl.uniform3fv(u.uLight,light);gl.uniform1i(u.uFamily,planet.family);gl.uniform3fv(u.uAtmosphereTint,tints[planet.family]);gl.uniform1f(u.uAtmosphereDensity,planet.profile.base.atmosphere);gl.uniform1f(u.uRelief,planet.profile.base.relief*.08);gl.uniform1f(u.uShadowQuality,tier>=2?1:0);gl.uniform1f(u.uTexel,2/planet.size);gl.uniform1f(u.uTime,Number.isFinite(time)?time:0);planet.audioEnergy=visualAudio(planet.audioEnergy,audio,delta);gl.uniform1f(u.uAudio,planet.audioEnergy);
  gl.drawElements(gl.TRIANGLES,mesh.count,gl.UNSIGNED_SHORT,0);
  if(tier>=2&&planet.cityMesh&&cityProgram)cityProgram.draw(planet.cityMesh,mvp,light,growth);
+ if(tier>=2&&growth>=1&&planet.landmarks&&cityProgram)cityProgram.draw(planet.landmarks,mvp,light,1);
  },
  dispose(){if(!disposed){disposed=true;for(const mesh of meshes.values())mesh.dispose();meshes.clear();gl.deleteTexture(neutral);cityProgram?.dispose();p.dispose();}}
  };

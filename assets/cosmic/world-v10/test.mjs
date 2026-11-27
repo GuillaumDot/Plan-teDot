@@ -84,3 +84,14 @@ let previous=0;for(let i=0;i<=100;i++){const count=growthDrawCount(144,i/100);as
 const twoCities=cityGeometry({...cityWorld,natural:{cities:[{cell:1,dir:[0,0,-1]},{cell:2,dir:[0,0,1]}]}});
 assert.equal(twoCities.buildings,18);assert.ok(twoCities.vertices[2]<0&&twoCities.vertices[30*7+2]>0,'First growth phase spans both cities');
 console.log('Monotonic civilization growth verified');
+
+import {readFileSync} from 'node:fs';
+import {decodeStaticGLB,CITY_MODEL_PATH,MODEL_TRIANGLE_BUDGET} from './static-glb.mjs';
+import {landmarkGeometry} from './landmarks.mjs';
+const modelBytes=readFileSync(new URL('../../../'+CITY_MODEL_PATH,import.meta.url));
+const model=decodeStaticGLB(modelBytes.buffer.slice(modelBytes.byteOffset,modelBytes.byteOffset+modelBytes.byteLength));
+assert.ok(model.triangles>0&&model.triangles<=MODEL_TRIANGLE_BUDGET);assert.ok(model.vertices.every(Number.isFinite));
+const placed=landmarkGeometry(cityWorld,model);assert.equal(placed.instances,1);assert.ok(placed.vertices.every(Number.isFinite));
+assert.equal(landmarkGeometry({...cityWorld,terrain:ocean},model).instances,0);
+assert.throws(()=>decodeStaticGLB(new ArrayBuffer(32)));
+console.log('Real GLB geometry and placement verified');

@@ -77,3 +77,6 @@ Rubans géométriques des routes Natural World, ponts schématiques sur les cell
 
 ## Relais ChatGPT — V10 — croissance urbaine par phases
 Ordre déterministe des bâtiments (centres, quartiers, périphéries), paramètre growth avec rendu partiel du même tampon, volumes industriels schématiques aux sites portuaires/fluviaux, curseur labo. Test de monotonie et ordre entre villes, dessin WebGL à trois états. Villes b92882f CPU/WebGL verts; infrastructures 3b80714 CPU vert, WebGL en cours au début du chantier. Aucun changement main/Supabase. CI et iPhone à vérifier; progression persistante et modèles Blender non branchés.
+
+## Relais ChatGPT — V10 — géométrie GLB architecturale réelle
+Lecture bornée du cottage world-v11 existant (glTF 2.0 statique, export trimesh), placement tangent de quatre instances maximum sur terre, plafond 12 000 triangles, chargement annulable, tampon libéré. Matériaux texturés et autres modèles non intégrés; proxies gardés. Tests CPU et WebGL ajoutés. Infrastructures 3b80714 CPU/WebGL verts; croissance bad150b CPU vert, WebGL en cours au début de cette étape. Aucun changement main/Supabase; CI et iPhone à confirmer.
