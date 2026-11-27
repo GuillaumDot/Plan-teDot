@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#010208">
 <title>planèteDot · ton univers musical</title>
-<meta name="pd-version" content="10.0-alpha.10">
+<meta name="pd-version" content="10.0-alpha.11">
 <meta name="description" content="PlanèteDot · l’album de GuillaumDot et ton univers musical en 3D : chaque planète est un morceau.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PlanèteDot">
@@ -3606,25 +3606,27 @@ function pd9PbrInit(){
       img.src=url;
     });
   }
-  // Sequential decode/upload limits transient memory on mobile.
+  const families=['basalt','desert','ice','ocean','gas'];
+  const layers=[['normal',PD9PBR.maps]];
+  if(params.get('legacy')!=='1'&&params.get('albedo')!=='0')layers.push(['albedo',PD9PBR.albedo]);
+  // Finish the first local pass before retrying a slow or interrupted file.
+  async function loadLayer(name,kind,target,base){
+    const file=name+'-'+kind+'.png';
+    const img=await load(new URL(file,base).href);
+    if(!alive()||!img)return;
+    const texture=upload(img);
+    if(texture)target.set(name,texture);
+  }
   (async()=>{
-    for(const name of ['basalt','desert','ice','ocean','gas']){
-      if(!alive())break;
-      const file=name+'-normal.png';
-      let img=await load(new URL(file,local).href);
-      if(!alive())break;
-      if(!img)img=await load(remote+file);
-      if(!alive())break;
-      if(img){const t=upload(img);if(t)PD9PBR.maps.set(name,t);}
+    for(const base of [local,local,remote]){
+      for(const [kind,target] of layers){
+        for(const name of families){
+          if(!alive())return;
+          if(!target.has(name))await loadLayer(name,kind,target,base);
+        }
+      }
     }
-    if(params.get('legacy')==='1'||params.get('albedo')==='0')return;
-    for(const name of ['basalt','desert','ice','ocean','gas']){
-      if(!alive())break;
-      const file=name+'-albedo.png';let img=await load(new URL(file,local).href);
-      if(!alive())break;if(!img)img=await load(remote+file);
-      if(!alive())break;if(img){const t=upload(img);if(t)PD9PBR.albedo.set(name,t);}
-    }
-  })().catch(()=>{ /* neutral material remains available */ });
+  })().catch(e=>console.warn('[PlanèteDot] Chargement des matériaux',e));
 }
 // V9 · fluidité : plus aucune question bloquante à la carte graphique (getParameter, une centaine par image sur Safari), table fixe,
 // et l'unité 4 n'est rebranchée que lorsque la carte de relief change d'un astre à l'autre
@@ -4248,7 +4250,7 @@ function pd10Draw(o){
  useSP();if(PD10_ERROR>=2||PD10_MISSES>=3){PD_REC_ACTIVE=true;return pdSafeBody(o);}return true;
  }catch(e){PD10_ERROR=2;PD_REC_ACTIVE=true;useSP();return pdSafeBody(o);}
 }
-window.__pd10Status=()=>({renderer:PD_REC_ACTIVE?'canvas':PD10_ORIGINAL?'legacy':'living-world',compiled:!!PD10_SHADER,checks:PD10_CHECKS,errors:PD10_ERROR,misses:PD10_MISSES,probeAvailable:!PD10_PROBE_UNAVAILABLE,blenderMaps:PD9PBR.maps.size,blenderDraws:PD10_DETAIL_DRAWS,albedoMaps:PD9PBR.albedo.size,albedoDraws:PD10_ALBEDO_DRAWS});
+window.__pd10Status=()=>({renderer:PD_REC_ACTIVE?'canvas':PD10_ORIGINAL?'legacy':'living-world',compiled:!!PD10_SHADER,checks:PD10_CHECKS,errors:PD10_ERROR,misses:PD10_MISSES,probeAvailable:!PD10_PROBE_UNAVAILABLE,normalFamilies:[...PD9PBR.maps.keys()],albedoFamilies:[...PD9PBR.albedo.keys()],blenderMaps:PD9PBR.maps.size,blenderDraws:PD10_DETAIL_DRAWS,albedoMaps:PD9PBR.albedo.size,albedoDraws:PD10_ALBEDO_DRAWS});
 
 function drawBody(o){
   if(pd10Draw(o))return;

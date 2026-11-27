@@ -24,7 +24,8 @@ test('complete application boots, enters album system and renders a planet on mo
  const context=await browser.newContext({...device,serviceWorkers:'block',deviceScaleFactor:1});
  const page=await context.newPage();const errors=[];
  page.on('pageerror',e=>errors.push(e.message));
- await page.route('**/*',async route=>{const u=new URL(route.request().url());if(u.hostname!=='pd10.test')return route.abort();if(u.pathname==='/index.html')return route.fulfill({contentType:'text/html',body:observed});if(/^\/assets\/blender\/pbr-512\/[a-z]+-(normal|albedo)\.png$/.test(u.pathname))return route.fulfill({path:'.'+u.pathname,contentType:'image/png'});return route.fulfill({status:404,body:''});});
+ let basaltNormalRequests=0;
+ await page.route('**/*',async route=>{const u=new URL(route.request().url());if(u.hostname!=='pd10.test')return route.abort();if(u.pathname==='/index.html')return route.fulfill({contentType:'text/html',body:observed});if(u.pathname==='/assets/blender/pbr-512/basalt-normal.png'&&++basaltNormalRequests===1)return route.abort();if(/^\/assets\/blender\/pbr-512\/[a-z]+-(normal|albedo)\.png$/.test(u.pathname))return route.fulfill({path:'.'+u.pathname,contentType:'image/png'});return route.fulfill({status:404,body:''});});
  await page.goto('http://pd10.test/index.html',{waitUntil:'domcontentloaded',timeout:60000});
  await page.waitForFunction(()=>{try{return window.__pd10Lab?.state().album&&window.__pd10Lab.state().frames>=2;}catch(e){return false;}},{},{timeout:45000});
  await page.evaluate(()=>window.__pd10Lab.enter());
@@ -34,6 +35,7 @@ test('complete application boots, enters album system and renders a planet on mo
  await page.waitForFunction(()=>window.__pd10Lab.pixels?.length===25,{},{timeout:35000});
  const result=await page.evaluate(()=>({state:window.__pd10Lab.state(),pixels:window.__pd10Lab.pixels}));
  console.log(JSON.stringify({result,errors}));
+ assert.equal(basaltNormalRequests,2,'recover interrupted local normal map');
  assert.equal(result.state.lite,false);assert.equal(result.state.frameErrors,0);
  assert.ok(result.state.renderer.blenderDraws>0,'actual Blender map draw required');assert.ok(result.state.renderer.albedoDraws>0,'actual Blender albedo draw required');assert.equal(result.state.mode,'planet');assert.ok(result.state.planet.r>30);
  const colors=new Set(result.pixels.filter(p=>p[3]>100).map(p=>p.slice(0,3).join(',')));
