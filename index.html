@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#010208">
 <title>planèteDot · ton univers musical</title>
-<meta name="pd-version" content="10.0.0">
+<meta name="pd-version" content="10.0.1">
 <meta name="description" content="PlanèteDot · l’album de GuillaumDot et ton univers musical en 3D : chaque planète est un morceau.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PlanèteDot">
@@ -1321,7 +1321,9 @@ function pdAtlasHeader(buf,names){
   ranges.sort((a,b)=>a[0]-b[0]);for(let i=1;i<ranges.length;i++)if(ranges[i][0]<ranges[i-1][1])throw Error('atlas overlap');
   return {H,base};
 }
-function pdAtlasFail(err){PDTX.fail=1;PDTX.n=0;PDTX.ready=0;PDTX.on=0;PDTX.mipWait=0;PDTX.failure=String(err?.message||err);for(const x of PDTX.q){try{x.im.close?.();}catch(_){}}PDTX.q=[];}
+function pdAtlasFail(err){PDTX.fail=1;PDTX.n=0;PDTX.ready=0;PDTX.on=0;PDTX.mipWait=0;PDTX.failure=String(err?.message||err);for(const x of PDTX.q){try{x.im.close?.();}catch(_){}}PDTX.q=[];const t=PDTX.t;if(t)for(const [tmp,live] of [['arr2','arr'],['gal2','gal'],['gz2','gz']]){if(t[tmp]&&t[tmp]!==t[live]){gl.deleteTexture(t[tmp]);delete t[tmp];}}}
+function pdAtlasCandidates(tier,mobile,hd){ return tier===0||(mobile&&tier===1)?['textures84-compact.bin']:hd?['textures84-hd.bin','textures84-mobile.bin','textures84-compact.bin']:['textures84-mobile.bin','textures84-compact.bin']; }
+async function pdAtlasLoad(files,names){ let failure; for(const file of files){ try{ const buf=await pd96Get(file,'b84','t84'); const {H,base}=pdAtlasHeader(buf,names); return {buf,H,base}; }catch(e){failure=e;console.warn('[PlanèteDot] atlas de secours',file,e.message);} } throw failure||Error('No texture atlas'); }
 const PD_TXSRC = 'pack';   // 'pack' : un seul fichier .bin à côté de index.html (GitHub) ; 'dir' : les 28 images une à une (version test dans Claude)
 const PD_GZN = ['gz_0', 'gz_1', 'gz_2', 'gz_3'];   // V8.3 · géantes gazeuses (2:1)
 const PD_TXALL = PD_TXN.concat(['gal_a', 'gal_b', 'sky_mw', 'sky_neb'], PD_GZN);
@@ -1330,14 +1332,13 @@ async function pdTxFetch(){ try { await Promise.race([Promise.resolve(SESSP).cat
   const t0 = performance.now(), hd = PDTX.sz >= 1024;
   try { let items;
     if (PD_TXSRC === 'dir'){ const d = hd ? 'tx-hd/' : 'tx-mobile/'; items = PD_TXALL.map(n => ({n, u: d + n + '.jpg'})); }
-    else { const file = TIER===0 ? 'textures84-compact.bin' : hd ? 'textures84-hd.bin' : 'textures84-mobile.bin', buf = await pd96Get(file, 'b84', 't84'), u8 = new Uint8Array(buf);
-      const {H,base}=pdAtlasHeader(buf,PD_TXALL);
+    else { const {buf,H,base}=await pdAtlasLoad(pdAtlasCandidates(TIER,PD_MOBILE,hd),PD_TXALL), u8=new Uint8Array(buf);
       PDTX.sz = H.sz; items = H.f.map(e => ({n: e.n, b: new Blob([u8.subarray(base + e.o, base + e.o + e.l)], {type: 'image/jpeg'})})); }
     PDTX.n = items.length;
     const dec = async (b, n) => { if (window.createImageBitmap) try { return await createImageBitmap(b, {premultiplyAlpha: 'none', colorSpaceConversion: 'none'}); } catch(err){}
       return await new Promise((ok, ko) => { const u = URL.createObjectURL(b), im = new Image(); im.onload = () => { URL.revokeObjectURL(u); ok(im); }; im.onerror = () => { URL.revokeObjectURL(u); ko(new Error('image ' + n)); }; im.src = u; }); };
-    for (const it of items){ if (PDTX.off || !PDTX.n) return; while (PDTX.q.length > (INTRO.on ? 30 : 2)) await new Promise(r => setTimeout(r, 120));   // one image at a time (V9.6 : décodées d'avance pendant l'ouverture)
-      let b = it.b; if (!b){ const r = await fetch(it.u, {priority: 'low'}); if (!r.ok) throw new Error(it.u + ' : ' + r.status); b = await r.blob(); }
+    for (const it of items){ if (PDTX.off || !PDTX.n) return; while (!PDTX.off&&!PDTX.fail&&PDTX.q.length > (INTRO.on ? 30 : 2)) await new Promise(r => setTimeout(r, 120));   // one image at a time (V9.6 : décodées d'avance pendant l'ouverture)
+      if(PDTX.off||PDTX.fail||!PDTX.n)return; let b = it.b; if (!b){ const r = await fetch(it.u, {priority: 'low'}); if (!r.ok) throw new Error(it.u + ' : ' + r.status); b = await r.blob(); }
       const im=await dec(b,it.n);if(PDTX.off||PDTX.fail||!PDTX.n){im.close?.();return;}PDTX.q.push({e:{n:it.n},im});PDTX.dn++; }
     PDTX.dl = PDTX.ms = Math.round(performance.now() - t0);
   } catch(err){ console.warn('[PlanèteDot] textures 8.2 indisponibles (' + (err && err.message || err) + ') : rendu V8.0 gardé'); pdAtlasFail(err); } }
@@ -1409,7 +1410,8 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden) PDG.
 function pdGov(avg){ if (PDG.no) return;
   if (pdHold() || document.hidden || performance.now() - PDG.calm < 4000 || PDTX.q.length){ PDG.n = 0; return; }
   if (avg > .05 && scale <= SMIN + .01 && !POST.on){ if (++PDG.n < 6) return;
-    if (!PDTX.off){ PDTX.off = 1; PDTX.q = []; if (PDTX.on){ PDTX.on = 0; console.info('[PlanèteDot] téléphone à la peine : textures 8.2 coupées, rendu V8.0'); } }
+    // Preserve compact textures and let in-flight uploads finish; only shed a heavier completed pack under sustained severe load.
+    if (!PDTX.off && PDTX.ready && PDTX.sz>256 && avg>.085){ PDTX.off=1; PDTX.on=0; console.info('[PlanèteDot] surcharge GPU sévère : atlas lourd suspendu'); }
     if (!PDG.hint && TIER > 0 && avg > .065){ PDG.hint = 1; try { localStorage.setItem('pd.perf', JSON.stringify({t: TIER - 1, d: Date.now()})); } catch(e){} } }
   else PDG.n = 0; }
 
@@ -4189,7 +4191,7 @@ function pdRecoverySprite(o,r){
  else if(type===2){const band=.5+.5*Math.sin(ny*37+f*8);base=c1.map((v,i)=>v*(.25+.75*band)+c2[i]*(.75-.75*band));}
  else if(type===4){const crack=1-Math.abs(f-.5)*15;if(crack>.65)base=[.95,.16+.35*crack,.035];else base=base.map(v=>v*.46);}
  else if(type===3){base=base.map(v=>v*.45+.45+fine*.08);}
- const diffuse=type===8?.95:.24+.76*Math.max(0,(nx*l[0]+ny*l[1]+nz*l[2])/ll),relief=.72+fine*.24+f*.24,edge=Math.pow(1-nz,3)*(o.atmo||0)*.22;
+ const diffuse=o.kind===1||type===8?.95:.24+.76*Math.max(0,(nx*l[0]+ny*l[1]+nz*l[2])/ll),relief=.72+fine*.24+f*.24,edge=Math.pow(1-nz,3)*(o.atmo||0)*.22;
  const i=(y*n+x)*4;for(let k=0;k<3;k++)d[i+k]=Math.round(sat(base[k]*diffuse*relief+edge*(o.at||c2)[k])*255);d[i+3]=Math.round(255*sat((1-Math.sqrt(rr))*n*.8));
  }
  g.putImageData(im,0,0);PD_REC_CACHE.set(key,c);while(PD_REC_CACHE.size>24)PD_REC_CACHE.delete(PD_REC_CACHE.keys().next().value);return c;
@@ -4230,7 +4232,7 @@ function drawBody(o){
   pdAdvancedBody(o);
   const err=gl.getError();gl.readPixels(x,y,1,1,gl.RGBA,gl.UNSIGNED_BYTE,after);
   const delta=Math.abs(before[0]-after[0])+Math.abs(before[1]-after[1])+Math.abs(before[2]-after[2]);
-  if(err!==gl.NO_ERROR||delta<3)PD_REC_FAIL++;else PD_REC_FAIL=0;
+  if(err!==gl.NO_ERROR)PD_REC_FAIL++;else PD_REC_FAIL=0; // A dark or unchanged center pixel alone is not a GL failure.
   if(PD_REC_FAIL>=2){PD_REC_ACTIVE=true;pdSafeBody(o);console.warn('[PlaneteDot] advanced body recovery',err,delta);}
  }catch(e){PD_REC_ACTIVE=true;pdSafeBody(o);console.warn('[PlaneteDot] body recovery',e);}
 }
@@ -4531,7 +4533,7 @@ function renderSystem(dt, flyIn){ { const kT = 1 + Math.max(0, starR(VIEW) - .55
   if (sp) STAR_PT = {x: sp.x, y: sp.y};
   if (sp){ const r = pxR(lerp(sR * (1 + lvl * .09 + beatLvl * .025) * (.2 + .8 * starIgnite), sl0 ? sl0.r * .5 : 1, sl0 ? mE : 0), sp.w); starPx = r; passTrack('star', sp.x, sp.y, r * 1.6);
     if (sys.gd){ bodies.push({w: sp.w + .02, kind: 2, x: sp.x, y: sp.y, r: Math.max(r * 4.2, 60 * RS), q: 1, c1: [.28, .5, 1], atmo: .5, alpha: (.5 + beatLvl * .15) * starIgnite}); bodies.push({w: sp.w + .01, kind: 2, x: sp.x, y: sp.y, r: r * 1.5, q: 1, c1: [.7, .85, 1], atmo: .4, alpha: .5 * starIgnite}); }
-    else bodies.push({w: sp.w, kind: 1, x: sp.x, y: sp.y, r, q: 2.8, c1: sc, seed: 3, audio: Math.min(2.1, lvl * 1.6 + beatLvl * .5 + bassLvl * .5), atmo: (.25 + .75 * starIgnite) * (1 + (1 - ECLs) * 1.3), alpha: BIRTH ? clamp(starIgnite * 3, 0, 1) : (readonly || sys.user ? 1 : 0), ecl: 1});
+    else bodies.push({w: sp.w, kind: 1, x: sp.x, y: sp.y, r, q: 2.8, c1: sc, seed: 3, audio: Math.min(2.1, lvl * 1.6 + beatLvl * .5 + bassLvl * .5), atmo: (.25 + .75 * starIgnite) * (1 + (1 - ECLs) * 1.3), alpha: BIRTH ? clamp(starIgnite * 3, 0, 1) : 1, ecl: 1});
     picks.push({x: sp.x, y: sp.y, r: Math.max(r * (sys.gd ? 1.8 : 1.2), 30 * RS), w: sp.w, act: () => sys.gd ? openAlbum() : openStar()});
     if (!sheetOpen) placeNC(lab('star', `<b>${esc(sys.user || 'Ton étoile')}</b>`, 'star'), sp.x, sp.y + r * 1.25 + 6 * RS, starIgnite);
   }
