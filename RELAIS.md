@@ -46,3 +46,7 @@ Prochaines étapes, dans l'ordre : 1) brancher la V2.2 derrière `?gen=22` (Work
 - Code : sur dev/chatgpt-sujet, derrière un flag, avec un fichier NOTES qui décrit le changement et la façon de le tester. Claude reprend, mesure et intègre.
 - Mise en ligne urgente (correctif) : seulement avec l'accord de Guillaume, après le test minimal ci-dessus, et en gardant le commit précédent comme retour arrière.
 - Canal : issue #1, format « AGENT | date | chantier | branche | commits | fichiers | blocages | prochaine action ».
+
+## Relais ChatGPT — V9.8.3 (27/11/2026)
+
+Mise à jour directe demandée par le fondateur. Chargeur d'atlas V10 alpha.15 intégré à la V9.8.2 publique : pack compact 256 px niveau 0, validation des 28 entrées, détection des erreurs GPU, arrêt propre et diagnostic. Gouverneur et atlas habituels conservés. Syntaxe JS, dimensions JPEG et en-tête compact vérifiés ; iPhone et audio verrouillé non vérifiés. Aucun changement Supabase, audio, géographie ou shader. Retour arrière par revert, parent 27b6746dc859d6d6bd04038a9cf338bae3607920. V10 alpha.19 reste sur sa branche.
