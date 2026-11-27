@@ -83,3 +83,6 @@ Lecture bornée du cottage world-v11 existant (glTF 2.0 statique, export trimesh
 
 ## Relais ChatGPT — V10 — diversité des modèles architecturaux
 Trois fichiers GLB world-v11 raccordés au catalogue (cottage, tour, usine), routage par site, budget global et protection contre les chargements concurrents. Tests CPU sur les trois fichiers et assertion budget WebGL. Croissance bad150b CPU/WebGL verts; premier GLB 6ad7a33 CPU vert, WebGL en cours au début de l'étape. Les nouveaux tests restent à confirmer. Aucun changement main ni Supabase; matériaux complets, végétation et validation iPhone restent à faire.
+
+## Relais ChatGPT — V10 — végétation 3D
+Sélection déterministe des sites sur grille naturelle fixe, trois GLB V1.4 (feuillu/pin/cactus), budget 6 000 triangles et 36 instances, couleur feuille/tronc et repli en cas de ressource absente. Tests CPU et WebGL ajoutés. Premier GLB 6ad7a33 CPU/WebGL verts; diversification f73705e CI en cours au début du chantier. Aucun changement main ou Supabase. Matériaux, densité forestière, vent, intégration application et validation iPhone à faire.

@@ -31,7 +31,7 @@ export function decodeStaticGLB(buffer,{maxTriangles=MODEL_TRIANGLE_BUDGET}={}){
    if((p.mode??4)!==4||p.indices===undefined)throw Error('GLB requires indexed triangles');
    const positions=accessor(p.attributes.POSITION,'VEC3',[5126]),indices=accessor(p.indices,'SCALAR',[5123,5125]);
    if(indices.count%3||triangles+indices.count/3>maxTriangles)throw Error('GLB triangle budget exceeded');
-   const tone=j.materials?.[p.material]?.name==='glass'?.42:.73;
+   const material=j.materials?.[p.material]?.name;const tone=material==='leaf'?-.45:material==='wood'?-.9:material==='glass'?.42:.73;
    for(let i=0;i<indices.count;i+=3){
     const q=[0,1,2].map(k=>point(m,positions.read(indices.read(i+k)[0])));
     if(q.flat().some(x=>!Number.isFinite(x)))throw Error('Nonfinite GLB vertex');

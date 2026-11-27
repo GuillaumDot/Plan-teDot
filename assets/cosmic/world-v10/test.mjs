@@ -103,3 +103,10 @@ assert.equal(landmarkKind({port:true},0),'factory');assert.equal(landmarkKind({}
 const diverse=landmarkGeometry({...cityWorld,natural:{cities:[{dir:[0,0,-1]},{dir:[0,0,1]},{dir:[1,0,0],port:true}]}},variants);
 assert.ok(diverse.instances>=1&&diverse.triangles<=MODEL_TRIANGLE_BUDGET);assert.ok(diverse.vertices.every(Number.isFinite));assert.deepEqual(diverse,landmarkGeometry({...cityWorld,natural:{cities:[{dir:[0,0,-1]},{dir:[0,0,1]},{dir:[1,0,0],port:true}]}},variants));
 console.log('Architectural model catalog and shared budget verified');
+
+import {VEGETATION_PATHS,VEGETATION_BUDGET,vegetationGeometry} from './vegetation.mjs';
+const plants={};for(const [kind,path] of Object.entries(VEGETATION_PATHS)){const bytes=readFileSync(new URL('../../../'+path,import.meta.url));plants[kind]=decodeStaticGLB(bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength));assert.ok(plants[kind].triangles>0);}
+const plantWorld={...cityWorld,natural:{vegetation:[{dir:[0,0,-1],kind:'pine'},{dir:[1,0,0],kind:'cactus'},{dir:[0,1,0],kind:'broadleaf'}]}};
+const forest=vegetationGeometry(plantWorld,plants);assert.equal(forest.instances,3);assert.ok(forest.triangles<=VEGETATION_BUDGET&&forest.vertices.every(Number.isFinite));assert.deepEqual(forest,vegetationGeometry(plantWorld,plants));assert.equal(vegetationGeometry({...plantWorld,terrain:ocean},plants).instances,0);
+assert.ok(smallWorld.natural.vegetation.length<=36);assert.deepEqual(smallWorld.natural.vegetation,largeWorld.natural.vegetation);
+console.log('Vegetation GLBs and deterministic biome placement verified');

@@ -43,3 +43,6 @@ Première intégration d'un fichier réel world-v11/cottage-00.glb : lecture glT
 
 ## Diversité architecturale
 Catalogue borné de trois GLB world-v11 : cottage, tour, usine. Sélection déterministe selon le site portuaire/fluvial et l'ordre des villes; repli cottage pour un modèle optionnel indisponible. Quatre instances maximum, plafond partagé de 12 000 triangles, sans nouveau draw call par modèle. Échelles visuelles distinctes. Le lecteur statique ignore toujours les textures et normal maps; végétation et rendu rapproché à faire.
+
+## Végétation V1
+Sites terrestres déterministes sélectionnés sur les poids de biomes, production végétale, pente et exclusion eau/villes du monde V2.2. Trois modèles V1.4 (feuillu, pin, cactus), matériaux verts/bruns simplifiés, 36 instances et 6 000 triangles supplémentaires maximum, un tampon et un dessin aux niveaux 2/3. Pas encore de forêt dense, d'animation du vent, ni de rendu des textures GLB. Aucune modification de la géographie ou des sauvegardes.

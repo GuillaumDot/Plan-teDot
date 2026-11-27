@@ -1,6 +1,7 @@
 import {bakeWorld as bakeNatural,worldSample} from '../natural-world-v22/world.mjs';
 import {baseWorld} from './base-worlds.mjs';
 import {makeSurface} from './surface.mjs';
+import {vegetationSites} from './vegetation.mjs';
 import {WORLD_CONFIG} from './config.mjs';
 // Fixed simulation grid: changing the GPU map resolution must not change geography.
 export const NATURAL_GRID=64;
@@ -22,6 +23,6 @@ export function bakeWorld(type,seed,size=WORLD_CONFIG.bakeResolution){
  for(let face=0;face<6;face++){const a=new Uint8Array(size*size*4),b=new Uint8Array(a.length);
  for(let y=0;y<size;y++)for(let x=0;x<size;x++){const p=sample(...cubeDirection(face,2*(x+.5)/size-1,2*(y+.5)/size-1)),i=4*(y*size+x);a[i]=byte(p.height);a[i+1]=byte(p.water);a[i+2]=byte(p.ice);a[i+3]=byte(p.metal);b[i]=byte(p.heat);b[i+1]=byte(p.humidity);b[i+2]=byte(p.cloud);b[i+3]=byte(p.emission);}
  terrain.push(a);climate.push(b);}
- return {type,seed,size,terrain,climate,bytes:48*size*size,natural:natural?{gen:natural.gen,grid:natural.N,stats:natural.stats,cities:natural.cities,roads:natural.roads,bridges:natural.bridges,seaRoutes:natural.seaRoutes,volcanoes:natural.volcanoes,detailBiome:naturalDetailBiome(natural.stats.biomeShare)}:null};
+ return {type,seed,size,terrain,climate,bytes:48*size*size,natural:natural?{gen:natural.gen,grid:natural.N,stats:natural.stats,cities:natural.cities,roads:natural.roads,bridges:natural.bridges,seaRoutes:natural.seaRoutes,volcanoes:natural.volcanoes,vegetation:vegetationSites(natural),detailBiome:naturalDetailBiome(natural.stats.biomeShare)}:null};
 }
 // Data maps, not color textures; upload as linear RGBA8 without sRGB conversion.
