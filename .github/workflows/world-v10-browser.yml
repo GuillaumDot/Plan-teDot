@@ -16,6 +16,8 @@ jobs:
           python3 -m http.server 8080 > /tmp/v10-server.log 2>&1 &
           for i in $(seq 1 20); do curl -fsS http://127.0.0.1:8080/ >/dev/null && break; sleep 1; done
           node assets/cosmic/world-v10/browser-test.mjs
+          node --test tests/render-audio.test.cjs
+          node assets/cosmic/world-v10/app-smoke.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:

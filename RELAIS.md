@@ -132,3 +132,6 @@ Mise à jour directe demandée par le fondateur. Chargeur d'atlas V10 alpha.15 i
 
 ## Relais ChatGPT — V10 — consolidation de la branche
 Intégration de main 5197e2a V9.8.3 dans la branche V10, index V9.8.3 exact + trois hooks V10 vérifiés réversibles, atlas compact copié par SHA du blob. Commit à deux parents. 96262e6 CPU/WebGL verts, mais test réel de l'application et audio verrouillé non validés. Nouveau CI à vérifier. Main inchangée.
+
+## Relais ChatGPT — V10 — validation application complète
+Consolidation cdd0c6a CPU/WebGL verts (45998670027/45998669766). Ajout app-smoke.mjs dans le workflow existant, vrai index avec fixture injectée uniquement dans Chromium, réseau externe bloqué, focus V10, sortie et repli, vérification absence de migration. Sept tests historiques render-audio ajoutés au même CI. Pas de modification index/main/Supabase/audio. Nouveau CI à confirmer, parcours authentifié/MP3/écran verrouillé iPhone non testés.
