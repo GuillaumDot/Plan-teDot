@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#010208">
 <title>planèteDot · ton univers musical</title>
-<meta name="pd-version" content="9.8.2">
+<meta name="pd-version" content="9.8.3">
 <meta name="description" content="PlanèteDot · l’album de GuillaumDot et ton univers musical en 3D : chaque planète est un morceau.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PlanèteDot">
@@ -1300,10 +1300,23 @@ function pdTxInit(){ if (PDTX.bad || PDTX.t) return;
     const br = pdTxMk(14, G.TEXTURE_2D_ARRAY, G.REPEAT, G.REPEAT, false); pdTxUp(14, () => G.texImage3D(G.TEXTURE_2D_ARRAY, 0, G.RGBA8, 1, 1, 1, 0, G.RGBA, G.UNSIGNED_BYTE, one));   // V9 : souffles
     PDTX.t = {arr, gal, ring, sky, neb, gz, br};
   } catch(e){ console.warn('[PlanèteDot] textures indisponibles : rendu V8.0 gardé', e); PDTX.bad = 1; PDTX.on = 0; } }
-function pdTxWhy(){ if (PDTX.bad || !PDTX.t) return 'rendu 8.2 refusé'; if (PDTX.off) return 'téléphone à la peine'; if (TIER === 0) return 'appareil modeste';
+function pdTxWhy(){ if (PDTX.bad || !PDTX.t) return 'rendu 8.2 refusé'; if (PDTX.off) return 'téléphone à la peine'; 
   const c = navigator.connection || {}; if (c.saveData) return 'économie de données'; if (/(^|-)2g$/.test(c.effectiveType || '')) return 'réseau très lent'; return ''; }
 // called when the logo is touched (or a little after the opening when there is no animation)
 function pdTxSoon(ms){ if (PDTX.st) return; PDTX.st = 1; setTimeout(pdTxFetch, ms || 0); }
+function pdAtlasHeader(buf,names){
+  const u8=new Uint8Array(buf);
+  if(u8.length<8||u8[0]!==80||u8[1]!==68||u8[2]!==84||u8[3]!==88)throw Error('atlas format');
+  const hl=new DataView(buf).getUint32(4,true),base=8+hl;
+  if(!hl||base>u8.length)throw Error('atlas header');
+  const H=JSON.parse(new TextDecoder().decode(u8.subarray(8,base)));
+  if(!H||![256,512,1024].includes(H.sz)||!Array.isArray(H.f)||H.f.length!==names.length)throw Error('atlas content');
+  const seen=new Set(),ranges=[];
+  for(const e of H.f){if(!e||!names.includes(e.n)||seen.has(e.n)||!Number.isSafeInteger(e.o)||!Number.isSafeInteger(e.l)||e.o<0||e.l<=0||e.o>u8.length-base-e.l)throw Error('atlas entry');seen.add(e.n);ranges.push([e.o,e.o+e.l]);}
+  ranges.sort((a,b)=>a[0]-b[0]);for(let i=1;i<ranges.length;i++)if(ranges[i][0]<ranges[i-1][1])throw Error('atlas overlap');
+  return {H,base};
+}
+function pdAtlasFail(err){PDTX.fail=1;PDTX.n=0;PDTX.ready=0;PDTX.on=0;PDTX.mipWait=0;PDTX.failure=String(err?.message||err);for(const x of PDTX.q){try{x.im.close?.();}catch(_){}}PDTX.q=[];}
 const PD_TXSRC = 'pack';   // 'pack' : un seul fichier .bin à côté de index.html (GitHub) ; 'dir' : les 28 images une à une (version test dans Claude)
 const PD_GZN = ['gz_0', 'gz_1', 'gz_2', 'gz_3'];   // V8.3 · géantes gazeuses (2:1)
 const PD_TXALL = PD_TXN.concat(['gal_a', 'gal_b', 'sky_mw', 'sky_neb'], PD_GZN);
@@ -1312,22 +1325,20 @@ async function pdTxFetch(){ try { await Promise.race([Promise.resolve(SESSP).cat
   const t0 = performance.now(), hd = PDTX.sz >= 1024;
   try { let items;
     if (PD_TXSRC === 'dir'){ const d = hd ? 'tx-hd/' : 'tx-mobile/'; items = PD_TXALL.map(n => ({n, u: d + n + '.jpg'})); }
-    else { const file = hd ? 'textures84-hd.bin' : 'textures84-mobile.bin', buf = await pd96Get(file, 'b84', 't84'), u8 = new Uint8Array(buf);
-      if (u8[0] !== 80 || u8[1] !== 68 || u8[2] !== 84 || u8[3] !== 88) throw new Error(file + ' : format');
-      const hl = new DataView(buf).getUint32(4, true), H = JSON.parse(new TextDecoder().decode(u8.subarray(8, 8 + hl))), base = 8 + hl;
-      if (!H || !H.f || H.f.length !== PD_TXALL.length) throw new Error(file + ' : contenu');
+    else { const file = TIER===0 ? 'textures84-compact.bin' : hd ? 'textures84-hd.bin' : 'textures84-mobile.bin', buf = await pd96Get(file, 'b84', 't84'), u8 = new Uint8Array(buf);
+      const {H,base}=pdAtlasHeader(buf,PD_TXALL);
       PDTX.sz = H.sz; items = H.f.map(e => ({n: e.n, b: new Blob([u8.subarray(base + e.o, base + e.o + e.l)], {type: 'image/jpeg'})})); }
     PDTX.n = items.length;
     const dec = async (b, n) => { if (window.createImageBitmap) try { return await createImageBitmap(b, {premultiplyAlpha: 'none', colorSpaceConversion: 'none'}); } catch(err){}
       return await new Promise((ok, ko) => { const u = URL.createObjectURL(b), im = new Image(); im.onload = () => { URL.revokeObjectURL(u); ok(im); }; im.onerror = () => { URL.revokeObjectURL(u); ko(new Error('image ' + n)); }; im.src = u; }); };
     for (const it of items){ if (PDTX.off || !PDTX.n) return; while (PDTX.q.length > (INTRO.on ? 30 : 2)) await new Promise(r => setTimeout(r, 120));   // one image at a time (V9.6 : décodées d'avance pendant l'ouverture)
       let b = it.b; if (!b){ const r = await fetch(it.u, {priority: 'low'}); if (!r.ok) throw new Error(it.u + ' : ' + r.status); b = await r.blob(); }
-      PDTX.q.push({e: {n: it.n}, im: await dec(b, it.n)}); PDTX.dn++; }
+      const im=await dec(b,it.n);if(PDTX.off||PDTX.fail||!PDTX.n){im.close?.();return;}PDTX.q.push({e:{n:it.n},im});PDTX.dn++; }
     PDTX.dl = PDTX.ms = Math.round(performance.now() - t0);
-  } catch(err){ console.warn('[PlanèteDot] textures 8.2 indisponibles (' + (err && err.message || err) + ') : rendu V8.0 gardé'); PDTX.q = []; PDTX.n = 0; PDTX.fail = 1; } }
+  } catch(err){ console.warn('[PlanèteDot] textures 8.2 indisponibles (' + (err && err.message || err) + ') : rendu V8.0 gardé'); pdAtlasFail(err); } }
 // one upload per frame, never during the opening animation
 function pdTxPut(x){ const G = gl, e = x.e, im = x.im, sz = PDTX.sz, T = PDTX.t, lv = n => Math.floor(Math.log2(n)) + 1;
-  try { const i = PD_TXN.indexOf(e.n);
+  try { for(let j=0;j<8&&G.getError()!==G.NO_ERROR;j++){} const i = PD_TXN.indexOf(e.n);
     if (i >= 0){ if (!T.arr2){ T.arr2 = pdTxMk(8, G.TEXTURE_2D_ARRAY, G.REPEAT, G.REPEAT, true); pdTxUp(8, () => { G.bindTexture(G.TEXTURE_2D_ARRAY, T.arr2); G.texStorage3D(G.TEXTURE_2D_ARRAY, lv(sz), G.RGBA8, sz, sz, PD_TXN.length); }); }
       pdTxUp(8, () => { G.bindTexture(G.TEXTURE_2D_ARRAY, T.arr2); G.texSubImage3D(G.TEXTURE_2D_ARRAY, 0, 0, 0, i, sz, sz, 1, G.RGBA, G.UNSIGNED_BYTE, im); }); }
     else if (e.n === 'gal_a' || e.n === 'gal_b'){ if (!T.gal2){ T.gal2 = pdTxMk(10, G.TEXTURE_2D_ARRAY, G.CLAMP_TO_EDGE, G.CLAMP_TO_EDGE, true); pdTxUp(10, () => { G.bindTexture(G.TEXTURE_2D_ARRAY, T.gal2); G.texStorage3D(G.TEXTURE_2D_ARRAY, lv(512), G.RGBA8, 512, 512, 2); }); }
@@ -1336,14 +1347,17 @@ function pdTxPut(x){ const G = gl, e = x.e, im = x.im, sz = PDTX.sz, T = PDTX.t,
       pdTxUp(13, () => { G.bindTexture(G.TEXTURE_2D_ARRAY, T.gz2); G.texSubImage3D(G.TEXTURE_2D_ARRAY, 0, 0, 0, PD_GZN.indexOf(e.n), gw, sz, 1, G.RGBA, G.UNSIGNED_BYTE, im); }); }
     else if (e.n === 'sky_mw') pdTxUp(11, () => { G.bindTexture(G.TEXTURE_2D, T.sky); G.texImage2D(G.TEXTURE_2D, 0, G.RGBA, G.RGBA, G.UNSIGNED_BYTE, im); });
     else if (e.n === 'sky_neb') pdTxUp(12, () => { G.bindTexture(G.TEXTURE_2D, T.neb); G.texImage2D(G.TEXTURE_2D, 0, G.RGBA, G.RGBA, G.UNSIGNED_BYTE, im); });
+    const error=G.getError();if(error!==G.NO_ERROR)throw Error('WebGL upload '+e.n+' : '+error);
     PDTX.got = (PDTX.got || 0) + 1;
-  } catch(err){ console.warn('[PlanèteDot] texture ' + e.n, err); PDTX.n = 0; PDTX.q = []; }
+  } catch(err){ console.warn('[PlanèteDot] texture ' + e.n, err); pdAtlasFail(err); }
   try { if (im.close) im.close(); } catch(_){}
   if (PDTX.n && PDTX.got === PDTX.n){ if (INTRO.on && INTRO.ph === 'seq' && !INTRO.flashed){ PDTX.mipWait = 1; return; } pdTxFin(); } }   // V9.6 : pendant l'ouverture, la fin (mipmaps) se fait sous le flash d'arrivée
 function pdTxFin(){ const G = gl, T = PDTX.t; PDTX.mipWait = 0; if (!T || !T.arr2 || !T.gal2) return;
   { try { pdTxUp(8, () => { G.bindTexture(G.TEXTURE_2D_ARRAY, T.arr2); G.generateMipmap(G.TEXTURE_2D_ARRAY); }); pdTxUp(10, () => { G.bindTexture(G.TEXTURE_2D_ARRAY, T.gal2); G.generateMipmap(G.TEXTURE_2D_ARRAY); });
+      if (T.gz2){ pdTxUp(13, () => { G.bindTexture(G.TEXTURE_2D_ARRAY, T.gz2); G.generateMipmap(G.TEXTURE_2D_ARRAY); }); }
+      const error=G.getError();if(error!==G.NO_ERROR)throw Error('WebGL mipmaps : '+error);
       G.deleteTexture(T.arr); G.deleteTexture(T.gal); T.arr = T.arr2; T.gal = T.gal2;
-      if (T.gz2){ pdTxUp(13, () => { G.bindTexture(G.TEXTURE_2D_ARRAY, T.gz2); G.generateMipmap(G.TEXTURE_2D_ARRAY); }); G.deleteTexture(T.gz); T.gz = T.gz2; } PDTX.ready = 1; } catch(err){ console.warn('[PlanèteDot] textures', err); } } }
+      if(T.gz2){G.deleteTexture(T.gz);T.gz=T.gz2;} PDTX.ready = 1; } catch(err){ console.warn('[PlanèteDot] textures', err); pdAtlasFail(err); } } }
 // V9.6 · progression du chargement (0 à 1) : octets reçus, images décodées, images envoyées ; 1 tout de suite si rien n'est à charger sur cet appareil
 function pd96P(){ const br = pd96BrOk() ? (PDBR9.st >= 2 ? 1 : PDBR9.got / 2) : 1;
   if (PDTX.ready || PDTX.mipWait) return br >= 1 ? 1 : .97 + .03 * br; if (PDTX.fail || PDTX.off || PDTX.bad || pdTxWhy()) return 1;
@@ -4138,7 +4152,7 @@ function pdVWq(q, V){ for (let c = 0; c < 9; c += 3){ const r = qRot(q, [V[c], V
 const PD_REC_ADV = new URLSearchParams(location.search).get('advanced')==='1';
 let PD_REC_ACTIVE = new URLSearchParams(location.search).get('safe')==='1', PD_REC_PROBE=0, PD_REC_FAIL=0, PD_REC_LAST=-100, PD_REC_STATE=-1;
 const PD_REC_CACHE=new Map();
-window.__pdRecovery=()=>({active:PD_REC_ACTIVE,failed:PD_REC_FAIL,checks:PD_REC_PROBE,textures:PDTX.on});
+window.__pdRecovery=()=>({active:PD_REC_ACTIVE,failed:PD_REC_FAIL,checks:PD_REC_PROBE,textures:PDTX.on,atlasSize:PDTX.sz,atlasLayers:PDTX.got||0,atlasFailure:PDTX.failure||null});
 const PD_REC_BODIES = [];
 const PD_REC_CANVAS = document.createElement('canvas');
 PD_REC_CANVAS.id='pdRecoveryBodies'; PD_REC_CANVAS.setAttribute('aria-hidden','true');

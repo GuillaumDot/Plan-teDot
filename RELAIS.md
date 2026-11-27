@@ -125,3 +125,10 @@ Correctif cdf2bfa : compilation et rendu WebGL2 visibles, assertion rouge sur in
 
 ## Relais ChatGPT — V10 — raccordement index expérimental
 9cc4b83 CPU/WebGL verts (45998086053/45998086030), composition et états restaurés. Index V9.8.2 de branche raccordé au focused-host dans renderPlanet, import paresseux sous world10=1 et version 10 requise. world10preview=1 opt-in supplémentaire pour apercevoir une planète existante sans mutation ni sauvegarde. Repli immédiat historique, une seule boucle, aucun changement audio/Supabase/main. Contrat syntaxe index ajouté. Avant fusion : réconcilier index main V9.8.3 (5197e2a), tester parcours authentifié et iPhone, MP3 et écran verrouillé, états GLR/POST en conditions réelles.
+
+## Relais ChatGPT — V9.8.3 (27/11/2026)
+
+Mise à jour directe demandée par le fondateur. Chargeur d'atlas V10 alpha.15 intégré à la V9.8.2 publique : pack compact 256 px niveau 0, validation des 28 entrées, détection des erreurs GPU, arrêt propre et diagnostic. Gouverneur et atlas habituels conservés. Syntaxe JS, dimensions JPEG et en-tête compact vérifiés ; iPhone et audio verrouillé non vérifiés. Aucun changement Supabase, audio, géographie ou shader. Retour arrière par revert, parent 27b6746dc859d6d6bd04038a9cf338bae3607920. V10 alpha.19 reste sur sa branche.
+
+## Relais ChatGPT — V10 — consolidation de la branche
+Intégration de main 5197e2a V9.8.3 dans la branche V10, index V9.8.3 exact + trois hooks V10 vérifiés réversibles, atlas compact copié par SHA du blob. Commit à deux parents. 96262e6 CPU/WebGL verts, mais test réel de l'application et audio verrouillé non validés. Nouveau CI à vérifier. Main inchangée.
