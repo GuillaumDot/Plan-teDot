@@ -46,3 +46,7 @@ Prochaines étapes, dans l'ordre : 1) brancher la V2.2 derrière `?gen=22` (Work
 - Code : sur dev/chatgpt-sujet, derrière un flag, avec un fichier NOTES qui décrit le changement et la façon de le tester. Claude reprend, mesure et intègre.
 - Mise en ligne urgente (correctif) : seulement avec l'accord de Guillaume, après le test minimal ci-dessus, et en gardant le commit précédent comme retour arrière.
 - Canal : issue #1, format « AGENT | date | chantier | branche | commits | fichiers | blocages | prochaine action ».
+
+
+## Relais ChatGPT — 27 novembre 2026 — V10
+Branche dev/chatgpt-world-v10. Modules dans assets/cosmic/world-v10 : profils, surfaces, bake worker, cache, GPU, shaders, géométrie, renderer et previews. Tests CPU réussis (45991630509). WebGL : première installation Chromium échouée, correctif conteneur b79bce03, nouvelle exécution 45991630345 en cours. Aucun changement main ni Supabase. Les modèles détaillés, Natural World V2.2, textures V1.9 et audio réel ne sont pas encore intégrés au renderer. Prochaine étape : vérifier WebGL, corriger puis intégrer sans régression V9. Ne pas déclarer validé avant test iPhone.
