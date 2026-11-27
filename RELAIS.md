@@ -62,3 +62,6 @@ Grille géographique terrestre fixée à N=64 indépendamment de la résolution 
 
 ## Relais ChatGPT — V10 — atlas multi-biomes terrestre
 Quatre matériaux V1.9 dans une seule texture 256 px, mélange local par climat et relief, repli sur le matériau dominant. Tests navigateur atlas, libération, mode par famille. Les poids exacts V2.2 et les textures tempérées dédiées restent à faire; performance iPhone non mesurée. Aucun changement main ni données.
+
+## Relais ChatGPT — V10 — ombres locales du relief
+Ajout d'une occlusion directionnelle bornée (trois lectures de la cube map, niveaux 2/3 uniquement), séparation de l'émission et de la lumière directe, test des deux niveaux sur terrain synthétique. Les tests du raccordement Natural World 646aaeb sont verts (45995104314 et 45995104412); l'atlas c32350b a passé les contrats CPU, WebGL à confirmer au moment de l'édition. Nouveau commit CI à vérifier. Aucun changement main ni Supabase. Validation visuelle iPhone et ombres des bâtiments encore nécessaires.

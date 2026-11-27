@@ -19,3 +19,25 @@ float worldCloudShadow(samplerCube climateMap,vec3 direction,vec3 light,float de
 }
 // Gas giants should bypass relief. Atmosphere is a surface rim approximation,
 // not volumetric scattering; use cloud shadows only for appropriate families.
+
+// Short horizon probe on the sphere, only for the high quality tiers.
+// A bounded approximation of directional terrain occlusion, not a shadow map.
+float worldTerrainShadow(samplerCube terrainMap,vec3 n,vec3 l,float height,float scale,float epsilon){
+ float nl=dot(n,l);
+ if(nl<=0.||scale<=0.)return 1.;
+ vec3 tangent=l-n*nl;
+ float len=length(tangent);
+ if(len<.001)return 1.;
+ tangent/=len;
+ float e=max(epsilon,.002);
+ float occlusion=0.;
+ for(int i=1;i<=3;i++){
+  float d=e*float(i)*1.6;
+  vec3 q=normalize(n+tangent*d);
+  float rise=(textureCube(terrainMap,q).r-height)*scale;
+  // Curvature lowers the local horizon with distance.
+  float clearance=d*nl/max(len,.001)+.5*d*d;
+  occlusion=max(occlusion,smoothstep(.002,.014,rise-clearance));
+ }
+ return 1.-.72*occlusion;
+}

@@ -22,3 +22,6 @@ La simulation terre utilise désormais N=64 indépendamment de la taille des cub
 
 ## Atlas de détail terrestre
 Quatre tuiles V1.9 (tropical, désert, alpin, polaire) dans un atlas unique 256 px au maximum dans l'aperçu. Mélanges locaux continus à partir de température, humidité et altitude du moteur, pas encore les onze poids exacts de V2.2. Les coordonnées restent à un demi-texel des bordures pour éviter la contamination entre tuiles. Le budget texture GPU reste identique à celui d'une seule texture 256²; davantage de lectures par fragment, à mesurer sur iPhone. Si l'atlas échoue, retour au matériau dominant, puis au procédural. Pas de modification de géographie.
+
+## Ombres du relief
+Sondage de l'horizon en trois échantillons de la cube map dans la direction de la lumière. Atténuation bornée de la lumière directe et du spéculaire, sans assombrir l'émission des volcans et villes. Désactivé aux niveaux 0 et 1, sur les géantes gazeuses et atténué sur les surfaces aquatiques. Aucun changement des altitudes enregistrées ni nouveau tampon GPU. Approximation locale, pas d'ombres géométriques des bâtiments ni de mesure de performance iPhone.

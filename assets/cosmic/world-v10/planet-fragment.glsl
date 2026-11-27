@@ -12,6 +12,7 @@ uniform vec3 uEye;
 uniform vec3 uAtmosphereTint;
 uniform float uAtmosphereDensity;
 uniform float uRelief;
+uniform float uShadowQuality;
 uniform float uTexel;
 uniform float uTime;
 uniform float uAudio;
@@ -58,7 +59,12 @@ void main(){
  vec3 normal=n;
  if(uFamily!=5)normal=worldReliefNormal(uTerrain,n,uRelief*(1.-terrain.g),uTexel);
  m.emission*=1.+.15*clamp(uAudio,0.,1.);
- vec3 color=shadeWorld(m,normal,l,v);
+ float visibility=1.;
+ if(uFamily!=5 && uShadowQuality>.5){
+  float land=(uFamily==0||uFamily==1)?1.-terrain.g:1.;
+  visibility=mix(1.,worldTerrainShadow(uTerrain,n,l,terrain.r,uRelief,uTexel),land);
+ }
+ vec3 color=shadeWorld(m,normal,l,v,visibility);
  if(uFamily==0||uFamily==1){
  float a=uTime*.015;
  vec3 q=vec3(cos(a)*n.x+sin(a)*n.z,n.y,-sin(a)*n.x+cos(a)*n.z);
