@@ -1,0 +1,16 @@
+<!doctype html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PlanèteDot V10 3D</title><style>body{margin:0;background:#080b15;color:#fff;font:16px system-ui;text-align:center}canvas{width:min(95vw,560px);height:min(95vw,560px);display:block;margin:auto}select,button{font:inherit;min-height:44px;margin:8px}#status{padding:12px}</style><h1>PlanèteDot V10</h1><select aria-label="Famille planétaire" id="family"></select><button id="motion">Pause</button><canvas id="view"></canvas><p id="status" role="status">Chargement…</p><script type="module">
+import {createPlanetRenderer} from './renderer.mjs';
+import {createWorldCache} from './world-cache.mjs';
+import {ARCHETYPES} from './archetypes.mjs';
+const canvas=document.querySelector('#view'),status=document.querySelector('#status'),select=document.querySelector('#family'),button=document.querySelector('#motion');
+for(const [i,type] of Object.keys(ARCHETYPES).entries())select.add(new Option(['Terre','Aquatique','Roche','Volcanique','Glace','Gaz','Spectrale métallique'][i],type));
+let renderer,cache,planet,request=0,raf=0,paused=matchMedia('(prefers-reduced-motion: reduce)').matches,angle=0,last=0,closed=false;
+const gl=canvas.getContext('webgl',{alpha:false,antialias:true});
+function cleanup(){closed=true;cancelAnimationFrame(raf);planet?.dispose();renderer?.dispose();cache?.dispose();}
+try{if(!gl)throw Error('WebGL indisponible');renderer=await createPlanetRenderer(gl);cache=createWorldCache();
+async function load(){const id=++request;status.textContent='Génération…';try{const world=await cache.get(select.value,42,64,{priority:true});if(closed||id!==request)return;const next=renderer.upload(world);planet?.dispose();planet=next;status.textContent='Planète chargée';}catch(e){if(id===request&&!closed)status.textContent=e.message;}}
+select.onchange=load;button.textContent=paused?'Animer':'Pause';button.onclick=()=>{paused=!paused;button.textContent=paused?'Animer':'Pause';};
+function frame(t){if(closed)return;const dt=Math.min(.05,(t-last)/1000);last=t;if(!paused)angle+=dt*.2;const size=Math.min(840,Math.round(canvas.clientWidth*Math.min(devicePixelRatio,1.5)));if(canvas.width!==size||canvas.height!==size)canvas.width=canvas.height=size;gl.viewport(0,0,size,size);gl.clearColor(.025,.035,.07,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);if(planet){const c=Math.cos(angle),s=Math.sin(angle),k=.83;renderer.draw(planet,{mvp:new Float32Array([k*c,0,-.5*s,0,0,k,0,0,k*s,0,.5*c,0,0,0,0,1]),eye:[3*s,0,-3*c],light:[-.45*c+.82*s,.35,-.45*s-.82*c],time:angle*5});}raf=requestAnimationFrame(frame);}
+canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();cleanup();status.textContent='Contexte perdu : rechargez la page.';});addEventListener('pagehide',cleanup,{once:true});await load();raf=requestAnimationFrame(frame);
+}catch(e){cleanup();status.textContent=e.message;}
+</script></html>
