@@ -7,7 +7,7 @@ const match=html.match(/const PD10_SHADER=pdTry\(\(\)=>compile\(("(?:\\.|[^"\\])
 assert.ok(match,'extract the actual shipped shader');
 const vs=JSON.parse(match[1]),frag=JSON.parse(match[2]);
 test('V10 source and isolation',()=>{
- assert.match(html,/name="pd-version" content="10\.0-alpha\.[1234]"/);
+ assert.match(html,/name="pd-version" content="10\.0-alpha\.[12345]"/);
  assert.doesNotMatch(frag,/\bsampler\w*\b/);
  assert.match(html,/function pd10Draw\(o\)/);
  assert.match(html,/if\(pd10Draw\(o\)\)return/);
@@ -57,7 +57,7 @@ test('production probe resolves MSAA pixels and restores framebuffer bindings',a
  const browser=process.env.PD_BROWSER==='webkit'?await webkit.launch({headless:true}):await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
  try{
  const page=await browser.newPage();
- const source=html.slice(html.indexOf('let PD10_PROBE_TARGET='),html.indexOf('function pd10TryProbe('));
+ const source=html.slice(html.indexOf('let PD10_PROBE_UNAVAILABLE='),html.indexOf('function pd10TryProbe('));
  assert.ok(source.includes('function pd10ProbePixels'));
  const result=await page.evaluate(source=>{
  const c=document.createElement('canvas');c.width=c.height=32;
@@ -66,12 +66,13 @@ test('production probe resolves MSAA pixels and restores framebuffer bindings',a
  const samples=Math.min(4,gl.getParameter(gl.MAX_SAMPLES));if(samples<2)throw Error('MSAA unavailable');
  gl.renderbufferStorageMultisample(gl.RENDERBUFFER,samples,gl.RGBA8,32,32);gl.framebufferRenderbuffer(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.RENDERBUFFER,rb);
  if(gl.checkFramebufferStatus(gl.FRAMEBUFFER)!==gl.FRAMEBUFFER_COMPLETE)throw Error('MSAA incomplete');
- const POST={on:true,ms:{f}},H=32,probe=new Function('gl','POST','H',source+';return pd10ProbePixels;')(gl,POST,H);
+ const dst=gl.createFramebuffer(),single=gl.createRenderbuffer();gl.bindFramebuffer(gl.FRAMEBUFFER,dst);gl.bindRenderbuffer(gl.RENDERBUFFER,single);gl.renderbufferStorage(gl.RENDERBUFFER,gl.RGBA8,32,32);gl.framebufferRenderbuffer(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.RENDERBUFFER,single);if(gl.checkFramebufferStatus(gl.FRAMEBUFFER)!==gl.FRAMEBUFFER_COMPLETE)throw Error('resolve target incomplete');gl.bindFramebuffer(gl.FRAMEBUFFER,f);
+ const POST={on:true,ms:{f},s:{f:dst}},H=32,probe=new Function('gl','POST','H',source+';return pd10ProbePixels;')(gl,POST,H);
  const a=new Uint8Array(16),b=new Uint8Array(16);
  gl.clearColor(.1,.2,.3,1);gl.clear(gl.COLOR_BUFFER_BIT);const first=probe({x:16,y:16},a);
  gl.clearColor(.8,.5,.2,1);gl.clear(gl.COLOR_BUFFER_BIT);const second=probe({x:16,y:16},b);
  return {first,second,a:Array.from(a),b:Array.from(b),restored:gl.getParameter(gl.READ_FRAMEBUFFER_BINDING)===f&&gl.getParameter(gl.DRAW_FRAMEBUFFER_BINDING)===f,error:gl.getError()};
  },source);
- assert.equal(result.first,true);assert.equal(result.second,true);assert.equal(result.restored,true);assert.equal(result.error,0);assert.ok(result.b[0]-result.a[0]>100,JSON.stringify(result));
+ assert.equal(result.first,true,JSON.stringify(result));assert.equal(result.second,true,JSON.stringify(result));assert.equal(result.restored,true,JSON.stringify(result));assert.equal(result.error,0,JSON.stringify(result));assert.ok(result.b[0]-result.a[0]>100,JSON.stringify(result));
  }finally{await browser.close();}
 });
