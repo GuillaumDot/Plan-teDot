@@ -2,6 +2,7 @@
 // No external buffers, compression, skins, animation or texture decoding.
 export const MODEL_TRIANGLE_BUDGET=12000;
 export const CITY_MODEL_PATH='assets/cosmic/world/world-v11/cottage-00.glb';
+export const CITY_MODEL_PATHS=Object.freeze({cottage:CITY_MODEL_PATH,tower:'assets/cosmic/world/world-v11/tower-00.glb',factory:'assets/cosmic/world/world-v11/factory-00.glb'});
 const identity=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1];
 function mul(a,b){return Array.from({length:16},(_,i)=>{const col=i>>2,row=i%4;return a[row]*b[col*4]+a[4+row]*b[col*4+1]+a[8+row]*b[col*4+2]+a[12+row]*b[col*4+3];});}
 function point(m,p){return [0,1,2].map(i=>m[i]*p[0]+m[4+i]*p[1]+m[8+i]*p[2]+m[12+i]);}
@@ -47,9 +48,19 @@ export function decodeStaticGLB(buffer,{maxTriangles=MODEL_TRIANGLE_BUDGET}={}){
  for(let i=0;i<vertices.length;i+=7)for(let k=0;k<3;k++){min[k]=Math.min(min[k],vertices[i+k]);max[k]=Math.max(max[k],vertices[i+k]);}
  return {vertices:new Float32Array(vertices),triangles,min,max};
 }
-export async function loadCityModel({signal}={}){
- const response=await fetch(new URL('../../../'+CITY_MODEL_PATH,import.meta.url),{signal});
+export async function loadCityModel({signal,kind='cottage'}={}){
+ if(!Object.hasOwn(CITY_MODEL_PATHS,kind))throw new RangeError('Unknown city model');
+ const response=await fetch(new URL('../../../'+CITY_MODEL_PATHS[kind],import.meta.url),{signal});
  if(!response.ok)throw Error('City GLB HTTP '+response.status);
  const buffer=await response.arrayBuffer();if(signal?.aborted)throw new DOMException('Aborted','AbortError');
  return decodeStaticGLB(buffer);
+}
+
+export async function loadCityModels(options={}){
+ const models={};
+ for(const kind of Object.keys(CITY_MODEL_PATHS)){
+  if(options.signal?.aborted)throw new DOMException('Aborted','AbortError');
+  try{models[kind]=await loadCityModel({...options,kind});}catch(e){if(options.signal?.aborted)throw e;if(kind==='cottage')throw e;console.warn('Optional city model fallback:',kind,e.message);}
+ }
+ return models;
 }

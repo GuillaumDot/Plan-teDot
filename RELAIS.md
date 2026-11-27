@@ -80,3 +80,6 @@ Ordre déterministe des bâtiments (centres, quartiers, périphéries), paramèt
 
 ## Relais ChatGPT — V10 — géométrie GLB architecturale réelle
 Lecture bornée du cottage world-v11 existant (glTF 2.0 statique, export trimesh), placement tangent de quatre instances maximum sur terre, plafond 12 000 triangles, chargement annulable, tampon libéré. Matériaux texturés et autres modèles non intégrés; proxies gardés. Tests CPU et WebGL ajoutés. Infrastructures 3b80714 CPU/WebGL verts; croissance bad150b CPU vert, WebGL en cours au début de cette étape. Aucun changement main/Supabase; CI et iPhone à confirmer.
+
+## Relais ChatGPT — V10 — diversité des modèles architecturaux
+Trois fichiers GLB world-v11 raccordés au catalogue (cottage, tour, usine), routage par site, budget global et protection contre les chargements concurrents. Tests CPU sur les trois fichiers et assertion budget WebGL. Croissance bad150b CPU/WebGL verts; premier GLB 6ad7a33 CPU vert, WebGL en cours au début de l'étape. Les nouveaux tests restent à confirmer. Aucun changement main ni Supabase; matériaux complets, végétation et validation iPhone restent à faire.

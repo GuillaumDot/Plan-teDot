@@ -40,3 +40,6 @@ Les bâtiments sont ordonnés par phases : centres de toutes les villes, voisins
 
 ## Modèles architecturaux GLB
 Première intégration d'un fichier réel world-v11/cottage-00.glb : lecture glTF 2.0 limitée aux maillages statiques indexés et matrices de nœuds, normales de faces, géométrie orientée dans le repère tangent. Jusqu'à quatre instances sur terre, 12 000 triangles maximum et tampon supplémentaire, uniquement aux niveaux 2/3 et croissance complète. Les proxies sont conservés si le chargement échoue. Le fichier examiné est exporté par trimesh, non par Blender; couleurs de matériaux simplifiées, textures/normal maps embarquées ignorées pour cette étape. Pas de prétention à un moteur glTF général ni à un rendu photoréaliste. Tests CPU sur le fichier réel et WebGL sur une scène synthétique.
+
+## Diversité architecturale
+Catalogue borné de trois GLB world-v11 : cottage, tour, usine. Sélection déterministe selon le site portuaire/fluvial et l'ordre des villes; repli cottage pour un modèle optionnel indisponible. Quatre instances maximum, plafond partagé de 12 000 triangles, sans nouveau draw call par modèle. Échelles visuelles distinctes. Le lecteur statique ignore toujours les textures et normal maps; végétation et rendu rapproché à faire.

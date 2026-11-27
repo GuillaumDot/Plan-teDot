@@ -6,7 +6,7 @@ import {loadTerrainAlbedo,loadEarthDetailAtlas} from './terrain-texture.mjs';
 import {assertTextureGL} from './texture-guard.mjs';
 import {visualAudio} from './visual-audio.mjs';
 import {createCityProgram,uploadCities} from './cities.mjs';
-import {loadCityModel} from './static-glb.mjs';
+import {loadCityModels} from './static-glb.mjs';
 import {uploadLandmarks} from './landmarks.mjs';
 const families=Object.keys(ARCHETYPES);
 const tints=[[.18,.45,1],[.12,.65,1],[.45,.38,.3],[1,.25,.08],[.4,.7,1],[.9,.65,.4],[.5,.3,1]];
@@ -20,12 +20,12 @@ export async function createPlanetRenderer(gl){
  }catch(e){if(neutral)gl.deleteTexture(neutral);p.dispose();throw e;}
  try{cityProgram=createCityProgram(gl);}catch(e){console.warn('City shader fallback:',e.message);}
  return {
- upload(world){if(disposed)throw new Error('Renderer disposed');const profile=planetProfile(world.type),maps=uploadWorldMaps(gl,world);let alive=true,revision=0,cityMesh=null;
+ upload(world){if(disposed)throw new Error('Renderer disposed');const profile=planetProfile(world.type),maps=uploadWorldMaps(gl,world);let alive=true,revision=0,landmarkRevision=0,cityMesh=null;
  if(cityProgram)try{cityMesh=uploadCities(gl,world);}catch(e){console.warn('City mesh fallback:',e.message);}
  const planet={maps,profile,type:world.type,family:families.indexOf(world.type),size:world.size,detail:null,audioEnergy:0,cityMesh,landmarks:null,
  async loadLandmarks(options){
  if(!alive||disposed||world.type!=='earth'||!cityProgram)return false;
- const model=await loadCityModel(options);if(!alive||disposed||options?.signal?.aborted)return false;
+ const id=++landmarkRevision,model=await loadCityModels(options);if(!alive||disposed||id!==landmarkRevision||options?.signal?.aborted)return false;
  const next=uploadLandmarks(gl,world,model);planet.landmarks?.dispose();planet.landmarks=next;return !!next;
  },
  async loadDetail(biome,options){

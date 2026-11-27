@@ -95,3 +95,11 @@ const placed=landmarkGeometry(cityWorld,model);assert.equal(placed.instances,1);
 assert.equal(landmarkGeometry({...cityWorld,terrain:ocean},model).instances,0);
 assert.throws(()=>decodeStaticGLB(new ArrayBuffer(32)));
 console.log('Real GLB geometry and placement verified');
+
+import {CITY_MODEL_PATHS} from './static-glb.mjs';
+import {landmarkKind} from './landmarks.mjs';
+const variants={};for(const [kind,path] of Object.entries(CITY_MODEL_PATHS)){const bytes=readFileSync(new URL('../../../'+path,import.meta.url));variants[kind]=decodeStaticGLB(bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength));assert.ok(variants[kind].triangles>0);}
+assert.equal(landmarkKind({port:true},0),'factory');assert.equal(landmarkKind({},1),'tower');
+const diverse=landmarkGeometry({...cityWorld,natural:{cities:[{dir:[0,0,-1]},{dir:[0,0,1]},{dir:[1,0,0],port:true}]}},variants);
+assert.ok(diverse.instances>=1&&diverse.triangles<=MODEL_TRIANGLE_BUDGET);assert.ok(diverse.vertices.every(Number.isFinite));assert.deepEqual(diverse,landmarkGeometry({...cityWorld,natural:{cities:[{dir:[0,0,-1]},{dir:[0,0,1]},{dir:[1,0,0],port:true}]}},variants));
+console.log('Architectural model catalog and shared budget verified');
