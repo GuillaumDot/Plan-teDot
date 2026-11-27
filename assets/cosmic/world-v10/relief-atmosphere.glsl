@@ -69,3 +69,13 @@ float worldStorm(vec3 n,vec3 center,float time,float radius){
  float eye=smoothstep(.07,.19,r),edge=1.-smoothstep(.60,1.,r);
  return eye*edge*mix(.25,1.,smoothstep(.20,.85,arm));
 }
+
+// One horizon sample at the intermediate quality level; no extra texture.
+float worldTerrainShadowLite(samplerCube terrainMap,vec3 n,vec3 l,float height,float scale,float epsilon){
+ float nl=dot(n,l); vec3 tangent=l-n*nl; float len=length(tangent);
+ if(nl<=0.||scale<=0.||len<.001)return 1.;
+ float d=max(epsilon,.002)*1.6;
+ float rise=(textureCube(terrainMap,normalize(n+tangent/len*d)).r-height)*scale;
+ float clearance=d*nl/max(len,.001)+.5*d*d;
+ return 1.-.42*smoothstep(.002,.014,rise-clearance);
+}

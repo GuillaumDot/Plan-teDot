@@ -1,1 +1,0 @@
-Archives historiques : fichiers uniques uniquement, non autonomes, hors runtime. Les versions cumulatives world et social sont prioritaires. Ne pas importer les poses GLB historiques en production.

@@ -1,11 +1,18 @@
 import {resolveTerrain} from './catalog.mjs';
 import {assertTextureGL} from './texture-guard.mjs';
+// WebKit may reject createImageBitmap for otherwise valid image blobs.
+async function decodeTerrainImage(blob){
+ if(typeof createImageBitmap==='function'){try{return await createImageBitmap(blob);}catch(_){}}
+ const url=URL.createObjectURL(blob);
+ try{return await new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=()=>reject(Error('Terrain image decode failed'));img.src=url;});}
+ finally{URL.revokeObjectURL(url);}
+}
 export async function loadTerrainAlbedo(gl,type,biome,{maxSize=512,signal,channel='albedo'}={}){
  const asset=resolveTerrain(type,biome);if(!asset)return null;
  if(!['albedo','height'].includes(channel))throw new RangeError('Invalid terrain channel');
  const url=new URL('../../../'+asset[channel],import.meta.url);
  const response=await fetch(url,{signal});if(!response.ok)throw new Error('Terrain HTTP '+response.status);
- const bitmap=await createImageBitmap(await response.blob());
+ const bitmap=await decodeTerrainImage(await response.blob());
  let texture=null;
  try{
  if(signal?.aborted)throw new DOMException('Aborted','AbortError');
@@ -37,7 +44,7 @@ export async function loadEarthDetailAtlas(gl,{maxSize=256,signal,channel='albed
   const asset=resolveTerrain('earth',biome);
   const response=await fetch(new URL('../../../'+asset[channel],import.meta.url),{signal});
   if(!response.ok)throw Error('Atlas '+biome+' HTTP '+response.status);
-  const bitmap=await createImageBitmap(await response.blob());
+  const bitmap=await decodeTerrainImage(await response.blob());
   try{ctx.drawImage(bitmap,(i%2)*tile,Math.floor(i/2)*tile,tile,tile);}finally{bitmap.close?.();}
  }
  if(signal?.aborted)throw new DOMException('Aborted','AbortError');
