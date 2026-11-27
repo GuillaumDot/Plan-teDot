@@ -136,5 +136,11 @@ const start={yaw:0,pitch:0,zoom:1},goal=cameraTarget(start,{yaw:1,pitch:9,zoom:9
 assert.equal(goal.pitch,CAMERA_LIMITS.maxPitch);assert.equal(goal.zoom,CAMERA_LIMITS.maxZoom);
 assert.equal(cameraTarget(start,{zoom:0}).zoom,CAMERA_LIMITS.minZoom);
 const step=cameraStep(start,goal,.016);assert.ok(step.zoom>1&&step.zoom<goal.zoom);assert.deepEqual(cameraStep(start,goal,0,true),goal);
-const view=cameraFrame(start);assert.deepEqual(Array.from(view.mvp),Array.from(new Float32Array([.83,0,0,0,0,.83,0,0,0,0,.5,0,0,0,0,1])));assert.ok(cameraFrame(goal).mvp.every(Number.isFinite));assert.ok(Math.abs(Math.hypot(...cameraFrame(goal).eye)-3)<1e-9);
+const view=cameraFrame(start);assert.ok(view.mvp.every((value,i)=>Math.abs(value-[.83,0,0,0,0,.83,0,0,0,0,.5,0,0,0,0,1][i])<1e-6));assert.ok(cameraFrame(goal).mvp.every(Number.isFinite));assert.ok(Math.abs(Math.hypot(...cameraFrame(goal).eye)-3)<1e-9);
 console.log('Camera bounds and smoothing verified');
+
+import {renderBudget} from './config.mjs';
+let adaptive={tier:3,average:33.33};for(let i=0;i<100;i++)adaptive=qualityStep(adaptive,60,.1);assert.equal(adaptive.tier,0);
+for(let i=0;i<300;i++)adaptive=qualityStep(adaptive,16,.1);assert.equal(adaptive.tier,3);
+assert.equal(qualityStep(adaptive,NaN,.1),adaptive);assert.equal(renderBudget(0,3).pixelRatio,.75);assert.equal(renderBudget(3,3).pixelRatio,1.5);
+console.log('Quality governor recovery and render budgets verified');

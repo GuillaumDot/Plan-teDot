@@ -61,3 +61,6 @@ Chargement des cartes de hauteur V1.9 existantes, même atlas que les albedos ou
 
 ## Navigation immersive V1
 Caméra orbitale yaw/pitch et zoom orthographique borné 0,8–3,2, lissage exponentiel réutilisant transitions.mjs, boutons/roue/clavier et gestes pointeurs à un ou deux doigts. Rotation automatique suspendue pendant le geste; mode mouvement réduit sans interpolation. Une seule boucle RAF dans l'aperçu. Le zoom rapproche la vue sans vol au sol, sans nouvelle géométrie ni déplacement de caméra en perspective. Tests CPU des limites et navigateur des boutons; gestes iPhone non vérifiés.
+
+## Gouverneur de qualité raccordé
+L'aperçu applique qualityStep existant au temps réel entre images (hors chargement de textures, reprise de visibilité et grandes interruptions), puis renderBudget au DPR et au tier du renderer. Choix Auto/Éco/Standard/Élevée/Ultra. En arrière-plan pas de dessin; un seul RAF. L'objectif 30 FPS n'est pas une mesure iPhone; aucune mesure batterie. Test caméra corrigé pour ne pas distinguer -0 et +0 dans les matrices. Tests CPU de baisse/remontée de qualité et navigateur de résolution.

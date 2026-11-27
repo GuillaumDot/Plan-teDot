@@ -105,5 +105,8 @@ try{
  assert.deepEqual(microCheck,{height:true,changed:true,error:0});
  await page.locator('#zoomin').click();await page.waitForFunction(()=>Number(document.querySelector('canvas').dataset.zoom)>1.15);
  await page.locator('#resetview').click();await page.waitForFunction(()=>Math.abs(Number(document.querySelector('canvas').dataset.zoom)-1)<.02);
+ await page.selectOption('#quality','0');await page.waitForFunction(()=>document.querySelector('canvas').dataset.tier==='0');const ecoWidth=await page.locator('canvas').evaluate(c=>c.width);
+ await page.selectOption('#quality','3');await page.waitForFunction(()=>document.querySelector('canvas').dataset.tier==='3');const ultraWidth=await page.locator('canvas').evaluate(c=>c.width);assert.ok(ultraWidth>ecoWidth);
+ await page.selectOption('#quality','auto');
  assert.deepEqual(errors,[]);
 }finally{await browser.close();}

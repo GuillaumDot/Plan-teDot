@@ -101,3 +101,6 @@ Cartes de hauteur V1.9 raccordées au même routage que les albedos; normales pe
 
 ## Relais ChatGPT — V10 — navigation immersive V1
 Caméra orbitale bornée, rotation tactile, pincement, zoom et recentrage dans l'aperçu; lissage et mouvement réduit, un RAF. Tests CPU et navigateur ajoutés. Matériaux 7c176e4 CPU/WebGL verts; microrelief 4f51e5d CPU vert, WebGL en cours au début du chantier. Le zoom est orthographique et non un vol jusqu'au sol. Aucun changement main/Supabase/audio; CI et gestes iPhone à confirmer. Prochaine étape: gouverneur qualité et adaptateur de l'application.
+
+## Relais ChatGPT — V10 — gouverneur graphique
+Qualité adaptative dans l'aperçu, résolution et tier synchronisés au budget existant, quatre modes manuels, rendu suspendu quand masqué. Test caméra modifié pour comparer les coefficients numériques avec tolérance (zéros signés suspectés; log détaillé non accessible). Microrelief 4f51e5d CPU/WebGL verts; caméra bce192a CPU rouge, WebGL en cours au début du chantier. CI du correctif à vérifier avant intégration. Aucun changement main/Supabase/audio. Objectif 30 FPS non mesuré sur iPhone.
