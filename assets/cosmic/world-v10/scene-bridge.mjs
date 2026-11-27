@@ -31,11 +31,13 @@ export function createSceneCompositor(gl){
  gl.attachShader(program,vs);gl.attachShader(program,fs);gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(program));
  }catch(e){dispose();throw e;}finally{for(const s of shaders)gl.deleteShader(s);}
  const rectLoc=gl.getUniformLocation(program,'uRect'),imageLoc=gl.getUniformLocation(program,'uImage');
+ // Hardware limits are immutable for this context; query once, not per frame.
+ const targetLimit=Math.min(gl.getParameter(gl.MAX_TEXTURE_SIZE),gl.getParameter(gl.MAX_RENDERBUFFER_SIZE));
  let allocated=0;
  return {draw(adapter,body,frame,width,height){
  if(closed||gl.isContextLost()||!adapter.ready)return false;
  const rect=sceneRect(body,width,height);if(!rect)return false;
- const cap=Math.min(frame.tier>=2?SCENE_TARGET_CAP:512,gl.getParameter(gl.MAX_TEXTURE_SIZE),gl.getParameter(gl.MAX_RENDERBUFFER_SIZE));
+ const cap=Math.min(frame.tier>=1?SCENE_TARGET_CAP:768,targetLimit);
  if(cap<32)return false;
  const size=Math.min(cap,Math.max(32,Math.ceil(body.r*2/.92/32)*32));
  const old={draw:gl.getParameter(gl.DRAW_FRAMEBUFFER_BINDING),read:gl.getParameter(gl.READ_FRAMEBUFFER_BINDING),renderbuffer:gl.getParameter(gl.RENDERBUFFER_BINDING),viewport:gl.getParameter(gl.VIEWPORT),program:gl.getParameter(gl.CURRENT_PROGRAM),vao:gl.getParameter(gl.VERTEX_ARRAY_BINDING),unit:gl.getParameter(gl.ACTIVE_TEXTURE),color:gl.getParameter(gl.COLOR_WRITEMASK),depthMask:gl.getParameter(gl.DEPTH_WRITEMASK),clearColor:gl.getParameter(gl.COLOR_CLEAR_VALUE),clearDepth:gl.getParameter(gl.DEPTH_CLEAR_VALUE),depthFunc:gl.getParameter(gl.DEPTH_FUNC),srcRGB:gl.getParameter(gl.BLEND_SRC_RGB),dstRGB:gl.getParameter(gl.BLEND_DST_RGB),srcA:gl.getParameter(gl.BLEND_SRC_ALPHA),dstA:gl.getParameter(gl.BLEND_DST_ALPHA),eqRGB:gl.getParameter(gl.BLEND_EQUATION_RGB),eqA:gl.getParameter(gl.BLEND_EQUATION_ALPHA)};
@@ -46,9 +48,9 @@ export function createSceneCompositor(gl){
  if(size!==allocated){gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA8,size,size,0,gl.RGBA,gl.UNSIGNED_BYTE,null);for(const p of [gl.TEXTURE_MIN_FILTER,gl.TEXTURE_MAG_FILTER])gl.texParameteri(gl.TEXTURE_2D,p,gl.LINEAR);for(const p of [gl.TEXTURE_WRAP_S,gl.TEXTURE_WRAP_T])gl.texParameteri(gl.TEXTURE_2D,p,gl.CLAMP_TO_EDGE);gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,texture,0);gl.bindRenderbuffer(gl.RENDERBUFFER,depth);gl.renderbufferStorage(gl.RENDERBUFFER,gl.DEPTH_COMPONENT16,size,size);gl.framebufferRenderbuffer(gl.FRAMEBUFFER,gl.DEPTH_ATTACHMENT,gl.RENDERBUFFER,depth);if(gl.checkFramebufferStatus(gl.FRAMEBUFFER)!==gl.FRAMEBUFFER_COMPLETE)throw Error('Incomplete V10 target');allocated=size;}
  for(const [flag] of flags)gl.disable(flag);
  gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LESS);gl.depthMask(true);gl.colorMask(true,true,true,true);gl.viewport(0,0,size,size);gl.clearColor(0,0,0,0);gl.clearDepth(1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
- if(!adapter.draw(frame)||gl.getError()!==gl.NO_ERROR)return false;
+ if(!adapter.draw(frame))return false;
  gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,old.draw);gl.viewport(...old.viewport);gl.disable(gl.DEPTH_TEST);gl.depthMask(false);gl.enable(gl.BLEND);gl.blendEquation(gl.FUNC_ADD);gl.blendFuncSeparate(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA,gl.ONE,gl.ONE_MINUS_SRC_ALPHA);gl.colorMask(...old.color);
- gl.useProgram(program);gl.bindVertexArray(vao);gl.activeTexture(gl.TEXTURE0);gl.bindSampler(0,null);gl.bindTexture(gl.TEXTURE_2D,texture);gl.uniform1i(imageLoc,0);gl.uniform4fv(rectLoc,rect);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);return gl.getError()===gl.NO_ERROR;
+ gl.useProgram(program);gl.bindVertexArray(vao);gl.activeTexture(gl.TEXTURE0);gl.bindSampler(0,null);gl.bindTexture(gl.TEXTURE_2D,texture);gl.uniform1i(imageLoc,0);gl.uniform4fv(rectLoc,rect);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);return !gl.isContextLost();
  }finally{
  gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,old.draw);gl.bindFramebuffer(gl.READ_FRAMEBUFFER,old.read);gl.bindRenderbuffer(gl.RENDERBUFFER,old.renderbuffer);gl.viewport(...old.viewport);gl.useProgram(old.program);gl.bindVertexArray(old.vao);gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,oldTex);gl.bindSampler(0,oldSampler);gl.activeTexture(old.unit);
  gl.colorMask(...old.color);gl.depthMask(old.depthMask);gl.depthFunc(old.depthFunc);gl.clearColor(...old.clearColor);gl.clearDepth(old.clearDepth);gl.blendFuncSeparate(old.srcRGB,old.dstRGB,old.srcA,old.dstA);gl.blendEquationSeparate(old.eqRGB,old.eqA);for(const [flag,enabled] of flags)enabled?gl.enable(flag):gl.disable(flag);
