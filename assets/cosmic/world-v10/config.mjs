@@ -3,7 +3,7 @@ export const WORLD_CONFIG=Object.freeze({
  enabled:false,
  targetFPS:30,
  cacheWorlds:4,
- bakeResolution:64,
+ bakeResolution:128,
  transitionSeconds:0.65,
  audioSmoothingSeconds:0.18,
  tiers:Object.freeze([
