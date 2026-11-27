@@ -12,4 +12,4 @@ Une seule source de vérité par fonctionnalité. Pas de second RAF, cache ou mo
 ## Collaboration
 Avant modification, vérifier les commits et le chantier de l'autre agent. Utiliser des commits atomiques et documenter les interfaces. Mettre à jour RELAIS.md lors des étapes significatives et signaler le chantier dans issue #1. Ne pas écraser les modifications concurrentes. Ne pas fusionner main sans accord et vérifications. Ne pas déclarer validé sur iPhone sans preuve.
 ## Critères
-Tests déterministes, continuité des biomes, budgets mémoire et GPU, récupération WebGL, audio indépendant, sauvegardes compatibles. Les modules présents sont des fondations non intégrées, pas une V10 livrée.
+Tests déterministes, continuité des biomes, budgets mémoire et GPU, récupération WebGL, audio indépendant, sauvegardes compatibles. Depuis le 27/11/2026, V10.0.3 est publiée (main f1207209, pd-version 10.0.3). Ces modules sont le moteur en ligne, pas un laboratoire détaché. Lire d'abord le haut de RELAIS.md. Ne pas modifier index.html sans accord de Guillaume, et ne pas déclarer un essai iPhone sans preuve.
