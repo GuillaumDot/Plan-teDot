@@ -120,6 +120,15 @@ test('urban preview is isolated behind an explicit flag',()=>{
 test('weather preview stays opt-in and covers both sphere shaders',()=>{
  assert.match(html,/const PD10_WEATHER=PD10_QUERY\.get\('weather'\)==='1'\?1:0;/);
  assert.equal((html.match(/vec3 oceanSlope10\(/g)||[]).length,2);
- assert.equal((html.match(/uDepth10,uWeather10;/g)||[]).length,2);
+ assert.equal((html.match(/uDepth10,uWeather10,uStar10;/g)||[]).length,2);
  assert.match(html,/if\(u\.uWeather10\)gl\.uniform1f\(u\.uWeather10,PD10_WEATHER\)/);
+});
+
+
+test('stellar preview is opt-in and available in both sphere shaders',()=>{
+ assert.match(html,/const PD10_STAR=PD10_QUERY\.get\('star'\)==='1'\?1:0;/);
+ assert.equal((html.match(/vec3 starCorona10\(/g)||[]).length,2);
+ assert.equal((html.match(/cor\+=starCorona10\(/g)||[]).length,2);
+ assert.equal((html.match(/uStar10>\.5&&uType==8&&d>0\./g)||[]).length,2);
+ assert.match(html,/if\(u\.uStar10\)gl\.uniform1f\(u\.uStar10,PD10_STAR\)/);
 });

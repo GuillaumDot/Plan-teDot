@@ -51,3 +51,7 @@ The normal maps now require `?pbr=1` in the original renderer, and the new albed
 ## Alpha.18 — ocean and weather experiment
 
 `?weather=1` adds three distance-filtered directional wave slopes in planet coordinates, bounded music/weather modulation of reflection roughness, shore foam, and cyclone spiral bands with eye and eyewall in both V9 shader variants. Corrected cyclone shadow offset to planet coordinates in preview. Existing cloud and city policies, planet geometry and saved geography are unchanged; no fluid simulation is introduced. Tests cover flag isolation and uniform availability, not actual weather appearance. Browser and physical device validation pending.
+
+## Alpha.19 — stellar close-up experiment
+
+`?star=1` enables bounded stellar corona streamers, curved prominences and photosphere grain in both V9 shader variants; the central star and type-8 stars receive the additional corona, with radius-dependent detail and bounded audio modulation. Existing V9 brightness and effects are retained when the flag is off. No additional textures or simulation state. Checks cover source isolation and uniform availability, not visual quality or GPU performance. Browser and physical-device validation pending.

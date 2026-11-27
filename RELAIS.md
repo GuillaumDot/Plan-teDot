@@ -64,3 +64,7 @@ Détails urbains city=1 : façades, toits, panneaux solaires, voirie, filtrage s
 ## Relais ChatGPT — alpha.18
 
 weather=1 : vagues directionnelles, reflets modulés par la musique, écume littorale et cyclones avec œil et bandes spiralées, shaders V9 principal et secours. Géographie conservée. Aucun nouveau simulateur de fluides. Main et Supabase inchangés. Validation navigateur et iPhone requise.
+
+## Relais ChatGPT — alpha.19
+
+star=1 : couronne solaire, filaments, protubérances, granulation et modulation audio bornée, shaders V9 principal et secours. Aucun changement du rendu de référence sans ce paramètre. Main et Supabase inchangés. Validation graphique et performances sur iPhone à faire.
