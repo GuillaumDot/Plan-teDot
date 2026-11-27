@@ -17,3 +17,11 @@ export function validateCatalog(){
 }
 // Derived catalog: no duplicate asset paths or archetype definitions.
 // Persistent account data and legacy generator versions are not migrated here.
+
+export function resolveTerrain(type,biome,lod=2){
+ const supported=supportedTerrain(type);
+ if(!supported.length)return null;
+ const fallback={earth:'tropical',aquatic:'island',rock:'desert',volcanic:'volcanic',ice:'polar',spectralMetallic:'alien'};
+ const resolved=supported.includes(biome)?biome:fallback[type];
+ return {requested:biome,resolved,fallback:resolved!==biome,...terrainAssets(type,resolved,lod)};
+}
