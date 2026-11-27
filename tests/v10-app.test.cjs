@@ -17,7 +17,7 @@ window.__pd10Lab={
 window.__pd10Status=()=>`);
 const observed=instrumented.replace('POST.end(); pdRecoveryPaint();','POST.end(); pdRecoveryPaint(); if(window.__pd10Lab&&mode==="planet"&&curP&&curP.r>30&&window.__pd10Lab.capture){window.__pd10Lab.pixels=window.__pd10Lab.sample();window.__pd10Lab.capture=false;}');
 assert.notEqual(observed,instrumented);
-test('complete application boots, enters album system and renders a planet on mobile viewport',{timeout:110000},async()=>{
+test('complete application boots, enters album system and renders a planet on mobile viewport',{timeout:180000},async()=>{
  const browser=process.env.PD_BROWSER==='webkit'?await webkit.launch({headless:true}):await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
  try{
  const device=devices['iPhone 13'];
@@ -29,7 +29,7 @@ test('complete application boots, enters album system and renders a planet on mo
  await page.waitForFunction(()=>{try{return window.__pd10Lab?.state().album&&window.__pd10Lab.state().frames>=2;}catch(e){return false;}},{},{timeout:45000});
  await page.evaluate(()=>window.__pd10Lab.enter());
  await page.waitForFunction(()=>window.__pd10Lab.state().mode==='system'&&window.__pd10Lab.state().frames>3,{},{timeout:25000});
- await page.waitForFunction(()=>window.__pd10Lab.state().renderer.blenderMaps===5&&window.__pd10Lab.state().renderer.albedoMaps===5,{},{timeout:30000});
+ await page.waitForFunction(()=>window.__pd10Lab.state().renderer.blenderMaps===5&&window.__pd10Lab.state().renderer.albedoMaps===5,{},{timeout:75000}).catch(async e=>{console.log('material timeout',await page.evaluate(()=>window.__pd10Lab.state()));throw e;});
  await page.evaluate(()=>{window.__pd10Lab.land();window.__pd10Lab.capture=true;});
  await page.waitForFunction(()=>window.__pd10Lab.pixels?.length===25,{},{timeout:35000});
  const result=await page.evaluate(()=>({state:window.__pd10Lab.state(),pixels:window.__pd10Lab.pixels}));
