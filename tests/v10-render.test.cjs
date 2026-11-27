@@ -7,7 +7,7 @@ const match=html.match(/const PD10_SHADER=pdTry\(\(\)=>compile\(("(?:\\.|[^"\\])
 assert.ok(match,'extract the actual shipped shader');
 const vs=JSON.parse(match[1]),frag=JSON.parse(match[2]);
 test('V10 source and isolation',()=>{
- assert.match(html,/name="pd-version" content="10\.0-alpha\.[12]"/);
+ assert.match(html,/name="pd-version" content="10\.0-alpha\.[123]"/);
  assert.doesNotMatch(frag,/\bsampler\w*\b/);
  assert.match(html,/function pd10Draw\(o\)/);
  assert.match(html,/if\(pd10Draw\(o\)\)return/);
@@ -20,8 +20,8 @@ test('V10 source and isolation',()=>{
  assert.ok(count>0);
 });
 test('actual WebGL2 compiles and draws all 12 planet types',async()=>{
- const {chromium}=require('playwright');
- const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+ const {chromium,webkit}=require('playwright');
+ const browser=process.env.PD_BROWSER==='webkit'?await webkit.launch({headless:true}):await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
  try{
  const page=await browser.newPage();
  const result=await page.evaluate(({vs,frag})=>{
@@ -44,4 +44,10 @@ test('actual WebGL2 compiles and draws all 12 planet types',async()=>{
  for(const r of result){assert.equal(r.error,0,JSON.stringify(r));assert.ok(r.pixels>3500,JSON.stringify(r));assert.ok(r.colors>30,JSON.stringify(r));}
  console.log(result);
  }finally{await browser.close();}
+});
+
+test('pixel watchdog distinguishes absent output from changed RGB',()=>{
+ const line=html.split('\n').find(l=>l.startsWith('function pd10PixelDelta('));assert.ok(line);
+ const c=vm.createContext({});vm.runInContext(line,c);
+ const a=new Uint8Array(16),b=new Uint8Array(16);assert.equal(c.pd10PixelDelta(a,b),0);b[3]=255;assert.equal(c.pd10PixelDelta(a,b),0);b[4]=50;assert.equal(c.pd10PixelDelta(a,b),50);
 });
