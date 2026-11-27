@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#010208">
 <title>planèteDot · ton univers musical</title>
-<meta name="pd-version" content="10.0.1">
+<meta name="pd-version" content="10.0.2">
 <meta name="description" content="PlanèteDot · l’album de GuillaumDot et ton univers musical en 3D : chaque planète est un morceau.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PlanèteDot">
@@ -1335,7 +1335,7 @@ async function pdTxFetch(){ try { await Promise.race([Promise.resolve(SESSP).cat
     else { const {buf,H,base}=await pdAtlasLoad(pdAtlasCandidates(TIER,PD_MOBILE,hd),PD_TXALL), u8=new Uint8Array(buf);
       PDTX.sz = H.sz; items = H.f.map(e => ({n: e.n, b: new Blob([u8.subarray(base + e.o, base + e.o + e.l)], {type: 'image/jpeg'})})); }
     PDTX.n = items.length;
-    const dec = async (b, n) => { if (window.createImageBitmap) try { return await createImageBitmap(b, {premultiplyAlpha: 'none', colorSpaceConversion: 'none'}); } catch(err){}
+    const dec = async (b, n) => { if (!PD_MOBILE && window.createImageBitmap) try { return await createImageBitmap(b, {premultiplyAlpha: 'none', colorSpaceConversion: 'none'}); } catch(err){}
       return await new Promise((ok, ko) => { const u = URL.createObjectURL(b), im = new Image(); im.onload = () => { URL.revokeObjectURL(u); ok(im); }; im.onerror = () => { URL.revokeObjectURL(u); ko(new Error('image ' + n)); }; im.src = u; }); };
     for (const it of items){ if (PDTX.off || !PDTX.n) return; while (!PDTX.off&&!PDTX.fail&&PDTX.q.length > (INTRO.on ? 30 : 2)) await new Promise(r => setTimeout(r, 120));   // one image at a time (V9.6 : décodées d'avance pendant l'ouverture)
       if(PDTX.off||PDTX.fail||!PDTX.n)return; let b = it.b; if (!b){ const r = await fetch(it.u, {priority: 'low'}); if (!r.ok) throw new Error(it.u + ' : ' + r.status); b = await r.blob(); }
@@ -1343,14 +1343,15 @@ async function pdTxFetch(){ try { await Promise.race([Promise.resolve(SESSP).cat
     PDTX.dl = PDTX.ms = Math.round(performance.now() - t0);
   } catch(err){ console.warn('[PlanèteDot] textures 8.2 indisponibles (' + (err && err.message || err) + ') : rendu V8.0 gardé'); pdAtlasFail(err); } }
 // one upload per frame, never during the opening animation
-function pdTxPut(x){ const G = gl, e = x.e, im = x.im, sz = PDTX.sz, T = PDTX.t, lv = n => Math.floor(Math.log2(n)) + 1;
+function pdTxFit(im,w,h){if((im.naturalWidth||im.width)===w&&(im.naturalHeight||im.height)===h)return im;const c=document.createElement('canvas');c.width=w;c.height=h;const ctx=c.getContext('2d');if(!ctx)throw Error('texture resize');ctx.drawImage(im,0,0,w,h);return c;}
+function pdTxPut(x){ const G = gl, e = x.e, im = x.im, sz = PDTX.sz, gs = Math.min(512,sz), T = PDTX.t, lv = n => Math.floor(Math.log2(n)) + 1;
   try { for(let j=0;j<8&&G.getError()!==G.NO_ERROR;j++){} const i = PD_TXN.indexOf(e.n);
     if (i >= 0){ if (!T.arr2){ T.arr2 = pdTxMk(8, G.TEXTURE_2D_ARRAY, G.REPEAT, G.REPEAT, true); pdTxUp(8, () => { G.bindTexture(G.TEXTURE_2D_ARRAY, T.arr2); G.texStorage3D(G.TEXTURE_2D_ARRAY, lv(sz), G.RGBA8, sz, sz, PD_TXN.length); }); }
-      pdTxUp(8, () => { G.bindTexture(G.TEXTURE_2D_ARRAY, T.arr2); G.texSubImage3D(G.TEXTURE_2D_ARRAY, 0, 0, 0, i, sz, sz, 1, G.RGBA, G.UNSIGNED_BYTE, im); }); }
-    else if (e.n === 'gal_a' || e.n === 'gal_b'){ if (!T.gal2){ T.gal2 = pdTxMk(10, G.TEXTURE_2D_ARRAY, G.CLAMP_TO_EDGE, G.CLAMP_TO_EDGE, true); pdTxUp(10, () => { G.bindTexture(G.TEXTURE_2D_ARRAY, T.gal2); G.texStorage3D(G.TEXTURE_2D_ARRAY, lv(512), G.RGBA8, 512, 512, 2); }); }
-      pdTxUp(10, () => { G.bindTexture(G.TEXTURE_2D_ARRAY, T.gal2); G.texSubImage3D(G.TEXTURE_2D_ARRAY, 0, 0, 0, e.n === 'gal_a' ? 0 : 1, 512, 512, 1, G.RGBA, G.UNSIGNED_BYTE, im); }); }
+      pdTxUp(8, () => { G.bindTexture(G.TEXTURE_2D_ARRAY, T.arr2); G.texSubImage3D(G.TEXTURE_2D_ARRAY, 0, 0, 0, i, sz, sz, 1, G.RGBA, G.UNSIGNED_BYTE, pdTxFit(im,sz,sz)); }); }
+    else if (e.n === 'gal_a' || e.n === 'gal_b'){ if (!T.gal2){ T.gal2 = pdTxMk(10, G.TEXTURE_2D_ARRAY, G.CLAMP_TO_EDGE, G.CLAMP_TO_EDGE, true); pdTxUp(10, () => { G.bindTexture(G.TEXTURE_2D_ARRAY, T.gal2); G.texStorage3D(G.TEXTURE_2D_ARRAY, lv(gs), G.RGBA8, gs, gs, 2); }); }
+      pdTxUp(10, () => { G.bindTexture(G.TEXTURE_2D_ARRAY, T.gal2); G.texSubImage3D(G.TEXTURE_2D_ARRAY, 0, 0, 0, e.n === 'gal_a' ? 0 : 1, gs, gs, 1, G.RGBA, G.UNSIGNED_BYTE, pdTxFit(im,gs,gs)); }); }
     else if (PD_GZN.includes(e.n)){ const gw = sz * 2; if (!T.gz2){ T.gz2 = pdTxMk(13, G.TEXTURE_2D_ARRAY, G.REPEAT, G.CLAMP_TO_EDGE, true); pdTxUp(13, () => { G.bindTexture(G.TEXTURE_2D_ARRAY, T.gz2); G.texStorage3D(G.TEXTURE_2D_ARRAY, lv(gw), G.RGBA8, gw, sz, PD_GZN.length); }); }
-      pdTxUp(13, () => { G.bindTexture(G.TEXTURE_2D_ARRAY, T.gz2); G.texSubImage3D(G.TEXTURE_2D_ARRAY, 0, 0, 0, PD_GZN.indexOf(e.n), gw, sz, 1, G.RGBA, G.UNSIGNED_BYTE, im); }); }
+      pdTxUp(13, () => { G.bindTexture(G.TEXTURE_2D_ARRAY, T.gz2); G.texSubImage3D(G.TEXTURE_2D_ARRAY, 0, 0, 0, PD_GZN.indexOf(e.n), gw, sz, 1, G.RGBA, G.UNSIGNED_BYTE, pdTxFit(im,gw,sz)); }); }
     else if (e.n === 'sky_mw') pdTxUp(11, () => { G.bindTexture(G.TEXTURE_2D, T.sky); G.texImage2D(G.TEXTURE_2D, 0, G.RGBA, G.RGBA, G.UNSIGNED_BYTE, im); });
     else if (e.n === 'sky_neb') pdTxUp(12, () => { G.bindTexture(G.TEXTURE_2D, T.neb); G.texImage2D(G.TEXTURE_2D, 0, G.RGBA, G.RGBA, G.UNSIGNED_BYTE, im); });
     const error=G.getError();if(error!==G.NO_ERROR)throw Error('WebGL upload '+e.n+' : '+error);
@@ -1401,6 +1402,7 @@ function pd96Up(){ const I = INTRO; if (!I.gl) return 1; if (I.ph === 'img') ret
 function pd96Calm(){ const I = INTRO; return !I.gl || I.ph === 'img' || (!!I.K && time >= I.K + I.SP + I.DV); }
 function pdTxTick(){ window.__pdF = (window.__pdF || 0) + 1; pd9BrTick(); if (!PDTX.st && !INTRO.on && time > 2.5) pdTxSoon(600);   // no opening animation (or it is over): start anyway
   for (let i = pd96Up(); i > 0 && PDTX.q.length && !PDTX.off; i--) pdTxPut(PDTX.q.shift());
+  if(PDTX.mipWait&&(!INTRO.on||INTRO.ph!=='seq'||INTRO.flashed))pdTxFin();
   if (PDTX.ready && !PDTX.on && !PDTX.off && pdTxHidden()){ PDTX.on = 1; console.info('[PlanèteDot] textures 8.2 allumées (' + PDTX.sz + ' px, ' + PDTX.dl + ' ms)'); } }
 // a phone that keeps struggling at the lowest resolution: textures off for this visit (V8.0 rendering), and the next opening starts one notch lower
 const PDG = {n: 0, hint: 0, calm: 0, no: (() => { try { return localStorage.getItem('pd.nogov') === '1' || localStorage.getItem('planetedot.quality') !== null; } catch(e){ return false; } })()};
@@ -1411,7 +1413,7 @@ function pdGov(avg){ if (PDG.no) return;
   if (pdHold() || document.hidden || performance.now() - PDG.calm < 4000 || PDTX.q.length){ PDG.n = 0; return; }
   if (avg > .05 && scale <= SMIN + .01 && !POST.on){ if (++PDG.n < 6) return;
     // Preserve compact textures and let in-flight uploads finish; only shed a heavier completed pack under sustained severe load.
-    if (!PDTX.off && PDTX.ready && PDTX.sz>256 && avg>.085){ PDTX.off=1; PDTX.on=0; console.info('[PlanèteDot] surcharge GPU sévère : atlas lourd suspendu'); }
+    // Keep photographic textures enabled; lower future quality tier instead.
     if (!PDG.hint && TIER > 0 && avg > .065){ PDG.hint = 1; try { localStorage.setItem('pd.perf', JSON.stringify({t: TIER - 1, d: Date.now()})); } catch(e){} } }
   else PDG.n = 0; }
 

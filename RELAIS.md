@@ -150,3 +150,7 @@ Branche de correction: archives hors runtime (385 fichiers, 10 345 596 octets) r
 
 ## Relais — V10.0.1 : textures persistantes
 PR #2 fusionnée après CI CPU et WebGL verts (46019818479, 46019818192). Correctif suivant : choix compact sur mobile niveau 0/1, secours HD → mobile → compact après échec HTTP/en-tête, textures compactes préservées par le gouverneur, libération des textures partielles sur échec, restauration des paramètres UNPACK du contexte partagé et microrelief réduit niveau 1. Journal des échecs de ressources optionnelles. Contrôle automatique de l'inventaire et tests de repli réseau/décodage. Aucun compte, audio ou autre dossier supprimé sans preuve. Validation CI de cette nouvelle candidate et iPhone réel encore nécessaires.
+
+
+## V10.0.2 — collaboration Gemini / ChatGPT
+Normalisation des dimensions avant upload, galaxies limitées à min(512, atlas), décodage Image sur mobile, finalisation mipmaps différée sécurisée, gouverneur sans coupure des textures. Patch Gemini partiel : isolation par famille et changement de signature non intégrés, nécessitent audit des bindings et des uniforms. Dimensions binaires réelles et rendu iOS non vérifiés.
