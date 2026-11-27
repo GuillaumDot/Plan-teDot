@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#010208">
 <title>planèteDot · ton univers musical</title>
-<meta name="pd-version" content="10.0.3">
+<meta name="pd-version" content="10.0.4">
 <meta name="description" content="PlanèteDot · l’album de GuillaumDot et ton univers musical en 3D : chaque planète est un morceau.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PlanèteDot">
@@ -1167,6 +1167,7 @@ async function initAccount(){
 
 /* ================= quality / GL ================= */
 const QKEY = 'planetedot.quality';
+function pdInApp(){ return /Instagram|FBAN|FBAV|FB_IAB|TikTok|musical_ly|BytedanceWebview|Snapchat|Line\//i.test(navigator.userAgent || ''); }   // V10.0.4 · test partagé : palier (detectTier) et atlas (pdAtlasCandidates)
 function detectTier(){
   const forced = LS.get(QKEY); if (forced === 0 || forced === 1 || forced === 2) return forced;
   let t = 2; const mem = navigator.deviceMemory || 4, cores = navigator.hardwareConcurrency || 4;
@@ -1174,7 +1175,7 @@ function detectTier(){
   if (mem <= 3 || cores <= 4) t = 1;
   if (mem <= 2 || /Mali-[4T]|Mali-G(31|51|52|57)|Adreno \(TM\) [3-5]\d\d|PowerVR|SGX|Intel\(R\) (HD|UHD) Graphics [2-6]\d\d|swiftshader|llvmpipe|Software/i.test(r)) t = 0;
   // V8.2 · navigateurs intégrés (Instagram, TikTok, Facebook, Snapchat…) : moins de mémoire, un cran en dessous
-  if (/Instagram|FBAN|FBAV|FB_IAB|TikTok|musical_ly|BytedanceWebview|Snapchat|Line\//i.test(navigator.userAgent || '')) t = Math.min(t, 1);
+  if (pdInApp()) t = Math.min(t, 1);
   // V8.2 · cet appareil a peiné lors d'une visite récente : on repart un cran en dessous (7 jours)
   // V9.7 : ces souvenirs venaient souvent d'un à-coup passager (et gardaient l'appareil un cran plus bas 7 jours) : ceux des versions d'avant sont oubliés, les nouveaux durent 1 jour
   try { if (localStorage.getItem('pd.perf.v') !== '103'){ localStorage.removeItem('pd.perf'); localStorage.setItem('pd.perf.v', '103'); } } catch(e){}
@@ -1211,10 +1212,13 @@ let slowN = 0, fastN = 0, PERF_UP = 0, postBackN = 0;
    - des images manquées en continu (plus de 15 % pendant 2,4 s) font aussi descendre d'un cran : l'à-coup régulier se voit plus qu'un cran de netteté ;
    - les effets reviennent après 7 s sans accroc (puis 14, 29, 58 s s'ils repartent) ;
    - à 30 images/s, le retour aux 60 est retenté juste après un changement de scène ; s'il ne tient pas, retour immédiat aux 30 (essais espacés de 30 s, 1, 2, 4, 8 min). */
-const PRV = {s0: scale, q0: clamp((scale - .4) / .5, .35, 1) * (TIER === 0 ? .6 : 1), qN: 0, qLow: false, sh: null, miss: 0, jank: 0, ok: 0, ceil: 1, ceilT: 0, back: 60000, upAt: -1e9, upFrom: 0, fT: 0, fBack: 30000, fTry: null, v: null, m: '', c: false, scT: 0, postN: 6};
-function perf(dt){ pdTxTick(); perfAcc += dt; perfN++; perfT += dt; if (dt > 1.45 / pdCap()) PRV.miss++; if (perfT < 1.2) return; const avg = perfAcc / perfN, mr = PRV.miss / perfN; perfAcc = perfN = perfT = 0; PRV.miss = 0; pdGov(avg); const tgt = 1 / pdCap(), smooth = mr < .02 && avg < tgt * 1.06;
+const PRV = {s0: scale, q0: clamp((scale - .4) / .5, .35, 1) * (TIER === 0 ? .6 : 1), qN: 0, qLow: false, sh: null, miss: 0, jank: 0, ok: 0, ceil: 1, ceilT: 0, back: 60000, upAt: -1e9, upFrom: 0, fT: 0, fBack: 30000, fTry: null, v: null, m: '', c: false, scT: 0, postN: 6, lpm: 0, c30: 0};
+function perf(dt){ pdTxTick(); perfAcc += dt; perfN++; perfT += dt; if (dt > 1.45 / pdCap()) PRV.miss++; if (dt > .029 && dt < .038) PRV.c30 = (PRV.c30 || 0) + 1; if (perfT < 1.2) return; const avg = perfAcc / perfN, mr = PRV.miss / perfN, r30 = (PRV.c30 || 0) / perfN; perfAcc = perfN = perfT = 0; PRV.miss = 0; PRV.c30 = 0; pdGov(avg); const tgt = 1 / pdCap(), smooth = mr < .02 && avg < tgt * 1.06;
   const nowP = performance.now(); const shN = cine ? cine.shot : null; if (VIEW !== PRV.v || mode !== PRV.m || !!cine !== PRV.c || shN !== PRV.sh){ PRV.v = VIEW; PRV.m = mode; PRV.c = !!cine; PRV.sh = shN; PRV.scT = nowP; }
   PRV.jank = mr > .15 ? PRV.jank + 1 : 0;
+  // V10.0.4 · mode économie d'énergie iOS : Safari bride requestAnimationFrame à 30 Hz. Une cadence très régulière autour de 33 ms n'est pas
+  // un appareil lent : on passe directement à 30 images/s sans baisser la netteté ni mémoriser un palier plus bas (dot-design.md §A.3).
+  if (FCAP === 60 && !document.hidden && r30 > .85){ if (++PRV.lpm >= 2){ PRV.lpm = 0; FCAP = 30; PRV.fT = Math.max(PRV.fT, nowP + 60000); slowN = fastN = PRV.ok = PRV.jank = 0; PERF_UP = nowP + 4000; return; } } else PRV.lpm = 0;
   if (pdHold() && avg < tgt * (STORY ? 1.3 : 1.8)) return;
   if (PRV.fTry){ if (avg > tgt * 1.22 || PRV.jank >= 2){ FCAP = 30; scale = PRV.fTry.s; resize(); PRV.fT = nowP + PRV.fBack; PRV.fBack = Math.min(PRV.fBack * 2, 480000); PRV.fTry = null; slowN = fastN = PRV.ok = PRV.jank = 0; PERF_UP = nowP + 4000; return; }
     if (nowP - PRV.fTry.at > 4000){ PRV.fTry = null; PRV.fBack = 30000; } }
@@ -1322,7 +1326,8 @@ function pdAtlasHeader(buf,names){
   return {H,base};
 }
 function pdAtlasFail(err){PDTX.fail=1;PDTX.n=0;PDTX.ready=0;PDTX.on=0;PDTX.mipWait=0;PDTX.failure=String(err?.message||err);for(const x of PDTX.q){try{x.im.close?.();}catch(_){}}PDTX.q=[];const t=PDTX.t;if(t)for(const [tmp,live] of [['arr2','arr'],['gal2','gal'],['gz2','gz']]){if(t[tmp]&&t[tmp]!==t[live]){gl.deleteTexture(t[tmp]);delete t[tmp];}}}
-function pdAtlasCandidates(tier,mobile,hd){ return tier===0||(mobile&&tier===1)?['textures84-compact.bin']:hd?['textures84-hd.bin','textures84-mobile.bin','textures84-compact.bin']:['textures84-mobile.bin','textures84-compact.bin']; }
+// V10.0.4 : 256 px (compact) seulement au palier 0 et dans les navigateurs intégrés (Instagram, TikTok… : moins de mémoire ; rendu gardé au palier 1, galaxies en 512) ; dès le palier 1 (départ iOS, iPhone 12-14) l'atlas mobile 512 px, comme en V9.6/V9.8.3. Repli compact gardé en cas d'échec.
+function pdAtlasCandidates(tier,mobile,hd,inApp){ return tier===0||inApp?['textures84-compact.bin']:hd?['textures84-hd.bin','textures84-mobile.bin','textures84-compact.bin']:['textures84-mobile.bin','textures84-compact.bin']; }
 async function pdAtlasLoad(files,names){ let failure; for(const file of files){ try{ const buf=await pd96Get(file,'b84','t84'); const {H,base}=pdAtlasHeader(buf,names); return {buf,H,base}; }catch(e){failure=e;console.warn('[PlanèteDot] atlas de secours',file,e.message);} } throw failure||Error('No texture atlas'); }
 const PD_TXSRC = 'pack';   // 'pack' : un seul fichier .bin à côté de index.html (GitHub) ; 'dir' : les 28 images une à une (version test dans Claude)
 const PD_GZN = ['gz_0', 'gz_1', 'gz_2', 'gz_3'];   // V8.3 · géantes gazeuses (2:1)
@@ -1332,23 +1337,23 @@ async function pdTxFetch(){ try { await Promise.race([Promise.resolve(SESSP).cat
   const t0 = performance.now(), hd = PDTX.sz >= 1024;
   try { let items;
     if (PD_TXSRC === 'dir'){ const d = hd ? 'tx-hd/' : 'tx-mobile/'; items = PD_TXALL.map(n => ({n, u: d + n + '.jpg'})); }
-    else { const {buf,H,base}=await pdAtlasLoad(pdAtlasCandidates(TIER,PD_MOBILE,hd),PD_TXALL), u8=new Uint8Array(buf);
+    else { const {buf,H,base}=await pdAtlasLoad(pdAtlasCandidates(TIER,PD_MOBILE,hd,pdInApp()),PD_TXALL), u8=new Uint8Array(buf);
       PDTX.sz = H.sz; items = H.f.map(e => ({n: e.n, b: new Blob([u8.subarray(base + e.o, base + e.o + e.l)], {type: 'image/jpeg'})})); }
     PDTX.n = items.length;
     const dec = async (b, n) => { if (!PD_MOBILE && window.createImageBitmap) try { return await createImageBitmap(b, {premultiplyAlpha: 'none', colorSpaceConversion: 'none'}); } catch(err){}
       return await new Promise((ok, ko) => { const u = URL.createObjectURL(b), im = new Image(); im.onload = () => { URL.revokeObjectURL(u); ok(im); }; im.onerror = () => { URL.revokeObjectURL(u); ko(new Error('image ' + n)); }; im.src = u; }); };
-    for (const it of items){ if (PDTX.off || !PDTX.n) return; while (!PDTX.off&&!PDTX.fail&&PDTX.q.length > (INTRO.on ? 30 : 2)) await new Promise(r => setTimeout(r, 120));   // one image at a time (V9.6 : décodées d'avance pendant l'ouverture)
+    for (const it of items){ if (PDTX.off || !PDTX.n) return; while (!PDTX.off&&!PDTX.fail&&PDTX.q.length > (INTRO.on ? (PD_MOBILE ? 6 : 30) : 2)) await new Promise(r => setTimeout(r, 120));   // one image at a time (V9.6 : décodées d'avance pendant l'ouverture)
       if(PDTX.off||PDTX.fail||!PDTX.n)return; let b = it.b; if (!b){ const r = await fetch(it.u, {priority: 'low'}); if (!r.ok) throw new Error(it.u + ' : ' + r.status); b = await r.blob(); }
       const im=await dec(b,it.n);if(PDTX.off||PDTX.fail||!PDTX.n){im.close?.();return;}PDTX.q.push({e:{n:it.n},im});PDTX.dn++; }
     PDTX.dl = PDTX.ms = Math.round(performance.now() - t0);
   } catch(err){ console.warn('[PlanèteDot] textures 8.2 indisponibles (' + (err && err.message || err) + ') : rendu V8.0 gardé'); pdAtlasFail(err); } }
 // one upload per frame, never during the opening animation
 function pdTxFit(im,w,h){if((im.naturalWidth||im.width)===w&&(im.naturalHeight||im.height)===h)return im;const c=document.createElement('canvas');c.width=w;c.height=h;const ctx=c.getContext('2d');if(!ctx)throw Error('texture resize');ctx.drawImage(im,0,0,w,h);return c;}
-function pdTxPut(x){ const G = gl, e = x.e, im = x.im, sz = PDTX.sz, gs = Math.min(512,sz), T = PDTX.t, lv = n => Math.floor(Math.log2(n)) + 1;
+function pdTxPut(x){ const G = gl, e = x.e, im = x.im, sz = PDTX.sz, gs = (T => T && T.gal2 ? T.galSz : Math.min(512, Math.max(sz, (im && (im.naturalWidth || im.width)) || sz)))(PDTX.t), T = PDTX.t, lv = n => Math.floor(Math.log2(n)) + 1;
   try { for(let j=0;j<8&&G.getError()!==G.NO_ERROR;j++){} const i = PD_TXN.indexOf(e.n);
     if (i >= 0){ if (!T.arr2){ T.arr2 = pdTxMk(8, G.TEXTURE_2D_ARRAY, G.REPEAT, G.REPEAT, true); pdTxUp(8, () => { G.bindTexture(G.TEXTURE_2D_ARRAY, T.arr2); G.texStorage3D(G.TEXTURE_2D_ARRAY, lv(sz), G.RGBA8, sz, sz, PD_TXN.length); }); }
       pdTxUp(8, () => { G.bindTexture(G.TEXTURE_2D_ARRAY, T.arr2); G.texSubImage3D(G.TEXTURE_2D_ARRAY, 0, 0, 0, i, sz, sz, 1, G.RGBA, G.UNSIGNED_BYTE, pdTxFit(im,sz,sz)); }); }
-    else if (e.n === 'gal_a' || e.n === 'gal_b'){ if (!T.gal2){ T.gal2 = pdTxMk(10, G.TEXTURE_2D_ARRAY, G.CLAMP_TO_EDGE, G.CLAMP_TO_EDGE, true); pdTxUp(10, () => { G.bindTexture(G.TEXTURE_2D_ARRAY, T.gal2); G.texStorage3D(G.TEXTURE_2D_ARRAY, lv(gs), G.RGBA8, gs, gs, 2); }); }
+    else if (e.n === 'gal_a' || e.n === 'gal_b'){ if (!T.gal2){ T.gal2 = pdTxMk(10, G.TEXTURE_2D_ARRAY, G.CLAMP_TO_EDGE, G.CLAMP_TO_EDGE, true); T.galSz = gs;   /* V10.0.4 : galaxies 512 px même avec l'atlas compact (qui les contient en 512) */ pdTxUp(10, () => { G.bindTexture(G.TEXTURE_2D_ARRAY, T.gal2); G.texStorage3D(G.TEXTURE_2D_ARRAY, lv(gs), G.RGBA8, gs, gs, 2); }); }
       pdTxUp(10, () => { G.bindTexture(G.TEXTURE_2D_ARRAY, T.gal2); G.texSubImage3D(G.TEXTURE_2D_ARRAY, 0, 0, 0, e.n === 'gal_a' ? 0 : 1, gs, gs, 1, G.RGBA, G.UNSIGNED_BYTE, pdTxFit(im,gs,gs)); }); }
     else if (PD_GZN.includes(e.n)){ const gw = sz * 2; if (!T.gz2){ T.gz2 = pdTxMk(13, G.TEXTURE_2D_ARRAY, G.REPEAT, G.CLAMP_TO_EDGE, true); pdTxUp(13, () => { G.bindTexture(G.TEXTURE_2D_ARRAY, T.gz2); G.texStorage3D(G.TEXTURE_2D_ARRAY, lv(gw), G.RGBA8, gw, sz, PD_GZN.length); }); }
       pdTxUp(13, () => { G.bindTexture(G.TEXTURE_2D_ARRAY, T.gz2); G.texSubImage3D(G.TEXTURE_2D_ARRAY, 0, 0, 0, PD_GZN.indexOf(e.n), gw, sz, 1, G.RGBA, G.UNSIGNED_BYTE, pdTxFit(im,gw,sz)); }); }
@@ -1357,7 +1362,7 @@ function pdTxPut(x){ const G = gl, e = x.e, im = x.im, sz = PDTX.sz, gs = Math.m
     const error=G.getError();if(error!==G.NO_ERROR)throw Error('WebGL upload '+e.n+' : '+error);
     PDTX.got = (PDTX.got || 0) + 1;
   } catch(err){ console.warn('[PlanèteDot] texture ' + e.n, err); pdAtlasFail(err); }
-  try { if (im.close) im.close(); } catch(_){}
+  try { if (im.close) im.close(); else if (im instanceof HTMLImageElement) im.src = ''; } catch(_){}   // V10.0.4 : libère aussi l'image décodée (chemin HTMLImageElement des mobiles)
   if (PDTX.n && PDTX.got === PDTX.n){ if (INTRO.on && INTRO.ph === 'seq' && !INTRO.flashed){ PDTX.mipWait = 1; return; } pdTxFin(); } }   // V9.6 : pendant l'ouverture, la fin (mipmaps) se fait sous le flash d'arrivée
 function pdTxFin(){ const G = gl, T = PDTX.t; PDTX.mipWait = 0; if (!T || !T.arr2 || !T.gal2) return;
   { try { pdTxUp(8, () => { G.bindTexture(G.TEXTURE_2D_ARRAY, T.arr2); G.generateMipmap(G.TEXTURE_2D_ARRAY); }); pdTxUp(10, () => { G.bindTexture(G.TEXTURE_2D_ARRAY, T.gal2); G.generateMipmap(G.TEXTURE_2D_ARRAY); });
@@ -4721,7 +4726,9 @@ function surfOf(p, n){ if (curP && curP.p === p){ const F = pdFrameW(curP.x, cur
   const w = [CR[0] * n[0] + CU[0] * n[1] - CF[0] * n[2], CR[1] * n[0] + CU[1] * n[1] - CF[1] * n[2], CR[2] * n[0] + CU[2] * n[1] - CF[2] * n[2]]; return ry(p._ang || 0, rz(p.tilt, pdU(p, w))); }
 // V10 release: compatible old worlds remodel on load; world10=0 is the session rollback.
 const PD10_QUERY = new URLSearchParams(location.search);
-const PD10_ENABLED = PD10_QUERY.get('world10') !== '0';
+// V10.0.4 (audit Grok, 27/11) : le rendu V10 au zoom remplaçait la planète V9 texturée (couleurs c1/c2, atlas, anneaux, atmosphère, terminateur)
+// par des cartes de 64 px : il devient opt-in (?world10=1) jusqu'à la parité visuelle. Les sauvegardes gardent generatorVersion 10.
+const PD10_ENABLED = PD10_QUERY.get('world10') === '1' || PD10_QUERY.get('world10preview') === '1';
 const PD10_PREVIEW = PD10_ENABLED && PD10_QUERY.get('world10preview') === '1';
 let PD10Host = null, PD10Loading = false, PD10Failed = false, PD10Closed = false;
 function pd10Status(){return PD10Failed?'fallback':PD10Host?PD10Host.state:PD10Loading?'loading':PD10_ENABLED?'idle':'disabled';}
@@ -4734,7 +4741,7 @@ function pd10FocusDraw(p,b,dt){
   if(!PD10_ENABLED||PD10Failed||PD10Closed||PD_REC_ACTIVE||!p||b.kind!==0||(!PD10_PREVIEW&&p.generatorVersion!==10))return false;
   if(![0,1,2,3,4,6,9,10,11].includes(p.type))return false;
   if(!PD10Host){
-    if(!PD10Loading){PD10Loading=true;import('./assets/cosmic/world-v10/focused-host.mjs?v=10.0.3').then(m=>{
+    if(!PD10Loading){PD10Loading=true;import('./assets/cosmic/world-v10/focused-host.mjs?v=10.0.4').then(m=>{
       if(PD10Closed||PD10Failed)return;
       PD10Host=m.createFocusedHost(gl,{enabled:true,onFallback:e=>{PD10Failed=true;console.warn('[PlanèteDot V10] repli historique',e.message);}});
     }).catch(e=>{PD10Failed=true;console.warn('[PlanèteDot V10] chargement indisponible',e.message);});}
@@ -4766,7 +4773,7 @@ function renderPlanet(dt){ PASS.clear();
   if (pr){
     const r = pxR(bodyR(p), pr.w); const isP = p.id === playingPlanet();
     const b = planetBody(p, pos, pr, r, isP ? audioLvl * .6 : 0, terrUniforms(p, ease(mapA)));
-    b.alpha = 1; b.rk = null; b.q = 1 + p.atmo * .55 + .12; b.L = norm(b.L); b.sunI = 1.1; bodies.push(b); satellites(p, pos, bodyR(p), bodies); 
+    b.alpha = 1; b.rk = null; b.q = 1 + p.atmo * .55 + .12; b.L = PD10_ENABLED ? norm(b.L) : norm(b.L.map((v, k) => v * .9 + [-.55, .42, .72][k] * .18)); b.sunI = 1.1;   /* V10.0.4 : rendu V9 par défaut, la lumière garde son léger biais vers la caméra (V9.6) pour ne jamais atterrir face nuit ; terminateur géométrique de la PR #5 conservé pour ?world10=1 */ bodies.push(b); satellites(p, pos, bodyR(p), bodies); 
     curP = {p, x: pr.x, y: pr.y, r};
     p.terr.slice(0, 12).forEach((t, k) => { const v = viewOf(p, seedDir(t)); if (v[2] < .12) return;
       const x = pr.x + v[0] * r, y = pr.y - v[1] * r; const fl = flagsOn(p, t);
@@ -5398,6 +5405,7 @@ function showEra(p){ const el = $('#evo'), st = stage(p);
   clearTimeout(el._t); el._t = setTimeout(() => el.classList.add('off'), 13000); }
 function transFx(k = 1){ camSpeed = Math.max(camSpeed, 2.2 * k); FOV = FOV0 * (1 + .2 * k); POST.flash = Math.max(POST.flash, .1 * k); POST.ca = Math.max(POST.ca, .3 * k); POST.bloom += .2 * k; }
 function land(p){ PDA.nav('land', {p}); transFx(); closeSheet(true); mode = 'planet'; focus = p.id; selT = -1; mapA = 0; angT = null; cam.g.pitch = .12;
+  { const i = VIEW.planets.indexOf(p); if (i >= 0){ const pos = planetPos(p, i); cam.g.yaw = wrapA(Math.atan2(pos[0], pos[2]) + 2.1, cam.yaw); } }   // V10.0.4 : à l'atterrissage, l'œil se place à ~60° du soleil (côté jour, terminateur visible) ; atan2(pos) seul placerait l'œil côté nuit
   if (!readonly) reorganize(p); updUI(); renderRail(); setRail(true); if (p.terr.length) setTimeout(() => selectTerr(0, true), 700); }
 function backToSystem(){ transFx(.7); PDA.nav('liftoff'); mode = 'system'; setRail(false); closeSheet(true); selT = -1; curP = null; const p = focus && VIEW.planets.find(x => x.id === focus); updUI(); if (p) scanPlanet(p); else overview(); }
 function setRail(on){ rail.classList.toggle('off', !on); dock.classList.toggle('down', false); }
