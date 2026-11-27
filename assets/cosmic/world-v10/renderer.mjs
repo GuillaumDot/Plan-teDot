@@ -51,7 +51,7 @@ export async function createPlanetRenderer(gl){
  },
  dispose(){if(!alive)return;alive=false;revision++;planet.detail?.dispose();planet.detail=null;planet.heightDetail?.dispose();planet.heightDetail=null;cityMesh?.dispose();planet.cityMesh=null;planet.landmarks?.dispose();planet.landmarks=null;planet.vegetation?.dispose();planet.vegetation=null;maps.dispose();}
  };return planet;},
- draw(planet,{mvp,eye=[0,0,3],light=[-.45,.35,.82],tier=2,time=0,audio=0,delta=1/60,detailStrength=.8,microStrength=.8,growth=1}){
+ draw(planet,{mvp,eye=[0,0,3],light=[-.45,.35,.82],tier=2,time=0,audio=0,delta=1/60,detailStrength=.8,microStrength=.8,growth=1,sunIntensity=1,sunColor=[1,1,1]}){
  if(disposed||gl.isContextLost())return;
  return withSharedGL(gl,vao,()=>{
  tier=Math.max(0,Math.min(3,Math.trunc(tier)||0));if(!meshes.has(tier))meshes.set(tier,uploadSphere(gl,...SPHERE_LODS[tier]));
@@ -61,7 +61,7 @@ export async function createPlanetRenderer(gl){
  gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_CUBE_MAP,planet.maps.climate);gl.uniform1i(u.uClimate,1);
  gl.activeTexture(gl.TEXTURE2);gl.bindTexture(gl.TEXTURE_2D,planet.detail?.texture??neutral);gl.uniform1i(u.uDetail,2);gl.uniform1f(u.uDetailAtlas,planet.detail?.atlas?1:0);gl.uniform1f(u.uDetailInset,planet.detail?.atlas?0.5/planet.detail.width:0);gl.uniform1f(u.uDetailStrength,planet.detail?Math.max(0,Math.min(1,Number(detailStrength)||0)):0);
  gl.activeTexture(gl.TEXTURE3);gl.bindTexture(gl.TEXTURE_2D,planet.heightDetail?.texture??neutral);gl.uniform1i(u.uHeight,3);gl.uniform1f(u.uMicroStrength,planet.heightDetail?(tier===0?.25:tier===1?.65:1)*Math.max(0,Math.min(1,Number(microStrength)||0))*Math.max(0,Math.min(1,Number(detailStrength)||0)):0);
- gl.uniformMatrix4fv(u.uMVP,false,mvp);gl.uniform3fv(u.uEye,eye);gl.uniform3fv(u.uLight,light);gl.uniform1i(u.uFamily,planet.family);gl.uniform3fv(u.uAtmosphereTint,tints[planet.family]);gl.uniform1f(u.uAtmosphereDensity,planet.profile.base.atmosphere);gl.uniform1f(u.uRelief,planet.profile.base.relief*.12);gl.uniform1f(u.uShadowQuality,tier>=2?1:.35);gl.uniform3fv(u.uStormCenter,planet.stormCenter);gl.uniform1f(u.uTexel,2/planet.size);gl.uniform1f(u.uTime,Number.isFinite(time)?time:0);planet.audioEnergy=visualAudio(planet.audioEnergy,audio,delta);gl.uniform1f(u.uAudio,planet.audioEnergy);
+ gl.uniformMatrix4fv(u.uMVP,false,mvp);gl.uniform3fv(u.uEye,eye);gl.uniform3fv(u.uLight,light);gl.uniform1f(u.uSunIntensity,Math.max(0,Math.min(3,Number.isFinite(sunIntensity)?sunIntensity:1)));gl.uniform3fv(u.uSunColor,sunColor?.length===3&&Array.from(sunColor).every(Number.isFinite)?sunColor:[1,1,1]);gl.uniform1i(u.uFamily,planet.family);gl.uniform3fv(u.uAtmosphereTint,tints[planet.family]);gl.uniform1f(u.uAtmosphereDensity,planet.profile.base.atmosphere);gl.uniform1f(u.uRelief,planet.profile.base.relief*.12);gl.uniform1f(u.uShadowQuality,tier>=2?1:.35);gl.uniform3fv(u.uStormCenter,planet.stormCenter);gl.uniform1f(u.uTexel,2/planet.size);gl.uniform1f(u.uTime,Number.isFinite(time)?time:0);planet.audioEnergy=visualAudio(planet.audioEnergy,audio,delta);gl.uniform1f(u.uAudio,planet.audioEnergy);
  gl.drawElements(gl.TRIANGLES,mesh.count,gl.UNSIGNED_SHORT,0);
  if(tier>=1&&planet.cityMesh&&cityProgram)cityProgram.draw(planet.cityMesh,mvp,light,growth);
  if(tier>=2&&growth>=1&&planet.landmarks&&cityProgram)cityProgram.draw(planet.landmarks,mvp,light,1,0,0,eye);
