@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#010208">
 <title>planèteDot · ton univers musical</title>
-<meta name="pd-version" content="10.0-alpha.13">
+<meta name="pd-version" content="10.0-alpha.14">
 <meta name="description" content="PlanèteDot · l’album de GuillaumDot et ton univers musical en 3D : chaque planète est un morceau.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PlanèteDot">
@@ -3607,9 +3607,9 @@ function pd9PbrInit(){
   if(!PD9PBR.neutral)return;
   G.useProgram(SP.p);G.uniform1i(SP.u.uPDNormal,4);G.uniform1i(SP.u.uPDColor,7);
   PD9PBR.active=true;
-  // V10 uses local baked material maps; legacy rendering remains explicitly opt-in.
+  // V10: preserve V9 materials by default; new baked maps are an explicit experiment.
   const params=new URLSearchParams(location.search);
-  if(params.get('pbr')==='0'||(params.get('legacy')==='1'&&params.get('pbr')!=='1'))return;
+  if(params.get('pbr')!=='1'&&!(params.get('renderer')==='procedural'&&params.get('pbr')!=='0'))return;
   const local=new URL('assets/blender/pbr-512/',document.baseURI);
   const remote='https://raw.githubusercontent.com/GuillaumDot/Plan-teDot/6dd4388d7472de85c93ad77882869e10a6e3dbb9/assets/blender/pbr-512/';
   const epoch=++PD9PBR.epoch;
@@ -3627,7 +3627,7 @@ function pd9PbrInit(){
   }
   const families=['basalt','desert','ice','ocean','gas'];
   const layers=[['normal',PD9PBR.maps]];
-  if(params.get('legacy')!=='1'&&params.get('albedo')!=='0')layers.push(['albedo',PD9PBR.albedo]);
+  if(params.get('albedo')==='1'&&params.get('legacy')!=='1')layers.push(['albedo',PD9PBR.albedo]);
   // Finish the first local pass before retrying a slow or interrupted file.
   async function loadLayer(name,kind,target,base){
     const file=name+'-'+kind+'.png';
@@ -4150,7 +4150,7 @@ function fitDist(sys){ const n = Math.max(sys.planets.length, 1); const maxR = o
 let pz = 1;
 function overview(){ if (focus && mode === 'system') PDA.nav('depart'); pz = 1; focus = null; cam.g.t = [0,0,0]; cam.g.dist = fitDist(VIEW); cam.g.pitch = .72; }
 function focusOn(id, pitch = .16){ if (focus !== id){ pz = 1; FOV = FOV0 * 1.07; if (mode === 'system') PDA.nav('approach', {id}); } focus = id; cam.g.pitch = pitch; const i = VIEW.planets.findIndex(p => p.id === id); if (i < 0) return;
-  cam.g.yaw = planetApproachYaw(VIEW.planets[i],i); }
+  const pos = planetPos(VIEW.planets[i], i); cam.g.yaw = PD10_QUERY.get('camera')==='lit' ? planetApproachYaw(VIEW.planets[i],i) : wrapA(Math.atan2(pos[0], pos[2]) + 1.1, cam.yaw); }
 function planetApproachYaw(p,i){
   const pos=planetPos(p,i,time);
   // The star is at the origin. A three-quarter view reveals terrain and its cast shadows.
@@ -5168,6 +5168,7 @@ function enterSystem(sys, ro, owner){
   if (ro && owner && owner !== GD_ID && !MYSIG.some(x => x.type === 'visit' && x.to === owner && Date.now() - x.ts < 6 * 3600e3)) pushSignal({id: uid(), type: 'visit', to: owner, fromName: SYS.user, fromSys: SYS.name, ts: Date.now()});
   if (radio) stopRadio();
   if(ro && sys!==SYS)starIgnite=1;
+  pdAtlasMode=PD10_QUERY.get('surface')==='compact';
   for(const check of pdBodyChecks){check.last=-100;check.misses=0;}
   VIEW = sys; readonly = ro; ownerId = owner || null; mode = 'system'; focus = null; selT = -1; overview(); transFx(.8);
   cam.dist = cam.g.dist * 3.2; cam.t = [0,0,0]; flyT = 0; closeSheet(); setRail(false); updUI(); renderFilters(); $('#gp').classList.add('off'); PDA.nav('system');
@@ -5518,7 +5519,7 @@ function showEra(p){ const el = $('#evo'), st = stage(p);
   clearTimeout(el._t); el._t = setTimeout(() => el.classList.add('off'), 13000); }
 function transFx(k = 1){ camSpeed = Math.max(camSpeed, 2.2 * k); FOV = FOV0 * (1 + .2 * k); POST.flash = Math.max(POST.flash, .1 * k); POST.ca = Math.max(POST.ca, .3 * k); POST.bloom += .2 * k; }
 function land(p){ PDA.nav('land', {p}); transFx(); closeSheet(true); mode = 'planet'; focus = p.id; selT = -1; mapA = 0; angT = null; cam.g.pitch = .12;
-  cam.g.yaw=planetApproachYaw(p,VIEW.planets.indexOf(p));
+  if(PD10_QUERY.get('camera')==='lit')cam.g.yaw=planetApproachYaw(p,VIEW.planets.indexOf(p));
   if (!readonly) reorganize(p); updUI(); renderRail(); setRail(true); if (p.terr.length) setTimeout(() => selectTerr(0, true), 700); }
 function backToSystem(){ transFx(.7); PDA.nav('liftoff'); mode = 'system'; setRail(false); closeSheet(true); selT = -1; curP = null; const p = focus && VIEW.planets.find(x => x.id === focus); updUI(); if (p) scanPlanet(p); else overview(); }
 function setRail(on){ rail.classList.toggle('off', !on); dock.classList.toggle('down', false); }

@@ -31,3 +31,7 @@ The restoration branch starts at b18fd7f, before the emergency renderers and the
 On the public album planet, `?world=1` adds geography baked with the Natural World V2.2 module from the production repository. The material uses elevation, vegetation and accumulated drainage. `?identity=preview` also blends a demonstration palette using the model's transition field. Run `node tools/bake-album-world.mjs` to rebuild the 128 KiB map. The V9 geometry and listener progression remain authoritative. This preview contains no unreleased cover art. The procedural V10 renderer is available with `?renderer=procedural`.
 
 The two browser integration cases exercise both modes, including the original texture pack, camera approach, loaded Blender maps and a displayed album frame. Physical iPhone rendering, screen-lock playback and multi-account behavior require separate validation.
+
+## Alpha.14 — V9 visual baseline
+
+The normal maps now require `?pbr=1` in the original renderer, and the new albedo maps additionally require `&albedo=1`. The V9 approach camera is restored by default; `?camera=lit` retains the experimental three-quarter view. Entering a new system resets automatic compact fallback so a failure in one system does not downgrade subsequent systems. The compact mobile texture pack remains available, so this is not a pixel-identical V9 rollback. Browser integration scenarios separately test default and opt-in materials. Hardware review and CI are still pending at commit time.

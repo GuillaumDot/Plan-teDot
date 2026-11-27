@@ -44,3 +44,7 @@ Prochaines étapes, dans l'ordre : 1) `uGen` et relief génération 1 derrière 
 - Code : sur dev/chatgpt-sujet, derrière un flag, avec un fichier NOTES qui décrit le changement et la façon de le tester. Claude reprend, mesure et intègre.
 - Mise en ligne urgente (correctif) : seulement avec l'accord de Guillaume, après le test minimal ci-dessus, et en gardant le commit précédent comme retour arrière.
 - Canal : issue #1, format « AGENT | date | chantier | branche | commits | fichiers | blocages | prochaine action ».
+
+## Relais ChatGPT — 27/11/2026, alpha.14
+
+Branche dev/v10-restauration-v9 : retour aux matières et à la caméra V9 par défaut ; essais Blender via pbr=1 et albedo=1, caméra expérimentale via camera=lit. Réinitialisation du secours compact entre systèmes. Tests navigateur et iPhone à valider. Main et Supabase inchangés.

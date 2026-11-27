@@ -35,8 +35,8 @@ const visitPage=observed.replace('const check=pdV9Before(o);\n  gl.drawArrays','
    if(sampled&&pd10TryProbe(point,post)&&pd10PixelDelta(pre,post)>12){if(o.kind===1)lab.starSeen=true;if(o.rk)lab.ringSeen=true;}
    useSP();return true;`);
 assert.notEqual(visitPage,observed);
-for(const scenario of ['original V9 materials','Natural World and dual identity','visited system recovers missing star and rings']) test(scenario,{timeout:360000},async()=>{
- const preview=scenario==='Natural World and dual identity',visit=scenario.startsWith('visited');
+for(const scenario of ['original V9 materials','V10 opt-in baked materials','Natural World and dual identity','visited system recovers missing star and rings']) test(scenario,{timeout:360000},async()=>{
+ const preview=scenario==='Natural World and dual identity',visit=scenario.startsWith('visited'),materials=scenario==='V10 opt-in baked materials';
  const browser=process.env.PD_BROWSER==='webkit'?await webkit.launch({headless:true}):await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
  try{
  const device=devices['iPhone 13'];
@@ -48,7 +48,7 @@ for(const scenario of ['original V9 materials','Natural World and dual identity'
  await page.route('**/*',async route=>{const u=new URL(route.request().url());if(u.hostname!=='pd10.test')return route.abort();if(u.pathname==='/index.html')return route.fulfill({contentType:'text/html',body:visit?visitPage:observed});if(u.pathname==='/assets/cosmic/natural-world-v22/album.rgba')return route.fulfill({path:'.'+u.pathname,contentType:'application/octet-stream'});
  if(/^\/textures(?:84-(?:compact|mobile|hd)|9-(?:mobile|hd))\.bin$/.test(u.pathname))return route.fulfill({path:'.'+u.pathname,contentType:'application/octet-stream'});
  if(u.pathname==='/assets/blender/pbr-512/basalt-normal.png'&&++basaltNormalRequests===1)return route.abort();if(/^\/assets\/blender\/pbr-512\/[a-z]+-(normal|albedo)\.png$/.test(u.pathname))return route.fulfill({path:'.'+u.pathname,contentType:'image/png'});return route.fulfill({status:404,body:''});});
- await page.goto('http://pd10.test/index.html'+(preview?'?identity=preview':''),{waitUntil:'domcontentloaded',timeout:60000});
+ await page.goto('http://pd10.test/index.html'+(preview?'?identity=preview&camera=lit':materials?'?pbr=1&albedo=1&camera=lit':''),{waitUntil:'domcontentloaded',timeout:60000});
  await page.waitForFunction(()=>{try{return window.__pd10Lab?.state().album&&window.__pd10Lab.state().frames>=2;}catch(e){return false;}},{},{timeout:90000,polling:250});
  await page.evaluate(visit=>visit?window.__pd10Lab.visit():window.__pd10Lab.enter(),visit);
  await page.waitForFunction(()=>window.__pd10Lab.state().mode==='system'&&window.__pd10Lab.state().frames>3,{},{timeout:90000,polling:250});
@@ -56,12 +56,12 @@ for(const scenario of ['original V9 materials','Natural World and dual identity'
    await page.waitForFunction(()=>window.__pd10Lab.starSeen&&window.__pd10Lab.state().renderer.renderer==='v9-compact',{},{timeout:120000});
  }
  await page.evaluate(()=>window.__pd10Lab.land());
- await page.waitForFunction(()=>window.__pd10Lab.state().renderer.blenderMaps===5&&window.__pd10Lab.state().renderer.albedoMaps===5&&window.__pd10Lab.state().renderer.atlasActive,{},{timeout:150000}).catch(async e=>{console.log('material timeout',await page.evaluate(()=>window.__pd10Lab.state()));throw e;});
+ await page.waitForFunction(enabled=>{const r=window.__pd10Lab.state().renderer;return r.atlasActive&&(!enabled||(r.blenderMaps===5&&r.albedoMaps===5));},materials,{timeout:150000}).catch(async e=>{console.log('material timeout',await page.evaluate(()=>window.__pd10Lab.state()));throw e;});
  await page.evaluate(()=>{window.__pd10Lab.capture=true;});
  await page.waitForFunction(()=>window.__pd10Lab.pixels?.length===25,{},{timeout:90000});
  const result=await page.evaluate(()=>({state:window.__pd10Lab.captureState,pixels:window.__pd10Lab.pixels}));
  console.log(JSON.stringify({result,errors}));
- assert.equal(basaltNormalRequests,2,'recover interrupted local normal map');
+ assert.equal(basaltNormalRequests,materials?2:0,'experimental normal maps must not load by default');
  assert.deepEqual(errors,[]);
  assert.equal(result.state.renderer.renderer,visit?'v9-compact':'v9');
  if(visit)assert.ok(await page.evaluate(()=>window.__pd10Lab.ringSeen),'ring changes pixels outside the sphere');
@@ -69,7 +69,7 @@ for(const scenario of ['original V9 materials','Natural World and dual identity'
  assert.equal(result.state.renderer.worldDraws>0,preview);
  assert.equal(result.state.renderer.atlasLayers,28);
  assert.equal(result.state.lite,false);assert.equal(result.state.frameErrors,0);
- if(!visit){assert.ok(result.state.renderer.blenderDraws>0,'actual Blender map draw required');assert.ok(result.state.renderer.albedoDraws>0,'actual Blender albedo draw required');}assert.equal(result.state.mode,'planet');assert.ok(result.state.planet.r>30);
+ if(materials){assert.ok(result.state.renderer.blenderDraws>0,'actual Blender map draw required');assert.ok(result.state.renderer.albedoDraws>0,'actual Blender albedo draw required');}else{assert.equal(result.state.renderer.blenderMaps,0);assert.equal(result.state.renderer.albedoMaps,0);assert.equal(result.state.renderer.blenderDraws,0);assert.equal(result.state.renderer.albedoDraws,0);}assert.equal(result.state.mode,'planet');assert.ok(result.state.planet.r>30);
  const colors=new Set(result.pixels.filter(p=>p[3]>100).map(p=>p.slice(0,3).join(',')));
  assert.ok(colors.size>=6,'final frame must contain varied visible pixels: '+JSON.stringify(result));
  assert.ok(result.pixels.some(p=>Math.max(...p.slice(0,3))>35),'final frame must not be black');
