@@ -49,3 +49,6 @@ Sites terrestres déterministes sélectionnés sur les poids de biomes, producti
 
 ## Phénomènes naturels visuels
 Centre de vortex déterministe par graine, dérive lente et bandes spirales sur la sphère, œil et bords progressifs. Sur terre/eau, condition d'océan chaud non gelé au centre; sur gaz, modulation des bandes. Effet de qualité 2/3 seulement. Émission volcanique modulée lentement par une phase spatiale, sans flash ni altération de la lave enregistrée. Aucun nouveau tampon GPU, pas de simulation météorologique ou d'éruption physique. Vent des arbres et densification restent à faire. Tests CPU du centre, WebGL de variation des pixels.
+
+## Vent et bosquets
+Vent analytique dans le vertex shader des modèles végétaux, ancrage approximatif au rayon 1, amplitude bornée et modulation légère par enveloppe audio. Les bâtiments ne sont pas déformés. Les sites végétaux sélectionnés sont servis d'abord, puis deux voisins pour les arbres (pas les cactus), en gardant le plafond partagé de 6 000 triangles et 48 instances maximum. Les voisins sont filtrés par eau/glace à l'échelle des cartes de rendu, pas par une nouvelle simulation écologique. Tests de déterminisme et dessin WebGL à temps distincts; aucune mesure FPS iPhone ni validation visuelle du vent.

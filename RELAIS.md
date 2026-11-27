@@ -89,3 +89,6 @@ Sélection déterministe des sites sur grille naturelle fixe, trois GLB V1.4 (fe
 
 ## Relais ChatGPT — V10 — phénomènes naturels visuels
 Vortex atmosphérique déterministe (gaz et océans chauds aux tiers 2/3), modulation lente de l'émission volcanique, aucun changement de géographie. Tests CPU/WebGL ajoutés. Diversification f73705e CPU/WebGL verts; végétation 1ce0fd4 CPU vert, WebGL en cours au début du chantier. Nouveau commit CI et iPhone à confirmer. Aucun changement main/Supabase. Vent et densité des forêts restent à traiter.
+
+## Relais ChatGPT — V10 — vent et bosquets
+Animation vertex des végétaux sans nouveau buffer, amplitude bornée et enveloppe musicale, bosquets de trois arbres par site si budget et terrain compatibles. Budget 6 000 triangles inchangé, 48 instances maximum. Biomes référencés par nom. Végétation 1ce0fd4 CPU/WebGL verts; phénomènes 0e4bf8c CI en cours au début du chantier. Tests nouveaux à confirmer. Aucun changement main, Supabase, sauvegardes ou moteur audio. Matériaux détaillés et validation iPhone restent nécessaires.

@@ -73,9 +73,9 @@ try{
  const planet=renderer.upload({type:'earth',size,terrain,climate,bytes:48*size*size,natural:{grid:8,cities:[{cell:1,dir:[0,0,-1]}],roads:[{cells:[0,1,2]}],bridges:[{cell:1}],vegetation:[{dir:[0,0,-1],kind:'pine'}]}});
  const mvp=new Float32Array([.8,0,0,0,0,.8,0,0,0,0,.5,0,0,0,0,1]);
  gl.viewport(0,0,256,256);gl.enable(gl.DEPTH_TEST);
- try{await planet.loadLandmarks();await planet.loadVegetation();for(const growth of [0,.5,1])renderer.draw(planet,{mvp,tier:2,eye:[0,0,-3],light:[0,0,-1],growth});return {buildings:planet.cityMesh?.buildings,roads:planet.cityMesh?.roads,bridges:planet.cityMesh?.bridges,landmarks:planet.landmarks?.instances,modelBudget:planet.landmarks?.triangles<=12000,plants:planet.vegetation?.instances,error:gl.getError()};}finally{planet.dispose();renderer.dispose();}
+ try{await planet.loadLandmarks();await planet.loadVegetation();for(const growth of [0,.5,1])renderer.draw(planet,{mvp,tier:2,eye:[0,0,-3],light:[0,0,-1],growth,time:growth*3});return {buildings:planet.cityMesh?.buildings,roads:planet.cityMesh?.roads,bridges:planet.cityMesh?.bridges,landmarks:planet.landmarks?.instances,modelBudget:planet.landmarks?.triangles<=12000,plants:planet.vegetation?.instances,error:gl.getError()};}finally{planet.dispose();renderer.dispose();}
  });
- assert.deepEqual(cityCheck,{buildings:9,roads:2,bridges:2,landmarks:1,modelBudget:true,plants:1,error:0});
+ assert.deepEqual(cityCheck,{buildings:9,roads:2,bridges:2,landmarks:1,modelBudget:true,plants:3,error:0});
  const weatherCheck=await page.evaluate(async()=>{
  const {createPlanetRenderer}=await import('./renderer.mjs');
  const canvas=document.createElement('canvas');canvas.width=canvas.height=96;

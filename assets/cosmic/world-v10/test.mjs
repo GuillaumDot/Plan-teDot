@@ -107,10 +107,16 @@ console.log('Architectural model catalog and shared budget verified');
 import {VEGETATION_PATHS,VEGETATION_BUDGET,vegetationGeometry} from './vegetation.mjs';
 const plants={};for(const [kind,path] of Object.entries(VEGETATION_PATHS)){const bytes=readFileSync(new URL('../../../'+path,import.meta.url));plants[kind]=decodeStaticGLB(bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength));assert.ok(plants[kind].triangles>0);}
 const plantWorld={...cityWorld,natural:{vegetation:[{dir:[0,0,-1],kind:'pine'},{dir:[1,0,0],kind:'cactus'},{dir:[0,1,0],kind:'broadleaf'}]}};
-const forest=vegetationGeometry(plantWorld,plants);assert.equal(forest.instances,3);assert.ok(forest.triangles<=VEGETATION_BUDGET&&forest.vertices.every(Number.isFinite));assert.deepEqual(forest,vegetationGeometry(plantWorld,plants));assert.equal(vegetationGeometry({...plantWorld,terrain:ocean},plants).instances,0);
+const forest=vegetationGeometry(plantWorld,plants);assert.equal(forest.instances,7);assert.ok(forest.triangles<=VEGETATION_BUDGET&&forest.vertices.every(Number.isFinite));assert.deepEqual(forest,vegetationGeometry(plantWorld,plants));assert.equal(vegetationGeometry({...plantWorld,terrain:ocean},plants).instances,0);
 assert.ok(smallWorld.natural.vegetation.length<=36);assert.deepEqual(smallWorld.natural.vegetation,largeWorld.natural.vegetation);
 console.log('Vegetation GLBs and deterministic biome placement verified');
 
 import {stormCenter} from './weather.mjs';
 for(const seed of [0,1,42,'abc']){const center=stormCenter('earth',seed);assert.ok(center.every(Number.isFinite));assert.ok(Math.abs(Math.hypot(...center)-1)<1e-9);assert.ok(Math.abs(center[1])<.6);assert.deepEqual(center,stormCenter('earth',seed));}
 console.log('Deterministic storm center verified');
+
+const cluster=vegetationGeometry({...plantWorld,natural:{vegetation:[{dir:[0,0,-1],kind:'pine'}]}},plants);
+assert.equal(cluster.instances,3);assert.ok(cluster.triangles<=VEGETATION_BUDGET);
+assert.deepEqual(cluster,vegetationGeometry({...plantWorld,natural:{vegetation:[{dir:[0,0,-1],kind:'pine'}]}},plants));
+assert.ok(cluster.vertices.every(Number.isFinite));
+console.log('Bounded deterministic forest clusters verified');

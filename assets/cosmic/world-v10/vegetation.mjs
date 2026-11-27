@@ -12,8 +12,8 @@ export function vegetationSites(w){
  for(let c=0;c<w.cells;c++){
   if(f.water[c]!==0||f.slope[c]>.8)continue;
   const a=f.weights.subarray(c*n,(c+1)*n);
-  const scores=[a[3]+a[4]+a[8]+a[10]*.5,a[2]*.3+a[3]*.9,a[6]+a[7]*.35];
-  scores[0]=a[4]+a[8]+a[10]*.5;
+  const weight=name=>a[BIOMES.indexOf(name)]??0;
+  const scores=[weight('temperate_forest')+weight('rainforest')+weight('wetland')*.5,weight('tundra')*.3+weight('taiga')*.9,weight('desert')+weight('savanna')*.35];
   const k=scores.indexOf(Math.max(...scores));if(scores[k]<.38||k!==2&&f.npp[c]<250)continue;
   const dir=Array.from(f.dir.subarray(c*3,c*3+3));
   if(w.cities.some(city=>dot(city.dir,dir)>.999))continue;
@@ -42,8 +42,16 @@ export function vegetationGeometry(world,models){
  const out=[];let instances=0,triangles=0;const kinds={};
  if(world.type!=='earth')return {vertices:new Float32Array(),instances,triangles,kinds};
  const size=world.size,area=size*size;
- for(const site of world.natural?.vegetation??[]){
-  const m=models[site.kind];if(!m||triangles+m.triangles>VEGETATION_BUDGET||instances>=36)continue;
+ const sites=world.natural?.vegetation??[];
+ // Give every selected site a first tree before adding neighbouring trees.
+ const expanded=[...sites];
+ for(const site of sites){
+  if(site.kind==='cactus')continue;
+  const n=norm(site.dir),t=norm(cross(Math.abs(n[1])>.9?[1,0,0]:[0,1,0],n)),b=cross(n,t);
+  for(const sign of [-1,1])expanded.push({...site,dir:norm(n.map((x,i)=>x+sign*.009*t[i]+.006*b[i]))});
+ }
+ for(const site of expanded){
+  const m=models[site.kind];if(!m||triangles+m.triangles>VEGETATION_BUDGET||instances>=48)continue;
   const d=norm(site.dir),cell=cellOf(d,size),a=world.terrain[Math.floor(cell/area)],i=cell%area*4;
   if(!a||a[i+1]>=64||a[i+2]>=128)continue;
   const right=norm(cross(Math.abs(d[1])>.9?[1,0,0]:[0,1,0],d)),forward=cross(right,d);

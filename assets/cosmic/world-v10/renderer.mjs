@@ -59,7 +59,7 @@ export async function createPlanetRenderer(gl){
  gl.drawElements(gl.TRIANGLES,mesh.count,gl.UNSIGNED_SHORT,0);
  if(tier>=2&&planet.cityMesh&&cityProgram)cityProgram.draw(planet.cityMesh,mvp,light,growth);
  if(tier>=2&&growth>=1&&planet.landmarks&&cityProgram)cityProgram.draw(planet.landmarks,mvp,light,1);
- if(tier>=2&&planet.vegetation&&cityProgram)cityProgram.draw(planet.vegetation,mvp,light,1);
+ if(tier>=2&&planet.vegetation&&cityProgram)cityProgram.draw(planet.vegetation,mvp,light,1,time,.65+.35*planet.audioEnergy);
  },
  dispose(){if(!disposed){disposed=true;for(const mesh of meshes.values())mesh.dispose();meshes.clear();gl.deleteTexture(neutral);cityProgram?.dispose();p.dispose();}}
  };
