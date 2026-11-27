@@ -1,3 +1,4 @@
+import {isWebGL2,withSharedGL} from './gl-compat.mjs';
 import {loadPlanetProgram} from './program.mjs';
 import {uploadSphere,SPHERE_LODS} from './sphere.mjs';
 import {uploadWorldMaps} from './gpu-maps.mjs';
@@ -15,11 +16,12 @@ const tints=[[.18,.45,1],[.12,.65,1],[.45,.38,.3],[1,.25,.08],[.4,.7,1],[.9,.65,
 // Dedicated context or caller-managed GL state. No animation loop is created.
 export async function createPlanetRenderer(gl){
  if(gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS)<4)throw new Error('Four fragment samplers required');
- const p=await loadPlanetProgram(gl),meshes=new Map();let disposed=false,neutral=null,cityProgram=null;
+ const p=await loadPlanetProgram(gl),meshes=new Map();let disposed=false,neutral=null,cityProgram=null,vao=null;
  try{
+ if(isWebGL2(gl)){vao=gl.createVertexArray();if(!vao)throw Error('V10 VAO allocation failed');}
  const previous=gl.getParameter(gl.TEXTURE_BINDING_2D);
  try{neutral=gl.createTexture();if(!neutral)throw Error('Detail fallback allocation failed');gl.bindTexture(gl.TEXTURE_2D,neutral);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([128,128,128,255]));gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST);assertTextureGL(gl,'Detail fallback');}finally{gl.bindTexture(gl.TEXTURE_2D,previous);}
- }catch(e){if(neutral)gl.deleteTexture(neutral);p.dispose();throw e;}
+ }catch(e){if(neutral)gl.deleteTexture(neutral);if(vao)gl.deleteVertexArray(vao);p.dispose();throw e;}
  try{cityProgram=createCityProgram(gl);}catch(e){console.warn('City shader fallback:',e.message);}
  return {
  upload(world){if(disposed)throw new Error('Renderer disposed');const profile=planetProfile(world.type),maps=uploadWorldMaps(gl,world);let alive=true,revision=0,landmarkRevision=0,vegetationRevision=0,cityMesh=null;
@@ -51,6 +53,7 @@ export async function createPlanetRenderer(gl){
  };return planet;},
  draw(planet,{mvp,eye=[0,0,3],light=[-.45,.35,.82],tier=2,time=0,audio=0,delta=1/60,detailStrength=.8,microStrength=.8,growth=1}){
  if(disposed||gl.isContextLost())return;
+ return withSharedGL(gl,vao,()=>{
  tier=Math.max(0,Math.min(3,Math.trunc(tier)||0));if(!meshes.has(tier))meshes.set(tier,uploadSphere(gl,...SPHERE_LODS[tier]));
  const mesh=meshes.get(tier),u=p.uniforms;
  gl.useProgram(p.program);gl.bindBuffer(gl.ARRAY_BUFFER,mesh.vertex);gl.enableVertexAttribArray(p.position);gl.vertexAttribPointer(p.position,3,gl.FLOAT,false,0,0);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,mesh.index);
@@ -63,8 +66,9 @@ export async function createPlanetRenderer(gl){
  if(tier>=2&&planet.cityMesh&&cityProgram)cityProgram.draw(planet.cityMesh,mvp,light,growth);
  if(tier>=2&&growth>=1&&planet.landmarks&&cityProgram)cityProgram.draw(planet.landmarks,mvp,light,1,0,0,eye);
  if(tier>=2&&planet.vegetation&&cityProgram)cityProgram.draw(planet.vegetation,mvp,light,1,time,.65+.35*planet.audioEnergy,eye);
+ });
  },
- dispose(){if(!disposed){disposed=true;for(const mesh of meshes.values())mesh.dispose();meshes.clear();gl.deleteTexture(neutral);cityProgram?.dispose();p.dispose();}}
+ dispose(){if(!disposed){disposed=true;for(const mesh of meshes.values())mesh.dispose();meshes.clear();gl.deleteTexture(neutral);if(vao)gl.deleteVertexArray(vao);cityProgram?.dispose();p.dispose();}}
  };
 }
 // Uploaded planets are caller-owned and must be disposed separately.

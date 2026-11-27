@@ -107,3 +107,6 @@ Qualité adaptative dans l'aperçu, résolution et tier synchronisés au budget 
 
 ## Relais ChatGPT — V10 — adaptateur application
 App-adapter.mjs : interface pilotée par le client, flag désactivé par défaut, admission explicite version 10 uniquement, aucun changement de sauvegarde, Worker unique et cycle de vie/annulation/repli. Tests CPU et WebGL. Main observé 5197e2a V9.8.3, rendu historique WebGL2 dans renderPlanet/drawBody, boucle pdQueueFrame, audioLvl et régulateur perf existants. Pas de branchement index à ce stade : moteur V10 WebGL1 isolé, adaptation de composition requise. Gouverneur 624ebf5 CPU vert, WebGL en cours au début du chantier; caméra bce192a WebGL vert. Aucun changement main, Supabase ou audio. CI et iPhone à confirmer.
+
+## Relais ChatGPT — V10 — compatibilité WebGL2
+Shaders GLSL ES 3.00 générés depuis les sources existantes, VAO isolé et restauration des états de dessin partagés. WebGL1 conservé. Tests CPU et WebGL2 ajoutés; host doit encore gérer composition, états framebuffer/viewport et upload. Gouverneur 624ebf5 CPU/WebGL verts; adaptateur c96e88c CPU vert, WebGL en cours au début du chantier. Aucun changement index/main/Supabase/audio. CI et iPhone à confirmer.

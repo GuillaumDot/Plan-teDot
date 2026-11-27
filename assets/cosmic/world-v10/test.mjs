@@ -156,3 +156,10 @@ assert.equal(await adapter.init(null),true);assert.equal(await adapter.select(de
 assert.equal(await adapter.select({...descriptor,generatorVersion:0}),false);assert.equal(adapter.draw({}),false);assert.equal(releases,1);assert.equal(await adapter.select(descriptor),true);adapter.contextLost();assert.equal(adapter.ready,false);assert.equal(failures,1);adapter.dispose();adapter.dispose();assert.equal(releases,2);assert.equal(cacheStops,1);assert.equal(rendererStops,1);
 assert.deepEqual(descriptor,{type:'earth',seed:42,generatorVersion:10});
 console.log('Application adapter fallback and lifecycle verified');
+
+import {shaderSource} from './gl-compat.mjs';
+assert.equal(shaderSource('attribute vec3 p;','vertex',false),'attribute vec3 p;');
+assert.ok(shaderSource('attribute vec3 p; varying vec3 v;','vertex',true).includes('in vec3 p; out vec3 v;'));
+const modern=shaderSource('precision mediump float; varying vec3 v; void main(){gl_FragColor=textureCube(t,v);}','fragment',true);
+assert.ok(modern.startsWith('#version 300 es\n')&&modern.includes('out vec4 pdFragment;')&&modern.includes('pdFragment=texture(t,v)'));
+console.log('WebGL2 shader compatibility verified');

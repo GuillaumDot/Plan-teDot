@@ -3,7 +3,8 @@ import {ARCHETYPES} from './archetypes.mjs';
 import {createWorldCache} from './world-cache.mjs';
 import {createPlanetRenderer} from './renderer.mjs';
 // The host owns its animation loop, camera, audio, quality governor and saves.
-// Use an isolated WebGL1 canvas; do not pass the legacy WebGL2 context.
+// WebGL1 dedicated canvas or WebGL2 host context. Host configures framebuffer,
+// viewport, depth/blend/scissor, and unpack state. No automatic composition.
 export const V10_GENERATOR=10;
 export function eligibleWorld(descriptor){
  return !!descriptor&&descriptor.generatorVersion===V10_GENERATOR&&Object.hasOwn(ARCHETYPES,descriptor.type)&&
