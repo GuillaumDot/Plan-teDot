@@ -2,6 +2,8 @@
 
 Mis à jour le 27/11/2026 à 3 h 10 (Paris) par Claude. Claude reprend à son retour (quota réinitialisé le mercredi 2/12 à 10 h).
 
+**Règle automatique** : chaque mise en ligne ou étape importante met à jour ce fichier dans le même commit (Claude comme ChatGPT), pour que l'autre puisse toujours reprendre à jour.
+
 ## En ligne
 - **V9.8.1 = commit b18fd7f sur main** (site guillaumdot.github.io/Plan-teDot, balise meta `pd-version` = 9.8.1).
 - Contenu : V9.8 (villes qui poussent maison par maison jusqu'au continent) + correctif : évolution, météo et éclairs de nouveau envoyés au rendu.
