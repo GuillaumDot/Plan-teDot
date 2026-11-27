@@ -104,3 +104,6 @@ Caméra orbitale bornée, rotation tactile, pincement, zoom et recentrage dans l
 
 ## Relais ChatGPT — V10 — gouverneur graphique
 Qualité adaptative dans l'aperçu, résolution et tier synchronisés au budget existant, quatre modes manuels, rendu suspendu quand masqué. Test caméra modifié pour comparer les coefficients numériques avec tolérance (zéros signés suspectés; log détaillé non accessible). Microrelief 4f51e5d CPU/WebGL verts; caméra bce192a CPU rouge, WebGL en cours au début du chantier. CI du correctif à vérifier avant intégration. Aucun changement main/Supabase/audio. Objectif 30 FPS non mesuré sur iPhone.
+
+## Relais ChatGPT — V10 — adaptateur application
+App-adapter.mjs : interface pilotée par le client, flag désactivé par défaut, admission explicite version 10 uniquement, aucun changement de sauvegarde, Worker unique et cycle de vie/annulation/repli. Tests CPU et WebGL. Main observé 5197e2a V9.8.3, rendu historique WebGL2 dans renderPlanet/drawBody, boucle pdQueueFrame, audioLvl et régulateur perf existants. Pas de branchement index à ce stade : moteur V10 WebGL1 isolé, adaptation de composition requise. Gouverneur 624ebf5 CPU vert, WebGL en cours au début du chantier; caméra bce192a WebGL vert. Aucun changement main, Supabase ou audio. CI et iPhone à confirmer.

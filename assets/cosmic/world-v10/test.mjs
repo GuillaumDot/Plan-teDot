@@ -144,3 +144,15 @@ let adaptive={tier:3,average:33.33};for(let i=0;i<100;i++)adaptive=qualityStep(a
 for(let i=0;i<300;i++)adaptive=qualityStep(adaptive,16,.1);assert.equal(adaptive.tier,3);
 assert.equal(qualityStep(adaptive,NaN,.1),adaptive);assert.equal(renderBudget(0,3).pixelRatio,.75);assert.equal(renderBudget(3,3).pixelRatio,1.5);
 console.log('Quality governor recovery and render budgets verified');
+
+import {createWorldAdapter,eligibleWorld,V10_GENERATOR} from './app-adapter.mjs';
+assert.equal(eligibleWorld({type:'earth',seed:42}),false);assert.equal(eligibleWorld({type:'earth',seed:42,generatorVersion:0}),false);
+const descriptor=Object.freeze({type:'earth',seed:42,generatorVersion:V10_GENERATOR});assert.equal(eligibleWorld(descriptor),true);
+let uploads=0,draws=0,releases=0,cacheStops=0,rendererStops=0,failures=0;
+const fakeRenderer=()=>({upload(){uploads++;return {dispose(){releases++;},loadDetail(){return Promise.resolve(false);},loadLandmarks(){return Promise.resolve(false);},loadVegetation(){return Promise.resolve(false);}};},draw(){draws++;},dispose(){rendererStops++;}});
+const disabled=createWorldAdapter({createRenderer:()=>{throw Error('Must not initialize');}});assert.equal(await disabled.init(null),false);assert.equal(await disabled.select(descriptor),false);disabled.dispose();
+const adapter=createWorldAdapter({enabled:true,createRenderer:async()=>fakeRenderer(),createCache:()=>({get:async()=>smallWorld,dispose(){cacheStops++;}}),onFallback:()=>failures++});
+assert.equal(await adapter.init(null),true);assert.equal(await adapter.select(descriptor),true);assert.equal(await adapter.select(descriptor),true);assert.equal(uploads,1);assert.equal(adapter.draw({audio:.5}),true);assert.equal(draws,1);
+assert.equal(await adapter.select({...descriptor,generatorVersion:0}),false);assert.equal(adapter.draw({}),false);assert.equal(releases,1);assert.equal(await adapter.select(descriptor),true);adapter.contextLost();assert.equal(adapter.ready,false);assert.equal(failures,1);adapter.dispose();adapter.dispose();assert.equal(releases,2);assert.equal(cacheStops,1);assert.equal(rendererStops,1);
+assert.deepEqual(descriptor,{type:'earth',seed:42,generatorVersion:10});
+console.log('Application adapter fallback and lifecycle verified');

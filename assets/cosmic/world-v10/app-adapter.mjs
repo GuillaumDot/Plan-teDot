@@ -1,0 +1,46 @@
+import {WORLD_CONFIG} from './config.mjs';
+import {ARCHETYPES} from './archetypes.mjs';
+import {createWorldCache} from './world-cache.mjs';
+import {createPlanetRenderer} from './renderer.mjs';
+// The host owns its animation loop, camera, audio, quality governor and saves.
+// Use an isolated WebGL1 canvas; do not pass the legacy WebGL2 context.
+export const V10_GENERATOR=10;
+export function eligibleWorld(descriptor){
+ return !!descriptor&&descriptor.generatorVersion===V10_GENERATOR&&Object.hasOwn(ARCHETYPES,descriptor.type)&&
+ (typeof descriptor.seed==='string'||Number.isFinite(descriptor.seed));
+}
+export function createWorldAdapter({enabled=WORLD_CONFIG.enabled,createCache=createWorldCache,createRenderer=createPlanetRenderer,onFallback=()=>{}}={}){
+ let cache=null,renderer=null,initializing=null,planet=null,controller=null,revision=0,closed=false,failed=false,activeKey=null,pending=null;
+ function release(){controller?.abort();controller=null;planet?.dispose();planet=null;activeKey=null;}
+ function fallback(error){failed=true;release();try{onFallback(error);}catch(_){}}
+ async function init(gl){
+  if(closed||!enabled||failed)return false;
+  if(renderer)return true;
+  if(!initializing)initializing=(async()=>{try{const next=await createRenderer(gl);if(closed){next.dispose();return false;}renderer=next;cache=createCache();return true;}catch(e){renderer?.dispose();renderer=null;fallback(e);return false;}})();
+  return initializing;
+ }
+ function select(descriptor){
+  if(closed||!enabled||failed||!renderer||!cache||!eligibleWorld(descriptor)){revision++;pending=null;release();return Promise.resolve(false);}
+  const {type,seed}=descriptor,key=JSON.stringify([type,seed,V10_GENERATOR]);
+  if(activeKey===key&&planet)return Promise.resolve(true);
+  if(pending?.key===key)return pending.promise;
+  const id=++revision;release();const abort=new AbortController();controller=abort;
+  const promise=(async()=>{try{
+   const world=await cache.get(type,seed,WORLD_CONFIG.bakeResolution,{priority:true});
+   if(closed||id!==revision||abort.signal.aborted)return false;
+   const next=renderer.upload(world);planet=next;activeKey=key;
+   // Optional visual resources must never prevent base geometry from appearing.
+   for(const load of [()=>next.loadDetail(world.natural?.detailBiome,{signal:abort.signal,maxSize:256}),()=>next.loadLandmarks({signal:abort.signal}),()=>next.loadVegetation({signal:abort.signal})]){
+    try{Promise.resolve(load()).catch(()=>{});}catch(_){}
+   }
+   return true;
+  }catch(e){if(!closed&&id===revision)fallback(e);return false;}finally{if(pending?.id===id)pending=null;}})();
+  pending={id,key,promise};return promise;
+ }
+ return {init,select,
+  draw(frame){if(!planet||closed||failed)return false;try{renderer.draw(planet,frame);return true;}catch(e){fallback(e);return false;}},
+  contextLost(){if(!closed){revision++;pending=null;fallback(new Error('V10 context lost'));}},
+  dispose(){if(closed)return;closed=true;revision++;pending=null;release();cache?.dispose();renderer?.dispose();cache=renderer=null;},
+  get ready(){return !!planet&&!closed&&!failed;},get failed(){return failed;}
+ };
+}

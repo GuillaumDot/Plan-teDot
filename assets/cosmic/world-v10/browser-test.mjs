@@ -108,5 +108,13 @@ try{
  await page.selectOption('#quality','0');await page.waitForFunction(()=>document.querySelector('canvas').dataset.tier==='0');const ecoWidth=await page.locator('canvas').evaluate(c=>c.width);
  await page.selectOption('#quality','3');await page.waitForFunction(()=>document.querySelector('canvas').dataset.tier==='3');const ultraWidth=await page.locator('canvas').evaluate(c=>c.width);assert.ok(ultraWidth>ecoWidth);
  await page.selectOption('#quality','auto');
+ const adapterCheck=await page.evaluate(async()=>{
+ const {createWorldAdapter}=await import('./app-adapter.mjs');
+ const canvas=document.createElement('canvas');canvas.width=canvas.height=64;const gl=canvas.getContext('webgl',{preserveDrawingBuffer:true});
+ const adapter=createWorldAdapter({enabled:true});const mvp=new Float32Array([.8,0,0,0,0,.8,0,0,0,0,.5,0,0,0,0,1]);
+ try{const init=await adapter.init(gl),legacy=await adapter.select({type:'rock',seed:42,generatorVersion:0}),ready=await adapter.select({type:'rock',seed:42,generatorVersion:10});gl.viewport(0,0,64,64);gl.enable(gl.DEPTH_TEST);
+ const drawn=adapter.draw({mvp,tier:0,audio:.3,eye:[0,0,-3],light:[0,0,-1]});const p=new Uint8Array(4);gl.readPixels(32,32,1,1,gl.RGBA,gl.UNSIGNED_BYTE,p);return {init,legacy,ready,drawn,visible:p[0]+p[1]+p[2]>0,error:gl.getError()};}finally{adapter.dispose();}
+ });
+ assert.deepEqual(adapterCheck,{init:true,legacy:false,ready:true,drawn:true,visible:true,error:0});
  assert.deepEqual(errors,[]);
 }finally{await browser.close();}

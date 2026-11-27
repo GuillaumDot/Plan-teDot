@@ -64,3 +64,6 @@ Caméra orbitale yaw/pitch et zoom orthographique borné 0,8–3,2, lissage expo
 
 ## Gouverneur de qualité raccordé
 L'aperçu applique qualityStep existant au temps réel entre images (hors chargement de textures, reprise de visibilité et grandes interruptions), puis renderBudget au DPR et au tier du renderer. Choix Auto/Éco/Standard/Élevée/Ultra. En arrière-plan pas de dessin; un seul RAF. L'objectif 30 FPS n'est pas une mesure iPhone; aucune mesure batterie. Test caméra corrigé pour ne pas distinguer -0 et +0 dans les matrices. Tests CPU de baisse/remontée de qualité et navigateur de résolution.
+
+## Adaptateur application V1
+Module app-adapter.mjs désactivé par défaut. Contrat explicite generatorVersion:10, type et seed; descripteur non modifié, aucun monde historique admis. Le propriétaire du rendu fournit caméra, audio, delta, temps, qualité et croissance, sans second RAF ni moteur audio. Initialisation paresseuse, un cache Worker, planète active unique, déduplication, annulation, ressources optionnelles, arrêt sur erreur/perte de contexte et repli demandé au client. Le contexte doit être WebGL1 isolé, car index.html V9.8.3 utilise WebGL2 et des états GPU spécifiques; aucune insertion dans index à cette étape. Test CPU du contrat et WebGL du chemin réel. Les performances du second contexte et l'intégration de l'interface principale restent à valider.
