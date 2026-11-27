@@ -91,3 +91,6 @@ Reprise exacte de l'index main 5197e2a et de son atlas compact textures84-compac
 
 ## Test application complète isolé
 La consolidation cdd0c6a a passé CPU 45998670027 et WebGL 45998669766. Le workflow ajoute les sept tests historiques render-audio (ordonnancement RAF et fondu) puis app-smoke.mjs : Chromium mobile, vrai index.html instrumenté uniquement via interception de la réponse locale, planète fictive, réseau externe bloqué, pas de compte ni de modification serveur. Le test exige un dessin V10 dans frame/renderPlanet, vérifie la graine et l'absence de migration, sortie vers le système puis repli V9 injecté. Aucun hook de test dans l'index livré. Parcours synthétique, ne couvre pas connexion réelle, écoute MP3 ni écran verrouillé iOS. Premier résultat CI à confirmer.
+
+## Lecture réelle de la piste de test
+Le job 140505506412 du run 45998985767 est vert : sept régressions historiques et vrai index focus/sortie/repli. Le smoke ajoute un WAV synthétique de 20 s créé uniquement en mémoire, passé au véritable playList/load/élément audio. Vérifie progression du temps, identité de piste, absence d'erreur média, continuité lors du repli graphique et pause/reprise. Autoplay autorisé dans Chromium CI; aucun son inédit ni donnée personnelle. Ne teste pas les MP3 de l'album, les services externes ni le verrouillage iOS. Nouveau CI à confirmer.

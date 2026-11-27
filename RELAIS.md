@@ -135,3 +135,6 @@ Intégration de main 5197e2a V9.8.3 dans la branche V10, index V9.8.3 exact + tr
 
 ## Relais ChatGPT — V10 — validation application complète
 Consolidation cdd0c6a CPU/WebGL verts (45998670027/45998669766). Ajout app-smoke.mjs dans le workflow existant, vrai index avec fixture injectée uniquement dans Chromium, réseau externe bloqué, focus V10, sortie et repli, vérification absence de migration. Sept tests historiques render-audio ajoutés au même CI. Pas de modification index/main/Supabase/audio. Nouveau CI à confirmer, parcours authentifié/MP3/écran verrouillé iPhone non testés.
+
+## Relais ChatGPT — V10 — validation app et lecture locale
+Run 45998985767 vert : vrai index focus V10, sortie et fallback V9, absence de migration et 7/7 tests historiques. Captures artifact 15197556361. Nouveau test synthétique WAV via playList/load, continuité au repli et pause/reprise. CI à confirmer; pas de validation iPhone, MP3 album ni écran verrouillé. Index/main/Supabase inchangés.

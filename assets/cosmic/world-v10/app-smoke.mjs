@@ -17,11 +17,24 @@ const fixture=`window.__pdAppSmoke={
   },
   tick(){frame(performance.now(),true);return {state:pd10Status(),draws:window.__pdSmokeDraws||0,mode,seed:VIEW.planets[0]?.seed,version:VIEW.planets[0]?.generatorVersion??null,error:gl.getError(),recovery:PD_REC_ACTIVE};},
   leave(){backToSystem();pdStopFrame();frame(performance.now(),true);return pd10Status();},
-  fail(){PD10Host?.contextLost();return pd10Status();}
+  fail(){PD10Host?.contextLost();return pd10Status();},
+  playFixture(){
+    const rate=16000,n=rate*20,data=new ArrayBuffer(44+n*2),d=new DataView(data);
+    const str=(i,s)=>{for(let j=0;j<s.length;j++)d.setUint8(i+j,s.charCodeAt(j));};
+    str(0,'RIFF');d.setUint32(4,36+n*2,true);str(8,'WAVE');str(12,'fmt ');d.setUint32(16,16,true);d.setUint16(20,1,true);d.setUint16(22,1,true);d.setUint32(24,rate,true);d.setUint32(28,rate*2,true);d.setUint16(32,2,true);d.setUint16(34,16,true);str(36,'data');d.setUint32(40,n*2,true);
+    for(let i=0;i<n;i++)d.setInt16(44+i*2,Math.round(1200*Math.sin(2*Math.PI*220*i/rate)),true);
+    const p=VIEW.planets[0],id='fixture-audio';
+    TRACKS.set(id,{id,title:'Fixture',artist:'Test',dur:20,blob:new Blob([data],{type:'audio/wav'}),src:{k:'local'}});
+    p.tracks=[id];playList([id],0,p.id);
+  },
+  audio(){return {time:au.currentTime,paused:au.paused,id:Q[qi],error:au.error?.code??0};},
+  pause(){au.pause();},
+  resume(){return au.play();}
+
 };\n`;
 let html=patch(raw,'if(ok)pd9OccAdd(b);','if(ok){window.__pdSmokeDraws=(window.__pdSmokeDraws||0)+1;pd9OccAdd(b);}');
 html=patch(html,'/* ---------- ?perf=1 : a small live meter',fixture+'/* ---------- ?perf=1 : a small live meter');
-const browser=await chromium.launch({headless:true,args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+const browser=await chromium.launch({headless:true,args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--autoplay-policy=no-user-gesture-required']});
 try{
  const context=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'block'});
  // No real authentication, telemetry, media services, or database writes.
@@ -40,7 +53,16 @@ try{
  await page.evaluate(()=>window.__pdAppSmoke.setup());
  for(let i=0;i<100;i++){result=await page.evaluate(()=>window.__pdAppSmoke.tick());if(result.state==='ready'||result.state==='fallback')break;await page.waitForTimeout(100);}
  assert.equal(result.state,'ready');
+ await page.evaluate(()=>window.__pdAppSmoke.playFixture());
+ await page.waitForFunction(()=>window.__pdAppSmoke.audio().time>.25&&!window.__pdAppSmoke.audio().paused,null,{timeout:15000});
+ const before=await page.evaluate(()=>window.__pdAppSmoke.audio());assert.equal(before.id,'fixture-audio');assert.equal(before.error,0);
  assert.equal(await page.evaluate(()=>window.__pdAppSmoke.fail()),'fallback');
+ await page.waitForFunction(t=>window.__pdAppSmoke.audio().time>t+.25&&!window.__pdAppSmoke.audio().paused,before.time,{timeout:10000});
+ const after=await page.evaluate(()=>window.__pdAppSmoke.audio());assert.equal(after.id,before.id);assert.equal(after.error,0);
+ await page.evaluate(()=>window.__pdAppSmoke.pause());const paused=await page.evaluate(()=>window.__pdAppSmoke.audio());assert.equal(paused.paused,true);
+ await page.evaluate(()=>window.__pdAppSmoke.resume());await page.waitForFunction(t=>window.__pdAppSmoke.audio().time>t+.15,paused.time,{timeout:10000});
+ await page.evaluate(()=>window.__pdAppSmoke.pause());
+ console.log('Synthetic local WAV through playList, playback continuity across graphics fallback and pause/resume verified');
  const fallback=await page.evaluate(()=>window.__pdAppSmoke.tick());assert.equal(fallback.state,'fallback');assert.equal(fallback.error,0);assert.equal(fallback.mode,'planet');assert.equal(fallback.version,null);
  assert.deepEqual(errors,[]);
  await page.screenshot({path:'v10-app-fallback.png'});
