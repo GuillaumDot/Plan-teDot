@@ -1,0 +1,128 @@
+[
+  {
+    "file": "alpine_lod0.glb",
+    "triangles": 18432,
+    "seed": 170,
+    "biome": "alpine"
+  },
+  {
+    "file": "alpine_lod1.glb",
+    "triangles": 4608,
+    "seed": 170,
+    "biome": "alpine"
+  },
+  {
+    "file": "alpine_lod2.glb",
+    "triangles": 1152,
+    "seed": 170,
+    "biome": "alpine"
+  },
+  {
+    "file": "desert_lod0.glb",
+    "triangles": 18432,
+    "seed": 171,
+    "biome": "desert"
+  },
+  {
+    "file": "desert_lod1.glb",
+    "triangles": 4608,
+    "seed": 171,
+    "biome": "desert"
+  },
+  {
+    "file": "desert_lod2.glb",
+    "triangles": 1152,
+    "seed": 171,
+    "biome": "desert"
+  },
+  {
+    "file": "volcanic_lod0.glb",
+    "triangles": 18432,
+    "seed": 172,
+    "biome": "volcanic"
+  },
+  {
+    "file": "volcanic_lod1.glb",
+    "triangles": 4608,
+    "seed": 172,
+    "biome": "volcanic"
+  },
+  {
+    "file": "volcanic_lod2.glb",
+    "triangles": 1152,
+    "seed": 172,
+    "biome": "volcanic"
+  },
+  {
+    "file": "tropical_lod0.glb",
+    "triangles": 18432,
+    "seed": 173,
+    "biome": "tropical"
+  },
+  {
+    "file": "tropical_lod1.glb",
+    "triangles": 4608,
+    "seed": 173,
+    "biome": "tropical"
+  },
+  {
+    "file": "tropical_lod2.glb",
+    "triangles": 1152,
+    "seed": 173,
+    "biome": "tropical"
+  },
+  {
+    "file": "polar_lod0.glb",
+    "triangles": 18432,
+    "seed": 174,
+    "biome": "polar"
+  },
+  {
+    "file": "polar_lod1.glb",
+    "triangles": 4608,
+    "seed": 174,
+    "biome": "polar"
+  },
+  {
+    "file": "polar_lod2.glb",
+    "triangles": 1152,
+    "seed": 174,
+    "biome": "polar"
+  },
+  {
+    "file": "alien_lod0.glb",
+    "triangles": 18432,
+    "seed": 175,
+    "biome": "alien"
+  },
+  {
+    "file": "alien_lod1.glb",
+    "triangles": 4608,
+    "seed": 175,
+    "biome": "alien"
+  },
+  {
+    "file": "alien_lod2.glb",
+    "triangles": 1152,
+    "seed": 175,
+    "biome": "alien"
+  },
+  {
+    "file": "island_lod0.glb",
+    "triangles": 18432,
+    "seed": 176,
+    "biome": "island"
+  },
+  {
+    "file": "island_lod1.glb",
+    "triangles": 4608,
+    "seed": 176,
+    "biome": "island"
+  },
+  {
+    "file": "island_lod2.glb",
+    "triangles": 1152,
+    "seed": 176,
+    "biome": "island"
+  }
+]
