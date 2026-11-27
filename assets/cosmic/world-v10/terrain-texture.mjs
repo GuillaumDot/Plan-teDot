@@ -20,3 +20,35 @@ export async function loadTerrainAlbedo(gl,type,biome,{maxSize=512,signal}={}){
  }catch(e){if(texture)gl.deleteTexture(texture);throw e;}finally{bitmap.close?.();}
 }
 // Caller owns texture unit, color conversion, caching and context restoration.
+
+// A single bounded atlas for four terrestrial detail materials. Canvas rows
+// are uploaded without Y flipping: the first row corresponds to v=0.
+export const EARTH_DETAIL_TILES=Object.freeze(['tropical','desert','alpine','polar']);
+export async function loadEarthDetailAtlas(gl,{maxSize=256,signal}={}){
+ const cap=Math.min(maxSize,gl.getParameter(gl.MAX_TEXTURE_SIZE));
+ if(!Number.isFinite(cap)||cap<2)throw new RangeError('Invalid atlas cap');
+ const tile=Math.floor(cap/2),size=tile*2;
+ const canvas=document.createElement('canvas');canvas.width=canvas.height=size;
+ const ctx=canvas.getContext('2d');if(!ctx)throw Error('Atlas canvas unavailable');
+ for(const [i,biome] of EARTH_DETAIL_TILES.entries()){
+  if(signal?.aborted)throw new DOMException('Aborted','AbortError');
+  const asset=resolveTerrain('earth',biome);
+  const response=await fetch(new URL('../../../'+asset.albedo,import.meta.url),{signal});
+  if(!response.ok)throw Error('Atlas '+biome+' HTTP '+response.status);
+  const bitmap=await createImageBitmap(await response.blob());
+  try{ctx.drawImage(bitmap,(i%2)*tile,Math.floor(i/2)*tile,tile,tile);}finally{bitmap.close?.();}
+ }
+ if(signal?.aborted)throw new DOMException('Aborted','AbortError');
+ assertTextureGL(gl,'Before detail atlas');
+ const old=gl.getParameter(gl.TEXTURE_BINDING_2D),flip=gl.getParameter(gl.UNPACK_FLIP_Y_WEBGL);
+ let texture=null;
+ try{
+  texture=gl.createTexture();if(!texture)throw Error('Atlas allocation failed');
+  gl.bindTexture(gl.TEXTURE_2D,texture);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);
+  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,canvas);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+  assertTextureGL(gl,'Earth detail atlas');
+  return {texture,atlas:true,width:size,height:size,bytes:size*size*4,dispose(){if(texture){gl.deleteTexture(texture);texture=null;}}};
+ }catch(e){if(texture)gl.deleteTexture(texture);throw e;}finally{gl.bindTexture(gl.TEXTURE_2D,old);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,flip);}
+}

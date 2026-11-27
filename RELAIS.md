@@ -59,3 +59,6 @@ Connexion du catalogue albedo au shader de surface via projection triplanaire, m
 
 ## Relais ChatGPT — V10 — Natural World V2.2 cohérent
 Grille géographique terrestre fixée à N=64 indépendamment de la résolution GPU, métadonnées des sites/réseaux préservées, signal de rivières et points urbains nocturnes dans le shader labo, sélection de texture par biome terrestre dominant. Test de cohérence des métadonnées entre deux résolutions. Aucun changement main ni sauvegardes. CI et iPhone à confirmer; mélange local et modèles 3D encore à faire.
+
+## Relais ChatGPT — V10 — atlas multi-biomes terrestre
+Quatre matériaux V1.9 dans une seule texture 256 px, mélange local par climat et relief, repli sur le matériau dominant. Tests navigateur atlas, libération, mode par famille. Les poids exacts V2.2 et les textures tempérées dédiées restent à faire; performance iPhone non mesurée. Aucun changement main ni données.

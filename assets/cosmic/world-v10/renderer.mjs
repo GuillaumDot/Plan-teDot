@@ -2,7 +2,7 @@ import {loadPlanetProgram} from './program.mjs';
 import {uploadSphere,SPHERE_LODS} from './sphere.mjs';
 import {uploadWorldMaps} from './gpu-maps.mjs';
 import {ARCHETYPES,planetProfile} from './archetypes.mjs';
-import {loadTerrainAlbedo} from './terrain-texture.mjs';
+import {loadTerrainAlbedo,loadEarthDetailAtlas} from './terrain-texture.mjs';
 import {assertTextureGL} from './texture-guard.mjs';
 const families=Object.keys(ARCHETYPES);
 const tints=[[.18,.45,1],[.12,.65,1],[.45,.38,.3],[1,.25,.08],[.4,.7,1],[.9,.65,.4],[.5,.3,1]];
@@ -19,7 +19,11 @@ export async function createPlanetRenderer(gl){
  const planet={maps,profile,type:world.type,family:families.indexOf(world.type),size:world.size,detail:null,
  async loadDetail(biome,options){
  if(!alive||disposed)return false;
- const id=++revision,asset=await loadTerrainAlbedo(gl,world.type,biome,options);
+ const id=++revision;
+ let asset;
+ if(world.type==='earth'){
+  try{asset=await loadEarthDetailAtlas(gl,options);}catch(e){if(options?.signal?.aborted||gl.isContextLost())throw e;asset=await loadTerrainAlbedo(gl,world.type,biome,options);}
+ }else asset=await loadTerrainAlbedo(gl,world.type,biome,options);
  if(!alive||disposed||id!==revision){asset?.dispose();return false;}
  planet.detail?.dispose();planet.detail=asset;return !!asset;
  },
@@ -32,7 +36,7 @@ export async function createPlanetRenderer(gl){
  gl.useProgram(p.program);gl.bindBuffer(gl.ARRAY_BUFFER,mesh.vertex);gl.enableVertexAttribArray(p.position);gl.vertexAttribPointer(p.position,3,gl.FLOAT,false,0,0);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,mesh.index);
  gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_CUBE_MAP,planet.maps.terrain);gl.uniform1i(u.uTerrain,0);
  gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_CUBE_MAP,planet.maps.climate);gl.uniform1i(u.uClimate,1);
- gl.activeTexture(gl.TEXTURE2);gl.bindTexture(gl.TEXTURE_2D,planet.detail?.texture??neutral);gl.uniform1i(u.uDetail,2);gl.uniform1f(u.uDetailStrength,planet.detail?Math.max(0,Math.min(1,Number(detailStrength)||0)):0);
+ gl.activeTexture(gl.TEXTURE2);gl.bindTexture(gl.TEXTURE_2D,planet.detail?.texture??neutral);gl.uniform1i(u.uDetail,2);gl.uniform1f(u.uDetailAtlas,planet.detail?.atlas?1:0);gl.uniform1f(u.uDetailInset,planet.detail?.atlas?0.5/planet.detail.width:0);gl.uniform1f(u.uDetailStrength,planet.detail?Math.max(0,Math.min(1,Number(detailStrength)||0)):0);
  gl.uniformMatrix4fv(u.uMVP,false,mvp);gl.uniform3fv(u.uEye,eye);gl.uniform3fv(u.uLight,light);gl.uniform1i(u.uFamily,planet.family);gl.uniform3fv(u.uAtmosphereTint,tints[planet.family]);gl.uniform1f(u.uAtmosphereDensity,planet.profile.base.atmosphere);gl.uniform1f(u.uRelief,planet.profile.base.relief*.08);gl.uniform1f(u.uTexel,2/planet.size);gl.uniform1f(u.uTime,time);gl.uniform1f(u.uAudio,audio);
  gl.drawElements(gl.TRIANGLES,mesh.count,gl.UNSIGNED_SHORT,0);
  },
