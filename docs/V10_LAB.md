@@ -1,0 +1,9 @@
+# PlanèteDot V10 — laboratoire
+
+🤝 means the owner approves continuing development without intermediate approvals. Production activation remains gated on the owner's explicit final iPhone validation.
+
+Alpha.1: independent sampler-free spherical WebGL2 shader, with procedural material colors, climate, atmosphere and an independent textured Canvas2D fallback. The isolated Chromium shader test passed for all 12 planet types (run 45930523650). This is not an end-to-end Safari test.
+
+Alpha.2: optical relief lighting, cloud shadows, progressive procedural urban surface blocks, metallic and rocky strata, and distance-dependent detail. No true 3D buildings or meshes are activated yet. The dual-face palette is an experimental preview only, not actual cover artwork. Preserve private release assets. No database migration.
+
+Acceptance: verify real app startup, user worlds, music and lock-screen playback, all planet types and close-up on iPhone, reactions, deterministic geometry, performance, and fallback. Do not merge or publish main before user validation. Existing GitHub Pages production is unchanged by this branch.
