@@ -1,5 +1,7 @@
 import {resolveTerrain} from './catalog.mjs';
 import {assertTextureGL} from './texture-guard.mjs';
+import {isWebGL2} from './gl-compat.mjs';
+const isPOT=n=>n>0&&(n&(n-1))===0;
 // WebKit may reject createImageBitmap for otherwise valid image blobs.
 async function decodeTerrainImage(blob){
  if(typeof createImageBitmap==='function'){try{return await createImageBitmap(blob);}catch(_){}}
@@ -30,8 +32,8 @@ export async function loadTerrainAlbedo(gl,type,biome,{maxSize=512,signal,channe
  canvas.getContext('2d').drawImage(bitmap,0,0,canvas.width,canvas.height);
  assertTextureGL(gl,'Before terrain upload');
  const old=gl.getParameter(gl.TEXTURE_BINDING_2D);
- try{texture=gl.createTexture();if(!texture)throw new Error('Texture allocation failed');gl.bindTexture(gl.TEXTURE_2D,texture);withTerrainUnpack(gl,()=>gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,canvas));gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);assertTextureGL(gl,'Terrain upload');}finally{gl.bindTexture(gl.TEXTURE_2D,old);}
- return {texture,biome:asset.resolved,fallback:asset.fallback,width:canvas.width,height:canvas.height,bytes:canvas.width*canvas.height*4,dispose(){if(texture){gl.deleteTexture(texture);texture=null;}}};
+ try{texture=gl.createTexture();if(!texture)throw new Error('Texture allocation failed');gl.bindTexture(gl.TEXTURE_2D,texture);withTerrainUnpack(gl,()=>gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,canvas));const mip=isWebGL2(gl)||(isPOT(canvas.width)&&isPOT(canvas.height));if(mip)gl.generateMipmap(gl.TEXTURE_2D);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,mip?gl.LINEAR_MIPMAP_LINEAR:gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);assertTextureGL(gl,'Terrain upload');}finally{gl.bindTexture(gl.TEXTURE_2D,old);}
+ return {texture,biome:asset.resolved,fallback:asset.fallback,width:canvas.width,height:canvas.height,bytes:Math.ceil(canvas.width*canvas.height*4*4/3),dispose(){if(texture){gl.deleteTexture(texture);texture=null;}}};
  }catch(e){if(texture)gl.deleteTexture(texture);throw e;}finally{bitmap.close?.();}
 }
 // Caller owns texture unit, color conversion, caching and context restoration.
@@ -62,6 +64,7 @@ export async function loadEarthDetailAtlas(gl,{maxSize=256,signal,channel='albed
   texture=gl.createTexture();if(!texture)throw Error('Atlas allocation failed');
   gl.bindTexture(gl.TEXTURE_2D,texture);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);
   withTerrainUnpack(gl,()=>gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,canvas));
+  // Atlas tiles share borders: retain bilinear filtering until padded mip levels exist.
   gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
   assertTextureGL(gl,'Earth detail atlas');
