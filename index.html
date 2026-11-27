@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#010208">
 <title>planèteDot · ton univers musical</title>
-<meta name="pd-version" content="9.6.1">
+<meta name="pd-version" content="9.6.2">
 <meta name="description" content="PlanèteDot · l’album de GuillaumDot et ton univers musical en 3D : chaque planète est un morceau.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PlanèteDot">
@@ -3737,20 +3737,42 @@ function pdFrameW(x, y){ pdFrame(x, y); const V = PDB_VW; return [[V[0], V[1], V
 /* V9 · U replié dans le repère de vue de l'astre : chaque colonne c (axe de vue exprimé dans le monde) devient U·c */
 const PDB_VQ = new Float32Array(9), PDBR = {k: 1, tx: 0};   // V9 : force des souffles, texture Figma des souffles prête (unité 14)
 function pdVWq(q, V){ for (let c = 0; c < 9; c += 3){ const r = qRot(q, [V[c], V[c + 1], V[c + 2]]); PDB_VQ[c] = r[0]; PDB_VQ[c + 1] = r[1]; PDB_VQ[c + 2] = r[2]; } return PDB_VQ; }
-// V9.6.1 emergency independent sphere renderer, no texture samplers.
-const PD_SAFE_BODY = pdTry(()=>compile(`#version 300 es
-in vec2 a; uniform vec2 uRes,uC; uniform float uR; out vec2 v;
-void main(){v=a; vec2 p=(uC+a*uR)/uRes*2.-1.;gl_Position=vec4(p.x,-p.y,0.,1.);}`,`#version 300 es
-precision highp float; in vec2 v; out vec4 o; uniform vec3 c1,c2,L; uniform float alpha,seed;
-void main(){float r=dot(v,v);if(r>1.)discard;vec3 n=vec3(v.x,-v.y,sqrt(max(0.,1.-r)));float f=sin(n.x*13.+sin(n.y*17.+seed)*2.)*sin(n.z*11.+n.y*9.);vec3 c=mix(c1,c2,.5+.35*f);float l=.24+.76*max(0.,dot(n,normalize(L+vec3(.001))));float a=alpha*(1.-smoothstep(.96,1.,r));o=vec4(c*l*a,a);}`),'safe sphere');
+// V9.6.2: independent Canvas2D recovery for actual projected bodies.
+const PD_REC_ADV = new URLSearchParams(location.search).get('advanced')==='1';
+const PD_REC_BODIES = [];
+const PD_REC_CANVAS = document.createElement('canvas');
+PD_REC_CANVAS.id='pdRecoveryBodies'; PD_REC_CANVAS.setAttribute('aria-hidden','true');
+PD_REC_CANVAS.style.cssText='position:fixed;inset:0;width:100%;height:100%;pointer-events:none;display:none';
+cv.after(PD_REC_CANVAS);
+const PD_REC_CTX=PD_REC_CANVAS.getContext('2d');
 function pdSafeBody(o){
- if(!PD_SAFE_BODY || ![0,1,6].includes(o.kind) || !Number.isFinite(o.r) || o.r<=0)return false;
- if(new URLSearchParams(location.search).get('advanced')==='1')return false;
- const p=PD_SAFE_BODY, u=p.u;
- gl.useProgram(p.p);gl.bindVertexArray(quad);
- gl.uniform2f(u.uRes,W,H);gl.uniform2f(u.uC,o.x,o.y);gl.uniform1f(u.uR,o.r);
- gl.uniform3fv(u.c1,o.c1||[.7,.7,.8]);gl.uniform3fv(u.c2,o.c2||o.c1||[.5,.5,.6]);gl.uniform3fv(u.L,o.kind===1?[0,0,1]:(o.L||[.3,.4,1]));gl.uniform1f(u.alpha,o.alpha??1);gl.uniform1f(u.seed,o.seed||0);
- gl.drawArrays(gl.TRIANGLE_STRIP,0,4);useSP();return true;
+ if(PD_REC_ADV||!PD_REC_CTX||(mode!=='system'&&mode!=='planet')||![0,1,6].includes(o.kind))return false;
+ if(![o.x,o.y,o.r].every(Number.isFinite)||o.r<=0)return false;
+ PD_REC_BODIES.push(o);return true;
+}
+function pdRecoveryPaint(){
+ const g=PD_REC_CTX;if(!g)return;
+ if(!PD_REC_BODIES.length){PD_REC_CANVAS.style.display='none';return;}
+ try{
+ const cw=Math.max(1,Math.round(W)),ch=Math.max(1,Math.round(H));
+ if(PD_REC_CANVAS.width!==cw)PD_REC_CANVAS.width=cw;
+ if(PD_REC_CANVAS.height!==ch)PD_REC_CANVAS.height=ch;
+ PD_REC_CANVAS.style.display='block';g.clearRect(0,0,cw,ch);
+ const col=(c,k)=>'rgb('+[0,1,2].map(i=>Math.round(Math.max(0,Math.min(1,(Number.isFinite(c?.[i])?c[i]:.6)*k))*255)).join(',')+')';
+ for(const o of PD_REC_BODIES){
+ const r=Math.max(2.5*(RS||1),o.r),x=o.x,y=o.y;
+ if(x+r<0||x-r>cw||y+r<0||y-r>ch)continue;
+ const alpha=Number.isFinite(o.alpha)?Math.max(0,Math.min(1,o.alpha)):1;if(alpha<=.005)continue;
+ g.save();g.globalAlpha=alpha;
+ const l=o.L||[.4,.5,1],lx=Number.isFinite(l[0])?l[0]:.4,ly=Number.isFinite(l[1])?l[1]:.5;
+ const c1=o.c1||[.6,.7,.9],c2=o.c2||c1;
+ const d=g.createRadialGradient(x+lx*r*.42,y-ly*r*.42,r*.04,x,y,r);
+ d.addColorStop(0,col(c1,1.35));d.addColorStop(.45,col(c2,.93));d.addColorStop(.85,col(c1,.52));d.addColorStop(1,col(c2,.22));
+ g.beginPath();g.arc(x,y,r,0,Math.PI*2);g.fillStyle=d;g.fill();
+ if(o.rk&&r>4){g.strokeStyle=col(o.rc||c1,.85);g.lineWidth=Math.max(1,r*.09);g.beginPath();g.ellipse(x,y,r*(o.rk[1]||1.7),r*.44,o.roll||0,0,Math.PI*2);g.stroke();}
+ g.restore();
+ }
+ }catch(e){console.warn('[PlaneteDot] recovery paint',e);g.globalAlpha=1;}
 }
 function drawBody(o){
   if(pdSafeBody(o))return;
@@ -4661,7 +4683,7 @@ setInterval(() => { if (PD93Z.on || performance.now() - PD93Z.t < 4200) return; 
 function fade(dt){ const f = $('#flash'); const fo = parseFloat(f.style.opacity || 0); if (fo > 0) f.style.opacity = Math.max(0, fo - dt * 1.6); }
 function frame(now, once){
   if (!running && !once) return;
-  if (!once){ const iv = 1000 / pdCap(); if (now - lastDraw < iv - 3){ pdQueueFrame(); return; } lastDraw = now - lastDraw < iv * 1.5 ? lastDraw + iv : now; } else lastDraw = now; SHOT_PT = null; ambTick(Math.min(.05, (now - last) / 1000));
+  if (!once){ const iv = 1000 / pdCap(); if (now - lastDraw < iv - 3){ pdQueueFrame(); return; } lastDraw = now - lastDraw < iv * 1.5 ? lastDraw + iv : now; } else lastDraw = now; PD_REC_BODIES.length=0; SHOT_PT = null; ambTick(Math.min(.05, (now - last) / 1000));
   const rawDt = Math.min(.25, (now - last) / 1000); const dt = Math.min(.05, rawDt); last = now; time = now / 1000 - T0;
   FDT = rawDt; perf(dt); readAudio(dt); scLevels(); pdMsTick(); pdPhTick(dt); listenTick(dt); ambUpdate(dt); radioSpatial(dt); POST.begin();
   if (mode !== 'splash' && !cine) FOV = lerp(FOV, FOV0, 1 - Math.exp(-dt * 2.2));
@@ -4689,7 +4711,7 @@ function frame(now, once){
   if (MENU.open && mode !== 'system') closeMenu(true);
   if (tutoI >= 0){ if (mode === 'splash' || (mode !== 'system' && TUTO_ACT === TUTO)) endTuto(); else tutoTick(); }
   if (cine && cine.album) albumFocus(dt); if (cine && cine.dir) pdDirPost(); if (OUTRO) outroTick(); if (INTRO.on) introTick(dt);
-  glowFlush(); pdShkTick(); POST.end(); shotTick(); pd9Draw(); if (STORY) storyTick();
+  glowFlush(); pdShkTick(); POST.end(); pdRecoveryPaint(); shotTick(); pd9Draw(); if (STORY) storyTick();
   if (!once) pdQueueFrame();
 }
 let FERR = 0;
