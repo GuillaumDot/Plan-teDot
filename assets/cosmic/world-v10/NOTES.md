@@ -46,3 +46,6 @@ Catalogue borné de trois GLB world-v11 : cottage, tour, usine. Sélection déte
 
 ## Végétation V1
 Sites terrestres déterministes sélectionnés sur les poids de biomes, production végétale, pente et exclusion eau/villes du monde V2.2. Trois modèles V1.4 (feuillu, pin, cactus), matériaux verts/bruns simplifiés, 36 instances et 6 000 triangles supplémentaires maximum, un tampon et un dessin aux niveaux 2/3. Pas encore de forêt dense, d'animation du vent, ni de rendu des textures GLB. Aucune modification de la géographie ou des sauvegardes.
+
+## Phénomènes naturels visuels
+Centre de vortex déterministe par graine, dérive lente et bandes spirales sur la sphère, œil et bords progressifs. Sur terre/eau, condition d'océan chaud non gelé au centre; sur gaz, modulation des bandes. Effet de qualité 2/3 seulement. Émission volcanique modulée lentement par une phase spatiale, sans flash ni altération de la lave enregistrée. Aucun nouveau tampon GPU, pas de simulation météorologique ou d'éruption physique. Vent des arbres et densification restent à faire. Tests CPU du centre, WebGL de variation des pixels.

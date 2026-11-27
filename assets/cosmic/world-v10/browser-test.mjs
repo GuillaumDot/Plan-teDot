@@ -76,5 +76,20 @@ try{
  try{await planet.loadLandmarks();await planet.loadVegetation();for(const growth of [0,.5,1])renderer.draw(planet,{mvp,tier:2,eye:[0,0,-3],light:[0,0,-1],growth});return {buildings:planet.cityMesh?.buildings,roads:planet.cityMesh?.roads,bridges:planet.cityMesh?.bridges,landmarks:planet.landmarks?.instances,modelBudget:planet.landmarks?.triangles<=12000,plants:planet.vegetation?.instances,error:gl.getError()};}finally{planet.dispose();renderer.dispose();}
  });
  assert.deepEqual(cityCheck,{buildings:9,roads:2,bridges:2,landmarks:1,modelBudget:true,plants:1,error:0});
+ const weatherCheck=await page.evaluate(async()=>{
+ const {createPlanetRenderer}=await import('./renderer.mjs');
+ const canvas=document.createElement('canvas');canvas.width=canvas.height=96;
+ const gl=canvas.getContext('webgl',{preserveDrawingBuffer:true}),renderer=await createPlanetRenderer(gl),size=8;
+ const terrain=Array.from({length:6},()=>{const a=new Uint8Array(size*size*4);for(let i=0;i<a.length;i+=4)a[i]=100;return a;});
+ const climate=terrain.map(a=>{const b=new Uint8Array(a.length);for(let i=0;i<b.length;i+=4){b[i+2]=100;b[i+3]=180;}return b;});
+ const mvp=new Float32Array([.8,0,0,0,0,.8,0,0,0,0,.5,0,0,0,0,1]);
+ gl.viewport(0,0,96,96);gl.enable(gl.DEPTH_TEST);const results=[];
+ try{for(const type of ['gas','volcanic']){
+ const planet=renderer.upload({type,seed:42,size,terrain,climate,bytes:48*size*size});planet.stormCenter=[0,.3,-Math.sqrt(.91)];
+ try{const frames=[];for(const time of [0,4]){gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);renderer.draw(planet,{mvp,tier:2,time,eye:[0,0,-3],light:[.3,.2,-1],audio:0});const p=new Uint8Array(96*96*4);gl.readPixels(0,0,96,96,gl.RGBA,gl.UNSIGNED_BYTE,p);frames.push(p);}
+ results.push({type,changed:frames[0].some((v,i)=>v!==frames[1][i]),error:gl.getError()});}finally{planet.dispose();}
+ }}finally{renderer.dispose();}return results;
+ });
+ assert.deepEqual(weatherCheck,[{type:'gas',changed:true,error:0},{type:'volcanic',changed:true,error:0}]);
  assert.deepEqual(errors,[]);
 }finally{await browser.close();}

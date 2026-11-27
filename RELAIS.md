@@ -86,3 +86,6 @@ Trois fichiers GLB world-v11 raccordés au catalogue (cottage, tour, usine), rou
 
 ## Relais ChatGPT — V10 — végétation 3D
 Sélection déterministe des sites sur grille naturelle fixe, trois GLB V1.4 (feuillu/pin/cactus), budget 6 000 triangles et 36 instances, couleur feuille/tronc et repli en cas de ressource absente. Tests CPU et WebGL ajoutés. Premier GLB 6ad7a33 CPU/WebGL verts; diversification f73705e CI en cours au début du chantier. Aucun changement main ou Supabase. Matériaux, densité forestière, vent, intégration application et validation iPhone à faire.
+
+## Relais ChatGPT — V10 — phénomènes naturels visuels
+Vortex atmosphérique déterministe (gaz et océans chauds aux tiers 2/3), modulation lente de l'émission volcanique, aucun changement de géographie. Tests CPU/WebGL ajoutés. Diversification f73705e CPU/WebGL verts; végétation 1ce0fd4 CPU vert, WebGL en cours au début du chantier. Nouveau commit CI et iPhone à confirmer. Aucun changement main/Supabase. Vent et densité des forêts restent à traiter.

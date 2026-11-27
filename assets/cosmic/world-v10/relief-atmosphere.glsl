@@ -55,3 +55,17 @@ vec3 rotateAtmosphere(vec3 n,float angle){
  float c=cos(angle),s=sin(angle);
  return vec3(c*n.x+s*n.z,n.y,-s*n.x+c*n.z);
 }
+
+// Analytic spiral weather feature, local tangent plane, no longitude seam.
+// This is a visual effect, not a physical weather forecast.
+float worldStorm(vec3 n,vec3 center,float time,float radius){
+ float facing=dot(n,center);
+ if(facing<cos(radius))return 0.;
+ vec3 t=normalize(cross(vec3(0.,1.,0.),center)),b=cross(center,t);
+ vec2 p=vec2(dot(n,t),dot(n,b));
+ float r=length(p)/max(sin(radius),.001);
+ float az=atan(p.y,p.x+.00001);
+ float arm=.5+.5*cos(3.*az-13.*r-time*.55*sign(center.y));
+ float eye=smoothstep(.07,.19,r),edge=1.-smoothstep(.60,1.,r);
+ return eye*edge*mix(.25,1.,smoothstep(.20,.85,arm));
+}

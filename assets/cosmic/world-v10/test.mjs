@@ -110,3 +110,7 @@ const plantWorld={...cityWorld,natural:{vegetation:[{dir:[0,0,-1],kind:'pine'},{
 const forest=vegetationGeometry(plantWorld,plants);assert.equal(forest.instances,3);assert.ok(forest.triangles<=VEGETATION_BUDGET&&forest.vertices.every(Number.isFinite));assert.deepEqual(forest,vegetationGeometry(plantWorld,plants));assert.equal(vegetationGeometry({...plantWorld,terrain:ocean},plants).instances,0);
 assert.ok(smallWorld.natural.vegetation.length<=36);assert.deepEqual(smallWorld.natural.vegetation,largeWorld.natural.vegetation);
 console.log('Vegetation GLBs and deterministic biome placement verified');
+
+import {stormCenter} from './weather.mjs';
+for(const seed of [0,1,42,'abc']){const center=stormCenter('earth',seed);assert.ok(center.every(Number.isFinite));assert.ok(Math.abs(Math.hypot(...center)-1)<1e-9);assert.ok(Math.abs(center[1])<.6);assert.deepEqual(center,stormCenter('earth',seed));}
+console.log('Deterministic storm center verified');

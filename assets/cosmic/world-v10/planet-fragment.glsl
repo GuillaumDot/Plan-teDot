@@ -16,6 +16,7 @@ uniform float uShadowQuality;
 uniform float uTexel;
 uniform float uTime;
 uniform float uAudio;
+uniform vec3 uStormCenter;
 // Triplanar detail: no longitude seam or polar singularity. Mirrored repeat
 // works on NPOT textures in WebGL 1 without changing sampler wrap modes.
 vec2 detailUV(vec2 p){return 1.-abs(mod(p*4.,2.)-1.);}
@@ -39,6 +40,7 @@ void main(){
  if(uFamily==5){
   float drift=.018+.028*sin(n.y*12.);
   climate.b=textureCube(uClimate,rotateAtmosphere(n,uTime*drift)).b;
+  if(uShadowQuality>.5)climate.b=mix(climate.b,.93,worldStorm(n,rotateAtmosphere(uStormCenter,uTime*.009),uTime,.32)*.48);
  }
  WorldMaterial m=worldMaterial(uFamily,terrain,climate);
  if(uFamily!=5 && uDetailStrength>0.){
@@ -68,6 +70,11 @@ void main(){
   normal=normalize(mix(normal,worldOceanNormal(n,uTime,uAudio),openWater));
   m.roughness=mix(m.roughness,.12+.07*clamp(uAudio,0.,1.),openWater);
  }
+ if(uFamily==3){
+  // Existing lava mask is stable; slow thermal pulses affect light only.
+  float pulse=.86+.14*sin(uTime*.7+dot(n,vec3(12.,19.,7.)));
+  m.emission*=pulse;
+ }
  m.emission*=1.+.15*clamp(uAudio,0.,1.);
  float visibility=1.;
  if(uFamily!=5 && uShadowQuality>.5){
@@ -79,6 +86,12 @@ void main(){
  float a=uTime*(.015+.008*cos(n.y*6.));
  vec3 q=rotateAtmosphere(n,a);
  float cloud=smoothstep(.48,.82,textureCube(uClimate,q).b);
+ if(uShadowQuality>.5){
+  vec3 center=rotateAtmosphere(uStormCenter,uTime*.009);
+  vec4 localTerrain=textureCube(uTerrain,center),localClimate=textureCube(uClimate,center);
+  float active=smoothstep(.65,.95,localTerrain.g)*smoothstep(.45,.7,localClimate.r)*(1.-localTerrain.b);
+  cloud=max(cloud,worldStorm(n,center,uTime,.24)*active*.88);
+ }
  color*=worldCloudShadow(uClimate,q,l,.7);
  color=mix(color,vec3(.85)*(.08+.92*max(dot(n,l),0.)),cloud*.55);
  }
