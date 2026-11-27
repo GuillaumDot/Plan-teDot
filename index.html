@@ -947,10 +947,15 @@ function makeEarth(){ const r = Math.random;
 function defaultSystem(){
   return {v: 2, name: '', user: '', hue: .58, theme: Math.floor(Math.random() * 6), xp: 0, secs: 0, created: Date.now(), planets: []};
 }
+// V10 remodel: only the generator marker changes; no random replacement seed.
+function pd10MigrationVersion(p){
+  if(!p||![0,1,2,3,4,6,9,10,11].includes(p.type)||!Number.isFinite(p.seed))return 0;
+  return p.generatorVersion==null||p.generatorVersion===0||p.generatorVersion===10?10:p.generatorVersion;
+}
 function fixSys(s){
   if (!s || !Array.isArray(s.planets)) return defaultSystem();
   s.v = 2; s.theme = s.theme ?? 0; s.xp = s.xp || 0; s.secs = s.secs || 0; s.hue = s.hue ?? .58;
-  s.planets.forEach(p => { p.terr = Array.isArray(p.terr) ? p.terr : []; p.tracks = Array.isArray(p.tracks) ? p.tracks : []; p.isPublic = p.isPublic !== false; p.org = p.org || 'genre'; p.emo = p.emo ?? -1; p.origin = p.origin || ''; p.auto = p.auto ?? true; p.xp = p.xp || 0; p.path = Array.isArray(p.path) ? p.path : [-1, -1, -1]; p.last = p.last || 0; p.ghosts = Array.isArray(p.ghosts) ? p.ghosts : []; /* Runtime animation cache must not survive JSON persistence. */ delete p._la; delete p._lt; });
+  s.planets.forEach(p => { p.terr = Array.isArray(p.terr) ? p.terr : []; p.tracks = Array.isArray(p.tracks) ? p.tracks : []; p.isPublic = p.isPublic !== false; p.org = p.org || 'genre'; p.emo = p.emo ?? -1; p.origin = p.origin || ''; p.auto = p.auto ?? true; p.xp = p.xp || 0; p.path = Array.isArray(p.path) ? p.path : [-1, -1, -1]; p.last = p.last || 0; p.ghosts = Array.isArray(p.ghosts) ? p.ghosts : []; /* Runtime animation cache must not survive JSON persistence. */ delete p._la; delete p._lt; p.generatorVersion=pd10MigrationVersion(p); });
   return s;
 }
 
@@ -4691,7 +4696,7 @@ function seedDir(t){ const la = t.lat, lo = t.lon; return [Math.cos(la) * Math.c
 function viewOf(p, s){ const w = pdUt(p, rz(-p.tilt, ry(-(p._ang || 0), s))); if (curP && curP.p === p){ const F = pdFrameW(curP.x, curP.y); return [dot(w, F[0]), dot(w, F[1]), dot(w, F[2])]; } const z = [-CF[0], -CF[1], -CF[2]]; return [dot(w, CR), dot(w, CU), dot(w, z)]; }
 function surfOf(p, n){ if (curP && curP.p === p){ const F = pdFrameW(curP.x, curP.y); return ry(p._ang || 0, rz(p.tilt, pdU(p, [0, 1, 2].map(k => F[0][k] * n[0] + F[1][k] * n[1] + F[2][k] * n[2])))); }
   const w = [CR[0] * n[0] + CU[0] * n[1] - CF[0] * n[2], CR[1] * n[0] + CU[1] * n[1] - CF[1] * n[2], CR[2] * n[0] + CU[2] * n[1] - CF[2] * n[2]]; return ry(p._ang || 0, rz(p.tilt, pdU(p, w))); }
-// V10 release: new worlds versioned at birth; existing worlds retain legacy rendering. world10=0 is the session rollback.
+// V10 release: compatible old worlds remodel on load; world10=0 is the session rollback.
 const PD10_QUERY = new URLSearchParams(location.search);
 const PD10_ENABLED = PD10_QUERY.get('world10') !== '0';
 const PD10_PREVIEW = PD10_ENABLED && PD10_QUERY.get('world10preview') === '1';
@@ -5112,7 +5117,7 @@ function copyPlanet(p){
   if(guestMode || !authUser || p.isPublic===false){toast('Copie indisponible');return;}
   if (SYS.planets.length >= slots(SYS)){ toast(`Toutes tes orbites sont occupées. Ton étoile en ouvrira une nouvelle au niveau ${level(SYS.xp) + 1}.`, 6000); return; }
   const lib = new Map([...TRACKS.values()].map(t => [(t.title + '|' + (t.artist || '')).toLowerCase(), t.id]));
-  const np = makePlanet(p.name, p.type, {generatorVersion:p.generatorVersion===10?10:0, size: p.size, c1: [...p.c1], c2: [...p.c2], atH: p.atH, atmo: p.atmo, ring: p.ring, ringH: p.ringH, ringTilt: p.ringTilt, ringRoll: p.ringRoll, moons: p.moons, clouds: p.clouds,
+  const np = makePlanet(p.name, p.type, {generatorVersion:pd10MigrationVersion(p), size: p.size, c1: [...p.c1], c2: [...p.c2], atH: p.atH, atmo: p.atmo, ring: p.ring, ringH: p.ringH, ringTilt: p.ringTilt, ringRoll: p.ringRoll, moons: p.moons, clouds: p.clouds,
     spin: p.spin, tilt: p.tilt, seed: p.seed, emo: p.emo, origin: p.origin, auto: false, org: 'manual', xp: 0});
   np.from = p.gd ? {user: 'GuillaumDot', sys: 'PlanèteDot'} : {user: VIEW.user, sys: VIEW.name}; np.ghosts = [];
   np.terr = p.terr.map(t => ({id: uid(), name: t.name, kind: t.kind, hue: t.hue, lat: t.lat, lon: t.lon, tracks: []}));
@@ -6532,7 +6537,7 @@ function nowInfo(){ if (au.paused || !Q.length) return null; const t = TRACKS.ge
   return {t: t.title.slice(0, 80), a: (t.artist || '').slice(0, 60), pid: p ? p.id : '', pn: p ? p.name.slice(0, 40) : '', src: t.src && t.src.k !== 'local' ? t.src.k : '', u: t.src && t.src.u ? t.src.u.slice(0, 200) : '', ts: Date.now() - (au.currentTime || 0) * 1000, dur: au.duration || 240}; }
 function snapshot(){ return {name: SYS.name.slice(0, 40), user: SYS.user.slice(0, 30), previousStar: String(SYS.previousStar||'').slice(0,30), starRenamedAt: SYS.starRenamedAt||0, hue: SYS.hue, hueSet: !!SYS.hueSet, secs: SYS.secs || 0, theme: SYS.theme, level: level(SYS.xp), updated: Date.now(), rx: pd9RxOut(), now: (()=>{const n=nowInfo();return n && SYS.planets.find(p=>p.id===n.pid)?.isPublic===false ? null : n;})(),
   planets: SYS.planets.slice(0, 24).map(p => { const tr = []; p.terr.slice(0, 12).forEach((t, ti) => t.tracks.slice(0, 40).forEach(id => { const x = TRACKS.get(id); if (x) { const m = META[id] || {}; tr.push([x.title.slice(0, 80), (x.artist || '').slice(0, 60), ti, x.src && x.src.k !== 'local' ? x.src.k : '', Math.round(((m.plays || 0) + (m.secs || 0) / 300) * 10) / 10, trackBiome(id, p)]); } }));
-    return {id: p.id, isPublic: p.isPublic !== false, name: p.name.slice(0, 40), type: p.type, generatorVersion: p.generatorVersion===10?10:0, size: p.size, c1: p.c1, c2: p.c2, atH: p.atH, atmo: p.atmo, ring: p.ring, ringH: p.ringH, ringTilt: p.ringTilt, ringRoll: p.ringRoll,
+    return {id: p.id, isPublic: p.isPublic !== false, name: p.name.slice(0, 40), type: p.type, generatorVersion: pd10MigrationVersion(p), size: p.size, c1: p.c1, c2: p.c2, atH: p.atH, atmo: p.atmo, ring: p.ring, ringH: p.ringH, ringTilt: p.ringTilt, ringRoll: p.ringRoll,
       moons: p.moons, clouds: p.clouds, arch: p.arch || 0, spin: p.spin, tilt: p.tilt, seed: p.seed, phase: p.phase, emo: p.emo, origin: (p.origin || '').slice(0, 40), level: plevel(p), xp: p.xp || 0, path: pathOf(p), act: Math.round(act(p) * 100) / 100, links: p.isPublic === false ? [] : scLinks(p.links), scw: p.isPublic === false ? [] : pdScItems(p).map(x => Math.round(x.w * 10) / 10),
       terr: p.terr.slice(0, 12).map(t => ({id: t.id, name: t.name.slice(0, 30), kind: t.kind, hue: t.hue, lat: t.lat, lon: t.lon, n: t.tracks.length, lib: Math.round(liberation(t, p) * 100) / 100})), tracks: tr.slice(0, 240).map(t => p.isPublic === false ? [t[0],t[1],t[2],'',t[4],t[5]] : t)}; })}; }
 const num = (v, a, b, d) => (typeof v === 'number' && isFinite(v)) ? clamp(v, a, b) : d;
@@ -6542,7 +6547,7 @@ function sanitize(v){ if (!v || !Array.isArray(v.planets)) return null; return {
   now: v.now && typeof v.now.t === 'string' ? {t: v.now.t.slice(0, 80), a: String(v.now.a || '').slice(0, 60), pid: sid(v.now.pid, ''), pn: String(v.now.pn || '').slice(0, 40), src: String(v.now.src || '').slice(0, 12), u: /^https?:\/\//.test(v.now.u || '') ? String(v.now.u).slice(0, 200) : '', ts: num(v.now.ts, 0, 1e15, 0), dur: num(v.now.dur, 1, 36000, 240)} : null,
   planets: v.planets.slice(0, 24).map(p => { const terr = Array.isArray(p.terr) ? p.terr.slice(0, 12).map(t => ({id: sid(t.id, uid()), name: String(t.name || 'Territoire').slice(0, 30), kind: String(t.kind || 'manual').slice(0, 10), hue: num(t.hue, 0, 1, .5), lat: num(t.lat, -1.6, 1.6, 0), lon: num(t.lon, -3.2, 3.2, 0), lib: num(t.lib, 0, 1, 0), tracks: new Array(Math.round(num(t.n, 0, 9999, 0))).fill(0)})) : [];
     const tracksRO = Array.isArray(p.tracks) ? p.tracks.slice(0, 240).filter(Array.isArray).map(t => [String(t[0] || '').slice(0, 80), String(t[1] || '').slice(0, 60), Math.round(num(t[2], 0, 11, 0)), String(t[3] || '').slice(0, 12), num(t[4], 0, 1e6, 0), Math.round(num(t[5], 0, 7, 7))]) : [];
-    return {id: sid(p.id, uid()), isPublic: p.isPublic !== false, name: String(p.name || 'Planète').slice(0, 40), type: Math.round(num(p.type, 0, 11, 0)), generatorVersion:p.generatorVersion===10?10:0, size: num(p.size, .5, 1.5, 1), c1: col3(p.c1, [.6,.6,.5]), c2: col3(p.c2, [.5,.6,.5]),
+    return {id: sid(p.id, uid()), isPublic: p.isPublic !== false, name: String(p.name || 'Planète').slice(0, 40), type: Math.round(num(p.type, 0, 11, 0)), generatorVersion:pd10MigrationVersion(p), size: num(p.size, .5, 1.5, 1), c1: col3(p.c1, [.6,.6,.5]), c2: col3(p.c2, [.5,.6,.5]),
       atH: num(p.atH, 0, 1, .6), atmo: num(p.atmo, 0, 1, .4), ring: Math.round(num(p.ring, 0, 2, 0)), ringH: num(p.ringH, 0, 1, .6), ringTilt: num(p.ringTilt, -1, 1, .25), ringRoll: num(p.ringRoll, -1, 1, 0),
       moons: Math.round(num(p.moons, 0, 3, 0)), arch: Math.round(num(p.arch, 0, 5, 0)), clouds: num(p.clouds, 0, 1, .4), spin: num(p.spin, 0, 1, .2), tilt: num(p.tilt, -1, 1, .2), seed: num(p.seed, 0, 100, 1), phase: num(p.phase, 0, 7, 0),
       emo: Math.round(num(p.emo, -1, 7, -1)), origin: String(p.origin || '').slice(0, 40), level: Math.round(num(p.level, 1, 99, 1)), xp: num(p.xp, 0, 1e7, 0), path: Array.isArray(p.path) ? p.path.slice(0, 3).map(x => Math.round(num(x, -1, 2, -1))) : [-1, -1, -1], act: num(p.act, 0, 1, 0), links: scLinks(p.links), scw: Array.isArray(p.scw) ? p.scw.slice(0, 12).map(x => num(x, 0, 1e6, 0)) : [], terr, tracksRO, tracks: tracksRO.map(() => 0), org: 'manual', auto: false}; })}; }

@@ -141,3 +141,6 @@ Run 45998985767 vert : vrai index focus V10, sortie et fallback V9, absence de m
 
 ## Relais ChatGPT — candidate V10.0.0
 Fondateur autorise publication si prête et demande remise à zéro des comptes. 9181503 CPU/WebGL verts, y compris continuité WAV. Candidate version 10.0.0 : moteur focus activé par défaut, world10=0 repli, nouvelles planètes version 10, copies et anciens mondes conservés, version transmise par snapshot/sanitize. Nouveau CI requis avant publication. Supabase lu uniquement : 9 comptes, 8 systèmes, 29 objets appartenant aux utilisateurs; suppression non exécutée, risque perte audio et blocage Storage. Le versionnement évite le besoin technique d'effacer les comptes. Aucune modification main ni serveur. iPhone/MP3 verrouillé non validés.
+
+## Relais ChatGPT — V10 — remodelage des planètes existantes
+4fd35cb CPU/WebGL verts (45999960063/45999959868). Demande du fondateur : remodeler les anciens mondes. Migration du marqueur vers 10 dans fixSys, même règle snapshot/sanitize/copie; graine, ID, playlists, territoires et XP conservés. Sauvegarde normale à la connexion déjà présente. Types non supportés et graines invalides restent historiques. Test de l'index sans preview et égalité du reste du payload ajouté. Aucun compte/fichier supprimé, aucune mutation SQL, main inchangée. Nouveau CI et iPhone requis avant publication.

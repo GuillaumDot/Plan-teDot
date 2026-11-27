@@ -188,5 +188,13 @@ console.log('Main index inline JavaScript syntax and opt-in integration verified
 
 assert.ok(legacyIndex.includes('name="pd-version" content="10.0.0"'));
 assert.ok(legacyIndex.includes('name, type, generatorVersion: 10, size: 1'));
-assert.ok(legacyIndex.includes('generatorVersion: p.generatorVersion===10?10:0')&&legacyIndex.includes('generatorVersion:p.generatorVersion===10?10:0'));
+assert.ok(legacyIndex.includes('p.generatorVersion=pd10MigrationVersion(p)')&&legacyIndex.includes('generatorVersion:pd10MigrationVersion(p)'));
 console.log('V10 default for new planets; explicit rollback and legacy version preservation');
+
+import {runInNewContext} from 'node:vm';
+const migrationSource=legacyIndex.match(/function pd10MigrationVersion\(p\)\{[\s\S]*?\n\}/)?.[0];assert.ok(migrationSource);
+const migrate=runInNewContext(migrationSource+';pd10MigrationVersion');
+for(const type of [0,1,2,3,4,6,9,10,11]){const p=Object.freeze({type,seed:7.7,tracks:['song'],xp:42});assert.equal(migrate(p),10);assert.equal(p.generatorVersion,undefined);assert.equal(migrate({...p,generatorVersion:0}),10);assert.equal(migrate({...p,generatorVersion:10}),10);}
+for(const type of [5,7,8])assert.equal(migrate({type,seed:7}),0);
+assert.equal(migrate({type:11,seed:NaN}),0);assert.equal(migrate({type:11,seed:7,generatorVersion:42}),42);
+console.log('Existing world migration preserves seed and payload; unsupported families retain legacy');
