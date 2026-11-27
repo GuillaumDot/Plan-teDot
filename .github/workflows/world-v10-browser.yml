@@ -1,7 +1,13 @@
 name: V10 WebGL
 on:
   push:
-    branches: [dev/chatgpt-world-v10]
+    branches: [dev/chatgpt-world-v10, fix/v10-render-cleanup]
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'assets/cosmic/**'
+      - 'textures*.bin'
+      - '.github/workflows/world-v10-browser.yml'
 permissions:
   contents: read
 jobs:
