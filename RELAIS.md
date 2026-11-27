@@ -154,3 +154,6 @@ PR #2 fusionnée après CI CPU et WebGL verts (46019818479, 46019818192). Correc
 
 ## V10.0.2 — collaboration Gemini / ChatGPT
 Normalisation des dimensions avant upload, galaxies limitées à min(512, atlas), décodage Image sur mobile, finalisation mipmaps différée sécurisée, gouverneur sans coupure des textures. Patch Gemini partiel : isolation par famille et changement de signature non intégrés, nécessitent audit des bindings et des uniforms. Dimensions binaires réelles et rendu iOS non vérifiés.
+
+## V10.0.4 — compléments à la V10.0.3 (audit Grok, 27/11/2026)
+Branche locale fix/grok-v10.0.4-on-1003 (depuis main f120720, PR #5 conservée en entier). Ajouts : rendu V10 au zoom en opt-in (`?world10=1`), la planète V9 texturée revient par défaut ; atlas 512 px au palier 1 (256 px seulement au palier 0) ; galaxies en 512 px ; mode économie d'énergie iOS détecté (30 images/s sans perte de netteté) ; file de décodage mobile 6 et image libérée après envoi ; cartes V10 cuites en 128 px ; navigateurs intégrés (Instagram, TikTok…) en atlas 256 px avec rendu au palier 1 (décision Dot Design) ; atterrissage cadré côté jour (comme focusOn) et léger biais de lumière V9.6 sur le rendu V9 par défaut. Le tone mapping Reinhard et l'éclairage V10 de la PR #5 sont conservés tels quels. À vérifier sur iPhone : images/s de la vue planète V9, mémoire, écran verrouillé.
