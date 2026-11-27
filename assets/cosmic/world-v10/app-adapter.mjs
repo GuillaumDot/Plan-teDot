@@ -31,7 +31,7 @@ export function createWorldAdapter({enabled=WORLD_CONFIG.enabled,createCache=cre
    if(closed||id!==revision||abort.signal.aborted)return false;
    const next=renderer.upload(world);planet=next;activeKey=key;
    // Optional visual resources must never prevent base geometry from appearing.
-   void Promise.resolve().then(()=>next.loadDetail(world.natural?.detailBiome,{signal:abort.signal,maxSize:256})).then(()=>{if(id===revision&&!abort.signal.aborted)detailReady=true;},e=>{if(id===revision&&!abort.signal.aborted){detailReady=true;console.warn('[PlanèteDot V10] detail fallback',e);}});
+   void Promise.resolve().then(()=>next.loadDetail(world.natural?.detailBiome,{signal:abort.signal,maxSize:512})).then(()=>{if(id===revision&&!abort.signal.aborted)detailReady=true;},e=>{if(id===revision&&!abort.signal.aborted){detailReady=true;console.warn('[PlanèteDot V10] detail fallback',e);}});
    for(const load of [()=>next.loadLandmarks({signal:abort.signal}),()=>next.loadVegetation({signal:abort.signal})]){
     try{Promise.resolve(load()).catch(e=>{if(!abort.signal.aborted)console.warn('[PlanèteDot V10] optional asset:',e?.message||e);});}catch(e){if(!abort.signal.aborted)console.warn('[PlanèteDot V10] optional asset:',e?.message||e);}
    }
