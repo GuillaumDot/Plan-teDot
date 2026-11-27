@@ -27,13 +27,13 @@ vec2 atlasUV(vec2 p,vec2 tile){
  if(uDetailAtlas<.5)return uv;
  return tile*.5+vec2(uDetailInset)+uv*(.5-2.*uDetailInset);
 }
-float detailLuma(vec3 n,vec2 tile){
+vec3 detailRGB(vec3 n,vec2 tile){
  vec3 w=pow(abs(n),vec3(4.));w/=max(dot(w,vec3(1.)),.0001);
  vec3 a=texture2D(uDetail,atlasUV(n.yz,tile)).rgb;
  vec3 b=texture2D(uDetail,atlasUV(n.xz,tile)).rgb;
  vec3 c=texture2D(uDetail,atlasUV(n.xy,tile)).rgb;
  vec3 rgb=a*w.x+b*w.y+c*w.z;
- return dot(rgb,vec3(.2126,.7152,.0722));
+ return rgb;
 }
 // Height values, not object-space normals. Project finite differences into
 // the spherical tangent plane, with a bounded strength at atlas transitions.
@@ -65,7 +65,7 @@ void main(){
  if(uFamily!=5 && uDetailStrength>0.){
  float mask=(uFamily==0||uFamily==1)?(1.-terrain.g)*(1.-terrain.b):1.;
  // Preserve the procedural climate colors, oceans and emission.
- float detail=0.5;
+ vec3 detail=vec3(.5);
  if(uFamily==0 && uDetailAtlas>.5){
   // Continuous local weights derived from the existing natural climate maps.
   float polar=1.-smoothstep(.20,.43,climate.r);
@@ -78,9 +78,10 @@ void main(){
   if(w.z>best){best=w.z;microTile=vec2(0.,1.);}
   if(w.w>best){best=w.w;microTile=vec2(1.,1.);}
   microConfidence=smoothstep(.52,.78,best);
-  detail=detailLuma(n,vec2(0.,0.))*w.x+detailLuma(n,vec2(1.,0.))*w.y+detailLuma(n,vec2(0.,1.))*w.z+detailLuma(n,vec2(1.,1.))*w.w;
- }else detail=detailLuma(n,vec2(0.));
- m.color*=mix(1.,mix(.65,1.35,detail),clamp(uDetailStrength*mask,0.,1.));
+  detail=detailRGB(n,vec2(0.,0.))*w.x+detailRGB(n,vec2(1.,0.))*w.y+detailRGB(n,vec2(0.,1.))*w.z+detailRGB(n,vec2(1.,1.))*w.w;
+ }else detail=detailRGB(n,vec2(0.));
+ vec3 photo=pow(max(detail,vec3(.001)),vec3(2.2));
+ m.color*=mix(vec3(1.),clamp(photo*2.4,vec3(.35),vec3(1.65)),clamp(uDetailStrength*mask,0.,1.));
  }
  // Earth-only channels: climate.a = river, terrain.a = city site.
  if(uFamily==0){

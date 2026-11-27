@@ -1,7 +1,7 @@
 // Bridge from legacy projected planet coordinates to a bounded offscreen V10 pass.
 // Host owns the frame, audio, selection, and persistent data.
 import {isWebGL2} from './gl-compat.mjs';
-export const SCENE_TARGET_CAP=512;
+export const SCENE_TARGET_CAP=1024;
 const valid3=v=>v?.length===3&&Array.from(v).every(Number.isFinite);
 export function sceneFrame({basis,light,audio=0,time=0,delta=0,tier=2,growth=1}){
  if(!Array.isArray(basis)||basis.length!==3||!basis.every(valid3)||!valid3(light))throw Error('Invalid scene basis');
@@ -35,7 +35,7 @@ export function createSceneCompositor(gl){
  return {draw(adapter,body,frame,width,height){
  if(closed||gl.isContextLost()||!adapter.ready)return false;
  const rect=sceneRect(body,width,height);if(!rect)return false;
- const cap=Math.min(SCENE_TARGET_CAP,gl.getParameter(gl.MAX_TEXTURE_SIZE),gl.getParameter(gl.MAX_RENDERBUFFER_SIZE));
+ const cap=Math.min(frame.tier>=2?SCENE_TARGET_CAP:512,gl.getParameter(gl.MAX_TEXTURE_SIZE),gl.getParameter(gl.MAX_RENDERBUFFER_SIZE));
  if(cap<32)return false;
  const size=Math.min(cap,Math.max(32,Math.ceil(body.r*2/.92/32)*32));
  const old={draw:gl.getParameter(gl.DRAW_FRAMEBUFFER_BINDING),read:gl.getParameter(gl.READ_FRAMEBUFFER_BINDING),renderbuffer:gl.getParameter(gl.RENDERBUFFER_BINDING),viewport:gl.getParameter(gl.VIEWPORT),program:gl.getParameter(gl.CURRENT_PROGRAM),vao:gl.getParameter(gl.VERTEX_ARRAY_BINDING),unit:gl.getParameter(gl.ACTIVE_TEXTURE),color:gl.getParameter(gl.COLOR_WRITEMASK),depthMask:gl.getParameter(gl.DEPTH_WRITEMASK),clearColor:gl.getParameter(gl.COLOR_CLEAR_VALUE),clearDepth:gl.getParameter(gl.DEPTH_CLEAR_VALUE),depthFunc:gl.getParameter(gl.DEPTH_FUNC),srcRGB:gl.getParameter(gl.BLEND_SRC_RGB),dstRGB:gl.getParameter(gl.BLEND_DST_RGB),srcA:gl.getParameter(gl.BLEND_SRC_ALPHA),dstA:gl.getParameter(gl.BLEND_DST_ALPHA),eqRGB:gl.getParameter(gl.BLEND_EQUATION_RGB),eqA:gl.getParameter(gl.BLEND_EQUATION_ALPHA)};
