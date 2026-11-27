@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#010208">
 <title>planèteDot · ton univers musical</title>
-<meta name="pd-version" content="10.0.0">
+<meta name="pd-version" content="10.0.1-test.1">
 <meta name="description" content="PlanèteDot · l’album de GuillaumDot et ton univers musical en 3D : chaque planète est un morceau.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PlanèteDot">
@@ -1355,6 +1355,7 @@ function pdTxPut(x){ const G = gl, e = x.e, im = x.im, sz = PDTX.sz, T = PDTX.t,
     const error=G.getError();if(error!==G.NO_ERROR)throw Error('WebGL upload '+e.n+' : '+error);
     PDTX.got = (PDTX.got || 0) + 1;
   } catch(err){ console.warn('[PlanèteDot] texture ' + e.n, err); pdAtlasFail(err); }
+  try {pdKeepMaterial(e.n,im);}catch(_){}
   try { if (im.close) im.close(); } catch(_){}
   if (PDTX.n && PDTX.got === PDTX.n){ if (INTRO.on && INTRO.ph === 'seq' && !INTRO.flashed){ PDTX.mipWait = 1; return; } pdTxFin(); } }   // V9.6 : pendant l'ouverture, la fin (mipmaps) se fait sous le flash d'arrivée
 function pdTxFin(){ const G = gl, T = PDTX.t; PDTX.mipWait = 0; if (!T || !T.arr2 || !T.gal2) return;
@@ -2600,7 +2601,7 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){ gFs=max(n.z,.12);
           oc=max(oc,smoothstep(0.,1.,((hl-g0s)*H-t*tE)/(t*.4+.003))); } gTQ=false;
         rSh=1.-oc*.6*min(1.,det*1.5)*smoothstep(-.15,.05,Lz0)*smoothstep(.6,.45,Lz0); } } }
   if(!(uType==11||uType==1)){ n=nb; shd*=rSh; }
-  float ndl=dot(n,L); float dif=lam(ndl)*shd; float amb=.038;
+  float ndl=dot(n,L); float dif=lam(ndl)*shd; float amb=.072+.052*clamp(uAtmo,0.,1.)*(.5+.5*n0.y);
   vec3 col; vec3 emi=vec3(0.); float a=1.; float land=1.; float spec=0.;
   if(sT){ col=vec3(.4); }   /* V8.4 : couleur faite plus bas par solid84 */
   else if(uType==0){ float f=fbm(sp*1.3); float cr=fbm(sp*5.); col=mix(uC2*.45,uC1,smoothstep(.3,.7,f)); col*=.68+.55*cr; col*=.9+.2*sin(dot(sp,vec3(9.,3.,7.))+fbm3(sp*4.)*6.)*(.3+det); col*=.93+.14*sin(s.y*90.+fbm3(sp*3.)*9.)*det;
@@ -2914,6 +2915,7 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){ gFs=max(n.z,.12);
   vec3 sun=uSun*uSunI; if(uType==2) col*=.62+.38*pow(max(n0.z,0.),.35); if(uType==10||uType==0||uType==9) dif*=1.+.22*pow(max(L.z,0.),8.)*shd;
   vec3 sky=mix(sun,uAt*1.2,.55*clamp(uAtmo*1.4,0.,1.));
   vec3 lit=col*(amb*mix(vec3(1.),sky,.7)+dif*sun+(1.-shd)*max(ndl,0.)*sky*.06*uAtmo)+emi;
+  lit+=col*mix(vec3(.12,.16,.22),sky,.32)*(.18+.32*uAtmo)*(1.-smoothstep(.0,.6,dif));
   if(gPl93>.003){ float pL=lam(dot(n0,L)+.08)*mix(1.,shd,.7); lit=mix(lit,gPc93*(amb*mix(vec3(1.),sky,.7)+pL*sun)+gPe93,gPl93); }   // V9.3 : panache de fumée au-dessus du sol
   lit+=vec3(.95,.72,.55)*cloudA*max(0.,lam(ndl+.14)-lam(ndl))*sun*.9;
   if(uType==3) lit+=col*vec3(.25,.55,.95)*max(0.,lam(ndl+.3)-dif)*.35*sun;
@@ -3165,7 +3167,7 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){ gFs=max(n.z,.12);
           oc=max(oc,smoothstep(0.,1.,((hl-g0s)*H-t*tE)/(t*.4+.003))); } gTQ=false;
         rSh=1.-oc*.6*min(1.,det*1.5)*smoothstep(-.15,.05,Lz0)*smoothstep(.6,.45,Lz0); } } }
   if(!(uType==11||uType==1)){ n=nb; shd*=rSh; }
-  float ndl=dot(n,L); float dif=lam(ndl)*shd; float amb=.038;
+  float ndl=dot(n,L); float dif=lam(ndl)*shd; float amb=.072+.052*clamp(uAtmo,0.,1.)*(.5+.5*n0.y);
   vec3 col; vec3 emi=vec3(0.); float a=1.; float land=1.; float spec=0.;
   if(uType==0){ float f=fbm(sp*1.3); float cr=fbm(sp*5.); col=mix(uC2*.45,uC1,smoothstep(.3,.7,f)); col*=.68+.55*cr; col*=.9+.2*sin(dot(sp,vec3(9.,3.,7.))+fbm3(sp*4.)*6.)*(.3+det); col*=.93+.14*sin(s.y*90.+fbm3(sp*3.)*9.)*det;
     float veg=smoothstep(.55,.15,abs(s.y))*clamp(uStage/3.,.12,1.)*smoothstep(.45,.6,f); col=mix(col,vec3(.13,.3,.1)*(.7+fbm3(sp*9.)*.6),veg*.55);
@@ -3448,6 +3450,7 @@ vec4 surface(vec3 n,vec3 s,vec3 L,mat3 RM){ gFs=max(n.z,.12);
   vec3 sun=uSun*uSunI; if(uType==2) col*=.62+.38*pow(max(n0.z,0.),.35); if(uType==10||uType==0||uType==9) dif*=1.+.22*pow(max(L.z,0.),8.)*shd;
   vec3 sky=mix(sun,uAt*1.2,.55*clamp(uAtmo*1.4,0.,1.));
   vec3 lit=col*(amb*mix(vec3(1.),sky,.7)+dif*sun+(1.-shd)*max(ndl,0.)*sky*.06*uAtmo)+emi;
+  lit+=col*mix(vec3(.12,.16,.22),sky,.32)*(.18+.32*uAtmo)*(1.-smoothstep(.0,.6,dif));
   if(gPl93>.003){ float pL=lam(dot(n0,L)+.08)*mix(1.,shd,.7); lit=mix(lit,gPc93*(amb*mix(vec3(1.),sky,.7)+pL*sun)+gPe93,gPl93); }   // V9.3 : panache de fumée au-dessus du sol
   lit+=vec3(.95,.72,.55)*cloudA*max(0.,lam(ndl+.14)-lam(ndl))*sun*.9;
   if(uType==3) lit+=col*vec3(.25,.55,.95)*max(0.,lam(ndl+.3)-dif)*.35*sun;
@@ -4158,6 +4161,23 @@ const PD_REC_ADV = new URLSearchParams(location.search).get('advanced')==='1';
 const PD_REC_FORCED = new URLSearchParams(location.search).get('safe')==='1';
 let PD_REC_ACTIVE = PD_REC_FORCED, PD_REC_PROBE=0, PD_REC_FAIL=0, PD_REC_LAST=-100, PD_REC_STATE=-1;
 const PD_REC_CACHE=new Map();
+const pdSurfaceCache=new Map(), pdMobileMaterials=new Map();
+let pdMaterialRevision=0;
+function pdKeepMaterial(name,image){
+ if(!PD_TXN.includes(name)&&!PD_GZN.includes(name))return;
+ const c=document.createElement('canvas');c.width=128;c.height=64;
+ const g=c.getContext('2d',{willReadFrequently:true});
+ if(!g)return;
+ g.drawImage(image,0,0,128,64);
+ const pixels=g.getImageData(0,0,128,64).data;
+ pdMobileMaterials.set(name,pixels);
+ if(pdSpriteWorker)pdSpriteWorker.postMessage({name,pixels});
+ pdMaterialRevision++;
+}
+function pdCachePut(cache,key,value,limit){
+ cache.set(key,value);
+ if(cache.size>limit)cache.delete(cache.keys().next().value);
+}
 window.__pdRecovery=()=>({active:PD_REC_ACTIVE,failed:PD_REC_FAIL,checks:PD_REC_PROBE,textures:PDTX.on,atlasSize:PDTX.sz,atlasLayers:PDTX.got||0,atlasFailure:PDTX.failure||null});
 const PD_REC_BODIES = [];
 const PD_REC_CANVAS = document.createElement('canvas');
@@ -4172,36 +4192,127 @@ function pdSafeBody(o){
 }
 // Bounded CPU fallback: deterministic spherical terrain, not the original material shader.
 function pdRecoverySprite(o,r){
- const n=r>100?256:r>28?128:64,seed=Number(o.seed)||0,type=o.type||0,ang=Math.round((o.ang||0)*4)/4;
- const c1=o.c1||[.6,.7,.9],c2=o.c2||c1,l=o.L||[.4,.5,1];
- const key=[n,seed,type,ang,...c1,...c2,...l.map(v=>Math.round(v*3))].join(':');
- if(PD_REC_CACHE.has(key)){const v=PD_REC_CACHE.get(key);PD_REC_CACHE.delete(key);PD_REC_CACHE.set(key,v);return v;}
- const c=document.createElement('canvas');c.width=c.height=n;const g=c.getContext('2d'),im=g.createImageData(n,n),d=im.data;
+ const n=r<9?24:r<22?48:r<55?96:r<110?160:256,seed=Number(o.seed)||0,type=o.type||0;
+ const step=n>=96?24:8, ang=Math.round((o.ang||0)*step)/step;
+ const c1=o.c1||[.6,.7,.9],c2=o.c2||c1,l=o.L||[.4,.5,1],at=o.at||c2;
+ const surfaceKey=[n,seed,type,ang,...c1,...c2,o.clouds||0,pdMaterialRevision].join(':');
+ const key=[surfaceKey,...l.map(v=>Math.round(v*12)),o.atmo,...at].join(':');
+ if(PD_REC_CACHE.has(key))return PD_REC_CACHE.get(key);
  const sat=x=>Math.max(0,Math.min(1,x));
+ let surface=pdSurfaceCache.get(surfaceKey);
+ if(!surface){
+ surface=new Uint8ClampedArray(n*n*8);
+ const variants=['s1_moon','s15_canyon','s13_mercury','s14_basalt'];
+ const volcanic=['s2_lava','s17_sulfur','s19_obsidian','s18_lavariver'];
+ const variant=Math.floor((seed*13.17%1+1)%1*4);
+ const layers=['s0_terrain','s10_forest','gz_'+variant,'s3_ice',volcanic[variant],'s6_crystal','s6_crystal','s7_clouds','s8_sun','s5_metal',variants[variant],'s10_forest'];
+ const material=pdMobileMaterials.get(layers[type]);
+ const cos=Math.cos(ang),sin=Math.sin(ang);
  const h=(x,y,z)=>{let v=Math.imul(x,374761393)^Math.imul(y,668265263)^Math.imul(z,1274126177)^Math.floor(seed*9137);v=Math.imul(v^(v>>>13),1274126177);return ((v^(v>>>16))>>>0)/4294967295;};
  const noise=(x,y,z)=>{const ix=Math.floor(x),iy=Math.floor(y),iz=Math.floor(z),a=x-ix,b=y-iy,c=z-iz,u=a*a*(3-2*a),v=b*b*(3-2*b),w=c*c*(3-2*c);let q=0;for(let i=0;i<2;i++)for(let j=0;j<2;j++)for(let k=0;k<2;k++)q+=h(ix+i,iy+j,iz+k)*(i?u:1-u)*(j?v:1-v)*(k?w:1-w);return q;};
  const fb=(x,y,z)=>.53*noise(x*3,y*3,z*3)+.27*noise(x*7,y*7,z*7)+.13*noise(x*16,y*16,z*16)+.07*noise(x*34,y*34,z*34);
- const ll=Math.hypot(...l)||1;
+
  // Screen-space terrain slopes reuse the previous samples without extra noise evaluations.
  const heights=new Float32Array(n).fill(NaN);
  for(let y=0;y<n;y++)for(let x=0;x<n;x++){
  const nx=(x+.5)/n*2-1,ny=1-(y+.5)/n*2,rr=nx*nx+ny*ny;if(rr>=1){heights[x]=NaN;continue;}
- const nz=Math.sqrt(1-rr),sx=nx*Math.cos(ang)+nz*Math.sin(ang),sz=nz*Math.cos(ang)-nx*Math.sin(ang),f=fb(sx,ny,sz),fine=noise(sx*70,ny*70,sz*70);
+ const nz=Math.sqrt(1-rr),sx=nx*cos+nz*sin,sz=nz*cos-nx*sin,f=fb(sx,ny,sz),fine=noise(sx*70,ny*70,sz*70);
  let mix=sat((f-.25)*2),base=c1.map((v,i)=>v*(1-mix)+c2[i]*mix);
- if(type===11||type===1){const land=f>.51&&type!==1;const polar=Math.abs(ny)>.83;const water=[.025,.15,.32];const earth=polar?[.79,.88,.94]:[.16+f*.22,.26+f*.25,.09+f*.13];base=land?earth:water;const cloud=fb(sx+4,ny+3,sz-2);if(cloud>.59)base=base.map(v=>v*.62+.38);}
- else if(type===2){const band=.5+.5*Math.sin(ny*37+f*8);base=c1.map((v,i)=>v*(.25+.75*band)+c2[i]*(.75-.75*band));}
- else if(type===4){const crack=1-Math.abs(f-.5)*15;if(crack>.65)base=[.95,.16+.35*crack,.035];else base=base.map(v=>v*.46);}
- else if(type===3){base=base.map(v=>v*.45+.45+fine*.08);}
- const height=type===1||type===2||type===8?0:type===11?Math.max(0,f-.51):f;
+ let wet=0,emission=0;
+ const earth=type===11||type===1,sea=type===1?.58:.51,land=earth&&f>sea;
+ if(earth){
+  wet=land?0:1;
+  const depth=sat((sea-f)*14),mountain=sat((f-sea-.06)*8),ice=sat((Math.abs(ny)+mountain*.23-.77)*8);
+  base=land?[.21+mountain*.29,.29+f*.1+mountain*.08,.12+mountain*.23]:
+   [.035+.06*(1-depth),.14+.24*(1-depth),.24+.19*(1-depth)];
+  base=base.map((v,i)=>v*(1-ice)+[.79,.85,.87][i]*ice);
+ }else if(type===2){
+  const band=.5+.5*Math.sin(ny*32+(fb(sx+1,ny,sz)-.5)*12);
+  base=c1.map((v,i)=>v*(.25+.55*band)+c2[i]*(.75-.55*band));
+ }else if(type===4){
+  emission=sat(1-Math.abs(f-.5)*43);base=base.map(v=>v*.34+.055);
+ }else if(type===3){base=base.map(v=>v*.48+.35+fine*.09);}
+ let grain=fine;
+ if(material&&(!earth||land)){
+  const u=(Math.atan2(sz,sx)/(2*Math.PI)+.5+seed*.13)%1,v=.5-Math.asin(ny)/Math.PI;
+  const at=4*((Math.floor(v*64)%64)*128+(Math.floor((u+1)*128)%128));
+  const m=[material[at]/255,material[at+1]/255,material[at+2]/255];
+  grain=.3*m[0]+.59*m[1]+.11*m[2];
+  base=base.map((v,i)=>v*(.62+grain*.65)+m[i]*(earth?.07:type===2?.16:.23));
+ }
+ if(earth){
+  const veil=sat((fb(sx+4,ny+3,sz-2)-.51)*6)*sat(o.clouds??.45);
+  base=base.map(v=>v*(1-veil)+.86*veil);wet*=1-veil;
+ }
+ const height=type===2||type===8?0:earth?Math.max(0,f-sea)*(1+grain*.22):f+grain*.045;
  const above=heights[x],left=x?heights[x-1]:NaN;
  heights[x]=height;
  const dx=Number.isFinite(left)?(height-left)*n*.08:0;
  const dy=Number.isFinite(above)?(height-above)*n*.08:0;
  const bx=nx-dx,by=ny+dy,normalLength=Math.hypot(bx,by,nz);
- const diffuse=type===8?.95:.24+.76*Math.max(0,(bx*l[0]+by*l[1]+nz*l[2])/(ll*normalLength)),relief=.72+fine*.24+f*.24,edge=Math.pow(1-nz,3)*(o.atmo||0)*.22;
- const i=(y*n+x)*4;for(let k=0;k<3;k++)d[i+k]=Math.round(sat(base[k]*diffuse*relief+edge*(o.at||c2)[k])*255);d[i+3]=Math.round(255*sat((1-Math.sqrt(rr))*n*.8));
+ const j=(y*n+x)*8;
+ for(let k=0;k<3;k++)surface[j+k]=base[k]*255;
+ surface[j+3]=128+127*bx/normalLength;surface[j+4]=128+127*by/normalLength;surface[j+5]=128+127*nz/normalLength;
+ surface[j+6]=Math.round(wet*15)*16+Math.round(emission*15);
+ surface[j+7]=255*sat((1-Math.sqrt(rr))*n*.8);
  }
- g.putImageData(im,0,0);PD_REC_CACHE.set(key,c);while(PD_REC_CACHE.size>24)PD_REC_CACHE.delete(PD_REC_CACHE.keys().next().value);return c;
+ pdCachePut(pdSurfaceCache,surfaceKey,surface,16);
+ }
+ const c=document.createElement('canvas');c.width=c.height=n;const g=c.getContext('2d'),im=g.createImageData(n,n),d=im.data;
+ const ll=Math.hypot(...l)||1,lx=l[0]/ll,ly=l[1]/ll,lz=l[2]/ll,hl=Math.hypot(lx,ly,lz+1)||1;
+ for(let j=0,i=0;j<surface.length;j+=8,i+=4){
+  if(!surface[j+7])continue;
+  const nx=(surface[j+3]-128)/127,ny=(surface[j+4]-128)/127,nz=(surface[j+5]-128)/127;
+  const sun=Math.max(0,nx*lx+ny*ly+nz*lz),light=type===8?1:Math.sqrt(.14+.86*sun);
+  const packed=surface[j+6],sea=packed>>4,hot=(packed&15)/15;
+  const glint=sea&&sun>0?sea/15*Math.pow(Math.max(0,(nx*lx+ny*ly+nz*(lz+1))/hl),38)*.36:0;
+  const rim=Math.pow(1-Math.max(0,nz),3)*(o.atmo||0)*(.06+.32*sun);
+  d[i]=surface[j]*light+255*(glint+rim*at[0]+hot*.87);
+  d[i+1]=surface[j+1]*light+255*(glint+rim*at[1]+hot*.28);
+  d[i+2]=surface[j+2]*light+255*(glint+rim*at[2]+hot*.045);
+  d[i+3]=surface[j+7];
+ }
+ g.putImageData(im,0,0);pdCachePut(PD_REC_CACHE,key,c,24);return c;
+}
+let pdSpriteWorker=null,pdWorkerBusy=false,pdWorkerUnavailable=false;
+const pdWorkerSprites=new Map();
+function pdMobileSprite(o,r){
+ if(r<22||pdWorkerUnavailable||typeof Worker==='undefined'||typeof OffscreenCanvas==='undefined')return pdRecoverySprite(o,r);
+ const id=o.pd9?.id??[o.kind,o.type,o.seed].join(':');
+ const stamp=[o.seed,o.type,r<55?96:r<110?160:256,Math.round((o.ang||0)*24),...(o.L||[]).map(v=>Math.round(v*12)),o.clouds,o.atmo,o.c1,o.c2,o.at,pdMaterialRevision].join(':');
+ const last=pdWorkerSprites.get(id);
+ if(last?.stamp===stamp)return last.image;
+ try{
+  if(!pdSpriteWorker){
+   const source=`const pdSurfaceCache=new Map(),PD_REC_CACHE=new Map(),pdMobileMaterials=new Map();
+    let pdMaterialRevision=0;
+    const document={createElement:()=>new OffscreenCanvas(1,1)};
+    ${pdCachePut.toString()}
+    ${pdRecoverySprite.toString()}
+    onmessage=e=>{
+     const {name,pixels,id,stamp,body,r}=e.data;
+     if(name){pdMobileMaterials.set(name,pixels);pdMaterialRevision++;return;}
+     const canvas=pdRecoverySprite(body,r);
+     createImageBitmap(canvas).then(image=>postMessage({id,stamp,image},[image])).catch(()=>postMessage({failed:true}));
+    };`;
+   const url=URL.createObjectURL(new Blob([source],{type:'text/javascript'}));
+   try{pdSpriteWorker=new Worker(url);}finally{URL.revokeObjectURL(url);}
+   const stop=()=>{pdWorkerUnavailable=true;pdWorkerBusy=false;pdSpriteWorker?.terminate();pdSpriteWorker=null;for(const v of pdWorkerSprites.values())v.image.close();pdWorkerSprites.clear();};
+   pdSpriteWorker.onerror=stop;
+   pdSpriteWorker.onmessage=({data})=>{
+    pdWorkerBusy=false;if(data.failed){stop();return;}
+    pdWorkerSprites.get(data.id)?.image.close();pdWorkerSprites.delete(data.id);
+    pdWorkerSprites.set(data.id,data);
+    if(pdWorkerSprites.size>20){const k=pdWorkerSprites.keys().next().value;pdWorkerSprites.get(k).image.close();pdWorkerSprites.delete(k);}
+   };
+   for(const [name,pixels] of pdMobileMaterials)pdSpriteWorker.postMessage({name,pixels});
+  }
+  if(!pdWorkerBusy){
+   const {seed,type,c1,c2,at,atmo,ang,L,clouds}=o;
+   pdSpriteWorker.postMessage({id,stamp,body:{seed,type,c1,c2,at,atmo,ang,L,clouds},r});pdWorkerBusy=true;
+  }
+ }catch(_){pdWorkerUnavailable=true;pdWorkerBusy=false;}
+ return last?.image||pdRecoverySprite(o,8);
 }
 function pdRecoveryPaint(){
  const g=PD_REC_CTX;if(!g)return;
@@ -4219,8 +4330,15 @@ function pdRecoveryPaint(){
  g.save();g.globalAlpha=alpha;
  const l=o.L||[.4,.5,1],lx=Number.isFinite(l[0])?l[0]:.4,ly=Number.isFinite(l[1])?l[1]:.5;
  const c1=o.c1||[.6,.7,.9],c2=o.c2||c1;
- g.drawImage(pdRecoverySprite(o,r),x-r,y-r,r*2,r*2);
- if(o.rk&&r>4){g.strokeStyle=col(o.rc||c1,.85);g.lineWidth=Math.max(1,r*.09);g.beginPath();g.ellipse(x,y,r*(o.rk[1]||1.7),r*.44,o.roll||0,0,Math.PI*2);g.stroke();}
+ const ring=o.rk&&r>4;
+ const ringArc=(start,end)=>{
+  g.strokeStyle=col(o.rc||c1,.82);g.lineWidth=Math.max(1,r*.075);
+  const radius=r*o.rk[1], tilt=Math.max(.06,Math.min(1,o.ringS??.38));
+  g.beginPath();g.ellipse(x,y,radius,radius*tilt,o.roll||0,start,end);g.stroke();
+ };
+ if(ring)ringArc(Math.PI,Math.PI*2);
+ g.drawImage(pdMobileSprite(o,r),x-r,y-r,r*2,r*2);
+ if(ring)ringArc(0,Math.PI);
  g.restore();
  }
  }catch(e){console.warn('[PlaneteDot] recovery paint',e);g.globalAlpha=1;}
@@ -4229,7 +4347,7 @@ function pdRecoveryPaint(){
 // The opt-in mobile pass uses the original environment shader, specialized for
 // one planet family. Its saved territories, palette and climate stay in the
 // same object-space coordinates in orbit and inside the V10 compositor.
-const PD_ENV_ENABLED=new URLSearchParams(location.search).get('environment')==='1';
+const PD_ENV_ENABLED=new URLSearchParams(location.search).get('environment')!=='0';
 const pdEnvironmentPrograms=new Map();
 let pdEnvironmentPending=null, pdEnvironmentSources=null, pdEnvironmentCompositor=null, pdEnvironmentLoading=false;
 const pdParallelCompile=PD_ENV_ENABLED?gl.getExtension('KHR_parallel_shader_compile'):null;
