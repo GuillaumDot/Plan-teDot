@@ -71,3 +71,6 @@ Normales animées de l'eau liquide, reflets modulés, dérive des nuages et band
 
 ## Relais ChatGPT — V10 — premiers volumes urbains
 Module cities.mjs : géométrie déterministe en repère tangent sur les sites Natural World, exclusion eau/glace via carte rendue, budget 144 bâtiments, shader jour/nuit et libération des buffers. Rendu aux tiers 2/3, test CPU et test WebGL. Les ombres fab6305 ont passé CPU/WebGL; océans a410855 CPU réussi, WebGL en cours au début du chantier. Les volumes ne sont pas encore les modèles Blender; aucune route géométrique ni croissance intégrée. Aucun changement main ni Supabase, CI et iPhone à confirmer.
+
+## Relais ChatGPT — V10 — réseaux de civilisation
+Rubans géométriques des routes Natural World, ponts schématiques sur les cellules de franchissement, quais orientés vers l'eau détectée, budget 768 segments, même buffer urbain et même draw call. Tests CPU de déterminisme et budget, WebGL étendu. Océans a410855 CPU/WebGL verts; villes b92882f CPU vert, WebGL en cours au début de cette édition. Aucun changement main/Supabase. Modèles Blender, zones industrielles et croissance restent à faire; CI et iPhone à confirmer.

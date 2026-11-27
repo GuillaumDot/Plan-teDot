@@ -31,3 +31,6 @@ Pentes analytiques de trois trains d'ondes, projetées sur le plan tangent sans 
 
 ## Géométrie urbaine initiale
 Sites Natural World terrestres uniquement, neuf volumes simples par ville (144 maximum), repère tangent local, exclusion des cellules d'eau et glace, hauteur déterministe. Un seul tampon et appel de dessin, niveaux 2/3 uniquement, éclairage jour/nuit. Les volumes sont des proxies à échelle visuelle, pas des modèles Blender ni une simulation de croissance; routes, ports, ponts et détails architecturaux restent à intégrer. Repli sur les points lumineux si le programme ou le tampon échoue.
+
+## Infrastructures initiales
+Les chemins de V2.2 sont convertis en rubans sur la sphère, dans le même tampon et appel de dessin que les bâtiments. Les segments partagés sont dédupliqués, budget 768; les segments adjacents à une cellule de pont sont élargis et surélevés. Les ports sont des quais schématiques orientés vers une cellule d'eau voisine quand elle est détectée. Aucun nouveau tracé ni changement de géographie. Il s'agit de proxies orbitaux, pas de ponts/ports détaillés, ni d'industries ou trafic animés. Validation iPhone nécessaire.

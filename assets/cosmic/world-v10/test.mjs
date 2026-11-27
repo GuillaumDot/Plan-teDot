@@ -67,3 +67,12 @@ assert.deepEqual(cityMesh,cityGeometry(cityWorld));assert.ok(cityMesh.vertices.e
 assert.equal(cityGeometry({...cityWorld,type:'gas'}).buildings,0);
 const ocean=land.map(a=>a.map((x,i)=>i%4===1?255:0));assert.equal(cityGeometry({...cityWorld,terrain:ocean}).buildings,0);
 console.log('Deterministic city geometry and land exclusion verified');
+
+import {infrastructureGeometry,ROAD_SEGMENT_LIMIT} from './infrastructure.mjs';
+const networkWorld={...cityWorld,natural:{grid:8,cities:[],roads:[{cells:[0,1,2]},{cells:[2,1]}],bridges:[{cell:1}]}};
+const network=infrastructureGeometry(networkWorld);
+assert.equal(network.roads,2);assert.equal(network.bridges,2);assert.equal(network.vertices.length,84);assert.ok(network.vertices.every(Number.isFinite));
+assert.deepEqual(network,infrastructureGeometry(networkWorld));
+assert.equal(infrastructureGeometry({...networkWorld,type:'gas'}).roads,0);
+const realNetwork=infrastructureGeometry(bakeWorld('earth',7,64));assert.ok(realNetwork.roads>0&&realNetwork.roads<=ROAD_SEGMENT_LIMIT);
+console.log('Natural infrastructure geometry verified');

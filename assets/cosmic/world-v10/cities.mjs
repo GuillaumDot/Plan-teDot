@@ -1,4 +1,5 @@
 import {cellOf} from '../natural-world-v22/world.mjs';
+import {infrastructureGeometry} from './infrastructure.mjs';
 import {assertTextureGL} from './texture-guard.mjs';
 const dot=(a,b)=>a.reduce((s,x,i)=>s+x*b[i],0);
 const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
@@ -31,11 +32,13 @@ export function cityGeometry(world){
  return {vertices:new Float32Array(vertices),buildings};
 }
 export function uploadCities(gl,world){
- const {vertices,buildings}=cityGeometry(world);if(!buildings)return null;
+ const city=cityGeometry(world),infra=infrastructureGeometry(world),{buildings}=city;
+ if(!buildings&&!infra.vertices.length)return null;
+ const vertices=new Float32Array(city.vertices.length+infra.vertices.length);vertices.set(city.vertices);vertices.set(infra.vertices,city.vertices.length);
  const old=gl.getParameter(gl.ARRAY_BUFFER_BINDING);let buffer;
  try{buffer=gl.createBuffer();if(!buffer)throw Error('City allocation failed');gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);assertTextureGL(gl,'City mesh');}
  catch(e){if(buffer)gl.deleteBuffer(buffer);throw e;}finally{gl.bindBuffer(gl.ARRAY_BUFFER,old);}
- return {buffer,count:vertices.length/7,buildings,dispose(){if(buffer){gl.deleteBuffer(buffer);buffer=null;}}};
+ return {buffer,count:vertices.length/7,buildings,roads:infra.roads,bridges:infra.bridges,ports:infra.ports,dispose(){if(buffer){gl.deleteBuffer(buffer);buffer=null;}}};
 }
 export function createCityProgram(gl){
  const shaders=[];let program;
