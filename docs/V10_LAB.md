@@ -11,3 +11,5 @@ Acceptance: verify real app startup, user worlds, music and lock-screen playback
 Alpha.3 added a pixel visibility watchdog and reaction anchors. Alpha.4 resolves multisample framebuffer probes via a reusable 2x2 single-sample target, restores framebuffer bindings, and separates probe failure from actual draw errors. CI includes a real MSAA regression; physical iPhone validation is still required.
 
 Alpha.4 MSAA test failed on both browsers (10/11 passed each). Alpha.5 corrects the resolve rectangle to identical source/destination coordinates using the existing postprocessing framebuffer, without additional GPU memory. New run required.
+
+Alpha.5 confirmed green on Chromium and WebKit (run 45948105599). The next CI gate exercises the actual application in an offline iPhone 13 viewport: boot, enter the built-in album system, land on the planet, and sample the final displayed frame. Its instrumentation exists only inside the test. It does not validate real accounts, audio assets or physical iPhone performance.
