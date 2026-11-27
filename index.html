@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#010208">
 <title>planèteDot · ton univers musical</title>
-<meta name="pd-version" content="9.6">
+<meta name="pd-version" content="9.6.1">
 <meta name="description" content="PlanèteDot · l’album de GuillaumDot et ton univers musical en 3D : chaque planète est un morceau.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PlanèteDot">
@@ -3737,7 +3737,23 @@ function pdFrameW(x, y){ pdFrame(x, y); const V = PDB_VW; return [[V[0], V[1], V
 /* V9 · U replié dans le repère de vue de l'astre : chaque colonne c (axe de vue exprimé dans le monde) devient U·c */
 const PDB_VQ = new Float32Array(9), PDBR = {k: 1, tx: 0};   // V9 : force des souffles, texture Figma des souffles prête (unité 14)
 function pdVWq(q, V){ for (let c = 0; c < 9; c += 3){ const r = qRot(q, [V[c], V[c + 1], V[c + 2]]); PDB_VQ[c] = r[0]; PDB_VQ[c + 1] = r[1]; PDB_VQ[c + 2] = r[2]; } return PDB_VQ; }
+// V9.6.1 emergency independent sphere renderer, no texture samplers.
+const PD_SAFE_BODY = pdTry(()=>compile(`#version 300 es
+in vec2 a; uniform vec2 uRes,uC; uniform float uR; out vec2 v;
+void main(){v=a; vec2 p=(uC+a*uR)/uRes*2.-1.;gl_Position=vec4(p.x,-p.y,0.,1.);}`,`#version 300 es
+precision highp float; in vec2 v; out vec4 o; uniform vec3 c1,c2,L; uniform float alpha,seed;
+void main(){float r=dot(v,v);if(r>1.)discard;vec3 n=vec3(v.x,-v.y,sqrt(max(0.,1.-r)));float f=sin(n.x*13.+sin(n.y*17.+seed)*2.)*sin(n.z*11.+n.y*9.);vec3 c=mix(c1,c2,.5+.35*f);float l=.24+.76*max(0.,dot(n,normalize(L+vec3(.001))));float a=alpha*(1.-smoothstep(.96,1.,r));o=vec4(c*l*a,a);}`),'safe sphere');
+function pdSafeBody(o){
+ if(!PD_SAFE_BODY || ![0,1,6].includes(o.kind) || !Number.isFinite(o.r) || o.r<=0)return false;
+ if(new URLSearchParams(location.search).get('advanced')==='1')return false;
+ const p=PD_SAFE_BODY, u=p.u;
+ gl.useProgram(p.p);gl.bindVertexArray(quad);
+ gl.uniform2f(u.uRes,W,H);gl.uniform2f(u.uC,o.x,o.y);gl.uniform1f(u.uR,o.r);
+ gl.uniform3fv(u.c1,o.c1||[.7,.7,.8]);gl.uniform3fv(u.c2,o.c2||o.c1||[.5,.5,.6]);gl.uniform3fv(u.L,o.kind===1?[0,0,1]:(o.L||[.3,.4,1]));gl.uniform1f(u.alpha,o.alpha??1);gl.uniform1f(u.seed,o.seed||0);
+ gl.drawArrays(gl.TRIANGLE_STRIP,0,4);useSP();return true;
+}
 function drawBody(o){
+  if(pdSafeBody(o))return;
   const u = SP.u;
   if (o.kind === 2){ if (!(o.alpha > .004) || !(o.r > .3)) return; if (GB.on){ glowAdd(o); return; } gl.uniform1i(u.uKind, 2); gl.uniform2f(u.uC, o.x, o.y); gl.uniform1f(u.uR, o.r); gl.uniform1f(u.uQ, o.q); gl.uniform1f(u.uAsp, 1); gl.uniform1f(u.uIrr, 0);
     gl.uniform3fv(u.uC1, o.c1); gl.uniform1f(u.uAtmo, o.atmo ?? 1); gl.uniform1f(u.uAlpha, o.alpha ?? 1); gl.uniform1f(u.uHi, o.hi || 0); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); return; }
