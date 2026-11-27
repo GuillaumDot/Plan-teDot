@@ -29,11 +29,13 @@ WorldMaterial worldMaterial(int family, vec4 terrain, vec4 climate) {
  }
  return m;
 }
-vec3 shadeWorld(WorldMaterial m,vec3 N,vec3 L,vec3 V,float visibility){
+vec3 shadeWorld(WorldMaterial m,vec3 N,vec3 L,vec3 V,float visibility,vec3 sunRadiance,float geometricNL){
  float nl=max(dot(N,L),0.);vec3 halfVector=L+V;vec3 H=halfVector/max(length(halfVector),.0001);
  float nv=max(dot(N,V),0.);vec3 f0=mix(vec3(.04),m.color,m.metal);
  vec3 F=f0+(1.-f0)*pow(1.-max(dot(H,V),0.),5.);
  float spec=pow(max(dot(N,H),0.),mix(96.,4.,m.roughness));
- return m.color*(1.-m.metal)*(.025+nl*visibility*(1.-F))+F*spec*nl*visibility+m.emission;
+ float day=smoothstep(-.08,.12,geometricNL);
+ vec3 direct=(m.color*(1.-m.metal)*(1.-F)+F*spec)*nl*visibility*day*sunRadiance;
+ return m.color*(.025+.035*m.metal)+direct+m.emission;
 }
 // Prototype direct lighting, not a complete PBR/IBL pipeline.

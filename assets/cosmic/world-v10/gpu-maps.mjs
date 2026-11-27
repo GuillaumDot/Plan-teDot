@@ -12,13 +12,16 @@ export function uploadWorldMaps(gl,world){
  for(const faces of [world.terrain,world.climate]){
  const t=gl.createTexture();if(!t)throw new Error('Texture allocation failed');textures.push(t);gl.bindTexture(gl.TEXTURE_CUBE_MAP,t);
  for(let i=0;i<6;i++)gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X+i,0,gl.RGBA,size,size,0,gl.RGBA,gl.UNSIGNED_BYTE,faces[i]);
- for(const p of [gl.TEXTURE_MIN_FILTER,gl.TEXTURE_MAG_FILTER])gl.texParameteri(gl.TEXTURE_CUBE_MAP,p,gl.LINEAR);
+ const mip=(size&(size-1))===0;
+ if(mip)gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+ gl.texParameteri(gl.TEXTURE_CUBE_MAP,gl.TEXTURE_MIN_FILTER,mip?gl.LINEAR_MIPMAP_LINEAR:gl.LINEAR);
+ gl.texParameteri(gl.TEXTURE_CUBE_MAP,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
  for(const p of [gl.TEXTURE_WRAP_S,gl.TEXTURE_WRAP_T])gl.texParameteri(gl.TEXTURE_CUBE_MAP,p,gl.CLAMP_TO_EDGE);
  assertTextureGL(gl,'World cube map upload');
  }
  }catch(e){textures.forEach(t=>gl.deleteTexture(t));throw e;}finally{
  gl.bindTexture(gl.TEXTURE_CUBE_MAP,previous);gl.pixelStorei(gl.UNPACK_ALIGNMENT,alignment);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,flip);gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,premultiply);gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL,colorspace);
  }
- let disposed=false;return {terrain:textures[0],climate:textures[1],bytes:world.bytes,dispose(){if(!disposed){disposed=true;textures.forEach(t=>gl.deleteTexture(t));}}};
+ let disposed=false;return {terrain:textures[0],climate:textures[1],bytes:(size&(size-1))===0?Math.ceil(world.bytes*4/3):world.bytes,dispose(){if(!disposed){disposed=true;textures.forEach(t=>gl.deleteTexture(t));}}};
 }
 // Renderer must check GL errors and available sampler slots, and recreate after context restoration.

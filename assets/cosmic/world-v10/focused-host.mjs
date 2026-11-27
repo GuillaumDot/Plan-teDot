@@ -39,7 +39,7 @@ export function createFocusedHost(gl,{enabled=false,makeAdapter=createWorldAdapt
    const key=JSON.stringify([d.type,d.seed,d.generatorVersion]);
    if(requested!==key)request(d,key);
    if(readyKey!==key||!adapter?.ready||!compositor||adapter.detailReady===false)return false;
-   try{const ok=compositor.draw(adapter,body,sceneFrame({basis,light,audio,time,delta,tier,growth}),width,height);if(!ok)fail(Error('V10 composition failed'));return ok;}
+   try{const ok=compositor.draw(adapter,body,sceneFrame({basis,light,audio,time,delta,tier,growth,sunIntensity:body.sunI??1,sunColor:body.sun??[1,1,1]}),width,height);if(!ok)fail(Error('V10 composition failed'));return ok;}
    catch(e){fail(e);return false;}
   },
   leave(){if(requested!==null)stop();},

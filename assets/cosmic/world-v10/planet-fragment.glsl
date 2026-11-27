@@ -10,6 +10,8 @@ uniform float uDetailAtlas;
 uniform float uDetailInset;
 uniform int uFamily;
 uniform vec3 uLight;
+uniform float uSunIntensity;
+uniform vec3 uSunColor;
 uniform vec3 uEye;
 uniform vec3 uAtmosphereTint;
 uniform float uAtmosphereDensity;
@@ -108,7 +110,7 @@ void main(){
   float shadow=uShadowQuality>.5?worldTerrainShadow(uTerrain,n,l,terrain.r,uRelief,uTexel):worldTerrainShadowLite(uTerrain,n,l,terrain.r,uRelief,uTexel);
   visibility=mix(1.,shadow,land);
  }
- vec3 color=shadeWorld(m,normal,l,v,visibility);
+ vec3 color=shadeWorld(m,normal,l,v,visibility,clamp(uSunColor,vec3(0.),vec3(2.))*uSunIntensity, dot(n,l));
  if(uFamily==0||uFamily==1){
  float a=uTime*(.015+.008*cos(n.y*6.));
  vec3 q=rotateAtmosphere(n,a);

@@ -9,9 +9,9 @@ vec3 worldReliefNormal(samplerCube terrainMap,vec3 direction,float strength,floa
  return normalize(n-strength*(dx*t+dy*b)/(2.*e));
 }
 vec3 worldAtmosphere(vec3 N,vec3 V,vec3 L,vec3 tint,float density){
- float rim=pow(1.-clamp(dot(N,V),0.,1.),3.);
- float day=smoothstep(-.25,.55,dot(N,L));
- return tint*rim*clamp(density,0.,1.)*(.025+.975*day);
+ float rim=pow(1.-clamp(dot(N,V),0.,1.),2.4);
+ float day=smoothstep(-.22,.42,dot(N,L));
+ return tint*rim*clamp(density,0.,1.)*(.045+1.35*day);
 }
 float worldCloudShadow(samplerCube climateMap,vec3 direction,vec3 light,float density){
  float cloud=textureCube(climateMap,normalize(direction+light*.025)).b;
