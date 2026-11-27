@@ -119,3 +119,6 @@ Le journal CI 140500487670 identifie précisément le mot réservé GLSL 300 `ac
 
 ## Relais ChatGPT — V10 — contrôleur focus
 focused-host.mjs prépare le branchement de renderPlanet avec conversion explicite de types, generatorVersion 10 uniquement, gestion du cycle de vie et repli. Tests CPU ajoutés. Correctif cdf2bfa CPU vert, WebGL en cours au début du chantier; pont 1ed6c0c WebGL rouge pour le même mot réservé corrigé. Aucun changement index/main/Supabase/audio. Attendre CI WebGL2 vert avant branchement; iPhone non validé.
+
+## Relais ChatGPT — V10 — correction sentinelles WebGL2
+Correctif cdf2bfa : compilation et rendu WebGL2 visibles, assertion rouge sur index et erreur 1282 (job 140501658186). Test corrigé avec deux buffers indépendants et contrôle GL avant dessin. Contrôleur focus 325ab40 ajouté. Nouveau CI requis; composition non encore validée. Main/index/Supabase/audio inchangés.

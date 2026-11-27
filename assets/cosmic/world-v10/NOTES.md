@@ -79,3 +79,6 @@ Le journal du job 140500487670 (commit 9b50752) confirme que `active` est réser
 
 ## Contrôleur de scène principale
 focused-host.mjs relie la typologie numérique historique aux familles V10 seulement si generatorVersion vaut explicitement 10. Étoiles, cristallines et mystiques restent historiques (pas de correspondance validée). Initialisation paresseuse, déduplication des sélections, annulation lors de la sortie, composition au rythme de l'appelant et repli permanent de la session sur erreur. Aucun RAF, compte, audio ou sauvegarde. Tests de contrat avec doublures; le module n'est pas encore appelé depuis index.html. Le raccordement doit conserver l'ordre drawBody, les labels et GLR/POST, et attendre validation WebGL2.
+
+## Correctif du test WebGL2 partagé
+Le job 140501658186 confirme que le shader compile, la planète et les modèles sont visibles, les états sentinelles sauf index restaurés, mais GL_INVALID_OPERATION 1282. Le test liait le même objet tampon aux cibles ARRAY_BUFFER et ELEMENT_ARRAY_BUFFER, interdit en WebGL2. Deux tampons distincts et contrôle d'erreur immédiatement après la préparation du test. Le nouveau résultat doit confirmer l'hypothèse avant toute intégration index.

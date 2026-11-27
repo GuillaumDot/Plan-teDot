@@ -123,13 +123,13 @@ try{
  const renderer=await createPlanetRenderer(gl),size=8;
  const terrain=Array.from({length:6},()=>new Uint8Array(size*size*4)),climate=terrain.map(a=>a.slice());
  const planet=renderer.upload({type:'earth',size,terrain,climate,bytes:48*size*size,natural:{cities:[{cell:1,dir:[0,0,-1]}]}});
- const vao=gl.createVertexArray(),buf=gl.createBuffer(),tex=gl.createTexture(),sampler=gl.createSampler();
+ const vao=gl.createVertexArray(),buf=gl.createBuffer(),indexBuf=gl.createBuffer(),tex=gl.createTexture(),sampler=gl.createSampler();
  const mvp=new Float32Array([.8,0,0,0,0,.8,0,0,0,0,.5,0,0,0,0,1]);
- try{await planet.loadLandmarks();gl.bindVertexArray(vao);gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,buf);gl.activeTexture(gl.TEXTURE2);gl.bindTexture(gl.TEXTURE_2D,tex);gl.bindSampler(2,sampler);
+ try{await planet.loadLandmarks();gl.bindVertexArray(vao);gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,indexBuf);gl.activeTexture(gl.TEXTURE2);gl.bindTexture(gl.TEXTURE_2D,tex);gl.bindSampler(2,sampler);if(gl.getError()!==gl.NO_ERROR)throw Error('Invalid WebGL2 sentinel setup');
  gl.viewport(0,0,128,128);gl.enable(gl.DEPTH_TEST);renderer.draw(planet,{mvp,tier:2,eye:[0,0,-3],light:[0,0,-1]});
  const pixel=new Uint8Array(4);gl.readPixels(64,64,1,1,gl.RGBA,gl.UNSIGNED_BYTE,pixel);
- return {visible:pixel[0]+pixel[1]+pixel[2]>0,vao:gl.getParameter(gl.VERTEX_ARRAY_BINDING)===vao,array:gl.getParameter(gl.ARRAY_BUFFER_BINDING)===buf,index:gl.getParameter(gl.ELEMENT_ARRAY_BUFFER_BINDING)===buf,active:gl.getParameter(gl.ACTIVE_TEXTURE)===gl.TEXTURE2,texture:gl.getParameter(gl.TEXTURE_BINDING_2D)===tex,sampler:gl.getParameter(gl.SAMPLER_BINDING)===sampler,city:!!planet.cityMesh,landmarks:!!planet.landmarks,error:gl.getError()};
- }finally{planet.dispose();renderer.dispose();gl.deleteVertexArray(vao);gl.deleteBuffer(buf);gl.deleteTexture(tex);gl.deleteSampler(sampler);}
+ return {visible:pixel[0]+pixel[1]+pixel[2]>0,vao:gl.getParameter(gl.VERTEX_ARRAY_BINDING)===vao,array:gl.getParameter(gl.ARRAY_BUFFER_BINDING)===buf,index:gl.getParameter(gl.ELEMENT_ARRAY_BUFFER_BINDING)===indexBuf,active:gl.getParameter(gl.ACTIVE_TEXTURE)===gl.TEXTURE2,texture:gl.getParameter(gl.TEXTURE_BINDING_2D)===tex,sampler:gl.getParameter(gl.SAMPLER_BINDING)===sampler,city:!!planet.cityMesh,landmarks:!!planet.landmarks,error:gl.getError()};
+ }finally{planet.dispose();renderer.dispose();gl.deleteVertexArray(vao);gl.deleteBuffer(buf);gl.deleteBuffer(indexBuf);gl.deleteTexture(tex);gl.deleteSampler(sampler);}
  });
  assert.deepEqual(sharedCheck,{visible:true,vao:true,array:true,index:true,active:true,texture:true,sampler:true,city:true,landmarks:true,error:0});
  const composition=await page.evaluate(async()=>{
