@@ -17,7 +17,7 @@ window.__pd10Lab={
 window.__pd10Status=()=>`);
 const observed=instrumented.replace('POST.end(); pdRecoveryPaint();','POST.end(); pdRecoveryPaint(); if(window.__pd10Lab&&mode==="planet"&&curP&&curP.r>30&&mapA>=.98&&Math.abs(cam.yaw-cam.g.yaw)<.06&&window.__pd10Lab.capture){window.__pd10Lab.captureState=window.__pd10Lab.state();window.__pd10Lab.pixels=window.__pd10Lab.sample();window.__pd10Lab.capture=false;}');
 assert.notEqual(observed,instrumented);
-test('complete application boots, enters album system and renders a planet on mobile viewport',{timeout:360000},async()=>{
+for(const preview of [false,true]) test('mobile album surface with '+(preview?'Natural World and dual identity':'original V9 materials'),{timeout:360000},async()=>{
  const browser=process.env.PD_BROWSER==='webkit'?await webkit.launch({headless:true}):await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
  try{
  const device=devices['iPhone 13'];
@@ -26,9 +26,10 @@ test('complete application boots, enters album system and renders a planet on mo
  page.on('pageerror',e=>errors.push(e.message));
  page.on('console',msg=>{if(msg.type()==='warning'||msg.type()==='error')console.log('browser',msg.text().slice(0,2000));});
  let basaltNormalRequests=0;
- await page.route('**/*',async route=>{const u=new URL(route.request().url());if(u.hostname!=='pd10.test')return route.abort();if(u.pathname==='/index.html')return route.fulfill({contentType:'text/html',body:observed});if(/^\/textures(?:84-(?:compact|mobile|hd)|9-(?:mobile|hd))\.bin$/.test(u.pathname))return route.fulfill({path:'.'+u.pathname,contentType:'application/octet-stream'});
+ await page.route('**/*',async route=>{const u=new URL(route.request().url());if(u.hostname!=='pd10.test')return route.abort();if(u.pathname==='/index.html')return route.fulfill({contentType:'text/html',body:observed});if(u.pathname==='/assets/cosmic/natural-world-v22/album.rgba')return route.fulfill({path:'.'+u.pathname,contentType:'application/octet-stream'});
+ if(/^\/textures(?:84-(?:compact|mobile|hd)|9-(?:mobile|hd))\.bin$/.test(u.pathname))return route.fulfill({path:'.'+u.pathname,contentType:'application/octet-stream'});
  if(u.pathname==='/assets/blender/pbr-512/basalt-normal.png'&&++basaltNormalRequests===1)return route.abort();if(/^\/assets\/blender\/pbr-512\/[a-z]+-(normal|albedo)\.png$/.test(u.pathname))return route.fulfill({path:'.'+u.pathname,contentType:'image/png'});return route.fulfill({status:404,body:''});});
- await page.goto('http://pd10.test/index.html',{waitUntil:'domcontentloaded',timeout:60000});
+ await page.goto('http://pd10.test/index.html'+(preview?'?identity=preview':''),{waitUntil:'domcontentloaded',timeout:60000});
  await page.waitForFunction(()=>{try{return window.__pd10Lab?.state().album&&window.__pd10Lab.state().frames>=2;}catch(e){return false;}},{},{timeout:45000});
  await page.evaluate(()=>window.__pd10Lab.enter());
  await page.waitForFunction(()=>window.__pd10Lab.state().mode==='system'&&window.__pd10Lab.state().frames>3,{},{timeout:25000});
@@ -41,6 +42,8 @@ test('complete application boots, enters album system and renders a planet on mo
  assert.equal(basaltNormalRequests,2,'recover interrupted local normal map');
  assert.deepEqual(errors,[]);
  assert.equal(result.state.renderer.renderer,'v9');
+ assert.equal(result.state.renderer.albumWorld,preview);
+ assert.equal(result.state.renderer.worldDraws>0,preview);
  assert.equal(result.state.renderer.atlasLayers,28);
  assert.equal(result.state.lite,false);assert.equal(result.state.frameErrors,0);
  assert.ok(result.state.renderer.blenderDraws>0,'actual Blender map draw required');assert.ok(result.state.renderer.albedoDraws>0,'actual Blender albedo draw required');assert.equal(result.state.mode,'planet');assert.ok(result.state.planet.r>30);

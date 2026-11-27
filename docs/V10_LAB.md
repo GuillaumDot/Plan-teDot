@@ -23,3 +23,11 @@ Alpha.7 passed both browser suites (run 45949023913). Alpha.8 reintroduces exist
 Alpha.8 passed 26/26 tests on Chromium and WebKit (run 45949611484), with all five normal maps loaded and actual mapped draws. Alpha.9 adds five baked albedo maps after normals, bounded to the existing 512x256 assets, preserving custom planet hues via luminance modulation. The ?perf=1 overlay now includes exact version and loaded map counts. ?albedo=0 disables albedo; ?pbr=0 keeps the procedural fallback. Physical iPhone validation remains required.
 
 Physical iPhone video confirmed alpha.8: visible but noisy Earth material and weak stellar corona. Alpha.9 passed Chromium but WebKit timed out waiting for all maps (run 45950436270). Alpha.10 separates continental-scale terrain from microdetail, smooths clouds and ocean normals, adds geological fractures to rocky worlds and a star corona, and gives slow WebKit integration tests a longer asset-loading window with diagnostics. Physical visual quality still needs owner review.
+
+## V10 rebuilt on V9.8.1
+
+The restoration branch starts at b18fd7f, before the emergency renderers and the V10 alphas. Its default planet and star materials use the V9 shader. The V10 normal-map retry, albedo detail, reaction anchors and textured recovery are carried over. Compact devices use a 256 px derivative of the original 28-layer asset pack. System selection and landing approach the lit hemisphere at a three-quarter angle.
+
+On the public album planet, `?world=1` adds geography baked with the Natural World V2.2 module from the production repository. The material uses elevation, vegetation and accumulated drainage. `?identity=preview` also blends a demonstration palette using the model's transition field. Run `node tools/bake-album-world.mjs` to rebuild the 128 KiB map. The V9 geometry and listener progression remain authoritative. This preview contains no unreleased cover art. The procedural V10 renderer is available with `?renderer=procedural`.
+
+The two browser integration cases exercise both modes, including the original texture pack, camera approach, loaded Blender maps and a displayed album frame. Physical iPhone rendering, screen-lock playback and multi-account behavior require separate validation.
