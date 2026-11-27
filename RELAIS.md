@@ -48,3 +48,7 @@ Prochaines étapes, dans l'ordre : 1) `uGen` et relief génération 1 derrière 
 ## Relais ChatGPT — 27/11/2026, alpha.14
 
 Branche dev/v10-restauration-v9 : retour aux matières et à la caméra V9 par défaut ; essais Blender via pbr=1 et albedo=1, caméra expérimentale via camera=lit. Réinitialisation du secours compact entre systèmes. Tests navigateur et iPhone à valider. Main et Supabase inchangés.
+
+## Relais ChatGPT — alpha.15
+
+Comparaison atlas mobile 512 / compact 256 par paramètre atlas, qualité des effets indépendante. Validation des paquets et détection des erreurs GPU avant activation. Tests complétés, résultats à vérifier. Main et Supabase inchangés.

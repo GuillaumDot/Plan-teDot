@@ -35,3 +35,7 @@ The two browser integration cases exercise both modes, including the original te
 ## Alpha.14 — V9 visual baseline
 
 The normal maps now require `?pbr=1` in the original renderer, and the new albedo maps additionally require `&albedo=1`. The V9 approach camera is restored by default; `?camera=lit` retains the experimental three-quarter view. Entering a new system resets automatic compact fallback so a failure in one system does not downgrade subsequent systems. The compact mobile texture pack remains available, so this is not a pixel-identical V9 rollback. Browser integration scenarios separately test default and opt-in materials. Hardware review and CI are still pending at commit time.
+
+## Alpha.15 — atlas diagnostics and comparison
+
+`?atlas=mobile` selects the original 512 px mobile pack even at low effects quality; `?atlas=compact` selects the 256 px pack. Default selection is unchanged. Validate the pack header, unique names, ranges and resolution before decoding, stop decoding on failure, and check actual WebGL upload/mipmap errors before marking the atlas ready. Errors appear in the existing diagnostics. Added malformed-pack tests and 512 px integration coverage. CI and hardware results not yet verified.

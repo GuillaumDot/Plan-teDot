@@ -92,3 +92,18 @@ test('actual CPU recovery distinguishes all 12 planet materials and caches deter
  for(let i=0;i<30;i++)build({...palette,seed:i,type:0},10);
  assert.ok(cache.size<=24);
 });
+
+
+test('atlas quality selection and malformed pack rejection',()=>{
+ const start=html.indexOf('function pdAtlasFile('),end=html.indexOf('function pdAtlasFail(',start);
+ assert.ok(start>=0&&end>start);
+ const {pdAtlasFile,pdAtlasHeader}=new Function(html.slice(start,end)+';return {pdAtlasFile,pdAtlasHeader};')();
+ assert.equal(pdAtlasFile(0,false,'mobile'),'textures84-mobile.bin');
+ assert.equal(pdAtlasFile(2,true,'compact'),'textures84-compact.bin');
+ assert.equal(pdAtlasFile(0,false,null),'textures84-compact.bin');
+ const pack=(f,sz=512)=>{const hdr=Buffer.from(JSON.stringify({sz,f}));const buf=Buffer.alloc(8+hdr.length+4);buf.write('PDTX');buf.writeUInt32LE(hdr.length,4);hdr.copy(buf,8);return buf.buffer.slice(buf.byteOffset,buf.byteOffset+buf.byteLength);};
+ const names=['a','b'],valid=[{n:'a',o:0,l:2},{n:'b',o:2,l:2}];
+ assert.equal(pdAtlasHeader(pack(valid),names).H.sz,512);
+ for(const f of [[{n:'a',o:0,l:2},{n:'a',o:2,l:2}],[{n:'a',o:0,l:3},{n:'b',o:2,l:2}],[{n:'a',o:0,l:2},{n:'b',o:2,l:9}]])assert.throws(()=>pdAtlasHeader(pack(f),names));
+ assert.throws(()=>pdAtlasHeader(pack(valid,999),names));assert.throws(()=>pdAtlasHeader(new ArrayBuffer(3),names));
+});
