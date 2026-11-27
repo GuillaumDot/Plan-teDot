@@ -3,7 +3,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
 const html=fs.readFileSync('index.html','utf8');
-const match=html.match(/const PD10_SHADER=pdTry\(\(\)=>compile\(("(?:\\.|[^"\\])*"),("(?:\\.|[^"\\])*")\)/);
+const match=html.match(/const PD10_SHADER=PD10_ORIGINAL\?null:pdTry\(\(\)=>compile\(("(?:\\.|[^"\\])*"),("(?:\\.|[^"\\])*")\)/);
 assert.ok(match,'extract the actual shipped shader');
 const vs=JSON.parse(match[1]),frag=JSON.parse(match[2]);
 const detailLine=html.split('\n').find(l=>l.startsWith('function pd10DetailSource('));assert.ok(detailLine);const detailFrag=new Function(detailLine+';return pd10DetailSource;')()(frag);

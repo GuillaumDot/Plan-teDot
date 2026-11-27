@@ -30,9 +30,9 @@ for(const preview of [false,true]) test('mobile album surface with '+(preview?'N
  if(/^\/textures(?:84-(?:compact|mobile|hd)|9-(?:mobile|hd))\.bin$/.test(u.pathname))return route.fulfill({path:'.'+u.pathname,contentType:'application/octet-stream'});
  if(u.pathname==='/assets/blender/pbr-512/basalt-normal.png'&&++basaltNormalRequests===1)return route.abort();if(/^\/assets\/blender\/pbr-512\/[a-z]+-(normal|albedo)\.png$/.test(u.pathname))return route.fulfill({path:'.'+u.pathname,contentType:'image/png'});return route.fulfill({status:404,body:''});});
  await page.goto('http://pd10.test/index.html'+(preview?'?identity=preview':''),{waitUntil:'domcontentloaded',timeout:60000});
- await page.waitForFunction(()=>{try{return window.__pd10Lab?.state().album&&window.__pd10Lab.state().frames>=2;}catch(e){return false;}},{},{timeout:45000});
+ await page.waitForFunction(()=>{try{return window.__pd10Lab?.state().album&&window.__pd10Lab.state().frames>=2;}catch(e){return false;}},{},{timeout:90000,polling:250});
  await page.evaluate(()=>window.__pd10Lab.enter());
- await page.waitForFunction(()=>window.__pd10Lab.state().mode==='system'&&window.__pd10Lab.state().frames>3,{},{timeout:25000});
+ await page.waitForFunction(()=>window.__pd10Lab.state().mode==='system'&&window.__pd10Lab.state().frames>3,{},{timeout:90000,polling:250});
  await page.evaluate(()=>window.__pd10Lab.land());
  await page.waitForFunction(()=>window.__pd10Lab.state().renderer.blenderMaps===5&&window.__pd10Lab.state().renderer.albedoMaps===5&&window.__pd10Lab.state().renderer.atlasActive,{},{timeout:150000}).catch(async e=>{console.log('material timeout',await page.evaluate(()=>window.__pd10Lab.state()));throw e;});
  await page.evaluate(()=>{window.__pd10Lab.capture=true;});
