@@ -2,6 +2,7 @@ import {WORLD_CONFIG} from './config.mjs';
 import {ARCHETYPES} from './archetypes.mjs';
 import {createWorldCache} from './world-cache.mjs';
 import {createPlanetRenderer} from './renderer.mjs';
+import {cacheWorldsForTier,bakeForTier} from './full-potential.mjs';
 // The host owns its animation loop, camera, audio, quality governor and saves.
 // WebGL1 dedicated canvas or WebGL2 host context. Host configures framebuffer,
 // viewport, depth/blend/scissor, and unpack state. No automatic composition.
@@ -11,7 +12,7 @@ export function eligibleWorld(descriptor){
  (typeof descriptor.seed==='string'||Number.isFinite(descriptor.seed));
 }
 export function createWorldAdapter({enabled=WORLD_CONFIG.enabled,createCache=createWorldCache,createRenderer=createPlanetRenderer,onFallback=()=>{}}={}){
- let cache=null,renderer=null,initializing=null,planet=null,controller=null,revision=0,closed=false,failed=false,activeKey=null,pending=null,detailReady=false;
+ let cache=null,renderer=null,initializing=null,planet=null,controller=null,revision=0,closed=false,failed=false,activeKey=null,pending=null,detailReady=false,bakeRes=WORLD_CONFIG.bakeResolution,bakeSmooth=false;
  function release(){detailReady=false;controller?.abort();controller=null;planet?.dispose();planet=null;activeKey=null;}
  function fallback(error){failed=true;release();try{onFallback(error);}catch(_){}}
  async function init(gl){
@@ -22,12 +23,12 @@ export function createWorldAdapter({enabled=WORLD_CONFIG.enabled,createCache=cre
  }
  function select(descriptor){
   if(closed||!enabled||failed||!renderer||!cache||!eligibleWorld(descriptor)){revision++;pending=null;release();return Promise.resolve(false);}
-  const {type,seed}=descriptor,key=JSON.stringify([type,seed,V10_GENERATOR]);
+  const {type,seed}=descriptor,key=JSON.stringify([type,seed,V10_GENERATOR,bakeRes,bakeSmooth]);
   if(activeKey===key&&planet)return Promise.resolve(true);
   if(pending?.key===key)return pending.promise;
   const id=++revision;release();const abort=new AbortController();controller=abort;
   const promise=(async()=>{try{
-   const world=await cache.get(type,seed,WORLD_CONFIG.bakeResolution,{priority:true});
+   const world=await cache.get(type,seed,bakeRes,{priority:true,smooth:bakeSmooth});
    if(closed||id!==revision||abort.signal.aborted)return false;
    const next=renderer.upload(world);planet=next;activeKey=key;
    // Optional visual resources must never prevent base geometry from appearing.
@@ -43,6 +44,6 @@ export function createWorldAdapter({enabled=WORLD_CONFIG.enabled,createCache=cre
   draw(frame){if(!planet||closed||failed)return false;try{renderer.draw(planet,frame);return true;}catch(e){fallback(e);return false;}},
   contextLost(){if(!closed){revision++;pending=null;fallback(new Error('V10 context lost'));}},
   dispose(){if(closed)return;closed=true;revision++;pending=null;release();cache?.dispose();renderer?.dispose();cache=renderer=null;},
-  get ready(){return !!planet&&!closed&&!failed;},get detailReady(){return detailReady;},get failed(){return failed;}
+  setTier(t,{smooth=false}={}){try{cache?.setLimit?.(cacheWorldsForTier(t));}catch(_){}bakeSmooth=!!smooth;bakeRes=bakeSmooth?bakeForTier(t):WORLD_CONFIG.bakeResolution;},get bake(){return {size:bakeRes,smooth:bakeSmooth};},get gpuBytes(){return planet?.gpuBytes?.()??0;},get cities(){return planet?.cities??[];},get cacheBytes(){return cache?.bytes??0;},get ready(){return !!planet&&!closed&&!failed;},get detailReady(){return detailReady;},get failed(){return failed;}
  };
 }

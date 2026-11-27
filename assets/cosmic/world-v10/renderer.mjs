@@ -10,13 +10,14 @@ import {createCityProgram,uploadCities} from './cities.mjs';
 import {loadCityModels} from './static-glb.mjs';
 import {uploadLandmarks} from './landmarks.mjs';
 import {loadVegetationModels,uploadVegetation} from './vegetation.mjs';
+import {livingPlacement,livingBatches,loadLivingModels,uploadLiving,createLivingProgram,drawLiving} from './living-cities.mjs';
 import {stormCenter} from './weather.mjs';
 const families=Object.keys(ARCHETYPES);
 const tints=[[.18,.45,1],[.12,.65,1],[.45,.38,.3],[1,.25,.08],[.4,.7,1],[.9,.65,.4],[.5,.3,1]];
 // Dedicated context or caller-managed GL state. No animation loop is created.
 export async function createPlanetRenderer(gl){
  if(gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS)<4)throw new Error('Four fragment samplers required');
- const p=await loadPlanetProgram(gl),meshes=new Map();let disposed=false,neutral=null,cityProgram=null,vao=null;
+ const p=await loadPlanetProgram(gl),meshes=new Map();let disposed=false,neutral=null,cityProgram=null,vao=null,livingProgram=null,livingBroken=false;
  try{
  if(isWebGL2(gl)){vao=gl.createVertexArray();if(!vao)throw Error('V10 VAO allocation failed');}
  const previous=gl.getParameter(gl.TEXTURE_BINDING_2D);
@@ -26,7 +27,14 @@ export async function createPlanetRenderer(gl){
  return {
  upload(world){if(disposed)throw new Error('Renderer disposed');const profile=planetProfile(world.type),maps=uploadWorldMaps(gl,world);let alive=true,revision=0,landmarkRevision=0,vegetationRevision=0,cityMesh=null;
  if(cityProgram)try{cityMesh=uploadCities(gl,world);}catch(e){console.warn('City mesh fallback:',e.message);}
- const planet={maps,profile,type:world.type,family:families.indexOf(world.type),size:world.size,stormCenter:stormCenter(world.type,world.seed??0),detail:null,heightDetail:null,audioEnergy:0,cityMesh,landmarks:null,vegetation:null,
+ const planet={maps,profile,type:world.type,family:families.indexOf(world.type),size:world.size,stormCenter:stormCenter(world.type,world.seed??0),detail:null,heightDetail:null,audioEnergy:0,cityMesh,landmarks:null,vegetation:null,living:null,cities:(world.natural?.cities??[]).slice(0,16),livingTier:-1,livingInstances:null,
+ // V10fp villes procédurales : modèles chargés au premier gros plan seulement (palier ≥ 1), jamais au palier 0.
+ async loadLiving(tier){
+  if(!alive||disposed||world.type!=='earth'||tier<1||planet.livingTier===tier)return false;
+  planet.livingTier=tier;const instances=livingPlacement(world,{tier});planet.livingInstances=instances;if(!instances.length)return false;
+  const models=await loadLivingModels(livingBatches(instances),{tier});if(!alive||disposed||planet.livingTier!==tier)return false;
+  const next=uploadLiving(gl,instances,models);planet.living?.dispose();planet.living=next;return !!next;
+ },
  async loadVegetation(options){
  if(!alive||disposed||world.type!=='earth'||!cityProgram||!world.natural?.vegetation?.length)return false;
  const id=++vegetationRevision,models=await loadVegetationModels(options);if(!alive||disposed||id!==vegetationRevision||options?.signal?.aborted)return false;
@@ -49,9 +57,10 @@ export async function createPlanetRenderer(gl){
  if(asset){try{const height=await loadTerrainHeight(gl,world.type,biome,{...options,atlas:!!asset.atlas});if(!alive||disposed||id!==revision){height?.dispose();return false;}planet.heightDetail=height;}catch(e){if(!options?.signal?.aborted)console.warn('Height detail fallback:',e.message);}}
  return alive&&!disposed&&id===revision&&!!asset;
  },
- dispose(){if(!alive)return;alive=false;revision++;planet.detail?.dispose();planet.detail=null;planet.heightDetail?.dispose();planet.heightDetail=null;cityMesh?.dispose();planet.cityMesh=null;planet.landmarks?.dispose();planet.landmarks=null;planet.vegetation?.dispose();planet.vegetation=null;maps.dispose();}
+ gpuBytes(){return (maps.bytes||0)+(planet.detail?.bytes||0)+(planet.heightDetail?.bytes||0)+(planet.pbr?.bytes||0)+(cityMesh?.bytes||0)+(planet.living?.bytes||0);},
+ dispose(){if(!alive)return;alive=false;revision++;planet.detail?.dispose();planet.detail=null;planet.heightDetail?.dispose();planet.heightDetail=null;cityMesh?.dispose();planet.cityMesh=null;planet.landmarks?.dispose();planet.landmarks=null;planet.vegetation?.dispose();planet.vegetation=null;planet.living?.dispose();planet.living=null;maps.dispose();}
  };return planet;},
- draw(planet,{mvp,eye=[0,0,3],light=[-.45,.35,.82],tier=2,time=0,audio=0,delta=1/60,detailStrength=.8,microStrength=.8,growth=1,sunIntensity=1,sunColor=[1,1,1]}){
+ draw(planet,{mvp,eye=[0,0,3],light=[-.45,.35,.82],tier=2,time=0,audio=0,delta=1/60,detailStrength=.8,microStrength=.8,growth=1,sunIntensity=1,sunColor=[1,1,1],lod=2,fp=null}){
  if(disposed||gl.isContextLost())return;
  return withSharedGL(gl,vao,()=>{
  tier=Math.max(0,Math.min(3,Math.trunc(tier)||0));if(!meshes.has(tier))meshes.set(tier,uploadSphere(gl,...SPHERE_LODS[tier]));
@@ -63,12 +72,18 @@ export async function createPlanetRenderer(gl){
  gl.activeTexture(gl.TEXTURE3);gl.bindTexture(gl.TEXTURE_2D,planet.heightDetail?.texture??neutral);gl.uniform1i(u.uHeight,3);gl.uniform1f(u.uMicroStrength,planet.heightDetail?(tier===0?.25:tier===1?.65:1)*Math.max(0,Math.min(1,Number(microStrength)||0))*Math.max(0,Math.min(1,Number(detailStrength)||0)):0);
  gl.uniformMatrix4fv(u.uMVP,false,mvp);gl.uniform3fv(u.uEye,eye);gl.uniform3fv(u.uLight,light);gl.uniform1f(u.uSunIntensity,Math.max(0,Math.min(3,Number.isFinite(sunIntensity)?sunIntensity:1)));gl.uniform3fv(u.uSunColor,sunColor?.length===3&&Array.from(sunColor).every(Number.isFinite)?sunColor:[1,1,1]);gl.uniform1i(u.uFamily,planet.family);gl.uniform3fv(u.uAtmosphereTint,tints[planet.family]);gl.uniform1f(u.uAtmosphereDensity,planet.profile.base.atmosphere);gl.uniform1f(u.uRelief,planet.profile.base.relief*.12);gl.uniform1f(u.uShadowQuality,tier>=2?1:.35);gl.uniform3fv(u.uStormCenter,planet.stormCenter);gl.uniform1f(u.uTexel,2/planet.size);gl.uniform1f(u.uTime,Number.isFinite(time)?time:0);planet.audioEnergy=visualAudio(planet.audioEnergy,audio,delta);gl.uniform1f(u.uAudio,planet.audioEnergy);
  gl.drawElements(gl.TRIANGLES,mesh.count,gl.UNSIGNED_SHORT,0);
- if(tier>=1&&planet.cityMesh&&cityProgram)cityProgram.draw(planet.cityMesh,mvp,light,growth);
- if(tier>=2&&growth>=1&&planet.landmarks&&cityProgram)cityProgram.draw(planet.landmarks,mvp,light,1,0,0,eye);
- if(tier>=2&&planet.vegetation&&cityProgram)cityProgram.draw(planet.vegetation,mvp,light,1,time,.65+.35*planet.audioEnergy,eye);
+ const geometry=lod>=2;   // V10fp : sous 256 px à l'écran, les villes ne sont que des lumières dans la carte
+ if(geometry&&tier>=1&&planet.cityMesh&&cityProgram)cityProgram.draw(planet.cityMesh,mvp,light,growth);
+ if(geometry&&tier>=2&&growth>=1&&planet.landmarks&&cityProgram)cityProgram.draw(planet.landmarks,mvp,light,1,0,0,eye);
+ if(geometry&&tier>=2&&planet.vegetation&&cityProgram)cityProgram.draw(planet.vegetation,mvp,light,1,time,fp?.reduced?0:.65+.35*planet.audioEnergy,eye);
+ if(geometry&&tier>=1&&fp?.living&&planet.type==='earth'&&!livingBroken){
+  if(planet.livingTier!==tier)void planet.loadLiving(tier).catch(e=>{console.warn('[PlanèteDot V10] living cities fallback:',e?.message||e);});
+  if(planet.living){try{livingProgram??=createLivingProgram(gl);fp.draws=drawLiving(gl,livingProgram,planet.living,{mvp,eye,light,time,era:fp.era??5,growth:fp.growth??1,motion:fp.motion??1,wind:fp.wind??0,gain:fp.gain??1,focusCity:fp.focusCity??-1,focus:fp.focus??0,pop:fp.pop??0});}
+  catch(e){livingBroken=true;console.warn('[PlanèteDot V10] living cities disabled:',e?.message||e);}}
+ }
  });
  },
- dispose(){if(!disposed){disposed=true;for(const mesh of meshes.values())mesh.dispose();meshes.clear();gl.deleteTexture(neutral);if(vao)gl.deleteVertexArray(vao);cityProgram?.dispose();p.dispose();}}
+ dispose(){if(!disposed){disposed=true;for(const mesh of meshes.values())mesh.dispose();meshes.clear();gl.deleteTexture(neutral);if(vao)gl.deleteVertexArray(vao);cityProgram?.dispose();livingProgram?.dispose();p.dispose();}}
  };
 }
 // Uploaded planets are caller-owned and must be disposed separately.
