@@ -30,3 +30,13 @@ import {strict as catalogAssert} from 'node:assert';
 const catalogCheck=validateCatalog();catalogAssert.equal(catalogCheck.ok,true,catalogCheck.errors.join('; '));
 for(const entry of worldCatalog())for(const terrain of entry.terrain)for(const lod of terrain.lods)for(const key of ['mesh','albedo','height','normal'])catalogAssert.ok(existsSync(new URL('../../../'+lod[key],import.meta.url)), 'Missing asset: '+lod[key]);
 console.log('Catalog and referenced assets verified');
+
+import {resolveTerrain} from './catalog.mjs';
+for(const entry of worldCatalog()){
+ const fallback=resolveTerrain(entry.type,'unknown-biome');
+ if(entry.type==='gas'){catalogAssert.equal(fallback,null);continue;}
+ catalogAssert.equal(fallback.fallback,true);
+ catalogAssert.ok(entry.terrain.some(t=>t.biome===fallback.resolved));
+ for(const t of entry.terrain)for(const lod of [0,1,2]){const resolved=resolveTerrain(entry.type,t.biome,lod);catalogAssert.equal(resolved.fallback,false);catalogAssert.equal(resolved.mesh,t.lods[lod].mesh);}
+}
+console.log('Terrain fallback contracts verified');
