@@ -114,8 +114,8 @@ void main(){
  if(uShadowQuality>.5){
   vec3 center=rotateAtmosphere(uStormCenter,uTime*.009);
   vec4 localTerrain=textureCube(uTerrain,center),localClimate=textureCube(uClimate,center);
-  float active=smoothstep(.65,.95,localTerrain.g)*smoothstep(.45,.7,localClimate.r)*(1.-localTerrain.b);
-  cloud=max(cloud,worldStorm(n,center,uTime,.24)*active*.88);
+  float stormActivity=smoothstep(.65,.95,localTerrain.g)*smoothstep(.45,.7,localClimate.r)*(1.-localTerrain.b);
+  cloud=max(cloud,worldStorm(n,center,uTime,.24)*stormActivity*.88);
  }
  color*=worldCloudShadow(uClimate,q,l,.7);
  color=mix(color,vec3(.85)*(.08+.92*max(dot(n,l),0.)),cloud*.55);

@@ -113,3 +113,6 @@ Shaders GLSL ES 3.00 générés depuis les sources existantes, VAO isolé et res
 
 ## Relais ChatGPT — V10 — pont de composition de scène
 Projection basée sur les axes viewOf et coordonnées écran de renderPlanet, cible RGBA8/profondeur bornée, composition alpha sur le framebuffer hôte et restauration des états. Un contexte WebGL2, pas de RAF supplémentaire. Test CPU et navigateur ajouté. Adaptateur c96e88c CPU/WebGL verts; WebGL2 9b50752 CPU vert, WebGL en cours au début du chantier. Index de branche V9.8.2, main V9.8.3 : aucun changement index ni main. Le pont doit encore être raccordé au chemin drawBody et testé avec GLR/POST et iPhone.
+
+## Relais ChatGPT — V10 — correctif de compilation WebGL2
+Le journal CI 140500487670 identifie précisément le mot réservé GLSL 300 `active`. Remplacé par stormActivity. Pont 1ed6c0c CPU vert, WebGL en cours au début de l'étape; compatibilité 9b50752 CPU vert/WebGL rouge. Ne pas raccorder index avant le nouveau CI vert. Aucun changement main/Supabase/audio.

@@ -73,3 +73,6 @@ Conversion contrôlée des shaders V10 en GLSL ES 3.00 à la compilation, chemin
 
 ## Pont de composition de scène
 scene-bridge.mjs traduit les trois axes viewOf du moteur historique et ses coordonnées écran vers le moteur V10. Une cible WebGL2 RGBA8 + profondeur 16 bits, 512² maximum (1,5 Mio théoriques), rend la planète avec transparence avant composition dans le framebuffer du client. Un seul contexte et aucune nouvelle boucle. Restauration des états utilisés, rendu en arrière-plan et erreurs à gérer par le client. Test CPU de projection et navigateur de composition et restauration. Le pont n'est pas encore appelé dans index.html; ordre des satellites, post-traitements, cache d'états GLR, restauration de contexte et iPhone restent à valider.
+
+## Correctif WebGL2 bloquant
+Le journal du job 140500487670 (commit 9b50752) confirme que `active` est réservé en GLSL ES 3.00. Renommage en stormActivity dans le shader source commun. Le test de composition 1ed6c0c a passé les contrats CPU; le rendu WebGL2 doit repasser avant insertion dans index.html. Aucun changement fonctionnel aux cyclones ni aux sauvegardes.
