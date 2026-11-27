@@ -8,7 +8,7 @@ assert.ok(match,'extract the actual shipped shader');
 const vs=JSON.parse(match[1]),frag=JSON.parse(match[2]);
 const detailLine=html.split('\n').find(l=>l.startsWith('function pd10DetailSource('));assert.ok(detailLine);const detailFrag=new Function(detailLine+';return pd10DetailSource;')()(frag);
 test('V10 source and isolation',()=>{
- assert.match(html,/name="pd-version" content="10\.0-alpha\.[12345678]"/);
+ assert.match(html,/name="pd-version" content="10\.0-alpha\.[123456789]"/);
  assert.doesNotMatch(frag,/\bsampler\w*\b/);
  assert.match(html,/function pd10Draw\(o\)/);
  assert.match(html,/if\(pd10Draw\(o\)\)return/);
