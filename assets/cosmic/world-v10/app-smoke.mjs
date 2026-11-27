@@ -45,7 +45,7 @@ try{
  // No real authentication, telemetry, media services, or database writes.
  await context.route('**/*',route=>{const u=new URL(route.request().url());if(u.origin!==base)return route.abort();if(u.pathname==='/index.html')return route.fulfill({contentType:'text/html; charset=utf-8',body:html});return route.continue();});
  const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto(base+'/index.html?advanced=1',{waitUntil:'domcontentloaded',timeout:90000});
+ await page.goto(base+'/index.html?advanced=1&world10=1',{waitUntil:'domcontentloaded',timeout:90000});
  await page.waitForFunction(()=>!!window.__pdAppSmoke,{timeout:90000});
  assert.deepEqual(await page.evaluate(()=>window.__pdAppSmoke.setup()),{version:10,seed:7,newVersion:10,publicVersion:10,oldPublic:10,unchanged:true});
  let result;
