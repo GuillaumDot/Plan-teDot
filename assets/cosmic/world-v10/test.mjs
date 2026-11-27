@@ -23,3 +23,10 @@ for(const temperature of [-30,0,20,40])for(const humidity of [0,.5,1])for(const 
 }
 let q={tier:3,average:50};for(let i=0;i<30;i++)q=qualityStep(q,50,.1);assert.ok(q.tier<3);
 console.log('V10 CPU contracts passed');
+
+import {validateCatalog,worldCatalog} from './catalog.mjs';
+import {existsSync} from 'node:fs';
+import {strict as catalogAssert} from 'node:assert';
+const catalogCheck=validateCatalog();catalogAssert.equal(catalogCheck.ok,true,catalogCheck.errors.join('; '));
+for(const entry of worldCatalog())for(const terrain of entry.terrain)for(const lod of terrain.lods)for(const key of ['mesh','albedo','height','normal'])catalogAssert.ok(existsSync(new URL('../../../'+lod[key],import.meta.url)), 'Missing asset: '+lod[key]);
+console.log('Catalog and referenced assets verified');
