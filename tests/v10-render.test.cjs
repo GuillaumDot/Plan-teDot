@@ -107,3 +107,11 @@ test('atlas quality selection and malformed pack rejection',()=>{
  for(const f of [[{n:'a',o:0,l:2},{n:'a',o:2,l:2}],[{n:'a',o:0,l:3},{n:'b',o:2,l:2}],[{n:'a',o:0,l:2},{n:'b',o:2,l:9}]])assert.throws(()=>pdAtlasHeader(pack(f),names));
  assert.throws(()=>pdAtlasHeader(pack(valid,999),names));assert.throws(()=>pdAtlasHeader(new ArrayBuffer(3),names));
 });
+
+
+test('urban preview is isolated behind an explicit flag',()=>{
+ assert.match(html,/const PD10_CITY=PD10_QUERY\.get\('city'\)==='1'\?1:0;/);
+ assert.match(html,/uniform float uCity10;/);
+ assert.match(html,/if\(u\.uCity10\)gl\.uniform1f\(u\.uCity10,PD10_CITY\)/);
+ assert.match(html,/float cityDetail10\(float pixelsPerUnit\)/);
+});

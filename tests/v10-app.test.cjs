@@ -49,7 +49,7 @@ for(const scenario of ['original V9 materials','V10 opt-in baked materials','Nat
  if(/^\/textures(?:84-(?:compact|mobile|hd)|9-(?:mobile|hd))\.bin$/.test(u.pathname))return route.fulfill({path:'.'+u.pathname,contentType:'application/octet-stream'});
  if(/^\/assets\/blender\/relief\/volcan-(hn|ao)(-512)?\.png$/.test(u.pathname)){volcanoRequests++;return route.fulfill({path:'.'+u.pathname,contentType:'image/png'});}
  if(u.pathname==='/assets/blender/pbr-512/basalt-normal.png'&&++basaltNormalRequests===1)return route.abort();if(/^\/assets\/blender\/pbr-512\/[a-z]+-(normal|albedo)\.png$/.test(u.pathname))return route.fulfill({path:'.'+u.pathname,contentType:'image/png'});return route.fulfill({status:404,body:''});});
- await page.goto('http://pd10.test/index.html'+(preview?'?identity=preview&camera=lit':materials?'?pbr=1&albedo=1&camera=lit&atlas=mobile&depth=1':''),{waitUntil:'domcontentloaded',timeout:60000});
+ await page.goto('http://pd10.test/index.html'+(preview?'?identity=preview&camera=lit':materials?'?pbr=1&albedo=1&camera=lit&atlas=mobile&depth=1&city=1':''),{waitUntil:'domcontentloaded',timeout:60000});
  await page.waitForFunction(()=>{try{return window.__pd10Lab?.state().album&&window.__pd10Lab.state().frames>=2;}catch(e){return false;}},{},{timeout:90000,polling:250});
  await page.evaluate(visit=>visit?window.__pd10Lab.visit():window.__pd10Lab.enter(),visit);
  await page.waitForFunction(()=>window.__pd10Lab.state().mode==='system'&&window.__pd10Lab.state().frames>3,{},{timeout:90000,polling:250});
@@ -70,7 +70,7 @@ for(const scenario of ['original V9 materials','V10 opt-in baked materials','Nat
  assert.equal(result.state.renderer.albumWorld,preview);
  assert.equal(result.state.renderer.worldDraws>0,preview);
  assert.equal(result.state.renderer.atlasLayers,28);
- assert.equal(result.state.renderer.atlasFailure,false);assert.equal(result.state.renderer.depthPreview,materials);if(materials){assert.equal(result.state.renderer.atlasSize,512);assert.equal(result.state.renderer.volcanoRelief,'ready');assert.equal(volcanoRequests,2);}
+ assert.equal(result.state.renderer.atlasFailure,false);assert.equal(result.state.renderer.depthPreview,materials);assert.equal(result.state.renderer.cityPreview,materials);if(materials)assert.equal(result.state.renderer.citySupported,true);if(materials){assert.equal(result.state.renderer.atlasSize,512);assert.equal(result.state.renderer.volcanoRelief,'ready');assert.equal(volcanoRequests,2);}
  assert.equal(result.state.lite,false);assert.equal(result.state.frameErrors,0);
  if(materials){assert.ok(result.state.renderer.blenderDraws>0,'actual Blender map draw required');assert.ok(result.state.renderer.albedoDraws>0,'actual Blender albedo draw required');}else{assert.equal(result.state.renderer.blenderMaps,0);assert.equal(result.state.renderer.albedoMaps,0);assert.equal(result.state.renderer.blenderDraws,0);assert.equal(result.state.renderer.albedoDraws,0);}assert.equal(result.state.mode,'planet');assert.ok(result.state.planet.r>30);
  const colors=new Set(result.pixels.filter(p=>p[3]>100).map(p=>p.slice(0,3).join(',')));

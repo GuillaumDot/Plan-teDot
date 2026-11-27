@@ -43,3 +43,7 @@ The normal maps now require `?pbr=1` in the original renderer, and the new albed
 ## Alpha.16 — close-up relief experiment
 
 `?depth=1` adds up to 25% optical terrain slope and increases terrain shadow attenuation close up, in both V9 shader paths. This is shading, not new mesh geometry. Replace the reversed-edge shadow smoothstep with defined GLSL math. Volcano height/normal and AO maps now have explicit load/upload status and GPU error checks; test serves the four actual PNG variants and requires ready status in the experimental scenario. Default depth remains unchanged. Browser and physical iPhone validation still pending.
+
+## Alpha.17 — urban close-up experiment
+
+`?city=1` enables distance-filtered facade frames, sill and story shading, roof tiles, solar-panel material details and road markings in the existing city98 renderer. Lot placement, city growth, building dimensions and saved worlds remain unchanged. The fallback renderer retains its previous city93 visuals. Source and integration checks cover flag isolation and uniform availability, not a visual city close-up or performance benchmark. Browser CI and physical iPhone review remain open.

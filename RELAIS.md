@@ -56,3 +56,7 @@ Comparaison atlas mobile 512 / compact 256 par paramètre atlas, qualité des ef
 ## Relais ChatGPT — alpha.16
 
 Relief optique renforcé à proximité via depth=1, principal et secours V9. Ombres du terrain : smoothstep défini. Cartes du volcan : diagnostic chargement/GPU et test des ressources réelles. Aucun nouveau maillage. Main et Supabase inchangés ; tests à vérifier.
+
+## Relais ChatGPT — alpha.17
+
+Détails urbains city=1 : façades, toits, panneaux solaires, voirie, filtrage selon la distance. Moteur city98 conservé, croissance et géométrie des villes inchangées. Tests source et présence du paramètre GPU ; validation visuelle et fluidité à faire. Main et Supabase inchangés.
