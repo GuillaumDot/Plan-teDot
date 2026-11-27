@@ -44,11 +44,12 @@ for(const scenario of ['original V9 materials','V10 opt-in baked materials','Nat
  const page=await context.newPage();const errors=[];
  page.on('pageerror',e=>errors.push(e.message));
  page.on('console',msg=>{if(msg.type()==='warning'||msg.type()==='error')console.log('browser',msg.text().slice(0,2000));});
- let basaltNormalRequests=0;
+ let basaltNormalRequests=0,volcanoRequests=0;
  await page.route('**/*',async route=>{const u=new URL(route.request().url());if(u.hostname!=='pd10.test')return route.abort();if(u.pathname==='/index.html')return route.fulfill({contentType:'text/html',body:visit?visitPage:observed});if(u.pathname==='/assets/cosmic/natural-world-v22/album.rgba')return route.fulfill({path:'.'+u.pathname,contentType:'application/octet-stream'});
  if(/^\/textures(?:84-(?:compact|mobile|hd)|9-(?:mobile|hd))\.bin$/.test(u.pathname))return route.fulfill({path:'.'+u.pathname,contentType:'application/octet-stream'});
+ if(/^\/assets\/blender\/relief\/volcan-(hn|ao)(-512)?\.png$/.test(u.pathname)){volcanoRequests++;return route.fulfill({path:'.'+u.pathname,contentType:'image/png'});}
  if(u.pathname==='/assets/blender/pbr-512/basalt-normal.png'&&++basaltNormalRequests===1)return route.abort();if(/^\/assets\/blender\/pbr-512\/[a-z]+-(normal|albedo)\.png$/.test(u.pathname))return route.fulfill({path:'.'+u.pathname,contentType:'image/png'});return route.fulfill({status:404,body:''});});
- await page.goto('http://pd10.test/index.html'+(preview?'?identity=preview&camera=lit':materials?'?pbr=1&albedo=1&camera=lit&atlas=mobile':''),{waitUntil:'domcontentloaded',timeout:60000});
+ await page.goto('http://pd10.test/index.html'+(preview?'?identity=preview&camera=lit':materials?'?pbr=1&albedo=1&camera=lit&atlas=mobile&depth=1':''),{waitUntil:'domcontentloaded',timeout:60000});
  await page.waitForFunction(()=>{try{return window.__pd10Lab?.state().album&&window.__pd10Lab.state().frames>=2;}catch(e){return false;}},{},{timeout:90000,polling:250});
  await page.evaluate(visit=>visit?window.__pd10Lab.visit():window.__pd10Lab.enter(),visit);
  await page.waitForFunction(()=>window.__pd10Lab.state().mode==='system'&&window.__pd10Lab.state().frames>3,{},{timeout:90000,polling:250});
@@ -57,6 +58,7 @@ for(const scenario of ['original V9 materials','V10 opt-in baked materials','Nat
  }
  await page.evaluate(()=>window.__pd10Lab.land());
  await page.waitForFunction(enabled=>{const r=window.__pd10Lab.state().renderer;return r.atlasActive&&(!enabled||(r.blenderMaps===5&&r.albedoMaps===5));},materials,{timeout:150000}).catch(async e=>{console.log('material timeout',await page.evaluate(()=>window.__pd10Lab.state()));throw e;});
+ if(materials)await page.waitForFunction(()=>window.__pd10Lab.state().renderer.volcanoRelief==='ready',{},{timeout:45000});
  await page.evaluate(()=>{window.__pd10Lab.capture=true;});
  await page.waitForFunction(()=>window.__pd10Lab.pixels?.length===25,{},{timeout:90000});
  const result=await page.evaluate(()=>({state:window.__pd10Lab.captureState,pixels:window.__pd10Lab.pixels}));
@@ -68,7 +70,7 @@ for(const scenario of ['original V9 materials','V10 opt-in baked materials','Nat
  assert.equal(result.state.renderer.albumWorld,preview);
  assert.equal(result.state.renderer.worldDraws>0,preview);
  assert.equal(result.state.renderer.atlasLayers,28);
- assert.equal(result.state.renderer.atlasFailure,false);if(materials)assert.equal(result.state.renderer.atlasSize,512);
+ assert.equal(result.state.renderer.atlasFailure,false);assert.equal(result.state.renderer.depthPreview,materials);if(materials){assert.equal(result.state.renderer.atlasSize,512);assert.equal(result.state.renderer.volcanoRelief,'ready');assert.equal(volcanoRequests,2);}
  assert.equal(result.state.lite,false);assert.equal(result.state.frameErrors,0);
  if(materials){assert.ok(result.state.renderer.blenderDraws>0,'actual Blender map draw required');assert.ok(result.state.renderer.albedoDraws>0,'actual Blender albedo draw required');}else{assert.equal(result.state.renderer.blenderMaps,0);assert.equal(result.state.renderer.albedoMaps,0);assert.equal(result.state.renderer.blenderDraws,0);assert.equal(result.state.renderer.albedoDraws,0);}assert.equal(result.state.mode,'planet');assert.ok(result.state.planet.r>30);
  const colors=new Set(result.pixels.filter(p=>p[3]>100).map(p=>p.slice(0,3).join(',')));

@@ -39,3 +39,7 @@ The normal maps now require `?pbr=1` in the original renderer, and the new albed
 ## Alpha.15 — atlas diagnostics and comparison
 
 `?atlas=mobile` selects the original 512 px mobile pack even at low effects quality; `?atlas=compact` selects the 256 px pack. Default selection is unchanged. Validate the pack header, unique names, ranges and resolution before decoding, stop decoding on failure, and check actual WebGL upload/mipmap errors before marking the atlas ready. Errors appear in the existing diagnostics. Added malformed-pack tests and 512 px integration coverage. CI and hardware results not yet verified.
+
+## Alpha.16 — close-up relief experiment
+
+`?depth=1` adds up to 25% optical terrain slope and increases terrain shadow attenuation close up, in both V9 shader paths. This is shading, not new mesh geometry. Replace the reversed-edge shadow smoothstep with defined GLSL math. Volcano height/normal and AO maps now have explicit load/upload status and GPU error checks; test serves the four actual PNG variants and requires ready status in the experimental scenario. Default depth remains unchanged. Browser and physical iPhone validation still pending.

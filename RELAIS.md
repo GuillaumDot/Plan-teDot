@@ -52,3 +52,7 @@ Branche dev/v10-restauration-v9 : retour aux matières et à la caméra V9 par d
 ## Relais ChatGPT — alpha.15
 
 Comparaison atlas mobile 512 / compact 256 par paramètre atlas, qualité des effets indépendante. Validation des paquets et détection des erreurs GPU avant activation. Tests complétés, résultats à vérifier. Main et Supabase inchangés.
+
+## Relais ChatGPT — alpha.16
+
+Relief optique renforcé à proximité via depth=1, principal et secours V9. Ombres du terrain : smoothstep défini. Cartes du volcan : diagnostic chargement/GPU et test des ressources réelles. Aucun nouveau maillage. Main et Supabase inchangés ; tests à vérifier.
