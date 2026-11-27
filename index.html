@@ -3640,12 +3640,12 @@ function pd9PbrInit(){
 // V9 · fluidité : plus aucune question bloquante à la carte graphique (getParameter, une centaine par image sur Safari), table fixe,
 // et l'unité 4 n'est rebranchée que lorsque la carte de relief change d'un astre à l'autre
 const PD9PBR_E={0:['desert',.86],1:['ocean',.32],2:['gas',.68],3:['ice',.48],4:['basalt',.82],10:['basalt',.82],11:['ocean',.32]};
-function pd9PbrDraw(o){
+function pd9PbrDraw(o, uniforms=SP.u){
   if(!PD9PBR.active)return;
   const entry=PD9PBR_E[o.type||0];
   const t=o.kind===0&&entry?PD9PBR.maps.get(entry[0]):null, tx=t||PD9PBR.neutral;
   if(PD9PBR.cur!==tx){PD9PBR.cur=tx;const old=GLR.at;gl.activeTexture(gl.TEXTURE0+4);gl.bindTexture(gl.TEXTURE_2D,tx);gl.activeTexture(old);}
-  gl.uniform2f(SP.u.uPDMaterial,t?.35:0,entry?entry[1]:.5);
+  gl.uniform2f(uniforms.uPDMaterial,t?.35:0,entry?entry[1]:.5);
 }
 pd9PbrInit();
 // V9.4 · relief cuit dans Blender (essai sur le volcan principal) : chargé après l'ouverture, sans rien bloquer.
@@ -4127,15 +4127,15 @@ function drawBG(camx, camy, warp, lights, ring, exp = 1.3){
 const NOL = new Float32Array(12);
 // V9.8.2: explicit texture bindings; ensure partial uploads cannot replace active samplers.
 const PD_FIX_TEXTURES=new Map();
-function pdRepairSamplers(){
+function pdRepairSamplers(uniforms=SP.u){
  const t=PDTX.t||{},g=gl,old=GLR.at;
  const slots=[['uPDNormal',4,g.TEXTURE_2D,PD9PBR.neutral],['uVS0',5,g.TEXTURE_2D,PDRV.tx?.[0]],['uVS1',6,g.TEXTURE_2D,PDRV.tx?.[1]],['uTx',8,g.TEXTURE_2D_ARRAY,t.arr],['uRingT',9,g.TEXTURE_2D,t.ring],['uGal',10,g.TEXTURE_2D_ARRAY,t.gal],['uGz',13,g.TEXTURE_2D_ARRAY,t.gz],['uBr',14,g.TEXTURE_2D_ARRAY,t.br]];
  for(const [name,unit,target,tex] of slots){
-  if(!SP.u[name])continue;
+  if(!uniforms[name])continue;
   g.activeTexture(g.TEXTURE0+unit);
   let b=tex;
   if(!b){b=PD_FIX_TEXTURES.get(unit);if(!b){b=g.createTexture();PD_FIX_TEXTURES.set(unit,b);g.bindTexture(target,b);g.texParameteri(target,g.TEXTURE_MIN_FILTER,g.LINEAR);g.texParameteri(target,g.TEXTURE_MAG_FILTER,g.LINEAR);g.texParameteri(target,g.TEXTURE_WRAP_S,g.CLAMP_TO_EDGE);g.texParameteri(target,g.TEXTURE_WRAP_T,g.CLAMP_TO_EDGE);const px=new Uint8Array([128,128,128,255]);if(target===g.TEXTURE_2D_ARRAY)g.texImage3D(target,0,g.RGBA8,1,1,1,0,g.RGBA,g.UNSIGNED_BYTE,px);else g.texImage2D(target,0,g.RGBA,1,1,0,g.RGBA,g.UNSIGNED_BYTE,px);}}
-  g.bindTexture(target,b);g.uniform1i(SP.u[name],unit);
+  g.bindTexture(target,b);g.uniform1i(uniforms[name],unit);
  }
  PD9PBR.cur=null;g.activeTexture(old);
 }
@@ -4226,7 +4226,96 @@ function pdRecoveryPaint(){
  }catch(e){console.warn('[PlaneteDot] recovery paint',e);g.globalAlpha=1;}
 }
 
+// The opt-in mobile pass uses the original environment shader, specialized for
+// one planet family. Its saved territories, palette and climate stay in the
+// same object-space coordinates in orbit and inside the V10 compositor.
+const PD_ENV_ENABLED=new URLSearchParams(location.search).get('environment')==='1';
+const pdEnvironmentPrograms=new Map();
+let pdEnvironmentPending=null, pdEnvironmentSources=null, pdEnvironmentCompositor=null, pdEnvironmentLoading=false;
+const pdParallelCompile=PD_ENV_ENABLED?gl.getExtension('KHR_parallel_shader_compile'):null;
+function pdEnvironmentProgram(type){
+ if(!pdEnvironmentPrograms.has(type)){
+  if(pdEnvironmentPending && pdParallelCompile &&
+     !gl.getProgramParameter(pdEnvironmentPending,pdParallelCompile.COMPLETION_STATUS_KHR))return null;
+  if(!pdEnvironmentSources)pdEnvironmentSources=gl.getAttachedShaders(SP.p).map(shader=>({
+   type:gl.getShaderParameter(shader,gl.SHADER_TYPE),source:gl.getShaderSource(shader)
+  }));
+  const program=gl.createProgram();
+  for(const src of pdEnvironmentSources){
+   const shader=gl.createShader(src.type);
+   const source=src.type===gl.FRAGMENT_SHADER?src.source.replace('uniform int uKind,uType,uTerN,uSel;',
+    'const int uKind=0,uType='+type+'; uniform int uTerN,uSel;'):src.source;
+   gl.shaderSource(shader,source);gl.compileShader(shader);gl.attachShader(program,shader);gl.deleteShader(shader);
+  }
+  gl.bindAttribLocation(program,0,'a');gl.linkProgram(program);pdEnvironmentPending=program;
+  pdEnvironmentPrograms.set(type,{program,uniforms:null});
+ }
+ const entry=pdEnvironmentPrograms.get(type);
+ if(!entry||entry.uniforms)return entry;
+ if(pdParallelCompile&&!gl.getProgramParameter(entry.program,pdParallelCompile.COMPLETION_STATUS_KHR))return null;
+ if(pdEnvironmentPending===entry.program)pdEnvironmentPending=null;
+ if(!gl.getProgramParameter(entry.program,gl.LINK_STATUS)){
+  console.warn('PlanèteDot environnement',type,gl.getProgramInfoLog(entry.program));
+  gl.deleteProgram(entry.program);pdEnvironmentPrograms.set(type,null);return null;
+ }
+ entry.uniforms={};
+ for(let i=0,count=gl.getProgramParameter(entry.program,gl.ACTIVE_UNIFORMS);i<count;i++){
+  const {name}=gl.getActiveUniform(entry.program,i);
+  entry.uniforms[name.replace('[0]','')]=gl.getUniformLocation(entry.program,name);
+ }
+ return entry;
+}
+function pdEnvironmentDraw(o){
+ if(!PD_ENV_ENABLED||PD_REC_FORCED||o.r<3||o.kind!==0||!o.pd9||!Number.isInteger(o.type)||!TYPES[o.type])return false;
+ const entry=pdEnvironmentProgram(o.type);
+ if(!entry)return false;
+ const focusView=mode==='planet'&&o.pd9.id===focus;
+ if(focusView&&!pdEnvironmentCompositor&&!pdEnvironmentLoading){
+  pdEnvironmentLoading=true;
+  import('./assets/cosmic/world-v10/scene-bridge.mjs').then(m=>{
+   pdEnvironmentCompositor=m.createSceneCompositor(gl);
+  }).catch(e=>console.warn('PlanèteDot composition',e));
+ }
+ const paint=(body,w,h)=>{
+  const u=entry.uniforms;
+  gl.useProgram(entry.program);gl.bindVertexArray(quad);
+  if(!entry.bound){pdRepairSamplers(u);entry.bound=true;}
+  gl.uniform2f(u.uRes,w,h);gl.uniform1f(u.uT,time);gl.uniform1f(u.uTxOn,PDTX.on);
+  gl.uniform1f(u.uTxS,PDTX.sz);gl.uniform1f(u.uVSOn,PDRV.on);
+  pdAdvancedBody(body,u,o);
+ };
+ glowFlush();
+ try{
+  if(focusView&&pdEnvironmentCompositor){
+   const frame=pdFrame(o.x,o.y);
+   const light=Array.from(pdInF(frame,o.L||[0,0,1],PDB_L,0));
+   const basis=new Float32Array(PDB_VW);
+   // sceneRect uses a .92 radius. Include the original atmosphere in the target.
+   const extent=Math.max(1,o.q||1);
+   const proxy={...o,r:o.r*extent};
+   const adapter={ready:true,draw(){
+    const size=gl.getParameter(gl.VIEWPORT)[2];
+    gl.disable(gl.DEPTH_TEST);
+    paint({...o,x:size/2,y:size/2,r:size*.46/extent,vw:basis,L:light,w:undefined},size,size);
+    return true;
+   }};
+   if(pdEnvironmentCompositor.draw(adapter,proxy,{},W,H)){pd9OccAdd(o);return true;}
+  }
+  if(!entry.checked && o.r>12 && o.alpha>.8 && o.x>o.r && o.x<W-o.r && o.y>o.r && o.y<H-o.r){
+   // Once per shader, compare the centre and both hemispheres. Ignore single dark pixels.
+   const points=[-.4,0,.4].map(t=>Math.floor(o.x+t*o.r)), y=Math.floor(H-o.y-1);
+   const sample=x=>{const rgba=new Uint8Array(4);gl.readPixels(x,y,1,1,gl.RGBA,gl.UNSIGNED_BYTE,rgba);return rgba;};
+   const before=points.map(sample);
+   paint(o,W,H);
+   if(points.some((x,i)=>sample(x).some((v,k)=>k<3&&Math.abs(v-before[i][k])>2)))entry.checked=true;
+   else if((entry.misses=(entry.misses||0)+1)>=2){gl.deleteProgram(entry.program);pdEnvironmentPrograms.set(o.type,null);return false;}
+   return true;
+  }
+  paint(o,W,H);return true;
+ }finally{gl.useProgram(SP.p);gl.bindVertexArray(quad);PD9PBR.cur=null;}
+}
 function drawBody(o){
+ if(pdEnvironmentDraw(o))return;
  if(pdSafeBody(o))return;
  const eligible=!PD_REC_ADV&&!PD_REC_ACTIVE&&(mode==='system'||mode==='planet')&&[0,1,6].includes(o.kind)&&o.r>8&&o.alpha>.6&&o.x>3&&o.x<W-3&&o.y>3&&o.y<H-3;
  const check=eligible&&(PD_REC_PROBE<3||PD_REC_STATE!==PDTX.on||time-PD_REC_LAST>8)&&time-PD_REC_LAST>.35;
@@ -4243,11 +4332,10 @@ function drawBody(o){
   if(PD_REC_FAIL>=2){PD_REC_ACTIVE=true;pdSafeBody(o);console.warn('[PlaneteDot] advanced body recovery',err,delta);}
  }catch(e){PD_REC_ACTIVE=true;pdSafeBody(o);console.warn('[PlaneteDot] body recovery',e);}
 }
-function pdAdvancedBody(o){
-  const u = SP.u;
+function pdAdvancedBody(o,u=SP.u,screenBody=o){
   if (o.kind === 2){ if (!(o.alpha > .004) || !(o.r > .3)) return; if (GB.on){ glowAdd(o); return; } gl.uniform1i(u.uKind, 2); gl.uniform2f(u.uC, o.x, o.y); gl.uniform1f(u.uR, o.r); gl.uniform1f(u.uQ, o.q); gl.uniform1f(u.uAsp, 1); gl.uniform1f(u.uIrr, 0);
     gl.uniform3fv(u.uC1, o.c1); gl.uniform1f(u.uAtmo, o.atmo ?? 1); gl.uniform1f(u.uAlpha, o.alpha ?? 1); gl.uniform1f(u.uHi, o.hi || 0); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); return; }
-  pd9PbrDraw(o);   // V9 · fluidité : pas pour les lueurs (elles ne lisent pas la matière)
+  pd9PbrDraw(o,u);   // V9 · fluidité : pas pour les lueurs (elles ne lisent pas la matière)
   if ((o.kind === 0 || o.kind === 1 || o.kind === 6) && typeof o.w === 'number' && o.r > 1.5 && (o.alpha ?? 1) > .5) pd9OccAdd(o);   // V9.7 : les astres dessinés cachent les messages des planètes derrière eux
   const fr = (o.kind === 0 || o.kind === 1) && !o.vw && o.x === o.x && o.y === o.y ? pdFrame(o.x, o.y) : null;   // V8.4
   gl.uniform1i(u.uKind, o.kind); gl.uniform1i(u.uType, o.type || 0);
@@ -4260,7 +4348,7 @@ function pdAdvancedBody(o){
   gl.uniform1i(u.uTerN, o.terN || 0); gl.uniform1i(u.uSel, o.sel ?? -1);
   gl.uniform1f(u.uPlay, o.play || 0); gl.uniform1f(u.uBeat, o.beat || 0); gl.uniform1f(u.uLv, o.lv || 0); gl.uniform1f(u.uBs, o.bs || 0); if (u.uSp) gl.uniform4fv(u.uSp, o.spb || [0, 0, 0, 0]); gl.uniform1f(u.uBt, o.bt ?? 9); if (u.uPh){ gl.uniform4f(u.uPh, PDPH.r, PDPH.w1, PDPH.w2, PDPH.b); if (u.uPh2) gl.uniform2f(u.uPh2, PDPH.a, PDK.s); } gl.uniform1f(u.uSunI, o.sunI ?? 1); gl.uniform3fv(u.uSun, o.sun || [1, 1, 1]); gl.uniform1f(u.uIrr, o.irr || 0);
   if (o.terN){ gl.uniform4fv(u.uTer, o.ter); gl.uniform4fv(u.uTerB, o.terB); }
-  const vwU = o.uq ? pdVWq(o.uq, fr ? PDB_VW : (o.vw || VWM)) : (fr ? PDB_VW : (o.vw || VWM)); gl.uniformMatrix3fv(u.uVW, false, vwU); if (u.uBreath) gl.uniform4f(u.uBreath, PDBR.k * PDMS.k, 0, PDBR.tx * PDTX.on, 0); if (o.pd9) pd9Seen(o, vwU); gl.uniform1i(u.uOccN, o.occN || 0); if (o.occN){ OCC12.fill(0); for (let i = 0; i < 12 && i < o.occ.length; i++) OCC12[i] = o.occ[i]; if (fr) for (let k = 0; k < 12; k += 4) pdInF(fr, OCC12, OCC12, k); gl.uniform4fv(u.uOcc, OCC12); }
+  const vwU = o.uq ? pdVWq(o.uq, fr ? PDB_VW : (o.vw || VWM)) : (fr ? PDB_VW : (o.vw || VWM)); gl.uniformMatrix3fv(u.uVW, false, vwU); if (u.uBreath) gl.uniform4f(u.uBreath, PDBR.k * PDMS.k, 0, PDBR.tx * PDTX.on, 0); if (o.pd9) pd9Seen(screenBody, vwU); gl.uniform1i(u.uOccN, o.occN || 0); if (o.occN){ OCC12.fill(0); for (let i = 0; i < 12 && i < o.occ.length; i++) OCC12[i] = o.occ[i]; if (fr) for (let k = 0; k < 12; k += 4) pdInF(fr, OCC12, OCC12, k); gl.uniform4fv(u.uOcc, OCC12); }
   gl.uniform1f(u.uArch, o.arch || 0); gl.uniform1f(u.uQual, QUAL); if (u.uGD) gl.uniform1f(u.uGD, o.gd ?? (o.pd9 && o.pd9.gd ? 1 : 0)); gl.uniform1f(u.uEvo, o.evo || 0); if (o.evo) gl.uniform3fv(u.uEvoD, o.evoD); gl.uniform1f(u.uWx, o.wx || 0); gl.uniform1f(u.uFlash, o.flash || 0);   // V9.7 : uGD = la PlanèteDot (monde des villes) ; V9.8.1 : évolution, météo et éclairs de nouveau envoyés (coupés par erreur en V9.7)
   gl.uniform1i(u.uTkN, o.cq ? o.cq.n : 0); gl.uniform1i(u.uTkSel, o.cq ? o.cq.sel : -1); gl.uniform1f(u.uTkHi, o.cq ? o.cq.hi : 0); if (o.cq && o.cq.n){ { const zq = pdZoneLerp(o.cq, o.pd9); gl.uniform4fv(u.uTk, zq.tk); gl.uniform4fv(u.uTkB, zq.tkB); } if (u.uTkG) gl.uniform4fv(u.uTkG, o.cq.tkG || TKG0); }
   if (o.kind === 3){ const hb = o.r * .26, y0 = Math.floor(H - o.y - hb); gl.enable(gl.SCISSOR_TEST); gl.scissor(0, y0, W, Math.max(0, Math.ceil(H - o.y + hb) - y0)); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); gl.disable(gl.SCISSOR_TEST); return; }   // V9 · fluidité : la traînée n'éclaire qu'une bande, le reste de l'écran n'est plus calculé pour rien
@@ -4717,7 +4805,7 @@ if(PD10_ENABLED){
   addEventListener('pagehide',e=>{if(e.persisted){PD10Host?.leave();return;}PD10Closed=true;PD10Host?.dispose();PD10Host=null;});
 }
 function pd10FocusDraw(p,b,dt){
-  if(!PD10_ENABLED||PD10Failed||PD10Closed||PD_REC_FORCED||!p||b.kind!==0||(!PD10_PREVIEW&&p.generatorVersion!==10))return false;
+  if(PD_ENV_ENABLED||!PD10_ENABLED||PD10Failed||PD10Closed||PD_REC_FORCED||!p||b.kind!==0||(!PD10_PREVIEW&&p.generatorVersion!==10))return false;
   if(![0,1,2,3,4,6,9,10,11].includes(p.type))return false;
   if(!PD10Host){
     if(!PD10Loading){PD10Loading=true;import('./assets/cosmic/world-v10/focused-host.mjs').then(m=>{
@@ -4752,7 +4840,7 @@ function renderPlanet(dt){ PASS.clear();
   if (pr){
     const r = pxR(bodyR(p), pr.w); const isP = p.id === playingPlanet();
     const b = planetBody(p, pos, pr, r, isP ? audioLvl * .6 : 0, terrUniforms(p, ease(mapA)));
-    b.alpha = 1; b.rk = null; b.q = 1 + p.atmo * .55 + .12; b.L = norm(b.L.map((v, k) => v * .9 + [-.55, .42, .72][k] * .18)); b.sunI = 1.1; bodies.push(b); satellites(p, pos, bodyR(p), bodies); 
+    b.alpha = 1; if(!PD_ENV_ENABLED)b.rk = null; b.q = Math.max(b.rk?b.rk[1]+.05:1,1 + p.atmo * .55 + .12); b.L = norm(b.L.map((v, k) => v * .9 + [-.55, .42, .72][k] * .18)); b.sunI = 1.1; bodies.push(b); satellites(p, pos, bodyR(p), bodies);
     curP = {p, x: pr.x, y: pr.y, r};
     p.terr.slice(0, 12).forEach((t, k) => { const v = viewOf(p, seedDir(t)); if (v[2] < .12) return;
       const x = pr.x + v[0] * r, y = pr.y - v[1] * r; const fl = flagsOn(p, t);
