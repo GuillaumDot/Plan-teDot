@@ -29,13 +29,30 @@ WorldMaterial worldMaterial(int family, vec4 terrain, vec4 climate) {
  }
  return m;
 }
+// Energy-conserving Cook-Torrance direct BRDF (GGX, Schlick-Smith).
+// All inputs remain in linear space; no extra texture reads or uniforms.
 vec3 shadeWorld(WorldMaterial m,vec3 N,vec3 L,vec3 V,float visibility,vec3 sunRadiance,float geometricNL){
- float nl=max(dot(N,L),0.);vec3 halfVector=L+V;vec3 H=halfVector/max(length(halfVector),.0001);
- float nv=max(dot(N,V),0.);vec3 f0=mix(vec3(.04),m.color,m.metal);
- vec3 F=f0+(1.-f0)*pow(1.-max(dot(H,V),0.),5.);
- float spec=pow(max(dot(N,H),0.),mix(96.,4.,m.roughness));
+ const float PI=3.14159265;
+ float nl=max(dot(N,L),0.),nv=max(dot(N,V),.001);
+ vec3 halfVector=L+V;
+ vec3 H=halfVector/max(length(halfVector),.0001);
+ float nh=max(dot(N,H),0.),vh=clamp(dot(V,H),0.,1.);
+ float rough=clamp(m.roughness,.13,1.);
+ float metal=clamp(m.metal,0.,1.);
+ vec3 f0=mix(vec3(.04),clamp(m.color,vec3(0.),vec3(1.)),metal);
+ float x=1.-vh,x2=x*x;
+ vec3 F=f0+(1.-f0)*x2*x2*x;
+ float a=rough*rough,a2=a*a;
+ float d=1.-nh*nh+nh*nh*a2;
+ float D=a2/(PI*max(d*d,.0000001));
+ float k=(rough+1.)*(rough+1.)*.125;
+ float Gv=nv/(nv*(1.-k)+k);
+ float Gl=nl/max(nl*(1.-k)+k,.001);
+ vec3 spec=F*(D*Gv*Gl/max(4.*nv*nl,.001));
+ vec3 diffuse=m.color*(1.-metal)*(1.-F)/PI;
  float day=smoothstep(-.08,.12,geometricNL);
- vec3 direct=(m.color*(1.-m.metal)*(1.-F)+F*spec)*nl*visibility*day*sunRadiance;
- return m.color*(.025+.035*m.metal)+direct+m.emission;
+ // Preserve existing scene exposure convention (previous diffuse omitted 1/PI).
+ vec3 direct=(diffuse+spec)*PI*nl*visibility*day*sunRadiance;
+ return m.color*(.025+.035*metal)+direct+m.emission;
 }
-// Prototype direct lighting, not a complete PBR/IBL pipeline.
+// Direct PBR only: environment IBL is a separate, future integration.
