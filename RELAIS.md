@@ -208,3 +208,11 @@ Cadre : vision de Guillaume copiée dans `docs/VISION_PACK_COSMIQUE.md` (référ
 - Tests : render-audio 18/18, living-cities 9/9, v10-sharpness 4/4, world-v10/test.mjs OK, app-smoke OK (SwiftShader, copie locale du script avec playwright-core).
 - Smoke sans flag : 0 pageerror, 0 erreur shader ; les 6 `ERR_FAILED` viennent des ressources externes de la sandbox et sont identiques sur main 39862e4.
 - Diff V9 accepté par le chef (branche vs main 2.06 < main vs main 2.64). Rien poussé, rien fusionné.
+
+## 10.0.6 — fluidité du gros plan villes (`fix/v10-city-smooth`, local, non poussée) — 28/11/2026 9h40 (Paris)
+- Cause : au passage LOD 2 (pincement relâché ou atterrissage déjà proche), les GLB des villes étaient encore chargés et parsés sur le thread principal (séquentiel, ~27 ms de décodage hors iPhone pour 25 lots, fetches encore en cours 2 s après le zoom). En parallèle, la cible hors écran était réallouée à chaque cran de zoom, et les bâtiments apparaissaient sans fondu ; le shader living n'était compilé qu'au premier draw.
+- Correctifs (retour `?v10flow=0`) : préchargement dès l'approche (hôte dès 45 px, modèles dès LOD 1 / sélection) ; décodage étalé (budget 6 ms/frame, 4 fetches à la fois) ; upload GPU étalé ; préchauffage du shader ; fondu d'apparition ~300 ms (`uReveal`) ; pas de réduction de la cible pendant un geste, croissance avec marge.
+- Mesures Chromium headless + SwiftShader, viewport iPhone, qualité forcée 2, `?world10=1` — **hors appareil réel**. Approche pz 1,6 → 0,22 (pincement simulé puis relâché), frames 4–400 ms.
+  - avant (d016fb5) : max 395,8 ms, p95 324,5 ms, 54 frames > 33 ms / 78, 8 réalloc. de tampon pendant l'approche, 11 GLB au total, 0 draw living à la fin.
+  - après : max 231,7 ms, p95 184,9 ms, 57 frames > 33 ms / 71 (SwiftShader reste saturé à cette résolution : le taux > 33 ms ne s'améliore pas), 31 GLB, 25 draws living déjà prêts au LOD 2.
+- Tests : render-audio 18, living-cities 9, v10-sharpness 4, v10-city-smooth 7, world-v10/test.mjs et app-smoke OK. Flags éteints par défaut. V9 intact. Rien poussé.

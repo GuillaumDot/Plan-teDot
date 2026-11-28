@@ -10,7 +10,7 @@ import {createCityProgram,uploadCities} from './cities.mjs';
 import {loadCityModels} from './static-glb.mjs';
 import {uploadLandmarks} from './landmarks.mjs';
 import {loadVegetationModels,uploadVegetation} from './vegetation.mjs';
-import {livingPlacement,livingBatches,loadLivingModels,uploadLiving,createLivingProgram,drawLiving} from './living-cities.mjs';
+import {livingPlacement,livingBatches,loadLivingModels,uploadLiving,uploadLivingAsync,createLivingProgram,prewarmLivingProgram,drawLiving} from './living-cities.mjs';
 import {stormCenter} from './weather.mjs';
 const families=Object.keys(ARCHETYPES);
 const tints=[[.18,.45,1],[.12,.65,1],[.45,.38,.3],[1,.25,.08],[.4,.7,1],[.9,.65,.4],[.5,.3,1]];
@@ -24,16 +24,20 @@ export async function createPlanetRenderer(gl){
  try{neutral=gl.createTexture();if(!neutral)throw Error('Detail fallback allocation failed');gl.bindTexture(gl.TEXTURE_2D,neutral);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([128,128,128,255]));gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST);assertTextureGL(gl,'Detail fallback');}finally{gl.bindTexture(gl.TEXTURE_2D,previous);}
  }catch(e){if(neutral)gl.deleteTexture(neutral);if(vao)gl.deleteVertexArray(vao);p.dispose();throw e;}
  try{cityProgram=createCityProgram(gl);}catch(e){console.warn('City shader fallback:',e.message);}
+ try{if(isWebGL2(gl)){livingProgram=createLivingProgram(gl);prewarmLivingProgram(gl,livingProgram);}}catch(e){livingBroken=true;console.warn('[PlanèteDot V10] living cities fallback:',e?.message||e);}
  return {
  upload(world){if(disposed)throw new Error('Renderer disposed');const profile=planetProfile(world.type),maps=uploadWorldMaps(gl,world);let alive=true,revision=0,landmarkRevision=0,vegetationRevision=0,cityMesh=null;
  if(cityProgram)try{cityMesh=uploadCities(gl,world);}catch(e){console.warn('City mesh fallback:',e.message);}
  const planet={maps,profile,type:world.type,family:families.indexOf(world.type),size:world.size,stormCenter:stormCenter(world.type,world.seed??0),detail:null,heightDetail:null,audioEnergy:0,cityMesh,landmarks:null,vegetation:null,living:null,cities:(world.natural?.cities??[]).slice(0,16),livingTier:-1,livingInstances:null,
  // V10fp villes procédurales : modèles chargés au premier gros plan seulement (palier ≥ 1), jamais au palier 0.
- async loadLiving(tier){
+ async loadLiving(tier,{flow=true}={}){
   if(!alive||disposed||world.type!=='earth'||tier<1||planet.livingTier===tier)return false;
-  planet.livingTier=tier;const instances=livingPlacement(world,{tier});planet.livingInstances=instances;if(!instances.length)return false;
+  planet.livingTier=tier;
+  const instances=planet.livingInstances&&planet.livingInstances._tier===tier?planet.livingInstances:livingPlacement(world,{tier});
+  instances._tier=tier;planet.livingInstances=instances;if(!instances.length)return false;
   const models=await loadLivingModels(livingBatches(instances),{tier});if(!alive||disposed||planet.livingTier!==tier)return false;
-  const next=uploadLiving(gl,instances,models);planet.living?.dispose();planet.living=next;return !!next;
+  const next=flow?await uploadLivingAsync(gl,instances,models):uploadLiving(gl,instances,models);if(!alive||disposed||planet.livingTier!==tier){next?.dispose();return false;}
+  planet.living?.dispose();planet.living=next;return !!next;
  },
  async loadVegetation(options){
  if(!alive||disposed||world.type!=='earth'||!cityProgram||!world.natural?.vegetation?.length)return false;
@@ -73,12 +77,13 @@ export async function createPlanetRenderer(gl){
  gl.uniformMatrix4fv(u.uMVP,false,mvp);gl.uniform3fv(u.uEye,eye);gl.uniform3fv(u.uLight,light);gl.uniform1f(u.uSunIntensity,Math.max(0,Math.min(3,Number.isFinite(sunIntensity)?sunIntensity:1)));gl.uniform3fv(u.uSunColor,sunColor?.length===3&&Array.from(sunColor).every(Number.isFinite)?sunColor:[1,1,1]);gl.uniform1i(u.uFamily,planet.family);gl.uniform3fv(u.uAtmosphereTint,tints[planet.family]);gl.uniform1f(u.uAtmosphereDensity,planet.profile.base.atmosphere);gl.uniform1f(u.uRelief,planet.profile.base.relief*.12);gl.uniform1f(u.uShadowQuality,tier>=2?1:.35);gl.uniform3fv(u.uStormCenter,planet.stormCenter);gl.uniform1f(u.uTexel,2/planet.size);gl.uniform1f(u.uTime,Number.isFinite(time)?time:0);planet.audioEnergy=visualAudio(planet.audioEnergy,audio,delta);gl.uniform1f(u.uAudio,planet.audioEnergy);
  gl.drawElements(gl.TRIANGLES,mesh.count,gl.UNSIGNED_SHORT,0);
  const geometry=lod>=2;   // V10fp : sous 256 px à l'écran, les villes ne sont que des lumières dans la carte
- if(geometry&&tier>=1&&planet.cityMesh&&cityProgram)cityProgram.draw(planet.cityMesh,mvp,light,growth);
- if(geometry&&tier>=2&&growth>=1&&planet.landmarks&&cityProgram)cityProgram.draw(planet.landmarks,mvp,light,1,0,0,eye);
- if(geometry&&tier>=2&&planet.vegetation&&cityProgram)cityProgram.draw(planet.vegetation,mvp,light,1,time,fp?.reduced?0:.65+.35*planet.audioEnergy,eye);
- if(geometry&&tier>=1&&fp?.living&&planet.type==='earth'&&!livingBroken){
-  if(planet.livingTier!==tier)void planet.loadLiving(tier).catch(e=>{console.warn('[PlanèteDot V10] living cities fallback:',e?.message||e);});
-  if(planet.living){try{livingProgram??=createLivingProgram(gl);fp.draws=drawLiving(gl,livingProgram,planet.living,{mvp,eye,light,time,era:fp.era??5,growth:fp.growth??1,motion:fp.motion??1,wind:fp.wind??0,gain:fp.gain??1,focusCity:fp.focusCity??-1,focus:fp.focus??0,pop:fp.pop??0});}
+ const reveal=fp?.reveal==null?1:fp.reveal,shown=geometry&&reveal>0;
+ if(shown&&tier>=1&&planet.cityMesh&&cityProgram)cityProgram.draw(planet.cityMesh,mvp,light,growth*reveal);
+ if(shown&&tier>=2&&growth>=1&&planet.landmarks&&cityProgram&&reveal>.15)cityProgram.draw(planet.landmarks,mvp,light,1,0,0,eye);
+ if(shown&&tier>=2&&planet.vegetation&&cityProgram&&reveal>.15)cityProgram.draw(planet.vegetation,mvp,light,1,time,fp?.reduced?0:.65+.35*planet.audioEnergy,eye);
+ if(fp?.living&&tier>=1&&planet.type==='earth'&&!livingBroken){
+  if(planet.livingTier!==tier)void planet.loadLiving(tier,{flow:fp.flow!==false}).catch(e=>{console.warn('[PlanèteDot V10] living cities fallback:',e?.message||e);});
+  if(shown&&planet.living){try{livingProgram??=createLivingProgram(gl);fp.draws=drawLiving(gl,livingProgram,planet.living,{mvp,eye,light,time,era:fp.era??5,growth:fp.growth??1,motion:fp.motion??1,wind:fp.wind??0,gain:fp.gain??1,focusCity:fp.focusCity??-1,focus:fp.focus??0,pop:fp.pop??0,reveal});}
   catch(e){livingBroken=true;console.warn('[PlanèteDot V10] living cities disabled:',e?.message||e);}}
  }
  });

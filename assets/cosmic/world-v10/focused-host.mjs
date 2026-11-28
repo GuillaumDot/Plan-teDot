@@ -1,7 +1,7 @@
 // Host-driven focused-planet integration; no RAF, audio engine or persistence.
 import {createWorldAdapter,eligibleWorld} from './app-adapter.mjs';
 import {createSceneCompositor,sceneFrame} from './scene-bridge.mjs';
-import {fpFlags,v10Tier,lodLevel,targetCapForTier,targetPixelsForTier,audioPacket,cityGrowth,cityLightGain,fadeStep,defaultReactivity} from './full-potential.mjs';
+import {fpFlags,v10Tier,lodLevel,targetCapForTier,targetPixelsForTier,audioPacket,cityGrowth,cityLightGain,fadeStep,defaultReactivity,shouldWarmHost,CITY_FADE_SEC} from './full-potential.mjs';
 const TYPES=Object.freeze({0:'rock',1:'aquatic',2:'gas',3:'ice',4:'volcanic',6:'spectralMetallic',9:'spectralMetallic',10:'rock',11:'earth'});
 export function legacyDescriptor(p){
  if(!p||!Object.hasOwn(TYPES,p.type))return null;
@@ -24,7 +24,7 @@ export function createFocusedHost(gl,{enabled=false,makeAdapter=createWorldAdapt
    const owner=adapter,ok=await owner.init(gl);
    if(closed||failed||adapter!==owner)return false;
    if(!ok){fail(Error('V10 host initialization failed'));return false;}
-   compositor=makeCompositor(gl);if(lastTier>=0)owner.setTier?.(lastTier,{smooth:fx.smooth});return true;
+   compositor=makeCompositor(gl);if(lastTier>=0)owner.setTier?.(lastTier,{smooth:fx.smooth,flow:fx.flow});return true;
   }catch(e){fail(e);return false;}})();
   return initializing;
  }
@@ -43,8 +43,14 @@ export function createFocusedHost(gl,{enabled=false,makeAdapter=createWorldAdapt
     // Dot Design §0 et §2 : palier V10 0..3, cache par palier, LOD selon la taille à l'écran (V9 sous 64 px).
     tier=v10Tier(appTier,mobile);targetCap=targetCapForTier(tier);
     lod=lodLevel(lod,px,gesture);
-    if(tier!==lastTier){lastTier=tier;adapter?.setTier?.(tier,{smooth:fx.smooth});}
-    if(lod===0){if(requested!==null)stop();return false;}
+    if(tier!==lastTier){lastTier=tier;adapter?.setTier?.(tier,{smooth:fx.smooth,flow:fx.flow});}
+    if(lod===0){
+     // ?v10flow : préparer cuisson et modèles dès l'approche, tout en laissant V9 à l'écran tant que le LOD est 0.
+     const d0=legacyDescriptor(planet),warm=fx.flow&&shouldWarmHost(px)&&d0;
+     if(warm){const key=JSON.stringify([d0.type,d0.seed,d0.generatorVersion]);if(requested!==key)request(d0,key);}
+     else if(requested!==null)stop();
+     return false;
+    }
    }
    const d=legacyDescriptor(planet);
    if(!d){if(requested!==null)stop();return false;}
@@ -53,14 +59,15 @@ export function createFocusedHost(gl,{enabled=false,makeAdapter=createWorldAdapt
    // V10fp villes : ère atteinte, croissance pendant l'écoute du morceau de la planète, lumière la nuit suivant la basse.
    if(growKey!==key){growKey=key;grow=0;fade=0;}
    grow=cityGrowth(grow,{floor:.5+.5*(Number.isFinite(eraPc)?eraPc:1),playing,dt:delta,reducedMotion});
-   fade=fadeStep(fade,lod===null||lod>=2,delta);
+   const wantHouses=lod===null||lod>=2;
+   fade=reducedMotion||!fx.flow?(wantHouses?1:0):fadeStep(fade,wantHouses,delta,CITY_FADE_SEC);
    aud=audioPacket(fx.aud?(audioIn??{level:audio,live:audio>0?1:0}):{live:0},aud,delta,{reducedMotion,reactivity:reactivity??defaultReactivity(inApp)});
-   fp.living=!!fx.city&&tier>=1;fp.era=Math.max(0,Math.min(5,Math.trunc(era)||0));fp.growth=grow;fp.motion=reducedMotion||tier<1?0:1;fp.wind=reducedMotion||tier<2?0:.6+.4*aud.level;fp.gain=fade*cityLightGain(aud,1);fp.draws=0;fp.reduced=!!reducedMotion;
+   fp.living=!!fx.city&&tier>=1;fp.flow=!!fx.flow;fp.reveal=fx.flow?fade:1;fp.era=Math.max(0,Math.min(5,Math.trunc(era)||0));fp.growth=grow;fp.motion=reducedMotion||tier<1?0:1;fp.wind=reducedMotion||tier<2?0:.6+.4*aud.level;fp.gain=fade*cityLightGain(aud,1);fp.draws=0;fp.reduced=!!reducedMotion;
    // Interactions (?v10act=1) : la ville touchée s'illumine 0,5 s, tient 5 s, s'éteint en 1 s ; en « réduire les animations », lumière seule.
    if(fx.act&&focusI>=0){focusT+=gesture?0:Math.max(0,Math.min(.25,delta||0));const f=focusT<.5?focusT/.5:focusT<5.5?1:Math.max(0,1-(focusT-5.5));fp.focusCity=focusI;fp.focus=f;fp.pop=reducedMotion||tier<1?0:f;if(f<=0&&focusT>5.5)focusI=-1;}
    else{fp.focusCity=-1;fp.focus=fp.pop=0;}
    if(readyKey!==key||!adapter?.ready||!compositor||adapter.detailReady===false)return false;
-   try{const ok=compositor.draw(adapter,body,sceneFrame({basis,light,audio,time,delta,tier,growth,sunIntensity:body.sunI??1,sunColor:body.sun??[1,1,1],lod:fx.lod&&lod!==null?lod:2,targetCap,fp,targetPixels:fx.win&&appTier!==undefined?targetPixelsForTier(tier):0}),width,height);if(!ok)fail(Error('V10 composition failed'));return ok;}
+   try{const ok=compositor.draw(adapter,body,sceneFrame({basis,light,audio,time,delta,tier,growth,sunIntensity:body.sunI??1,sunColor:body.sun??[1,1,1],lod:fx.lod&&lod!==null?lod:2,targetCap,fp,gesture,flow:fx.flow,targetPixels:fx.win&&appTier!==undefined?targetPixelsForTier(tier):0}),width,height);if(!ok)fail(Error('V10 composition failed'));return ok;}
    catch(e){fail(e);return false;}
   },
   // Picking sans hit-testing GPU : direction du point touché (rayon/sphère côté hôte), puis ville la plus proche dans les données CPU.
