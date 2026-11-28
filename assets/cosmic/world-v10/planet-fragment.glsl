@@ -125,6 +125,8 @@ void main(){
  color=mix(color,vec3(.85)*(.08+.92*max(dot(n,l),0.)),cloud*.55);
  }
  color+=worldAtmosphere(n,v,l,uAtmosphereTint,uAtmosphereDensity);
- color=color/(1.+color);
+ // ACES filmic fit in linear space; bounded input for mediump and bright lava.
+ vec3 hdr=clamp(color,vec3(0.),vec3(32.));
+ color=clamp((hdr*(2.51*hdr+.03))/(hdr*(2.43*hdr+.59)+.14),0.,1.);
  gl_FragColor=vec4(pow(max(color,vec3(0.)),vec3(1./2.2)),1.);
 }
