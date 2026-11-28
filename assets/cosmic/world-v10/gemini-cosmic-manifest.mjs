@@ -37,7 +37,8 @@ export function resolveGeminiRenderPlan(familyKey,tierIndex,activeFlags=COSMIC_D
   if (!Object.values(FAMILY_KEYS).includes(family) || !checkTierMemorySafety(tierIndex,0)) throw RangeError('Invalid cosmic render plan');
   return Object.freeze({family,tier:tierIndex,flags:activeFlags,allowSurfaceCivilization:family==='terrestre'});
 }
-const chunks = {};
+import {createSharedReliefPool} from './shared-relief-pool.mjs';
+const chunks = {cosmicArtProfilesV1:['atmosphere','volcanic']};
 export async function prepareCosmicSession(search) {
   const flags=readCosmicFlags(search), sources={};
   await Promise.all(Object.entries(chunks).flatMap(([flag,names])=>flags[flag] ? names.map(async name=>{
@@ -45,5 +46,9 @@ export async function prepareCosmicSession(search) {
     if(!response.ok)throw Error(name+' HTTP '+response.status);
     sources[name]=await response.text();
   }) : []));
-  return {flags,sources,envelope:createAudioEnvelopeState(),updateAudioEnvelopeInPlace,resolveGeminiRenderPlan};
+  let reserved=0;
+  const session={flags,sources,tier:0,pool:createSharedReliefPool(),otherBytes:()=>0,
+    reserve(bytes){if(!checkTierMemorySafety(session.tier,session.otherBytes()+reserved,bytes))return false;reserved+=bytes;return true;},
+    release(bytes){reserved=Math.max(0,reserved-bytes);},get bytes(){return reserved;},envelope:createAudioEnvelopeState(),updateAudioEnvelopeInPlace,resolveGeminiRenderPlan};
+  return session;
 }

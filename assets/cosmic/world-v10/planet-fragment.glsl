@@ -117,6 +117,20 @@ void main(){
   float shadow=uShadowQuality>.5?worldTerrainShadow(uTerrain,n,l,terrain.r,uRelief,uTexel):worldTerrainShadowLite(uTerrain,n,l,terrain.r,uRelief,uTexel);
   visibility=mix(1.,shadow,land);
  }
+ #ifdef PD_ATMOSPHERE
+ m.roughness=pdComputeSafeRoughness(normal,mix(m.roughness,uArt.y,.16));
+ vec2 clouds=pdSampleCloudsAndShadow(n,l,uAudB.z,uCosmicEnv.y,uCosmicTier,uArt.z);
+ if(uFamily==0||uFamily==1||uFamily==3)visibility*=1.-clouds.y*.26;
+ if(uFamily==3){
+   vec2 uv=pdSphereUV(n);
+   vec3 ao=mix(vec3(1.,0.,0.),texture2D(uReliefAO,uv).rgb,uReliefReady);
+   vec3 tangent=pdDecodeBlenderNormal(texture2D(uReliefHN,uv).rg,.10*uReliefReady,1.);
+   vec3 east=vec3(-n.z,0.,n.x);
+   normal=normalize(normal+east*tangent.x+cross(n,east)*tangent.y);
+   m.color*=mix(.76,1.,ao.r);
+   m.emission=pdComputeVolcanicEmissive(climate.a,ao,uv,uCosmicEnv,uCosmicTier)+pdVolcanicAshUnderglow(clouds.x,climate.a,dot(n,l));
+ }
+ #endif
  vec3 color=shadeWorld(m,normal,l,v,visibility,clamp(uSunColor,vec3(0.),vec3(2.))*uSunIntensity, dot(n,l));
  if(uFamily==0||uFamily==1){
  float a=uTime*(.015+.008*cos(n.y*6.));
@@ -133,6 +147,10 @@ void main(){
  }
  // Atmosphère : limbe +8 % sur les médiums, teinte à peine plus chaude sur les voix.
  color+=worldAtmosphere(n,v,l,uAtmosphereTint,uAtmosphereDensity)*(1.+.08*mid)*vec3(1.+.05*mid,1.,1.-.04*mid);
+ #ifdef PD_ATMOSPHERE
+ color+=pdComputeAtmosphereScatter(n,v,l,uArtTint,uArt.x,uCosmicEnv.z);
+ if(uFamily<=1) color=mix(color,vec3(.76,.77,.79)*(.08+.65*max(dot(l,n),0.)),clouds.x*.14);
+ #endif
  color=color/(1.+color);
  gl_FragColor=vec4(pow(max(color,vec3(0.)),vec3(1./2.2)),1.);
 }

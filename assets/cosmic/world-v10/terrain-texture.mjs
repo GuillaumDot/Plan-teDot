@@ -4,14 +4,14 @@ import {isWebGL2} from './gl-compat.mjs';
 import {trackResource} from './resource-registry.mjs';
 const isPOT=n=>n>0&&(n&(n-1))===0;
 // WebKit may reject createImageBitmap for otherwise valid image blobs.
-async function decodeTerrainImage(blob){
+export async function decodeTerrainImage(blob){
  if(typeof createImageBitmap==='function'){try{return await createImageBitmap(blob);}catch(_){}}
  const url=URL.createObjectURL(blob);
  try{return await new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=()=>reject(Error('Terrain image decode failed'));img.src=url;});}
  finally{URL.revokeObjectURL(url);}
 }
 // Shared pixel-store state: uploads must not inherit the legacy logo/atlas settings.
-function withTerrainUnpack(gl,fn){
+export function withTerrainUnpack(gl,fn){
  const keys=[gl.UNPACK_FLIP_Y_WEBGL,gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,gl.UNPACK_ALIGNMENT,gl.UNPACK_COLORSPACE_CONVERSION_WEBGL];
  const old=keys.map(k=>gl.getParameter(k));
  try{[false,false,4,gl.NONE].forEach((v,i)=>gl.pixelStorei(keys[i],v));return fn();}

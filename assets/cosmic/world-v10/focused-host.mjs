@@ -11,6 +11,7 @@ export function legacyDescriptor(p){
  return eligibleWorld(d)?d:null;
 }
 export function createFocusedHost(gl,{enabled=false,makeAdapter=createWorldAdapter,makeCompositor=createSceneCompositor,onFallback=()=>{},search='',cosmic=null}={}){
+ if(cosmic) cosmic.otherBytes=()=>Math.max(cosmic.baseReserve??0,(adapter?.gpuBytes??0)+(compositor?.bytes??0));
  const fx=fpFlags(search);let lod=null,lastTier=-1,grow=0,growKey=null,fade=0;
  const aud={},audOpts={reducedMotion:false,reactivity:'full'};   // paquet audio et options réutilisés : aucune allocation par image
  let focusI=-1,focusT=9,cityDirs=null,cityKey=null;const focusOut={city:-1,level:0};   // objets réutilisés : aucune allocation par image ni au tap

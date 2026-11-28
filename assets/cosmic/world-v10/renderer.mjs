@@ -14,12 +14,16 @@ import {livingPlacement,livingBatches,loadLivingModels,uploadLiving,uploadLiving
 import {stormCenter} from './weather.mjs';
 import {createParticleProgram} from './particles.mjs';
 import {WAVE_PERIOD,STORM_PERIOD,particleBudget} from './full-potential.mjs';
+import {createCosmicPlanet} from './cosmic-planet.mjs';
 const families=Object.keys(ARCHETYPES);
 const tints=[[.18,.45,1],[.12,.65,1],[.45,.38,.3],[1,.25,.08],[.4,.7,1],[.9,.65,.4],[.5,.3,1]];
 // Dedicated context or caller-managed GL state. No animation loop is created.
-export async function createPlanetRenderer(gl){
+export async function createPlanetRenderer(gl,session=null){
  if(gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS)<4)throw new Error('Four fragment samplers required');
- const p=await loadPlanetProgram(gl),meshes=new Map();let disposed=false,neutral=null,cityProgram=null,vao=null,livingProgram=null,livingBroken=false,trafficProgram=null,trafficBroken=false,particles=null,particlesBroken=false;const fallbackAudio=new Float32Array(8);
+ const cosmic=createCosmicPlanet(gl,session);
+ let p;try{p=await loadPlanetProgram(gl,cosmic);}catch(e){cosmic?.dispose();throw e;}
+ const saved=cosmic?Array(7*3):null;
+ const meshes=new Map();let disposed=false,neutral=null,cityProgram=null,vao=null,livingProgram=null,livingBroken=false,trafficProgram=null,trafficBroken=false,particles=null,particlesBroken=false;const fallbackAudio=new Float32Array(8);
  try{
  if(isWebGL2(gl)){vao=gl.createVertexArray();if(!vao)throw Error('V10 VAO allocation failed');}
  const previous=gl.getParameter(gl.TEXTURE_BINDING_2D);
@@ -30,7 +34,7 @@ export async function createPlanetRenderer(gl){
  return {
  upload(world){if(disposed)throw new Error('Renderer disposed');const profile=planetProfile(world.type),maps=uploadWorldMaps(gl,world);let alive=true,revision=0,landmarkRevision=0,vegetationRevision=0,cityMesh=null;
  if(cityProgram)try{cityMesh=uploadCities(gl,world);}catch(e){console.warn('City mesh fallback:',e.message);}
- const planet={maps,profile,type:world.type,family:families.indexOf(world.type),size:world.size,stormCenter:stormCenter(world.type,world.seed??0),detail:null,heightDetail:null,audioEnergy:0,cityMesh,landmarks:null,vegetation:null,living:null,cities:(world.natural?.cities??[]).slice(0,16),livingTier:-1,livingInstances:null,traffic:null,trafficTier:-1,
+ const planet={cosmic:cosmic?.plan(world.type,world.seed),maps,profile,type:world.type,family:families.indexOf(world.type),size:world.size,stormCenter:stormCenter(world.type,world.seed??0),detail:null,heightDetail:null,audioEnergy:0,cityMesh,landmarks:null,vegetation:null,living:null,cities:(world.natural?.cities??[]).slice(0,16),livingTier:-1,livingInstances:null,traffic:null,trafficTier:-1,
  // V10fp interactions (?v10act=1) : trafic lumineux sur les routes, placé en CPU une fois par palier, sans téléchargement.
  ensureTraffic(tier){if(!alive||disposed||world.type!=='earth'||planet.trafficTier===tier)return planet.traffic;planet.trafficTier=tier;planet.traffic?.dispose();planet.traffic=uploadTraffic(gl,trafficPlacement(world,{tier}));return planet.traffic;},
  // V10fp villes procédurales : modèles chargés au premier gros plan seulement (palier ≥ 1), jamais au palier 0.
@@ -66,7 +70,7 @@ export async function createPlanetRenderer(gl){
  return alive&&!disposed&&id===revision&&!!asset;
  },
  gpuBytes(){return (maps.bytes||0)+(planet.detail?.bytes||0)+(planet.heightDetail?.bytes||0)+(planet.pbr?.bytes||0)+(cityMesh?.bytes||0)+(planet.living?.bytes||0)+(planet.traffic?.bytes||0);},
- dispose(){if(!alive)return;alive=false;revision++;planet.detail?.dispose();planet.detail=null;planet.heightDetail?.dispose();planet.heightDetail=null;cityMesh?.dispose();planet.cityMesh=null;planet.landmarks?.dispose();planet.landmarks=null;planet.vegetation?.dispose();planet.vegetation=null;planet.living?.dispose();planet.living=null;planet.traffic?.dispose();planet.traffic=null;maps.dispose();}
+ dispose(){if(!alive)return;alive=false;revision++;cosmic?.release(planet.cosmic);planet.detail?.dispose();planet.detail=null;planet.heightDetail?.dispose();planet.heightDetail=null;cityMesh?.dispose();planet.cityMesh=null;planet.landmarks?.dispose();planet.landmarks=null;planet.vegetation?.dispose();planet.vegetation=null;planet.living?.dispose();planet.living=null;planet.traffic?.dispose();planet.traffic=null;maps.dispose();}
  };return planet;},
  draw(planet,{mvp,eye=[0,0,3],light=[-.45,.35,.82],tier=2,time=0,audio=0,delta=1/60,detailStrength=.8,microStrength=.8,growth=1,sunIntensity=1,sunColor=[1,1,1],lod=2,fp=null,viewPx=480}){
  if(disposed||gl.isContextLost())return;
@@ -82,6 +86,7 @@ export async function createPlanetRenderer(gl){
  // Audio V10 : paquet complet de l'hôte (2 vec4) ; sans paquet (anciens appelants), seul le niveau global existe et les phases suivent le temps.
  const au=fp?.aud?.u??(fallbackAudio[3]=planet.audioEnergy,fallbackAudio[5]=(Number.isFinite(time)?time:0)%WAVE_PERIOD,fallbackAudio[6]=(Number.isFinite(time)?time:0)%STORM_PERIOD,fallbackAudio[7]=1,fallbackAudio);
  gl.uniform4f(u.uAudA,au[0],au[1],au[2],au[3]);gl.uniform4f(u.uAudB,au[4],au[5],au[6],au[7]);
+ cosmic?.bind(u,planet,tier,neutral,fp);
  gl.drawElements(gl.TRIANGLES,mesh.count,gl.UNSIGNED_SHORT,0);
  const geometry=lod>=2;   // V10fp : sous 256 px à l'écran, les villes ne sont que des lumières dans la carte
  const reveal=fp?.reveal==null?1:fp.reveal,shown=geometry&&reveal>0;
@@ -105,9 +110,9 @@ export async function createPlanetRenderer(gl){
     fp.draws=(fp.draws||0)+particles.draw({mvp,light,time:Number.isFinite(time)?time:0,count:pb.count,px:Math.max(.8,Math.min(2.2,viewPx/520)),reactive,high:reactive?au[2]:0,burstAge:reactive&&A?A.burstAge:9,burstSeed:A?.burstSeed??0,tint:tints[planet.family]});
     if(vao)gl.bindVertexArray(vao);}}
   catch(e){particlesBroken=true;console.warn('[PlanèteDot V10] particles disabled:',e?.message||e);}}
- });
+ },saved);
  },
- dispose(){if(!disposed){disposed=true;for(const mesh of meshes.values())mesh.dispose();meshes.clear();gl.deleteTexture(neutral);if(vao)gl.deleteVertexArray(vao);cityProgram?.dispose();livingProgram?.dispose();trafficProgram?.dispose();particles?.dispose();p.dispose();}}
+ dispose(){if(!disposed){disposed=true;cosmic?.dispose();for(const mesh of meshes.values())mesh.dispose();meshes.clear();gl.deleteTexture(neutral);if(vao)gl.deleteVertexArray(vao);cityProgram?.dispose();livingProgram?.dispose();trafficProgram?.dispose();particles?.dispose();p.dispose();}}
  };
 }
 // Uploaded planets are caller-owned and must be disposed separately.

@@ -3733,11 +3733,19 @@ pd9PbrInit();
 // V9.4 · relief cuit dans Blender (essai sur le volcan principal) : chargé après l'ouverture, sans rien bloquer.
 // S'il manque ou si le téléphone refuse, le volcan V9.3 reste tel quel. ?relief=0 pour comparer.
 const PDRV = {on: 0, tx:null};
+if(cosmic){
+  cosmic.tier = TIER===2 && !matchMedia('(pointer:coarse)').matches ? 3 : TIER;
+  // Envelope for the existing V10 world + target. Subtract it before sharing the remaining headroom.
+  cosmic.baseReserve=[3,7,15,17][cosmic.tier]*1048576;
+  cosmic.otherBytes=()=>cosmic.baseReserve;
+  cv.addEventListener('webglcontextlost',()=>cosmic.pool.onContextLost());
+}
 function pdRvInit(){
   if (!SP.u.uVS0 || !SP.u.uVS1 || !SP.u.uVSOn) return;
   const G = gl, one = new Uint8Array([128, 128, 0, 255]);
   const tx = [pdTxMk(5, G.TEXTURE_2D, G.CLAMP_TO_EDGE, G.CLAMP_TO_EDGE, true), pdTxMk(6, G.TEXTURE_2D, G.CLAMP_TO_EDGE, G.CLAMP_TO_EDGE, true)];
   tx.forEach((t, i) => pdTxUp(5 + i, () => { G.bindTexture(G.TEXTURE_2D, t); G.texImage2D(G.TEXTURE_2D, 0, G.RGBA, 1, 1, 0, G.RGBA, G.UNSIGNED_BYTE, one); }));
+  const shared=cosmic?.flags.cosmicArtProfilesV1?cosmic.pool.acquire('volcan',()=>({textures:tx,bytes:0,ready:false})):null;
   PDRV.tx=tx; const pp = G.getParameter(G.CURRENT_PROGRAM); G.useProgram(SP.p); G.uniform1i(SP.u.uVS0, 5); G.uniform1i(SP.u.uVS1, 6); G.uniform1f(SP.u.uVSOn, 0); G.useProgram(pp);
   if (new URLSearchParams(location.search).get('relief') === '0') return;
   const sz = TIER === 0 ? '-512' : '', base = new URL('assets/blender/relief/', document.baseURI);
@@ -3745,8 +3753,16 @@ function pdRvInit(){
   setTimeout(async () => { try {
       const a = await load('volcan-hn' + sz + '.png'), b = a && await load('volcan-ao' + sz + '.png');
       if (!a || !b || G.isContextLost()) return; while (!pd96Calm()) await new Promise(r => setTimeout(r, 120));   // V9.6 : jamais pendant le tour du logo
-      [a, b].forEach((im, i) => pdTxUp(5 + i, () => { G.bindTexture(G.TEXTURE_2D, tx[i]); G.pixelStorei(G.UNPACK_FLIP_Y_WEBGL, true); G.texImage2D(G.TEXTURE_2D, 0, G.RGBA, G.RGBA, G.UNSIGNED_BYTE, im); G.generateMipmap(G.TEXTURE_2D); }));
-      const p2 = G.getParameter(G.CURRENT_PROGRAM); G.useProgram(SP.p); G.uniform1f(SP.u.uVSOn, 1); G.useProgram(p2); PDRV.on = 1;
+      let images=[a,b];
+      if(shared){
+        let size=Math.min(a.width,cosmic.tier===0?128:256);
+        while(size>=64 && !cosmic.reserve(Math.ceil(2*size*size*4*4/3)))size/=2;
+        if(size<64)return;
+        shared.bytes=Math.ceil(2*size*size*4*4/3);
+        images=images.map(im=>{const c=document.createElement('canvas');c.width=c.height=size;c.getContext('2d').drawImage(im,0,0,size,size);return c;});
+      }
+      images.forEach((im, i) => pdTxUp(5 + i, () => { G.bindTexture(G.TEXTURE_2D, tx[i]); G.pixelStorei(G.UNPACK_FLIP_Y_WEBGL, true); G.texImage2D(G.TEXTURE_2D, 0, G.RGBA, G.RGBA, G.UNSIGNED_BYTE, im); G.generateMipmap(G.TEXTURE_2D); }));
+      const p2 = G.getParameter(G.CURRENT_PROGRAM); G.useProgram(SP.p); G.uniform1f(SP.u.uVSOn, 1); G.useProgram(p2); PDRV.on = 1; if(shared)shared.ready=true;
     } catch(e){ console.warn('[PlanèteDot] relief Blender indisponible, volcan V9.3 gardé', e); } }, 2500);
 }
 pdRvInit();
