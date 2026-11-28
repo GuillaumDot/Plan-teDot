@@ -19,7 +19,10 @@ uniform float uRelief;
 uniform float uShadowQuality;
 uniform float uTexel;
 uniform float uTime;
-uniform float uAudio;
+// Audio V10 (2 vec4, aucune texture) : uAudA=(basses, médiums, aigus, niveau) lissés 0..1 ; uAudB=(kick, phase des vagues, phase des cyclones, plafond de lumière).
+// Les phases sont accumulées côté CPU (jamais temps × vitesse). L'audio ne change JAMAIS le terrain : il ne module que lumière, normales d'eau, phases et nuages.
+uniform vec4 uAudA;
+uniform vec4 uAudB;
 uniform vec3 uStormCenter;
 // Triplanar detail: no longitude seam or polar singularity. Mirrored repeat
 // works on NPOT textures in WebGL 1 without changing sampler wrap modes.
@@ -55,12 +58,15 @@ vec3 microRelief(vec3 n,vec3 base,vec2 tile,float strength){
 }
 void main(){
  vec3 n=normalize(vDirection),l=normalize(uLight),v=normalize(uEye-n);
+ float bass=uAudA.x,mid=uAudA.y,level=uAudA.w,kick=uAudB.x,cap=uAudB.w;
+ // Lumières de ville : jusqu'à +20 % (basses + kick), la nuit seulement (le masque de nuit est déjà dans la ligne d'émission).
+ float cityPulse=min(.12*bass+.08*kick,min(.2,cap));
  vec4 terrain=textureCube(uTerrain,n),climate=textureCube(uClimate,n);
  // Gas bands move at different angular speeds according to latitude.
  if(uFamily==5){
   float drift=.018+.028*sin(n.y*12.);
   climate.b=textureCube(uClimate,rotateAtmosphere(n,uTime*drift)).b;
-  if(uShadowQuality>.5)climate.b=mix(climate.b,.93,worldStorm(n,rotateAtmosphere(uStormCenter,uTime*.009),uTime,.32)*.48);
+  if(uShadowQuality>.5)climate.b=mix(climate.b,.93,worldStorm(n,rotateAtmosphere(uStormCenter,uTime*.009),uAudB.z,.32)*.48);
  }
  WorldMaterial m=worldMaterial(uFamily,terrain,climate);
  vec2 microTile=vec2(0.);float microConfidence=1.;
@@ -88,22 +94,23 @@ void main(){
  // Earth-only channels: climate.a = river, terrain.a = city site.
  if(uFamily==0){
  m.color=mix(m.color,vec3(.018,.075,.095),climate.a*(1.-terrain.g)*.24);
- m.emission+=vec3(1.,.56,.19)*pow(terrain.a,3.)*.22*(1.-terrain.g)*(1.-smoothstep(-.15,.15,dot(n,l)));
+ m.emission+=vec3(1.,.56,.19)*pow(terrain.a,3.)*.22*(1.+cityPulse)*(1.-terrain.g)*(1.-smoothstep(-.15,.15,dot(n,l)));
  }
  vec3 normal=n;
  if(uFamily!=5)normal=worldReliefNormal(uTerrain,n,uRelief*(1.-terrain.g),uTexel);
  if(uFamily!=5&&uMicroStrength>0.){float land=(uFamily==0||uFamily==1)?(1.-terrain.g)*(1.-terrain.b):1.;normal=microRelief(n,normal,microTile,uMicroStrength*land*microConfidence);}
  if(uFamily==0||uFamily==1){
   float openWater=terrain.g*(1.-terrain.b);
-  normal=normalize(mix(normal,worldOceanNormal(n,uTime,uAudio),openWater));
-  m.roughness=mix(m.roughness,.12+.07*clamp(uAudio,0.,1.),openWater);
+  normal=normalize(mix(normal,worldOceanNormal(n,uAudB.y,bass,level),openWater));
+  m.roughness=mix(m.roughness,.12+.07*clamp(level,0.,1.),openWater);
  }
  if(uFamily==3){
   // Existing lava mask is stable; slow thermal pulses affect light only.
   float pulse=.86+.14*sin(uTime*.7+dot(n,vec3(12.,19.,7.)));
-  m.emission*=pulse;
+  // Lave : +18 % sur les basses et une chaleur qui retombe après le kick (au plus +25 %, +20 % en « réduire les animations »).
+  m.emission*=pulse*min(1.+.18*bass+.07*kick,1.+cap);
  }
- m.emission*=1.+.15*clamp(uAudio,0.,1.);
+ if(uFamily!=0&&uFamily!=3)m.emission*=1.+min(.08*clamp(level,0.,1.),cap);
  float visibility=1.;
  if(uFamily!=5 && uShadowQuality>0.){
   float land=(uFamily==0||uFamily==1)?1.-terrain.g:1.;
@@ -119,12 +126,13 @@ void main(){
   vec3 center=rotateAtmosphere(uStormCenter,uTime*.009);
   vec4 localTerrain=textureCube(uTerrain,center),localClimate=textureCube(uClimate,center);
   float stormActivity=smoothstep(.65,.95,localTerrain.g)*smoothstep(.45,.7,localClimate.r)*(1.-localTerrain.b);
-  cloud=max(cloud,worldStorm(n,center,uTime,.24)*stormActivity*.88);
+  cloud=max(cloud,worldStorm(n,center,uAudB.z,.24)*stormActivity*.88);
  }
  color*=worldCloudShadow(uClimate,q,l,.7);
- color=mix(color,vec3(.85)*(.08+.92*max(dot(n,l),0.)),cloud*.55);
+ color=mix(color,vec3(.85)*(.08+.92*max(dot(n,l),0.)),cloud*(.55+.06*mid));
  }
- color+=worldAtmosphere(n,v,l,uAtmosphereTint,uAtmosphereDensity);
+ // Atmosphère : limbe +8 % sur les médiums, teinte à peine plus chaude sur les voix.
+ color+=worldAtmosphere(n,v,l,uAtmosphereTint,uAtmosphereDensity)*(1.+.08*mid)*vec3(1.+.05*mid,1.,1.-.04*mid);
  color=color/(1.+color);
  gl_FragColor=vec4(pow(max(color,vec3(0.)),vec3(1./2.2)),1.);
 }
