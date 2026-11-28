@@ -1,6 +1,7 @@
 import {resolveTerrain} from './catalog.mjs';
 import {assertTextureGL} from './texture-guard.mjs';
 import {isWebGL2} from './gl-compat.mjs';
+import {trackResource} from './resource-registry.mjs';
 const isPOT=n=>n>0&&(n&(n-1))===0;
 // WebKit may reject createImageBitmap for otherwise valid image blobs.
 async function decodeTerrainImage(blob){
@@ -20,8 +21,9 @@ export async function loadTerrainAlbedo(gl,type,biome,{maxSize=512,signal,channe
  const asset=resolveTerrain(type,biome);if(!asset)return null;
  if(!['albedo','height'].includes(channel))throw new RangeError('Invalid terrain channel');
  const url=new URL('../../../'+asset[channel],import.meta.url);
- const response=await fetch(url,{signal});if(!response.ok)throw new Error('Terrain HTTP '+response.status);
- const bitmap=await decodeTerrainImage(await response.blob());
+ const response=await fetch(url,{signal});if(!response.ok){trackResource(asset[channel],'failed');throw new Error('Terrain HTTP '+response.status);}
+ const blob=await response.blob();trackResource(asset[channel],'ready',blob.size);
+ const bitmap=await decodeTerrainImage(blob);
  let texture=null;
  try{
  if(signal?.aborted)throw new DOMException('Aborted','AbortError');
@@ -52,8 +54,9 @@ export async function loadEarthDetailAtlas(gl,{maxSize=256,signal,channel='albed
   if(signal?.aborted)throw new DOMException('Aborted','AbortError');
   const asset=resolveTerrain('earth',biome);
   const response=await fetch(new URL('../../../'+asset[channel],import.meta.url),{signal});
-  if(!response.ok)throw Error('Atlas '+biome+' HTTP '+response.status);
-  const bitmap=await decodeTerrainImage(await response.blob());
+  if(!response.ok){trackResource(asset[channel],'failed');throw Error('Atlas '+biome+' HTTP '+response.status);}
+  const blob=await response.blob();trackResource(asset[channel],'ready',blob.size);
+  const bitmap=await decodeTerrainImage(blob);
   try{ctx.drawImage(bitmap,(i%2)*tile,Math.floor(i/2)*tile,tile,tile);}finally{bitmap.close?.();}
  }
  if(signal?.aborted)throw new DOMException('Aborted','AbortError');

@@ -1,6 +1,7 @@
 import {BIOMES,hash4,cellOf} from '../natural-world-v22/world.mjs';
 import {decodeStaticGLB,MODEL_VERTEX_STRIDE} from './static-glb.mjs';
 import {assertTextureGL} from './texture-guard.mjs';
+import {trackResource} from './resource-registry.mjs';
 export const VEGETATION_BUDGET=6000;
 export const VEGETATION_PATHS=Object.freeze(Object.fromEntries(['broadleaf','pine','cactus'].map(k=>[k,'assets/cosmic/world/expansion-v14/models/'+k+'-01.glb'])));
 const dot=(a,b)=>a.reduce((s,x,i)=>s+x*b[i],0);
@@ -33,8 +34,8 @@ export async function loadVegetationModels({signal}={}){
  const models={};
  for(const [kind,path] of Object.entries(VEGETATION_PATHS)){
   if(signal?.aborted)throw new DOMException('Aborted','AbortError');
-  try{const r=await fetch(new URL('../../../'+path,import.meta.url),{signal});if(!r.ok)throw Error('Vegetation HTTP '+r.status);models[kind]=decodeStaticGLB(await r.arrayBuffer(),{maxTriangles:VEGETATION_BUDGET});}
-  catch(e){if(signal?.aborted)throw e;console.warn('Vegetation fallback:',kind,e.message);}
+  try{const r=await fetch(new URL('../../../'+path,import.meta.url),{signal});if(!r.ok)throw Error('Vegetation HTTP '+r.status);const buf=await r.arrayBuffer();models[kind]=decodeStaticGLB(buf,{maxTriangles:VEGETATION_BUDGET});trackResource(path,'ready',buf.byteLength);}
+  catch(e){if(signal?.aborted)throw e;trackResource(path,'failed');console.warn('Vegetation fallback:',kind,e.message);}
  }
  return models;
 }
