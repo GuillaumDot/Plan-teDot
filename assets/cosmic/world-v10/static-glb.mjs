@@ -1,5 +1,6 @@
 // Restricted glTF 2.0 reader for our static, embedded, indexed triangle models.
 // No external buffers, compression, skins, animation or texture decoding.
+import {trackResource} from './resource-registry.mjs';
 export const MODEL_TRIANGLE_BUDGET=12000;
 export const MODEL_VERTEX_STRIDE=11;
 const clamp01=x=>Number.isFinite(x)?Math.max(0,Math.min(1,x)):1;
@@ -59,9 +60,9 @@ export function decodeStaticGLB(buffer,{maxTriangles=MODEL_TRIANGLE_BUDGET}={}){
 export async function loadCityModel({signal,kind='cottage'}={}){
  if(!Object.hasOwn(CITY_MODEL_PATHS,kind))throw new RangeError('Unknown city model');
  const response=await fetch(new URL('../../../'+CITY_MODEL_PATHS[kind],import.meta.url),{signal});
- if(!response.ok)throw Error('City GLB HTTP '+response.status);
+ if(!response.ok){trackResource(CITY_MODEL_PATHS[kind],'failed');throw Error('City GLB HTTP '+response.status);}
  const buffer=await response.arrayBuffer();if(signal?.aborted)throw new DOMException('Aborted','AbortError');
- return decodeStaticGLB(buffer);
+ const model=decodeStaticGLB(buffer);trackResource(CITY_MODEL_PATHS[kind],'ready',buffer.byteLength);return model;
 }
 
 export async function loadCityModels(options={}){
