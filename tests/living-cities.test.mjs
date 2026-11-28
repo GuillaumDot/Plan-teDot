@@ -7,7 +7,7 @@ import * as L from '../assets/cosmic/world-v10/living-cities.mjs';
 import {fpFlags} from '../assets/cosmic/world-v10/full-potential.mjs';
 const earth=bakeWorld('earth',12345,128),earth2=bakeWorld('earth',777,128);
 const file=p=>{const b=fs.readFileSync(new URL('../'+p,import.meta.url));return {ok:true,arrayBuffer:async()=>b.buffer.slice(b.byteOffset,b.byteOffset+b.byteLength)};};
-const fetcher=async u=>file(decodeURIComponent(new URL(u).pathname).split('/repo/')[1]);
+const fetcher=async u=>file((x=>x.slice(x.indexOf('/assets/')+1))(decodeURIComponent(new URL(u).pathname)));
 test('placement is deterministic per seed and differs between seeds',()=>{
  assert.deepEqual(L.livingPlacement(earth,{tier:3}),L.livingPlacement(bakeWorld('earth',12345,128),{tier:3}));
  assert.notDeepEqual(L.livingPlacement(earth,{tier:3}).map(i=>i.dir),L.livingPlacement(earth2,{tier:3}).map(i=>i.dir));
@@ -33,8 +33,10 @@ test('era gating and listening growth: nothing before era 1, all at era 5 and fu
 });
 test('GLB loading on demand stays within the tier triangle and memory budget',async()=>{
  for(const t of [1,2,3]){const inst=L.livingPlacement(earth,{tier:t}),models=await L.loadLivingModels(L.livingBatches(inst),{tier:t,fetcher});
-  const tris=Object.values(models).reduce((s,m)=>s+m.triangles,0);assert.ok(tris>0&&tris<=L.livingTier(t).triangles);
+  const tris=[...new Set(Object.values(models))].reduce((s,m)=>s+m.triangles,0);   // doublons du registre partagés : comptés une fois
+  if(models['market-01']&&models['rail_station-01'])assert.equal(models['market-01'],models['rail_station-01'],'market et rail_station partagent le même modèle');assert.ok(tris>0&&tris<=L.livingTier(t).triangles);
   const bytes=L.livingBytes(models,inst.length);assert.ok(bytes<[0,.5,1,2][t]*1024*1024,'tier '+t+' '+bytes);}
+ const keys=Object.keys(await L.loadLivingModels(L.livingBatches(L.livingPlacement(earth,{tier:3})),{tier:3,fetcher}));assert.ok(keys.some(k=>k.startsWith('rail_station'))||keys.some(k=>k.startsWith('solar_array')),'au moins un doublon exercé au palier 3: '+keys.join(','));
 });
 test('city light colours: sodium and LED only, never #1e8bf1; no hit-testing or readPixels',()=>{
  const src=fs.readFileSync(new URL('../assets/cosmic/world-v10/living-cities.mjs',import.meta.url),'utf8');

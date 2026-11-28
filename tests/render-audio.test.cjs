@@ -61,3 +61,40 @@ test('v10fp audio 5: no createMediaElementSource on the music element',()=>{asse
 test('v10fp cities grow only while the planet track plays, never shrink',async()=>{const m=await import(fpUrl);
  let g=m.cityGrowth(0,{floor:.2});assert.equal(g,.2);g=m.cityGrowth(g,{floor:.2,playing:true,dt:.1});assert.ok(g>.2);const h=m.cityGrowth(g,{floor:.2,playing:false,dt:10});assert.equal(h,g);
  assert.equal(m.cityGrowth(.3,{playing:true,reducedMotion:true}),1);});
+
+// V10 audio complet (feature/v10-audio) : paquet sur place, phases accumulées, 2 uniformes vec4, particules, garde-fous statiques.
+const v10dir=path.join(__dirname,'..','assets','cosmic','world-v10');
+const read=f=>fs.readFileSync(path.join(v10dir,f),'utf8');
+test('v10audio 6: packet is updated in place (no allocation per frame) and exposes the 8 floats of the 2 vec4',async()=>{const m=await import(fpUrl);
+ const s={};const r=m.audioPacket({bass:.5,mid:.4,high:.3,level:.6,kick:0,kickAge:9,live:1},s,1/60);assert.equal(r,s);const u=s.u;assert.ok(u instanceof Float32Array&&u.length===8);
+ for(let i=0;i<120;i++)m.audioPacket({bass:.5,mid:.4,high:.3,level:.6,kick:0,kickAge:9,live:1},s,1/60);assert.equal(s.u,u,'same Float32Array every frame');
+ assert.ok(Math.abs(u[0]-.5)<.01&&Math.abs(u[1]-.4)<.01&&Math.abs(u[2]-.3)<.01&&Math.abs(u[3]-.6)<.01);assert.equal(u[7],1);
+ const opts={reducedMotion:true,reactivity:'full'};m.audioPacket({bass:1,live:1},s,1/60,opts);assert.ok(Math.abs(s.u[7]-.2)<1e-6);});
+test('v10audio 7: wave and storm phases are accumulated, continuous, wrap exactly on the shader period, and only speed up with the bass',async()=>{const m=await import(fpUrl);
+ const run=(bass,reduced)=>{const s={};let maxStep=0,prev=0,wraps=0;for(let i=0;i<60*120;i++){m.audioPacket({bass,mid:0,high:0,level:bass,kick:0,kickAge:9,live:1},s,1/60,{reducedMotion:reduced,reactivity:'full'});let step=s.wave-prev;if(step<-1){wraps++;step+=m.WAVE_PERIOD;}maxStep=Math.max(maxStep,step);prev=s.wave;}return {maxStep,wraps,wave:s.wave};};
+ const calm=run(0,false),loud=run(1,false),red=run(1,true);
+ assert.ok(Math.abs(calm.maxStep-1/60)<1e-6,'calm speed = 1×');assert.ok(loud.maxStep<=(1+.6)/60+1e-6&&loud.maxStep>calm.maxStep,'bass speeds up to ×1.6, no jump');assert.ok(Math.abs(red.maxStep-1/60)<1e-6,'reduced motion: no speed modulation');
+ assert.ok(loud.wraps>=1);for(const k of [.9,1.3,1.7])assert.ok(Math.abs(Math.sin(m.WAVE_PERIOD*k/2))<1e-9,'wave period is a multiple of 2π/'+k);assert.ok(Math.abs(Math.sin(m.STORM_PERIOD*.55/2))<1e-9);});
+test('v10audio 8: shader packs audio in exactly 2 vec4 uniforms, caps lights, keeps terrain untouched',()=>{const f=read('planet-fragment.glsl'),r=read('relief-atmosphere.glsl'),p=read('program.mjs');
+ assert.match(f,/uniform vec4 uAudA;/);assert.match(f,/uniform vec4 uAudB;/);assert.doesNotMatch(f,/\buAudio\b/);assert.match(p,/'uAudA','uAudB'/);
+ assert.match(f,/cityPulse=min\(\.12\*bass\+\.08\*kick,min\(\.2,cap\)\)/,'city lights: +20 % max');assert.match(f,/1\.\+\.18\*bass\+\.07\*kick,1\.\+cap/,'lava: +25 % max, +20 % reduced');
+ assert.match(f,/worldOceanNormal\(n,uAudB\.y,bass,level\)/,'ocean waves driven by the accumulated phase');assert.match(f,/worldStorm\(n,center,uAudB\.z/,'cyclones on the accumulated phase');assert.match(r,/\.35\*clamp\(bass/);
+ // l'audio ne modifie jamais le terrain : aucune lecture audio avant les cartes terrain/climat, aucune écriture de texture ni de maillage depuis le paquet
+ assert.doesNotMatch(f.slice(0,f.indexOf('void main')),/uAud[AB]\s*[\*\+]/);assert.doesNotMatch(read('renderer.mjs'),/texSubImage2D|bufferSubData/);
+ assert.doesNotMatch(f,/vec4 terrain=textureCube\(uTerrain,n\)[^;]*uAud/);});
+test('v10audio 9: particles — none at tier 0, 128 without audio at tier 1, reactive from tier 2, single draw call, deterministic',async()=>{const m=await import(fpUrl);
+ assert.deepEqual([0,1,2,3].map(t=>m.particleBudget(t)),[{count:0,audio:false},{count:128,audio:false},{count:256,audio:true},{count:512,audio:true}]);
+ const pr=read('particles.mjs'),rd=read('renderer.mjs');assert.equal((pr.match(/gl\.drawArrays\(gl\.POINTS/g)||[]).length,1);assert.doesNotMatch(pr,/Math\.random|requestAnimationFrame/);assert.match(rd,/fp\?\.part&&!fp\.reduced/,'no particles in reduce-motion');
+ assert.match(rd,/geometry&&tier>=1&&fp\?\.part/,'tier 0 and small planets: nothing');assert.equal(m.fpFlags('?world10=1').part,true);assert.equal(m.fpFlags('?world10=1&v10part=0').part,false);});
+test('v10audio 10: kick bursts only for strong kicks, never in reduce-motion, at most 3 per second',async()=>{const m=await import(fpUrl);
+ const run=(kick,reduced)=>{const s={};let bursts=0,seed=0;for(let f=0;f<600;f++){const age=(f/60)%.25,k=age<1/60;m.audioPacket({bass:.5,level:.5,kick:k?kick:0,kickAge:k?0:age,live:1},s,1/60,{reducedMotion:reduced,reactivity:'full'});if(s.burstSeed!==seed){bursts++;seed=s.burstSeed;}}return bursts;};
+ assert.ok(run(1,false)<=31&&run(1,false)>=20);assert.equal(run(.5,false),0,'weak kicks: no burst');assert.equal(run(1,true),0);
+ const s={};m.audioPacket({kick:1,kickAge:0,live:1},s,1/60);assert.equal(s.burstAge,0);for(let i=0;i<30;i++)m.audioPacket({live:1},s,1/60);assert.ok(s.burstAge>.45&&s.burstAge<.55);});
+test('v10audio 11: pause calms down progressively (smoothed values neither jump nor stay), silence = rest',async()=>{const m=await import(fpUrl);
+ const s={};for(let i=0;i<90;i++)m.audioPacket({bass:1,mid:1,high:1,level:1,kick:0,kickAge:9,live:1},s,1/60);let prev=s.u[0];assert.ok(prev>.95);let monotone=true,first=null;
+ for(let i=0;i<60;i++){m.audioPacket({live:0},s,1/60);if(first===null)first=s.u[0];if(s.u[0]>prev+1e-9)monotone=false;prev=s.u[0];}
+ assert.ok(monotone);assert.ok(first>.5,'no sudden drop');assert.ok(s.u[0]<.05,'calm after 1 s: '+s.u[0]);});
+test('v10audio 12: host keeps one packet and one options object, reads the app spectrum only, and the host stays the single RAF',()=>{
+ const h=read('focused-host.mjs');assert.match(h,/audOpts=\{/);assert.match(h,/fp=\{aud,part/);assert.doesNotMatch(h,/requestAnimationFrame|AudioContext|AnalyserNode/);
+ for(const f of fs.readdirSync(v10dir).filter(f=>f.endsWith('.mjs')&&!/test|smoke/.test(f))){const code=read(f).replace(/\/\/.*$/gm,'');assert.doesNotMatch(code,/createMediaElementSource|createAnalyser/,f);if(f!=='living-cities.mjs')assert.doesNotMatch(code,/requestAnimationFrame\s*\(/,f);}   // living-cities.mjs (10.0.6) : simple attente d'une image entre deux décodages, pas une boucle
+ assert.match(html,/A\.bass = bassLvl \* k;/);assert.match(html,/PD10_REACT/);assert.doesNotMatch(html,/createMediaElementSource\(\s*au\s*\)/);});

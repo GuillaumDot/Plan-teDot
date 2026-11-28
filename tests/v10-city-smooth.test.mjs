@@ -7,7 +7,7 @@ import * as L from '../assets/cosmic/world-v10/living-cities.mjs';
 import {fpFlags,fadeStep,CITY_FADE_SEC,targetAlloc,shouldWarmHost,shouldPrepareLiving,lodLevel,LOD_PREPARE,LOD_WARM} from '../assets/cosmic/world-v10/full-potential.mjs';
 const earth=bakeWorld('earth',12345,128);
 const file=p=>{const b=fs.readFileSync(new URL('../'+p,import.meta.url));return {ok:true,arrayBuffer:async()=>b.buffer.slice(b.byteOffset,b.byteOffset+b.byteLength)};};
-const fetcher=async u=>file(decodeURIComponent(new URL(u).pathname).split('/repo/')[1]);
+const fetcher=async u=>file((x=>x.slice(x.indexOf('/assets/')+1))(decodeURIComponent(new URL(u).pathname)));
 
 test('rollback ?v10flow=0 ; flow is on by default under the other V10 flags',()=>{
  assert.equal(fpFlags('').flow,true);
@@ -50,7 +50,7 @@ test('GLB decode is spread across frames when the budget is tight, and stays wit
  const models=await L.loadLivingModels(batches,{tier:2,fetcher,budgetMs:.001,yieldFrame:()=>{yields++;return Promise.resolve();}});
  assert.ok(Object.keys(models).length>0);
  assert.ok(yields>=1,'at least one yield when the budget is ~0 ms');
- const tris=Object.values(models).reduce((s,m)=>s+m.triangles,0);
+ const tris=[...new Set(Object.values(models))].reduce((s,m)=>s+m.triangles,0);
  assert.ok(tris<=L.livingTier(2).triangles);
  const same=await L.loadLivingModels(batches,{tier:2,fetcher,budgetMs:1e9,yieldFrame:()=>{throw new Error('should not yield');}});
  assert.deepEqual(Object.keys(same).sort(),Object.keys(models).sort());
