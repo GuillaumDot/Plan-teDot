@@ -33,20 +33,9 @@ vec3 shadeWorld(WorldMaterial m,vec3 N,vec3 L,vec3 V,float visibility,vec3 sunRa
  float nl=max(dot(N,L),0.);vec3 halfVector=L+V;vec3 H=halfVector/max(length(halfVector),.0001);
  float nv=max(dot(N,V),0.);vec3 f0=mix(vec3(.04),m.color,m.metal);
  vec3 F=f0+(1.-f0)*pow(1.-max(dot(H,V),0.),5.);
- #ifdef PD_MATERIALS
- float nh=max(dot(N,H),0.);
- float alpha=max(.065,m.roughness*m.roughness),a2=alpha*alpha;
- float den=nh*nh*(a2-1.)+1.;
- float distribution=a2/max(3.141592*den*den,.00001);
- float k=(m.roughness+1.)*(m.roughness+1.)*.125;
- float vis=.25/max((nv*(1.-k)+k)*(nl*(1.-k)+k),.001);
- vec3 diffuse=m.color*(1.-m.metal)*(1.-F);
- vec3 direct=(diffuse+F*min(distribution*vis,12.))*nl*visibility*smoothstep(-.08,.12,geometricNL)*sunRadiance;
- #else
  float spec=pow(max(dot(N,H),0.),mix(96.,4.,m.roughness));
  float day=smoothstep(-.08,.12,geometricNL);
  vec3 direct=(m.color*(1.-m.metal)*(1.-F)+F*spec)*nl*visibility*day*sunRadiance;
- #endif
  return m.color*(.025+.035*m.metal)+direct+m.emission;
 }
 // Prototype direct lighting, not a complete PBR/IBL pipeline.

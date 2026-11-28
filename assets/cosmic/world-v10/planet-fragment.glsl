@@ -1,9 +1,5 @@
 // Concatenate after precision declaration, materials.glsl and relief-atmosphere.glsl.
 varying vec3 vDirection;
-#ifdef PD_MATERIALS
-uniform sampler2D uPbrNormal,uPbrColor;
-uniform float uBakedRoughness;
-#endif
 uniform samplerCube uTerrain;
 uniform samplerCube uClimate;
 uniform sampler2D uDetail;
@@ -101,39 +97,13 @@ void main(){
  m.emission+=vec3(1.,.56,.19)*pow(terrain.a,3.)*.22*(1.+cityPulse)*(1.-terrain.g)*(1.-smoothstep(-.15,.15,dot(n,l)));
  }
  vec3 normal=n;
- float relief=uRelief;
- #ifdef PD_MATERIALS
- if(uFamily==0){
-  float highland=smoothstep(.62,.9,terrain.r);
-  float damp=smoothstep(.30,.80,climate.g)*smoothstep(.20,.48,climate.r);
-  float land=(1.-terrain.g)*(1.-terrain.b);
-  m.roughness=mix(m.roughness,mix(.89,.56,max(damp*(1.-.6*highland),climate.a)),land);
-  m.roughness=mix(m.roughness,.38,terrain.b);
-  relief*=1.+.24*highland*land;
- }
- #endif
- if(uFamily!=5)normal=worldReliefNormal(uTerrain,n,relief*(1.-terrain.g),uTexel);
+ if(uFamily!=5)normal=worldReliefNormal(uTerrain,n,uRelief*(1.-terrain.g),uTexel);
  if(uFamily!=5&&uMicroStrength>0.){float land=(uFamily==0||uFamily==1)?(1.-terrain.g)*(1.-terrain.b):1.;normal=microRelief(n,normal,microTile,uMicroStrength*land*microConfidence);}
  if(uFamily==0||uFamily==1){
   float openWater=terrain.g*(1.-terrain.b);
   normal=normalize(mix(normal,worldOceanNormal(n,uAudB.y,bass,level),openWater));
   m.roughness=mix(m.roughness,.12+.07*clamp(level,0.,1.),openWater);
  }
- #ifdef PD_MATERIALS
- if(uBakedRoughness>=0.){
-  float mask=(uFamily==0||uFamily==1)?terrain.g*(1.-terrain.b):1.;
-  if(uFamily==3)mask*=1.-climate.a;
-  if(uFamily==5)mask=0.;
-  float radial=length(n.xz);
-  vec2 uv=vec2(atan(n.z,n.x+.000001)/6.2831853+.5,.5-asin(clamp(n.y,-1.,1.))/3.14159265);
-  vec3 tangent=vec3(-n.z,0.,n.x)/max(radial,.0001);
-  vec2 slope=texture2D(uPbrNormal,uv).rg*2.-1.;
-  normal=normalize(normal+(tangent*slope.x+cross(tangent,n)*slope.y)*mask*smoothstep(.02,.16,radial)*.38);
-  vec3 texel=texture2D(uPbrColor,uv).rgb;
-  m.color*=mix(vec3(1.),clamp(pow(texel,vec3(2.2))*2.2,vec3(.45),vec3(1.55)),mask*.45);
-  m.roughness=mix(m.roughness,uBakedRoughness,mask*.7);
- }
- #endif
  if(uFamily==3){
   // Existing lava mask is stable; slow thermal pulses affect light only.
   float pulse=.86+.14*sin(uTime*.7+dot(n,vec3(12.,19.,7.)));
@@ -163,11 +133,6 @@ void main(){
  }
  // Atmosphère : limbe +8 % sur les médiums, teinte à peine plus chaude sur les voix.
  color+=worldAtmosphere(n,v,l,uAtmosphereTint,uAtmosphereDensity)*(1.+.08*mid)*vec3(1.+.05*mid,1.,1.-.04*mid);
- #ifdef PD_MATERIALS
- color=clamp(color*.85,vec3(0.),vec3(32.));
- color=clamp(color*(2.51*color+.03)/(color*(2.43*color+.59)+.14),0.,1.);
- #else
  color=color/(1.+color);
- #endif
  gl_FragColor=vec4(pow(max(color,vec3(0.)),vec3(1./2.2)),1.);
 }

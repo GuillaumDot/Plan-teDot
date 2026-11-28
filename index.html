@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#010208">
 <title>planèteDot · ton univers musical</title>
-<meta name="pd-version" content="10.0.8">
+<meta name="pd-version" content="10.0.7">
 <meta name="description" content="PlanèteDot · l’album de GuillaumDot et ton univers musical en 3D : chaque planète est un morceau.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PlanèteDot">
@@ -3048,7 +3048,6 @@ void main(){
       float sn=fbm(n*3.2+uSeed*3.+vec3(uT*.0008)); float um=smoothstep(.71,.745,sn), pen=smoothstep(.64,.71,sn); float fil=.72+.28*sin(atan(n.y,n.x)*70.+sn*40.);
       float ld=.32+.68*pow(mu,.55);
       vec3 col=hot*(.84+cell*.32)*lanes*(.9+sg*.2)*ld*1.38*pulse+hot*fac*.3;
-      if(${new URLSearchParams(location.search).get('cosmic10')==='1'?'1.':'0.'}>.5){float contrast=smoothstep(.18,.82,cell);col*=mix(.84,1.17,contrast);col+=hot*fac*.10;}
       col=mix(col,col*.42*fil,pen*(1.-um)); col=mix(col,uC1*.1,um);
       col=mix(col,uC1*vec3(1.,.62,.38)*1.2,pow(1.-mu,3.)*.5);
       acc=vec4(col,1.)*smoothstep(1.,1.-aa,r); gOct=gS; }
@@ -3060,7 +3059,6 @@ void main(){
     float ray=n3(vec3(cos(ang)*5.,sin(ang)*5.,d*1.5-uT*.25+uSeed))*n3(vec3(cos(ang)*11.,sin(ang)*11.,d*3.-uT*.4+uSeed+3.)); float shim=.93+.07*sin(ang*9.+uT*1.1+d*7.);
     float bm=pow(n3(vec3(cos(ang+uT*.02)*2.6,sin(ang+uT*.02)*2.6,uT*.3+uSeed+9.)),5.)*2.6+pow(n3(vec3(cos(ang-uT*.013)*6.,sin(ang-uT*.013)*6.,uT*.55+uSeed+4.)),7.)*3.; bm*=exp(-d*.6)*(.6+.4*n3(vec3(uT*1.7,cos(ang)*2.,sin(ang)*2.+1.)));
     vec3 cor=(hot*(exp(-d*3.4)*.95+exp(-d*1.)*.25)*shim+uC1*ray*exp(-d*1.4)*.85+hot*bm*.5)*pulse*smoothstep(2.75,1.75,r)*.8;
-    if(${new URLSearchParams(location.search).get('cosmic10')==='1'?'1.':'0.'}>.5){float stream=pow(max(ray,0.),1.6)*exp(-d*2.4);cor+=hot*stream*.18*pulse*smoothstep(2.75,1.75,r);}
     acc=over(acc,vec4((cor+chrom*.8+vec3(1.,.42,.3)*pr*.8)*uAtmo,0.)); }
     o=acc*uAlpha; return;
   }
@@ -3079,8 +3077,7 @@ void main(){
     float lane=smoothstep(.4,0.,abs(sw+.5))*exp(-r2*1.8)*.6; float knots=smoothstep(.7,.9,n3(vec3(q*13.,uSeed+2.)))*arm; float arm2=pow(.5+.5*sin(4.*(an-log(r2+.04)*2.6)+uT*.1+uSeed*3.),4.)*exp(-r2*3.2)*.35;
     vec3 c=uC1*(arm+arm2)*dust*1.25*(1.-lane)+mix(uC1,vec3(1.,.9,.75),.65)*core; c+=vec3(1.,.42,.6)*knots*.65; c+=mix(uC1,vec3(.45,.65,1.),.7)*exp(-r2*1.5)*.13*(.5+.5*fbm3(vec3(q*3.,uSeed+5.)));
     c+=vec3(1.,.92,.8)*exp(-pow(q.y*9.,2.)-pow(q.x*3.5,2.))*.35;
-    if(${new URLSearchParams(location.search).get('cosmic10')==='1'?'1.':'0.'}<.5)c+=vec3(.9,.95,1.)*step(.982,h3(vec3(floor(q*55.),uSeed)))*exp(-r2*2.5)*.9;
-    else c+=mix(vec3(.36,.51,.83),vec3(1.,.62,.45),.5+.5*sw)*knots*(.28+.08*sin(uT*.15+an*2.));
+    c+=vec3(.9,.95,1.)*step(.982,h3(vec3(floor(q*55.),uSeed)))*exp(-r2*2.5)*.9;
     if(uTxOn>.5){ float ga=uT*.012+uSeed; vec2 gq=mat2(cos(ga),sin(ga),-sin(ga),cos(ga))*q; vec3 gt=textureLod(uGal,vec3(gq*.5+.5,mod(floor(uSeed*7.),2.)),log2(max(256./(max(uR,1.)*sqrt(max(uRingS,.22))),1e-3))).rgb;
       c=mix(c,gt*mix(vec3(1.),uC1*1.5+.15,.4)*1.7,.82); }
     c*=1.+.4*dot(normalize(p+1e-4),uL.xy)*smoothstep(0.,.25,r2); c+=vec3(1.,.85,.6)*max(dot(normalize(p+1e-4),uL.xy),0.)*arm*.25*length(uL.xy);
@@ -3582,7 +3579,6 @@ void main(){
       float sn=fbm(n*3.2+uSeed*3.+vec3(uT*.0008)); float um=smoothstep(.71,.745,sn), pen=smoothstep(.64,.71,sn); float fil=.72+.28*sin(atan(n.y,n.x)*70.+sn*40.);
       float ld=.32+.68*pow(mu,.55);
       vec3 col=hot*(.84+cell*.32)*lanes*(.9+sg*.2)*ld*1.38*pulse+hot*fac*.3;
-      if(${new URLSearchParams(location.search).get('cosmic10')==='1'?'1.':'0.'}>.5){float contrast=smoothstep(.18,.82,cell);col*=mix(.84,1.17,contrast);col+=hot*fac*.10;}
       col=mix(col,col*.42*fil,pen*(1.-um)); col=mix(col,uC1*.1,um);
       col=mix(col,uC1*vec3(1.,.62,.38)*1.2,pow(1.-mu,3.)*.5);
       acc=vec4(col,1.)*smoothstep(1.,1.-aa,r); gOct=gS; }
@@ -3594,7 +3590,6 @@ void main(){
     float ray=n3(vec3(cos(ang)*5.,sin(ang)*5.,d*1.5-uT*.25+uSeed))*n3(vec3(cos(ang)*11.,sin(ang)*11.,d*3.-uT*.4+uSeed+3.)); float shim=.93+.07*sin(ang*9.+uT*1.1+d*7.);
     float bm=pow(n3(vec3(cos(ang+uT*.02)*2.6,sin(ang+uT*.02)*2.6,uT*.3+uSeed+9.)),5.)*2.6+pow(n3(vec3(cos(ang-uT*.013)*6.,sin(ang-uT*.013)*6.,uT*.55+uSeed+4.)),7.)*3.; bm*=exp(-d*.6)*(.6+.4*n3(vec3(uT*1.7,cos(ang)*2.,sin(ang)*2.+1.)));
     vec3 cor=(hot*(exp(-d*3.4)*.95+exp(-d*1.)*.25)*shim+uC1*ray*exp(-d*1.4)*.85+hot*bm*.5)*pulse*smoothstep(2.75,1.75,r)*.8;
-    if(${new URLSearchParams(location.search).get('cosmic10')==='1'?'1.':'0.'}>.5){float stream=pow(max(ray,0.),1.6)*exp(-d*2.4);cor+=hot*stream*.18*pulse*smoothstep(2.75,1.75,r);}
     acc=over(acc,vec4((cor+chrom*.8+vec3(1.,.42,.3)*pr*.8)*uAtmo,0.)); }
     o=acc*uAlpha; return;
   }
@@ -3613,8 +3608,7 @@ void main(){
     float lane=smoothstep(.4,0.,abs(sw+.5))*exp(-r2*1.8)*.6; float knots=smoothstep(.7,.9,n3(vec3(q*13.,uSeed+2.)))*arm; float arm2=pow(.5+.5*sin(4.*(an-log(r2+.04)*2.6)+uT*.1+uSeed*3.),4.)*exp(-r2*3.2)*.35;
     vec3 c=uC1*(arm+arm2)*dust*1.25*(1.-lane)+mix(uC1,vec3(1.,.9,.75),.65)*core; c+=vec3(1.,.42,.6)*knots*.65; c+=mix(uC1,vec3(.45,.65,1.),.7)*exp(-r2*1.5)*.13*(.5+.5*fbm3(vec3(q*3.,uSeed+5.)));
     c+=vec3(1.,.92,.8)*exp(-pow(q.y*9.,2.)-pow(q.x*3.5,2.))*.35;
-    if(${new URLSearchParams(location.search).get('cosmic10')==='1'?'1.':'0.'}<.5)c+=vec3(.9,.95,1.)*step(.982,h3(vec3(floor(q*55.),uSeed)))*exp(-r2*2.5)*.9;
-    else c+=mix(vec3(.36,.51,.83),vec3(1.,.62,.45),.5+.5*sw)*knots*(.28+.08*sin(uT*.15+an*2.));
+    c+=vec3(.9,.95,1.)*step(.982,h3(vec3(floor(q*55.),uSeed)))*exp(-r2*2.5)*.9;
     c*=1.+.4*dot(normalize(p+1e-4),uL.xy)*smoothstep(0.,.25,r2); c+=vec3(1.,.85,.6)*max(dot(normalize(p+1e-4),uL.xy),0.)*arm*.25*length(uL.xy);
     c*=smoothstep(1.,.65,r2)*(1.+uHi*.6);
     if(uHi>0.){ float rr=abs(length(p)-.95); c+=uC1*uHi*exp(-rr*rr*700.)*.8; }
@@ -4799,7 +4793,7 @@ function pd10FocusDraw(p,b,dt){
   if(!PD10_ENABLED||PD10Failed||PD10Closed||PD_REC_ACTIVE||!p||b.kind!==0||(!PD10_PREVIEW&&p.generatorVersion!==10))return false;
   if(![0,1,2,3,4,6,9,10,11].includes(p.type))return false;
   if(!PD10Host){
-    if(!PD10Loading){PD10Loading=true;import('./assets/cosmic/world-v10/focused-host.mjs?v=10.0.8').then(m=>{
+    if(!PD10Loading){PD10Loading=true;import('./assets/cosmic/world-v10/focused-host.mjs?v=10.0.7').then(m=>{
       if(PD10Closed||PD10Failed)return;
       PD10Host=m.createFocusedHost(gl,{enabled:true,search:location.search,onFallback:e=>{PD10Failed=true;console.warn('[PlanèteDot V10] repli historique',e.message);}});
     }).catch(e=>{PD10Failed=true;console.warn('[PlanèteDot V10] chargement indisponible',e.message);});}
@@ -4956,16 +4950,6 @@ function sysGenres(s){ const c = new Map(); (s.planets || []).forEach(p => (p.te
   return [...c].sort((a, b) => b[1] - a[1]).map(x => x[0]).filter(n => !/^Terres|^Autres/.test(n)).slice(0, 4); }
 function galaxyList(){ const others = [...OTHERS].map(([id, s]) => ({id, s, mine: false})); if (guestMode) return others;   // a spectator has no system of his own
   return [{id: ME || 'me', s: snapshotLite(), mine: true}, ...others]; }
-// Experimental M31 observation layer: request only on the galaxy map, never on startup.
-let pdM31=null,pdM31Loading=false,pdM31Closed=false;
-const pdM31Enabled=new URLSearchParams(location.search).get('cosmic10')==='1';
-function pdM31Draw(){
- if(!pdM31Enabled||pdM31Closed||gl.isContextLost())return false;
- if(pdM31){try{pdM31.draw(quad,VP,time);return true;}catch(e){pdM31.dispose();pdM31=null;pdM31Closed=true;return false;}}
- if(!pdM31Loading){pdM31Loading=true;import('./assets/cosmic/andromeda/andromeda.mjs').then(m=>m.loadAndromeda(gl)).then(m=>{if(pdM31Closed)m.dispose();else pdM31=m;}).catch(e=>{console.warn('[PlanèteDot] M31 procedural fallback',e.message);});}
- return false;
-}
-if(pdM31Enabled){cv.addEventListener('webglcontextlost',()=>{pdM31Closed=true;pdM31=null;});addEventListener('pagehide',e=>{if(!e.persisted){pdM31Closed=true;pdM31?.dispose();pdM31=null;}});}
 function renderGalaxy(dt){
   const galEntries = galaxyList();
   pdGalFollow(); updateCam(dt, 2.6);
@@ -4975,12 +4959,10 @@ function renderGalaxy(dt){
   gl.useProgram(LN.p); gl.bindVertexArray(circ); gl.uniformMatrix4fv(LN.u.uVP, false, VP); gl.uniform3f(LN.u.uO, 0, 0, 0); gl.uniform1f(LN.u.uDash, 0); gl.uniform4f(LN.u.uE, 0, 0, 0, 0);
   gl.uniform2f(LN.u.uArc, 0, 0);
   for (let r = 20; r <= 120; r += 20){ gl.uniform4f(LN.u.uC, .45, .65, 1, .018); gl.uniform1f(LN.u.uRad, r); gl.drawArrays(gl.LINE_LOOP, 0, 256); }
-  if(!pdM31Draw()){
   gl.useProgram(PT.p); gl.bindVertexArray(galaxy.vao); gl.uniformMatrix4fv(PT.u.uVP, false, VP); gl.uniform1f(PT.u.uT, time); gl.uniform1f(PT.u.uDpr, RS);
   gl.uniform1f(PT.u.uScale, .55 * (H / 2) * P5); gl.uniform1f(PT.u.uRot, .003); gl.uniform3f(PT.u.uC, .62, .58, 1); gl.uniform1f(PT.u.uA, .85); gl.drawArrays(gl.POINTS, 0, galaxy.n);
   gl.bindVertexArray(gdust.vao); gl.uniform1f(PT.u.uScale, 1.3 * (H / 2) * P5); gl.uniform3f(PT.u.uC, .85, .5, .75); gl.uniform1f(PT.u.uA, .22); gl.drawArrays(gl.POINTS, 0, gdust.n);
   gl.bindVertexArray(gyoung.vao); gl.uniform1f(PT.u.uScale, .9 * (H / 2) * P5); gl.uniform3f(PT.u.uC, .55, .75, 1); gl.uniform1f(PT.u.uA, 1); gl.drawArrays(gl.POINTS, 0, gyoung.n);
-  }
   { const gl2 = galEntries, P = new Map(gl2.map(o => [o.id, sysPos(o.id)])), br = [], add = (a, b) => { if (a && b && br.length < 1014) br.push(...a, ...b); };
     FOLLOWS.forEach((ids, id) => ids.forEach(t => add(P.get(id), P.get(t))));
     gl2.forEach(o => { if (!galTraits(o).includes('Constellation')) return; const a = P.get(o.id); gl2.filter(x => x.id !== o.id).map(x => [Math.hypot(P.get(x.id)[0] - a[0], P.get(x.id)[2] - a[2]), x.id]).sort((x, y) => x[0] - y[0]).slice(0, 2).forEach(x => add(a, P.get(x[1]))); });

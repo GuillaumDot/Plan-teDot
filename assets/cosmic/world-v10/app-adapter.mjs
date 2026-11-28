@@ -11,14 +11,14 @@ export function eligibleWorld(descriptor){
  return !!descriptor&&descriptor.generatorVersion===V10_GENERATOR&&Object.hasOwn(ARCHETYPES,descriptor.type)&&
  (typeof descriptor.seed==='string'||Number.isFinite(descriptor.seed));
 }
-export function createWorldAdapter({enabled=WORLD_CONFIG.enabled,materials=false,createCache=createWorldCache,createRenderer=createPlanetRenderer,onFallback=()=>{}}={}){
+export function createWorldAdapter({enabled=WORLD_CONFIG.enabled,createCache=createWorldCache,createRenderer=createPlanetRenderer,onFallback=()=>{}}={}){
  let cache=null,renderer=null,initializing=null,planet=null,controller=null,revision=0,closed=false,failed=false,activeKey=null,pending=null,detailReady=false,bakeRes=WORLD_CONFIG.bakeResolution,bakeSmooth=false,lastTier=2,flowOn=true;
  function release(){detailReady=false;controller?.abort();controller=null;planet?.dispose();planet=null;activeKey=null;}
  function fallback(error){failed=true;release();try{onFallback(error);}catch(_){}}
  async function init(gl){
   if(closed||!enabled||failed)return false;
   if(renderer)return true;
-  if(!initializing)initializing=(async()=>{try{const next=await createRenderer(gl,{materials});if(closed){next.dispose();return false;}renderer=next;cache=createCache();return true;}catch(e){renderer?.dispose();renderer=null;fallback(e);return false;}})();
+  if(!initializing)initializing=(async()=>{try{const next=await createRenderer(gl);if(closed){next.dispose();return false;}renderer=next;cache=createCache();return true;}catch(e){renderer?.dispose();renderer=null;fallback(e);return false;}})();
   return initializing;
  }
  function select(descriptor){
