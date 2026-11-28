@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#010208">
 <title>planèteDot · ton univers musical</title>
-<meta name="pd-version" content="10.0.7">
+<meta name="pd-version" content="10.0.8">
 <meta name="description" content="PlanèteDot · l’album de GuillaumDot et ton univers musical en 3D : chaque planète est un morceau.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PlanèteDot">
@@ -4799,7 +4799,7 @@ function pd10FocusDraw(p,b,dt){
   if(!PD10_ENABLED||PD10Failed||PD10Closed||PD_REC_ACTIVE||!p||b.kind!==0||(!PD10_PREVIEW&&p.generatorVersion!==10))return false;
   if(![0,1,2,3,4,6,9,10,11].includes(p.type))return false;
   if(!PD10Host){
-    if(!PD10Loading){PD10Loading=true;import('./assets/cosmic/world-v10/focused-host.mjs?v=10.0.7').then(m=>{
+    if(!PD10Loading){PD10Loading=true;import('./assets/cosmic/world-v10/focused-host.mjs?v=10.0.8').then(m=>{
       if(PD10Closed||PD10Failed)return;
       PD10Host=m.createFocusedHost(gl,{enabled:true,search:location.search,onFallback:e=>{PD10Failed=true;console.warn('[PlanèteDot V10] repli historique',e.message);}});
     }).catch(e=>{PD10Failed=true;console.warn('[PlanèteDot V10] chargement indisponible',e.message);});}
