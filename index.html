@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#010208">
 <title>planèteDot · ton univers musical</title>
-<meta name="pd-version" content="10.0.6">
+<meta name="pd-version" content="10.0.7">
 <meta name="description" content="PlanèteDot · l’album de GuillaumDot et ton univers musical en 3D : chaque planète est un morceau.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PlanèteDot">
@@ -1168,11 +1168,58 @@ async function initAccount(){
 /* ================= quality / GL ================= */
 const QKEY = 'planetedot.quality';
 function pdInApp(){ return /Instagram|FBAN|FBAV|FB_IAB|TikTok|musical_ly|BytedanceWebview|Snapchat|Line\//i.test(navigator.userAgent || ''); }   // V10.0.4 · test partagé : palier (detectTier) et atlas (pdAtlasCandidates)
+/* V10fp · interactions (?world10=1&v10act=1, éteintes par défaut ; sans ces deux drapeaux, aucune de ces fonctions n'agit) :
+   tap sur une ville de la planète focalisée = la planète tourne et la caméra s'approche en douceur (angT + pz, la boucle existante),
+   la ville s'illumine (ses bâtiments se gonflent un instant), panneau de verre ancré au sol par un faisceau rose néon ; une réaction
+   émoji qui arrive sur la zone jouée se pose sur la ville V10 la plus proche (comète, faisceau et carte de verre V9 réutilisés) et
+   l'allume. Picking : rayon/sphère de tapPlanet, puis ville la plus proche dans les données CPU du monde V10 (PD10Host.pickCity) ;
+   aucun hit-testing GPU, aucune lecture de pixels. Un geste reprend la main tout de suite ; « réduire les animations » et palier 0 :
+   rien d'animé (placement immédiat, pas de transition). Aucune donnée sauvegardée. */
+const PD10ACT = {i: -1, dir: null, z: null, el: null, t: 0, miss: 0, pid: null, rx: '', g: -1, a0: 0, a1: 0, z0: 1, rect: null, lbl: null};
+const PD10ACT_GLIDE = 1.9;   // V10fp · approche longue et lissée (smootherstep) jusqu'à l'orbite proche ; aucune allocation pendant le glissé
+function pd10ActEase(u){ u = u < 0 ? 0 : u > 1 ? 1 : u; return u * u * u * (u * (u * 6 - 15) + 10); }
+function pd10ActRect(){ if (!PD10ACT.rect){ const r = cv.getBoundingClientRect(); PD10ACT.rect = {l: r.left, t: r.top, k: r.width / Math.max(1, cv.width)}; } return PD10ACT.rect; }   // mis en cache : pas de mise en page forcée à chaque image
+addEventListener('resize', () => { PD10ACT.rect = null; });
+function pd10ActOn(){ return typeof PD10_ENABLED !== 'undefined' && PD10_ENABLED && PD10_QUERY.get('v10act') === '1' && !!PD10Host && PD10Host.state === 'ready'; }
+function pd10ActStill(){ let red = false; try { red = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch(e){} return red || TIER === 0; }
+function pd10ActTag(){ if (PD10ACT.el) return PD10ACT.el; const e = document.createElement('div'); e.id = 'pd10Tag'; e.setAttribute('aria-hidden', 'true');
+  e.style.cssText = 'position:fixed;left:0;top:0;pointer-events:none;z-index:6;opacity:0;will-change:transform,opacity' + (pd10ActStill() ? '' : ';transition:opacity .35s');
+  e.innerHTML = '<div style="position:absolute;left:-22px;bottom:-7px;width:44px;height:14px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,79,216,.55),rgba(255,79,216,.18) 60%,rgba(255,79,216,0));box-shadow:0 0 10px rgba(255,79,216,.35)"></div><div style="position:absolute;left:-1px;bottom:0;width:2px;height:62px;background:linear-gradient(to top,#ff4fd8,rgba(255,79,216,0));box-shadow:0 0 8px 2px rgba(255,79,216,.65)"></div><div class="c" style="position:absolute;bottom:62px;left:0;transform:translateX(-50%);white-space:nowrap;padding:6px 11px;border-radius:12px;background:rgba(18,12,28,.74);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:#fff;font:600 13px/1.25 Inter,system-ui,sans-serif;box-shadow:0 0 14px rgba(255,79,216,.45)"></div>';
+  document.body.appendChild(e); PD10ACT.el = e; PD10ACT.lbl = e.querySelector('.c'); return e; }
+function pd10ActLabel(c){ return (c.port ? '⚓ Ville portuaire' : c.river ? '🌉 Ville fluviale' : '🏙️ Ville') + ' · ' + Math.round(c.tempC || 0) + ' °C'; }
+function pd10ActTap(p, s){ if (!pd10ActOn() || dragging || pinch) return false; const c = PD10Host.pickCity(s); if (!c) return false;
+  const still = pd10ActStill(); PD10Host.focusCity(c.index); PD10ACT.i = c.index; PD10ACT.dir = c.dir; PD10ACT.t = 0; PD10ACT.pid = p.id; PD10ACT.rx = ''; PD10ACT.miss = 0;
+  const u = rz(p.tilt, pdU(p, [-CF[0], -CF[1], -CF[2]])), a0 = p._ang || 0, a1 = wrapA(Math.atan2(c.dir[0], c.dir[2]) - Math.atan2(u[0], u[2]), a0);
+  angT = null; PD10ACT.a0 = a0; PD10ACT.a1 = a1; PD10ACT.z0 = pz; PD10ACT.z = Math.min(pz, .45); PD10ACT.g = 0;   // un seul glissé temporel (rotation + approche ensemble), pas deux lissages concurrents
+  if (still){ p._ang = a1; pz = PD10ACT.z; PD10ACT.z = null; PD10ACT.g = -1; }
+  pd10ActTag(); PD10ACT.lbl.textContent = pd10ActLabel(c); return true; }
+/* une réaction posée sur la zone jouée rejoint la ville V10 la plus proche (moins de 0,35 rad), sinon elle garde sa place V9 */
+function pd10ActSnap(P, d){ if (!pd10ActOn() || !curP || curP.p.id !== P.pid) return d; const L = PD10Host.cities; let best = -1, bd = Math.cos(.35);
+  for (let i = 0; i < L.length; i++){ const k = L[i][0] * d[0] + L[i][1] * d[1] + L[i][2] * d[2]; if (k > bd){ bd = k; best = i; } }
+  if (best < 0) return d; P.v10c = best; return L[best].slice(); }
+function pd10ActReact(P){ if (!(P.v10c >= 0) || !pd10ActOn() || !curP || curP.p.id !== P.pid) return; const R = PD9_RXM.get(P.r);
+  PD10Host.focusCity(P.v10c); PD10ACT.i = P.v10c; PD10ACT.dir = P.dir; PD10ACT.pid = P.pid; PD10ACT.miss = 0; PD10ACT.rx = R ? (R.txt ? R.em + ' ' + R.txt : R.em) : '';
+  pd10ActTag(); PD10ACT.lbl.textContent = PD10ACT.rx || '🏙️ Ville'; }
+function pd10ActHide(){ if (PD10ACT.el){ PD10ACT.el.style.opacity = 0; PD10ACT.el._o = 0; } PD10ACT.i = -1; PD10ACT.z = null; PD10ACT.g = -1; PD10ACT.rx = ''; }
+function pd10ActTick(p, dt){ if (PD10ACT.i < 0 || !PD10ACT.el || !curP || curP.p !== p) return; PD10ACT.miss = 0;
+  if (PD10ACT.g >= 0){ if (dragging || pinch){ PD10ACT.g = -1; PD10ACT.z = null; }   // un geste reprend la main tout de suite
+    else { PD10ACT.g = Math.min(1, PD10ACT.g + Math.min(dt, .05) / PD10ACT_GLIDE); const e = pd10ActEase(PD10ACT.g);
+      p._ang = PD10ACT.a0 + (PD10ACT.a1 - PD10ACT.a0) * e; pz = PD10ACT.z0 + (PD10ACT.z - PD10ACT.z0) * e; if (PD10ACT.g >= 1){ PD10ACT.g = -1; PD10ACT.z = null; } } }
+  const f = PD10Host.focus; PD10ACT.t += dt; if (f.city !== PD10ACT.i){ pd10ActHide(); return; }
+  const v = viewOf(p, PD10ACT.dir), r = pd10ActRect(), op = v[2] > .08 ? Math.round(f.level * Math.min(1, (v[2] - .08) * 6) * 100) / 100 : 0;   // fondu doux près de l'horizon
+  if (PD10ACT.el._o !== op){ PD10ACT.el._o = op; PD10ACT.el.style.opacity = op; }
+  if (op > 0) PD10ACT.el.style.transform = `translate3d(${((curP.x + v[0] * curP.r) * r.k + r.l).toFixed(1)}px,${((curP.y - v[1] * curP.r) * r.k + r.t).toFixed(1)}px,0)`; }
 /* V10fp · données de la planète pour les villes et le son (ère, avancée de l'ère, écoute en cours, réduire les animations) ; lu seulement avec ?world10=1 */
-function pd10Extra(p){ let E = {e: 5, pc: 1}; try { E = eraInfo(p); } catch(e){} let red = false; try { red = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch(e){}
-  const tr = !au.paused && Q.length ? Q[qi] : null;
-  return {era: ST_OF[E.e] ?? 5, eraPc: E.e >= 6 ? 1 : E.pc, playing: !!tr && Array.isArray(p.tracks) && p.tracks.includes(tr), reducedMotion: red, inApp: pdInApp(),
-    audioIn: {bass: bassLvl, mid: SPB[1], high: SPB[3], level: audioLvl, kick: beatLvl, kickAge: time - beatT, live: !au.paused ? 1 : 0}}; }
+const PD10_AIN = {bass: 0, mid: 0, high: 0, level: 0, kick: 0, kickAge: 9, live: 0}, PD10_EX = {era: 5, eraPc: 1, playing: false, reducedMotion: false, inApp: false, audioIn: PD10_AIN, reactivity: undefined};   // objets réutilisés : aucune allocation par image côté son
+let PD10_RED = false, PD10_REACT, PD10_INAPP = false, PD10_INIT = false;
+function pd10ExtraInit(){ PD10_INIT = true; PD10_INAPP = pdInApp();   // lu une seule fois, au premier gros plan V10 (rien n'est lu sans ?world10=1)
+  try { const mq = matchMedia('(prefers-reduced-motion: reduce)'); PD10_RED = mq.matches; if (mq.addEventListener) mq.addEventListener('change', e => { PD10_RED = e.matches; }); } catch(e){}
+  try { const r = new URLSearchParams(location.search).get('v10react') || localStorage.getItem('pd.v10react'); if (r === 'off' || r === 'soft' || r === 'full') PD10_REACT = r; } catch(e){} }   // réglage de réactivité Off / Doux / Plein ; sans choix : Plein dans Safari, Doux dans les navigateurs intégrés
+function pd10Extra(p){ if (!PD10_INIT) pd10ExtraInit(); let E = {e: 5, pc: 1}; try { E = eraInfo(p); } catch(e){}
+  const tr = !au.paused && Q.length ? Q[qi] : null, k = PDMS.k, A = PD10_AIN;
+  // V10 audio : spectre précalculé de l'hôte (aucun AnalyserNode) ; k = montée douce de 2,5 s au début d'un morceau. Basses, médiums (SPB[1]), aigus (SPB[3]), niveau, grosse caisse et temps depuis la dernière.
+  A.bass = bassLvl * k; A.mid = SPB[1] * k; A.high = SPB[3] * k; A.level = audioLvl * k; A.kick = beatLvl * k; A.kickAge = time - beatT; A.live = !au.paused ? 1 : 0;
+  const X = PD10_EX; X.era = ST_OF[E.e] ?? 5; X.eraPc = E.e >= 6 ? 1 : E.pc; X.playing = !!tr && Array.isArray(p.tracks) && p.tracks.includes(tr); X.reducedMotion = PD10_RED; X.inApp = PD10_INAPP; X.reactivity = PD10_REACT; return X; }
 function detectTier(){
   const forced = LS.get(QKEY); if (forced === 0 || forced === 1 || forced === 2) return forced;
   let t = 2; const mem = navigator.deviceMemory || 4, cores = navigator.hardwareConcurrency || 4;
@@ -4746,7 +4793,7 @@ function pd10FocusDraw(p,b,dt){
   if(!PD10_ENABLED||PD10Failed||PD10Closed||PD_REC_ACTIVE||!p||b.kind!==0||(!PD10_PREVIEW&&p.generatorVersion!==10))return false;
   if(![0,1,2,3,4,6,9,10,11].includes(p.type))return false;
   if(!PD10Host){
-    if(!PD10Loading){PD10Loading=true;import('./assets/cosmic/world-v10/focused-host.mjs?v=10.0.6').then(m=>{
+    if(!PD10Loading){PD10Loading=true;import('./assets/cosmic/world-v10/focused-host.mjs?v=10.0.7').then(m=>{
       if(PD10Closed||PD10Failed)return;
       PD10Host=m.createFocusedHost(gl,{enabled:true,search:location.search,onFallback:e=>{PD10Failed=true;console.warn('[PlanèteDot V10] repli historique',e.message);}});
     }).catch(e=>{PD10Failed=true;console.warn('[PlanèteDot V10] chargement indisponible',e.message);});}
@@ -4759,6 +4806,9 @@ function pd10FocusDraw(p,b,dt){
     glowFlush();
     const ok=PD10Host.draw({planet:descriptor,body:b,basis,light,width:W,height:H,audio:Math.max(0,Math.min(1,b.lv||0)),time,delta:dt,tier:Math.max(0,Math.min(3,TIER)),growth:1,appTier:TIER,mobile:PD_MOBILE,px:2*b.r/Math.max(RS,.01),gesture:dragging||!!pinch,...pd10Extra(p)});
     if(ok)pd9OccAdd(b);
+    if(ok&&b.pd9&&PD10_QUERY.get('v10act')==='1'){const fr=!b.vw&&b.x===b.x&&b.y===b.y?pdFrame(b.x,b.y):null;pd9Seen(b,b.uq?pdVWq(b.uq,fr?PDB_VW:(b.vw||VWM)):(fr?PDB_VW:(b.vw||VWM)));}   // V10fp interactions : les réactions de zone (comète, faisceau, carte) suivent aussi la planète rendue par V10
+    if(ok&&!PD10ACT.el&&PD10_QUERY.get('v10act')==='1')pd10ActTag();   // V10fp : panneau créé dès la première image V10, jamais au moment du tap
+    if(PD10ACT.i>=0)pd10ActTick(p,dt);
     return ok;
   }catch(e){PD10Failed=true;PD10Host?.dispose();console.warn('[PlanèteDot V10] repli historique',e.message);return false;}
 }
@@ -4795,6 +4845,7 @@ function renderPlanet(dt){ PASS.clear();
 function tapPlanet(x, y){
   if (!curP) return false; const {p, r} = curP; const dx = (x - curP.x) / r, dy = -(y - curP.y) / r; const d2 = dx * dx + dy * dy; if (d2 > 1) return false;
   const s = surfOf(p, [dx, dy, Math.sqrt(1 - d2)]); let best = -1, bd = -2;
+  if (PD10Host && pd10ActTap(p, s)) return true;   // V10fp · interactions (?world10=1&v10act=1) : une ville touchée passe avant la zone ; sinon rien ne change
   p.terr.slice(0, 12).forEach((t, i) => { const d = dot(s, seedDir(t)); if (d > bd){ bd = d; best = i; } });
   if (best >= 0) selectTerr(best, true); return true;
 }
@@ -5218,7 +5269,7 @@ function frame(now, once){
   if (ECL < .45 && !eclOn){ eclOn = true; POST.flash = Math.max(POST.flash, .1); if (actx && SND.bus && SND.amb){ const t = actx.currentTime; tone(58, t, 3.2, .06, 'sine', true, 44); swell(t, 1.6, .02, 900, 200); } }
   else if (ECL > .8 && eclOn){ eclOn = false; POST.flash = Math.max(POST.flash, .22); if (actx && SND.bus && SND.amb){ const t = actx.currentTime; tone(1568, t, 1.4, .008); tone(2093, t + .05, 1.2, .006); } }
   const AF = !!(cine && cine.album && cine.t > 1.6);
-  if(PD10Host&&(mode!=='planet'||AF))PD10Host.leave();
+  if(PD10Host&&(mode!=='planet'||AF))PD10Host.leave();if(PD10ACT.i>=0){if(mode!=='planet'||AF||PD10ACT.miss>2)pd10ActHide();else PD10ACT.miss++;}   // V10fp : panneau retiré si la passe V10 ne l'a pas suivi depuis 3 images
   if (mode === 'splash'){
     if (warpT >= 0){ warpT += rawDt / 4.2; const f = $('#flash'); f.style.opacity = clamp((warpT - .86) / .14, 0, 1) * .8; }
     if (INTRO.gl) introGL(); else renderSplash(dt); if (warpT < 0) fade(dt);
@@ -8404,7 +8455,7 @@ function pd9Pop(s){ if (!s || !VIEW || !Array.isArray(VIEW.planets) || !s.p) ret
   if (PD9.pops.length > 16) PD9.pops.splice(0, PD9.pops.length - 16); }
 function pd9Dir(S, P, L){ if (P.dir) return P.dir; const x = P.z ? pd9Zone(S, P.z) : L;
   const d = x ? pd9Jit(x.dir, Math.min(pd9Rad(x) * .1, .06), P.seed * 2 - 1, P.s2 * 2 - 1) : pd9From(S, (P.seed - .5) * .6, .15);   // V9.7 : au cœur de la zone jouée (plus de point sur l'horizon)
-  P.dir = d; P.col = pd9Hue(x); return d; }
+  P.dir = PD10Host ? pd10ActSnap(P, d) : d; P.col = pd9Hue(x); return P.dir; }   // V10fp : sans ?world10=1&v10act=1, d inchangé
 const pd9Ease = u => 1 - Math.pow(1 - clamp(u, 0, 1), 3);
 function pd9Bez(a0, a1, b0, b1, c0, c1, q){ const m = 1 - q; PD9_B[0] = m * m * a0 + 2 * m * q * b0 + q * q * c0; PD9_B[1] = m * m * a1 + 2 * m * q * b1 + q * q * c1; return PD9_B; }
 const PD9_B = [0, 0];
@@ -8412,7 +8463,7 @@ function pd9Pops(B, n){ const G = PD9.g; if (!G) return n; const keep = []; let 
   for (const P of PD9.pops){
     if (P.t0 < 0){ if (time < P.due){ keep.push(P); continue; }
       const S0 = act < 5 && time - PD9.last >= .4 ? pd9Ready(P) : null; if (!S0){ if (time - P.due < 8) keep.push(P); continue; }
-      P.t0 = time; PD9.last = time; act++; if (P.ping) pd9Ping(); }
+      P.t0 = time; PD9.last = time; act++; if (P.ping) pd9Ping(); if (P.v10c >= 0) pd10ActReact(P); }
     const el = time - P.t0; if (el >= P.dur) continue; keep.push(P);
     const S = PD9.scr.get(P.pid); if (!S || S.t !== time) continue;
     pd9At(S, pd9Dir(S, P, pd9LiveZ(S)), PD9_Q); const f = PD9_Q[2], vis = sstep(-.02, .28, f) * S.a; if (vis < .01) continue;   // V9.7 : un astre devant cache le message pixel par pixel (pd9Mask)
@@ -8430,7 +8481,7 @@ function pd9Pops(B, n){ const G = PD9.g; if (!G) return n; const keep = []; let 
       for (let j = 0; j < 2; j++){ const e = e2 - j * .14; if (e < 0 || e > .95) continue; const rs = (j ? 10 + 36 * pd9Ease(e / .95) : 14 + 58 * pd9Ease(e / .95)) * k1, a = Math.pow(1 - e / .95, 2) * (j ? .55 : .9) * vis;
         n = pd9Put(B, n, ix, iy, rs * 2 * sq, rs * 2, cr, cg, cb, 1, a, 2, ang, 0); } }
     // 3 · la carte de verre monte sur un faisceau, flotte au rythme, puis se dissout en éclats
-    const e3 = e2 - .06; if (e3 < 0) continue;
+    const e3 = e2 - .06; if (e3 < 0 || P.v10c >= 0) continue;   // V10fp : sur une ville V10, la carte monte dans le panneau ancré au faisceau rose (pd10ActReact)
     const fin = clamp(e3 / .2, 0, 1), fo = clamp((P.dur - el) / .55, 0, 1), ru = pd9Ease(e3 / .75), sc = (e3 < .45 ? .55 + .45 * pd9Back(e3 / .45) : 1) * bt * (1 + .08 * (1 - fo));
     const h0 = (R.em ? 54 : 34) * k1, w0 = h0 * R.w / R.h, cx = ix + Math.sin(time * 1.1 + P.seed * 9) * 1.5 * k1, cy = iy - (42 + 22 * P.s2) * k1 * ru - h0 * .62 - 10 * k1 * (1 - fo) + Math.sin(time * 1.7 + P.seed * 6) * 2 * k1;
     const al = fin * fo * vis, by2 = cy + h0 * .5 * sc, bl = Math.hypot(cx - ix, by2 - iy);
