@@ -111,14 +111,30 @@ export function normalizeModel(m){
  return {vertices:v,triangles:m.triangles};
 }
 export function livingBytes(models,instances){let b=0;for(const m of Object.values(models))b+=m.vertices.byteLength;return b+instances*LIVING_INSTANCE_FLOATS*4;}
-// Chargement à la demande (premier gros plan, palier ≥ 1), séquentiel, annulable, plafonné en triangles.
-export async function loadLivingModels(batches,{signal,tier=1,fetcher=fetch}={}){
+// Chargement : fetches modestement en parallèle, décodage étalé (budget ms / frame), ordre des lots conservé (plafond de triangles déterministe).
+export const DECODE_BUDGET_MS=6,UPLOAD_BUDGET_MS=4,FETCH_CONCURRENCY=4;
+const now=()=>typeof performance!=='undefined'&&performance.now?performance.now():Date.now();
+const defaultYield=()=>typeof requestAnimationFrame==='function'?new Promise(r=>requestAnimationFrame(r)):Promise.resolve();
+export async function loadLivingModels(batches,{signal,tier=1,fetcher=fetch,budgetMs=DECODE_BUDGET_MS,yieldFrame,concurrency=FETCH_CONCURRENCY}={}){
  const cfg=livingTier(tier),models={};let tris=0;
- for(const b of batches){
+ const pause=yieldFrame??defaultYield,limit=Math.max(1,Math.min(8,concurrency|0));
+ const raw=new Array(batches.length);let next=0,active=0;
+ const kick=()=>{while(active<limit&&next<batches.length){const i=next++;active++;
+  const b=batches[i];raw[i]=(async()=>{
+   if(signal?.aborted)throw new DOMException('Aborted','AbortError');
+   try{const r=await fetcher(new URL('../../../'+modelPath(b.family,b.variant),import.meta.url),{signal});if(!r.ok)throw Error('HTTP '+r.status);
+    return {b,buf:await r.arrayBuffer()};}
+   catch(e){if(signal?.aborted)throw e;console.warn('[PlanèteDot V10] living model fallback:',b.key,e.message);return {b,err:e};}
+  })().finally(()=>{active--;kick();});
+ }};
+ kick();
+ let start=now();
+ for(let i=0;i<batches.length;i++){
   if(signal?.aborted)throw new DOMException('Aborted','AbortError');
-  try{const r=await fetcher(new URL('../../../'+modelPath(b.family,b.variant),import.meta.url),{signal});if(!r.ok)throw Error('HTTP '+r.status);
-   const m=normalizeModel(decodeStaticGLB(await r.arrayBuffer(),{maxTriangles:2000}));if(!m||tris+m.triangles>cfg.triangles)continue;tris+=m.triangles;models[b.key]=m;}
-  catch(e){if(signal?.aborted)throw e;console.warn('[PlanèteDot V10] living model fallback:',b.key,e.message);}
+  const job=await raw[i];if(job.err||!job.buf)continue;
+  if(now()-start>=budgetMs){await pause();start=now();}
+  try{const m=normalizeModel(decodeStaticGLB(job.buf,{maxTriangles:2000}));if(!m||tris+m.triangles>cfg.triangles)continue;tris+=m.triangles;models[job.b.key]=m;}
+  catch(e){if(signal?.aborted)throw e;console.warn('[PlanèteDot V10] living model fallback:',job.b.key,e.message);}
  }
  return models;
 }
@@ -137,7 +153,7 @@ void main(){
  vec3 up=normalize(mix(a,b,t));vec3 ref=abs(up.y)>.9?vec3(1.,0.,0.):vec3(0.,1.,0.);
  vec3 fw=iB.w>.5&&length(b-a)>1e-5?normalize(b-a-up*dot(b-a,up)):normalize(cross(ref,up));
  vec3 rt=normalize(cross(up,fw));if(iB.w<.5){float c=cos(iMeta.x),s=sin(iMeta.x);vec3 r2=rt*c+fw*s;fw=rt*-s+fw*c;rt=r2;}
- float sc=iA.w*(1.+.35*uPop*step(abs(iMeta.w-uFocusCity),.5));
+ float sc=iA.w*(1.+.35*uPop*step(abs(iMeta.w-uFocusCity),.5))*max(uReveal,0.);
  vec3 p=aPosition;if(aTone<0.&&uWind>0.){p.x+=sin(uTime*1.6+iMeta.y*40.)*p.y*p.y*.18*uWind;}
  vec3 world=up*(1.-.0006+p.y*sc)+rt*p.x*sc+fw*p.z*sc;
  vNormal=rt*aNormal.x+up*aNormal.y+fw*aNormal.z;vRadial=up;vMaterial=aMaterial;vTone=aTone;vGlow=iMeta.z;vFocus=uFocus*step(abs(iMeta.w-uFocusCity),.5);
@@ -150,6 +166,7 @@ uniform vec3 uLight;uniform vec3 uSodium;uniform vec3 uLed;uniform float uGain;o
 void main(){vec3 l=normalize(uLight);float day=max(dot(normalize(vNormal),l),0.);float night=1.-smoothstep(-.12,.12,dot(normalize(vRadial),l));
  vec3 c=vMaterial.rgb*(.22+.95*day);float win=vTone>.40&&vTone<.44?1.:.18;
  c+=mix(uSodium,uLed,step(.9,vGlow))*night*vGlow*win*.55*uGain;c+=uSodium*vFocus*(.25+.5*night)*win;o=vec4(c,1.);}`;
+const SODIUM=[1,.702,.353],LED=[.875,.91,1];   // #ffb35a et #dfe8ff (Dot Visuels), jamais le bleu d'interface
 export function createLivingProgram(gl){
  if(typeof WebGL2RenderingContext==='undefined'||!(gl instanceof WebGL2RenderingContext))throw Error('Living cities require WebGL2');
  const shaders=[];let program=null;
@@ -157,28 +174,69 @@ export function createLivingProgram(gl){
   program=gl.createProgram();for(const s of shaders)gl.attachShader(program,s);gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(program));
  }catch(e){if(program)gl.deleteProgram(program);throw e;}finally{for(const s of shaders)gl.deleteShader(s);}
  const U=Object.fromEntries(['uMVP','uEye','uTime','uMotion','uWind','uReveal','uLight','uSodium','uLed','uGain','uFocusCity','uFocus','uPop','uLightV'].map(n=>[n,gl.getUniformLocation(program,n)]));
- return {program,U,dispose(){if(program){gl.deleteProgram(program);program=null;}}};
+ const prog={program,U,dispose(){if(program){gl.deleteProgram(program);program=null;}}};
+ return prog;
+}
+// Premier dessin hors écran (1×1) : sur iPhone le pilote compile souvent au premier draw, pas au link.
+export function prewarmLivingProgram(gl,prog){
+ if(!prog?.program)return;
+ const old={fbo:gl.getParameter(gl.FRAMEBUFFER_BINDING),vao:gl.getParameter(gl.VERTEX_ARRAY_BINDING),prog:gl.getParameter(gl.CURRENT_PROGRAM),vp:gl.getParameter(gl.VIEWPORT),ab:gl.getParameter(gl.ARRAY_BUFFER_BINDING),tex:gl.getParameter(gl.TEXTURE_BINDING_2D)};
+ const fbo=gl.createFramebuffer(),tex=gl.createTexture(),vao=gl.createVertexArray(),vb=gl.createBuffer(),ib=gl.createBuffer();
+ try{
+  gl.bindTexture(gl.TEXTURE_2D,tex);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA8,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,null);
+  gl.bindFramebuffer(gl.FRAMEBUFFER,fbo);gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,tex,0);
+  if(gl.checkFramebufferStatus(gl.FRAMEBUFFER)!==gl.FRAMEBUFFER_COMPLETE)return;
+  gl.viewport(0,0,1,1);gl.bindVertexArray(vao);
+  gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(MODEL_VERTEX_STRIDE*3),gl.STATIC_DRAW);
+  const S=MODEL_VERTEX_STRIDE*4;
+  for(const [loc,n,off] of [[0,3,0],[1,3,12],[2,1,24],[3,4,28]]){gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,n,gl.FLOAT,false,S,off);gl.vertexAttribDivisor(loc,0);}
+  const inst=new Float32Array(LIVING_INSTANCE_FLOATS);inst[1]=1;inst[3]=.001;inst[5]=1;
+  gl.bindBuffer(gl.ARRAY_BUFFER,ib);gl.bufferData(gl.ARRAY_BUFFER,inst,gl.STATIC_DRAW);
+  for(let k=0;k<4;k++){gl.enableVertexAttribArray(4+k);gl.vertexAttribPointer(4+k,4,gl.FLOAT,false,LIVING_INSTANCE_FLOATS*4,k*16);gl.vertexAttribDivisor(4+k,1);}
+  gl.useProgram(prog.program);const U=prog.U,I=new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]);
+  if(U.uMVP)gl.uniformMatrix4fv(U.uMVP,false,I);if(U.uEye)gl.uniform3fv(U.uEye,[0,0,3]);if(U.uLight)gl.uniform3fv(U.uLight,[0,1,0]);if(U.uLightV)gl.uniform3fv(U.uLightV,[0,1,0]);
+  if(U.uReveal)gl.uniform1f(U.uReveal,1);if(U.uGain)gl.uniform1f(U.uGain,0);if(U.uMotion)gl.uniform1f(U.uMotion,0);if(U.uWind)gl.uniform1f(U.uWind,0);
+  if(U.uSodium)gl.uniform3fv(U.uSodium,SODIUM);if(U.uLed)gl.uniform3fv(U.uLed,LED);
+  gl.drawArraysInstanced(gl.TRIANGLES,0,3,1);
+ }catch(_){}
+ finally{
+  gl.bindFramebuffer(gl.FRAMEBUFFER,old.fbo);gl.bindVertexArray(old.vao);gl.useProgram(old.prog);gl.viewport(...old.vp);gl.bindBuffer(gl.ARRAY_BUFFER,old.ab);gl.bindTexture(gl.TEXTURE_2D,old.tex);
+  gl.deleteBuffer(vb);gl.deleteBuffer(ib);gl.deleteVertexArray(vao);gl.deleteTexture(tex);gl.deleteFramebuffer(fbo);
+ }
 }
 // Envoi GPU : un VAO + deux tampons par lot. Retourne null s'il n'y a rien.
+function uploadLivingBatch(gl,b,m){
+ const vao=gl.createVertexArray(),vb=gl.createBuffer(),ib=gl.createBuffer();if(!vao||!vb||!ib)throw Error('Living allocation failed');
+ const inst=instanceData(b.items);gl.bindVertexArray(vao);
+ gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,m.vertices,gl.STATIC_DRAW);const S=MODEL_VERTEX_STRIDE*4;
+ for(const [loc,n,off] of [[0,3,0],[1,3,12],[2,1,24],[3,4,28]]){gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,n,gl.FLOAT,false,S,off);gl.vertexAttribDivisor(loc,0);}
+ gl.bindBuffer(gl.ARRAY_BUFFER,ib);gl.bufferData(gl.ARRAY_BUFFER,inst,gl.STATIC_DRAW);
+ for(let k=0;k<4;k++){gl.enableVertexAttribArray(4+k);gl.vertexAttribPointer(4+k,4,gl.FLOAT,false,LIVING_INSTANCE_FLOATS*4,k*16);gl.vertexAttribDivisor(4+k,1);}
+ return {vao,vb,ib,instBytes:inst.byteLength,count:m.vertices.length/MODEL_VERTEX_STRIDE};
+}
 export function uploadLiving(gl,instances,models){
  const batches=[];let bytes=0;const oldVAO=gl.getParameter(gl.VERTEX_ARRAY_BINDING),oldArray=gl.getParameter(gl.ARRAY_BUFFER_BINDING);
  try{for(const b of livingBatches(instances)){const m=models[b.key];if(!m)continue;
-  const vao=gl.createVertexArray(),vb=gl.createBuffer(),ib=gl.createBuffer();if(!vao||!vb||!ib)throw Error('Living allocation failed');
-  const inst=instanceData(b.items);gl.bindVertexArray(vao);
-  gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,m.vertices,gl.STATIC_DRAW);const S=MODEL_VERTEX_STRIDE*4;
-  for(const [loc,n,off] of [[0,3,0],[1,3,12],[2,1,24],[3,4,28]]){gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,n,gl.FLOAT,false,S,off);gl.vertexAttribDivisor(loc,0);}
-  gl.bindBuffer(gl.ARRAY_BUFFER,ib);gl.bufferData(gl.ARRAY_BUFFER,inst,gl.STATIC_DRAW);
-  for(let k=0;k<4;k++){gl.enableVertexAttribArray(4+k);gl.vertexAttribPointer(4+k,4,gl.FLOAT,false,LIVING_INSTANCE_FLOATS*4,k*16);gl.vertexAttribDivisor(4+k,1);}
-  bytes+=m.vertices.byteLength+inst.byteLength;batches.push({...b,vao,vb,ib,count:m.vertices.length/MODEL_VERTEX_STRIDE});}
+  const u=uploadLivingBatch(gl,b,m);bytes+=m.vertices.byteLength+u.instBytes;batches.push({...b,vao:u.vao,vb:u.vb,ib:u.ib,count:u.count});}
  }catch(e){for(const b of batches){gl.deleteVertexArray(b.vao);gl.deleteBuffer(b.vb);gl.deleteBuffer(b.ib);}throw e;}
  finally{gl.bindVertexArray(oldVAO);gl.bindBuffer(gl.ARRAY_BUFFER,oldArray);}
  if(!batches.length)return null;
  return {batches,bytes,instances:batches.reduce((s,b)=>s+b.items.length,0),dispose(){for(const b of batches){gl.deleteVertexArray(b.vao);gl.deleteBuffer(b.vb);gl.deleteBuffer(b.ib);}batches.length=0;}};
 }
-const SODIUM=[1,.702,.353],LED=[.875,.91,1];   // #ffb35a et #dfe8ff (Dot Visuels), jamais le bleu d'interface
-export function drawLiving(gl,prog,mesh,{mvp,eye,light,time=0,era=0,growth=1,motion=1,wind=0,gain=1,focusCity=-1,focus=0,pop=0}){
- if(!mesh||!prog?.program)return 0;let draws=0;const oldVAO=gl.getParameter(gl.VERTEX_ARRAY_BINDING),U=prog.U;
- gl.useProgram(prog.program);gl.uniformMatrix4fv(U.uMVP,false,mvp);gl.uniform3fv(U.uEye,eye);gl.uniform3fv(U.uLight,light);gl.uniform1f(U.uTime,time);gl.uniform1f(U.uMotion,motion);gl.uniform1f(U.uWind,wind);gl.uniform1f(U.uGain,gain);gl.uniform3fv(U.uSodium,SODIUM);gl.uniform3fv(U.uLed,LED);gl.uniform1f(U.uFocusCity,focusCity);gl.uniform1f(U.uFocus,focus);gl.uniform1f(U.uPop,pop);gl.uniform3fv(U.uLightV,light);
+export async function uploadLivingAsync(gl,instances,models,{yieldFrame,budgetMs=UPLOAD_BUDGET_MS}={}){
+ const pause=yieldFrame??defaultYield,list=livingBatches(instances).filter(b=>models[b.key]);
+ const batches=[];let bytes=0,start=now();
+ const oldVAO=gl.getParameter(gl.VERTEX_ARRAY_BINDING),oldArray=gl.getParameter(gl.ARRAY_BUFFER_BINDING);
+ try{for(const b of list){if(now()-start>=budgetMs){await pause();start=now();}
+  const m=models[b.key],u=uploadLivingBatch(gl,b,m);bytes+=m.vertices.byteLength+u.instBytes;batches.push({...b,vao:u.vao,vb:u.vb,ib:u.ib,count:u.count});}
+ }catch(e){for(const b of batches){gl.deleteVertexArray(b.vao);gl.deleteBuffer(b.vb);gl.deleteBuffer(b.ib);}throw e;}
+ finally{gl.bindVertexArray(oldVAO);gl.bindBuffer(gl.ARRAY_BUFFER,oldArray);}
+ if(!batches.length)return null;
+ return {batches,bytes,instances:batches.reduce((s,b)=>s+b.items.length,0),dispose(){for(const b of batches){gl.deleteVertexArray(b.vao);gl.deleteBuffer(b.vb);gl.deleteBuffer(b.ib);}batches.length=0;}};
+}
+export function drawLiving(gl,prog,mesh,{mvp,eye,light,time=0,era=0,growth=1,motion=1,wind=0,gain=1,focusCity=-1,focus=0,pop=0,reveal=1}){
+ if(!mesh||!prog?.program||!(reveal>0))return 0;let draws=0;const oldVAO=gl.getParameter(gl.VERTEX_ARRAY_BINDING),U=prog.U;
+ gl.useProgram(prog.program);gl.uniformMatrix4fv(U.uMVP,false,mvp);gl.uniform3fv(U.uEye,eye);gl.uniform3fv(U.uLight,light);gl.uniform1f(U.uTime,time);gl.uniform1f(U.uMotion,motion);gl.uniform1f(U.uWind,wind);gl.uniform1f(U.uGain,gain);gl.uniform1f(U.uReveal,reveal);gl.uniform3fv(U.uSodium,SODIUM);gl.uniform3fv(U.uLed,LED);gl.uniform1f(U.uFocusCity,focusCity);gl.uniform1f(U.uFocus,focus);gl.uniform1f(U.uPop,pop);gl.uniform3fv(U.uLightV,light);
  for(const b of mesh.batches){const n=visibleCount(b.items,era,growth);if(!n)continue;gl.bindVertexArray(b.vao);gl.drawArraysInstanced(gl.TRIANGLES,0,b.count,n);draws++;}
  gl.bindVertexArray(oldVAO);return draws;
 }

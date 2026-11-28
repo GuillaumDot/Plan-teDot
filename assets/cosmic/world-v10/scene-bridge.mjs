@@ -1,17 +1,17 @@
-import {visibleWindow} from './full-potential.mjs';
+import {visibleWindow,targetAlloc} from './full-potential.mjs';
 // Bridge from legacy projected planet coordinates to a bounded offscreen V10 pass.
 // Host owns the frame, audio, selection, and persistent data.
 import {isWebGL2} from './gl-compat.mjs';
 export const SCENE_TARGET_CAP=1024;
 const valid3=v=>v?.length===3&&Array.from(v).every(Number.isFinite);
-export function sceneFrame({basis,light,audio=0,time=0,delta=0,tier=2,growth=1,sunIntensity=1,sunColor=[1,1,1],lod=2,targetCap=0,fp=null,targetPixels=0}){
+export function sceneFrame({basis,light,audio=0,time=0,delta=0,tier=2,growth=1,sunIntensity=1,sunColor=[1,1,1],lod=2,targetCap=0,fp=null,targetPixels=0,gesture=false,flow=true}){
  if(!Array.isArray(basis)||basis.length!==3||!basis.every(valid3)||!valid3(light))throw Error('Invalid scene basis');
  const [x,y,z]=basis;
  // Columns are legacy viewOf(object-space unit vectors); positive z is near.
  const mvp=new Float32Array([.92*x[0],.92*x[1],-.5*x[2],0,.92*y[0],.92*y[1],-.5*y[2],0,.92*z[0],.92*z[1],-.5*z[2],0,0,0,0,1]);
  const eye=[x[2]*3,y[2]*3,z[2]*3];
  const objectLight=basis.map(v=>v.reduce((sum,q,i)=>sum+q*light[i],0));
- return {mvp,eye,light:objectLight,viewLight:light,audio,time,delta,tier,growth,sunIntensity,sunColor,lod,targetCap,fp,targetPixels};
+ return {mvp,eye,light:objectLight,viewLight:light,audio,time,delta,tier,growth,sunIntensity,sunColor,lod,targetCap,fp,targetPixels,gesture,flow};
 }
 export function sceneRect(body,width,height){
  if(![body?.x,body?.y,body?.r,width,height].every(Number.isFinite)||body.r<=0||width<=0||height<=0)return null;
@@ -46,8 +46,8 @@ export function createSceneCompositor(gl){
  const win=frame.targetPixels>0?visibleWindow(body,width,height,frame.targetPixels):null;
  if(win){
   vw=Math.min(win.w,targetLimit);vh=Math.min(win.h,targetLimit);
-  const need=[vw,vh].map(v=>Math.ceil(v/64)*64);
-  if(need[0]>allocW||need[1]>allocH||need[0]*need[1]*2<allocW*allocH){allocW=need[0];allocH=need[1];}
+  const next=targetAlloc(vw,vh,allocW,allocH,{gesture:!!frame.gesture,flow:frame.flow!==false});
+  allocW=Math.min(next[0],targetLimit);allocH=Math.min(next[1],targetLimit);
   size=-1;uvScale=[vw/allocW,vh/allocH];local=win.local;
   const [x0,y0,x1,y1]=win.px;rect=[2*x0/width-1,1-2*y1/height,2*x1/width-1,1-2*y0/height];
   const cx=(local[0]+local[2])/2,cy=(local[1]+local[3])/2,hx=(local[2]-local[0])/2,hy=(local[3]-local[1])/2,m=Float32Array.from(frame.mvp);

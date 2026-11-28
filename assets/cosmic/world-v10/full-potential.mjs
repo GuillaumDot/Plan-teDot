@@ -1,7 +1,7 @@
 // V10 « plein potentiel » : helpers purs, sans DOM, sans RAF, sans moteur audio.
 // Chaque levier a son drapeau (?v10pal=0, ?v10pbr=0, ?v10aud=0, ?v10city=0, ?v10lod=0) ; tous actifs seulement sous ?world10=1.
 export const FP_VERSION=1;
-export const FP_FLAGS=Object.freeze(['pal','pbr','aud','city','lod','smooth','win']);
+export const FP_FLAGS=Object.freeze(['pal','pbr','aud','city','lod','smooth','win','flow']);
 // Leviers encore en ébauche : éteints même sous ?world10=1, à allumer un par un (?v10act=1).
 export const FP_OPT_IN=Object.freeze(['act']);
 export function fpFlags(search=''){
@@ -51,6 +51,18 @@ export function budgetTable(){
 // LOD selon la taille à l'écran (px CSS du diamètre) : 0 = V9, 1 = lumières de villes seules, 2 = bâtiments.
 // Hystérésis de 15 % à chaque seuil ; jamais de changement pendant un geste. (Dot Design §2)
 export const LOD_THRESHOLDS=Object.freeze([64,256]);
+// Préchargement avant le seuil bâtiments (256 px) ; le hôte V10 se prépare dès ~45 px (avant le passage à LOD 1).
+export const LOD_PREPARE=180,LOD_WARM=45,CITY_FADE_SEC=.3;
+export function shouldWarmHost(diameter){return Number.isFinite(diameter)&&diameter>=LOD_WARM;}
+export function shouldPrepareLiving(lod,diameter,flow=true){if(!flow)return lod===2;return lod>=1||(Number.isFinite(diameter)&&diameter>=LOD_PREPARE);}
+// Taille du tampon hors écran : pas de réallocation pendant un geste (sauf croissance avec marge), marge hors geste pour éviter un realloc à chaque cran de zoom.
+export function targetAlloc(needW,needH,allocW,allocH,{gesture=false,flow=true}={}){
+ const pad=n=>Math.max(16,Math.ceil(Math.max(0,n)/64)*64),fit=needW<=allocW&&needH<=allocH;
+ if(!flow){if(fit&&needW*needH*2>=allocW*allocH)return [allocW,allocH];return [pad(needW),pad(needH)];}
+ if(gesture&&allocW&&allocH){if(fit)return [allocW,allocH];return [pad(Math.max(allocW,needW*1.25)),pad(Math.max(allocH,needH*1.25))];}
+ if(fit&&needW*needH*2>=allocW*allocH)return [allocW,allocH];
+ return [pad(needW+32),pad(needH+32)];
+}
 export function lodLevel(prev,diameter,gesture=false){
  const p=prev===0||prev===1||prev===2?prev:null;
  if(!Number.isFinite(diameter))return p??0;
@@ -100,7 +112,7 @@ export function cityGrowth(prev,{floor=0,playing=false,dt=0,reducedMotion=false,
  return playing?Math.min(1,p+Math.max(0,Math.min(.25,dt||0))*rate):p;
 }
 // Fondu d'apparition des bâtiments (400 ms) au franchissement du seuil.
-export function fadeStep(prev,on,dt,seconds=.4){const v=unit(prev)+(on?1:-1)*Math.max(0,dt||0)/seconds;return unit(v);}
+export function fadeStep(prev,on,dt,seconds=CITY_FADE_SEC){const v=unit(prev)+(on?1:-1)*Math.max(0,dt||0)/seconds;return unit(v);}
 // Couleurs de l'album (c1, c2 en HSL 0..1, format des sauvegardes) -> RGB linéaire.
 export function hslToLinear(c){
  if(!Array.isArray(c)||c.length<3||!c.every(Number.isFinite))return null;

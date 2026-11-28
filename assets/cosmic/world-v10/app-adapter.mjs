@@ -12,7 +12,7 @@ export function eligibleWorld(descriptor){
  (typeof descriptor.seed==='string'||Number.isFinite(descriptor.seed));
 }
 export function createWorldAdapter({enabled=WORLD_CONFIG.enabled,createCache=createWorldCache,createRenderer=createPlanetRenderer,onFallback=()=>{}}={}){
- let cache=null,renderer=null,initializing=null,planet=null,controller=null,revision=0,closed=false,failed=false,activeKey=null,pending=null,detailReady=false,bakeRes=WORLD_CONFIG.bakeResolution,bakeSmooth=false;
+ let cache=null,renderer=null,initializing=null,planet=null,controller=null,revision=0,closed=false,failed=false,activeKey=null,pending=null,detailReady=false,bakeRes=WORLD_CONFIG.bakeResolution,bakeSmooth=false,lastTier=2,flowOn=true;
  function release(){detailReady=false;controller?.abort();controller=null;planet?.dispose();planet=null;activeKey=null;}
  function fallback(error){failed=true;release();try{onFallback(error);}catch(_){}}
  async function init(gl){
@@ -33,6 +33,7 @@ export function createWorldAdapter({enabled=WORLD_CONFIG.enabled,createCache=cre
    const next=renderer.upload(world);planet=next;activeKey=key;
    // Optional visual resources must never prevent base geometry from appearing.
    void Promise.resolve().then(()=>next.loadDetail(world.natural?.detailBiome,{signal:abort.signal,maxSize:512})).then(()=>{if(id===revision&&!abort.signal.aborted)detailReady=true;},e=>{if(id===revision&&!abort.signal.aborted){detailReady=true;console.warn('[PlanèteDot V10] detail fallback',e);}});
+   if(flowOn&&world.type==='earth')void next.loadLiving?.(lastTier,{flow:true}).catch(e=>{if(!abort.signal.aborted)console.warn('[PlanèteDot V10] living cities fallback:',e?.message||e);});
    for(const load of [()=>next.loadLandmarks({signal:abort.signal}),()=>next.loadVegetation({signal:abort.signal})]){
     try{Promise.resolve(load()).catch(e=>{if(!abort.signal.aborted)console.warn('[PlanèteDot V10] optional asset:',e?.message||e);});}catch(e){if(!abort.signal.aborted)console.warn('[PlanèteDot V10] optional asset:',e?.message||e);}
    }
@@ -44,6 +45,6 @@ export function createWorldAdapter({enabled=WORLD_CONFIG.enabled,createCache=cre
   draw(frame){if(!planet||closed||failed)return false;try{renderer.draw(planet,frame);return true;}catch(e){fallback(e);return false;}},
   contextLost(){if(!closed){revision++;pending=null;fallback(new Error('V10 context lost'));}},
   dispose(){if(closed)return;closed=true;revision++;pending=null;release();cache?.dispose();renderer?.dispose();cache=renderer=null;},
-  setTier(t,{smooth=false}={}){try{cache?.setLimit?.(cacheWorldsForTier(t));}catch(_){}bakeSmooth=!!smooth;bakeRes=bakeSmooth?bakeForTier(t):WORLD_CONFIG.bakeResolution;},get bake(){return {size:bakeRes,smooth:bakeSmooth};},get gpuBytes(){return planet?.gpuBytes?.()??0;},get cities(){return planet?.cities??[];},get cacheBytes(){return cache?.bytes??0;},get ready(){return !!planet&&!closed&&!failed;},get detailReady(){return detailReady;},get failed(){return failed;}
+  setTier(t,{smooth=false,flow=true}={}){lastTier=Math.max(0,Math.min(3,Math.trunc(t)||0));flowOn=flow!==false;try{cache?.setLimit?.(cacheWorldsForTier(t));}catch(_){}bakeSmooth=!!smooth;bakeRes=bakeSmooth?bakeForTier(t):WORLD_CONFIG.bakeResolution;},get bake(){return {size:bakeRes,smooth:bakeSmooth};},get gpuBytes(){return planet?.gpuBytes?.()??0;},get cities(){return planet?.cities??[];},get cacheBytes(){return cache?.bytes??0;},get ready(){return !!planet&&!closed&&!failed;},get detailReady(){return detailReady;},get failed(){return failed;}
  };
 }
