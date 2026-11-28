@@ -2,7 +2,7 @@
 import {createWorldAdapter,eligibleWorld} from './app-adapter.mjs';
 import {createSceneCompositor,sceneFrame} from './scene-bridge.mjs';
 import {registrySnapshot} from './resource-registry.mjs';
-import {fpFlags,v10Tier,lodLevel,targetCapForTier,targetPixelsForTier,audioPacket,cityGrowth,cityLightGain,fadeStep,defaultReactivity,shouldWarmHost,CITY_FADE_SEC} from './full-potential.mjs';
+import {pbrPreset,fpFlags,v10Tier,lodLevel,targetCapForTier,targetPixelsForTier,audioPacket,cityGrowth,cityLightGain,fadeStep,defaultReactivity,shouldWarmHost,CITY_FADE_SEC} from './full-potential.mjs';
 const NOLIVE=Object.freeze({live:0});
 const TYPES=Object.freeze({0:'rock',1:'aquatic',2:'gas',3:'ice',4:'volcanic',6:'spectralMetallic',9:'spectralMetallic',10:'rock',11:'earth'});
 export function legacyDescriptor(p){
@@ -24,7 +24,7 @@ export function createFocusedHost(gl,{enabled=false,makeAdapter=createWorldAdapt
   if(closed||failed||!enabled)return false;
   if(initializing)return initializing;
   initializing=(async()=>{try{
-   adapter=makeAdapter({enabled:true,onFallback:fail});
+   adapter=makeAdapter({enabled:true,materials:fx.pbr,onFallback:fail});
    const owner=adapter,ok=await owner.init(gl);
    if(closed||failed||adapter!==owner)return false;
    if(!ok){fail(Error('V10 host initialization failed'));return false;}
@@ -67,6 +67,7 @@ export function createFocusedHost(gl,{enabled=false,makeAdapter=createWorldAdapt
    fade=reducedMotion||!fx.flow?(wantHouses?1:0):fadeStep(fade,wantHouses,delta,CITY_FADE_SEC);
    audOpts.reducedMotion=!!reducedMotion;audOpts.reactivity=reactivity??defaultReactivity(inApp);
    audioPacket(fx.aud?(audioIn??(audio>0?audio:NOLIVE)):NOLIVE,aud,delta,audOpts);
+   fp.pbrPreset=fx.pbr?pbrPreset(planet.type):null;
    fp.part=!!fx.part&&tier>=1;
    fp.living=!!fx.city&&tier>=1;fp.flow=!!fx.flow;fp.reveal=fx.flow?fade:1;fp.era=Math.max(0,Math.min(5,Math.trunc(era)||0));fp.growth=grow;fp.motion=reducedMotion||tier<1?0:1;fp.wind=reducedMotion||tier<2?0:.6+.4*aud.level;fp.gain=fade*cityLightGain(aud,1);fp.draws=0;fp.reduced=!!reducedMotion;fp.traffic=!!fx.act&&tier>=1;fp.trafficDraws=0;
    // Interactions (?v10act=1) : la ville touchée s'illumine 0,5 s, tient 5 s, s'éteint en 1 s ; en « réduire les animations », lumière seule.

@@ -13,12 +13,12 @@ export function shaderSource(source,stage,webgl2){
 }
 // VAO isolates index/attribute state. Host retains framebuffer, viewport,
 // depth, blending, scissor and color mask; caller must configure those.
-export function withSharedGL(gl,vao,draw){
+export function withSharedGL(gl,vao,draw,units=4){
  if(!vao)return draw();
  const oldVAO=gl.getParameter(gl.VERTEX_ARRAY_BINDING),oldProgram=gl.getParameter(gl.CURRENT_PROGRAM),oldArray=gl.getParameter(gl.ARRAY_BUFFER_BINDING),oldUnit=gl.getParameter(gl.ACTIVE_TEXTURE);
  const textures=[];
  try{
-  for(let i=0;i<4;i++){gl.activeTexture(gl.TEXTURE0+i);textures.push([gl.getParameter(gl.TEXTURE_BINDING_2D),gl.getParameter(gl.TEXTURE_BINDING_CUBE_MAP),gl.getParameter(gl.SAMPLER_BINDING)]);gl.bindSampler(i,null);}
+  for(let i=0;i<units;i++){gl.activeTexture(gl.TEXTURE0+i);textures.push([gl.getParameter(gl.TEXTURE_BINDING_2D),gl.getParameter(gl.TEXTURE_BINDING_CUBE_MAP),gl.getParameter(gl.SAMPLER_BINDING)]);gl.bindSampler(i,null);}
   gl.bindVertexArray(vao);
   return draw();
  }finally{
