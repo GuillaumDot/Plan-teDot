@@ -1,8 +1,8 @@
 // V10 « plein potentiel » : helpers purs, sans DOM, sans RAF, sans moteur audio.
-// Chaque levier a son drapeau (?v10pal=0, ?v10pbr=0, ?v10aud=0, ?v10part=0, ?v10city=0, ?v10lod=0) ; tous actifs seulement sous ?world10=1.
+// Les leviers stables s'éteignent avec ?v10<levier>=0. PBR et interactions restent opt-in (?v10pbr=1, ?v10act=1).
 export const FP_VERSION=1;
 export const FP_FLAGS=Object.freeze(['pal','aud','city','lod','smooth','win','flow','part']);
-// Leviers encore en ébauche : éteints même sous ?world10=1, à allumer un par un (?v10act=1).
+// Leviers expérimentaux éteints même sous ?world10=1.
 export const FP_OPT_IN=Object.freeze(['act','pbr']);
 export function fpFlags(search=''){
  const q=new URLSearchParams(search||'');
