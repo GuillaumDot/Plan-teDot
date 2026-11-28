@@ -4,6 +4,7 @@
 import {faceDir,cellOf,hash4} from '../natural-world-v22/world.mjs';
 import {decodeStaticGLB,MODEL_VERTEX_STRIDE} from './static-glb.mjs';
 import {eligible,lod as livingLod} from '../world/expansion-v14/living.mjs';
+import {canonicalPath,trackResource} from './resource-registry.mjs';
 const dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
 const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
 const norm=a=>{const l=Math.hypot(a[0],a[1],a[2]);return l>1e-9?[a[0]/l,a[1]/l,a[2]/l]:null;};
@@ -110,31 +111,37 @@ export function normalizeModel(m){
  for(let i=0;i<v.length;i+=MODEL_VERTEX_STRIDE){v[i]=(v[i]-cx)/ext;v[i+1]=(v[i+1]-m.min[1])/ext;v[i+2]=(v[i+2]-cz)/ext;}
  return {vertices:v,triangles:m.triangles};
 }
-export function livingBytes(models,instances){let b=0;for(const m of Object.values(models))b+=m.vertices.byteLength;return b+instances*LIVING_INSTANCE_FLOATS*4;}
+export function livingBytes(models,instances){let b=0;for(const m of new Set(Object.values(models)))b+=m.vertices.byteLength;return b+instances*LIVING_INSTANCE_FLOATS*4;}
 // Chargement : fetches modestement en parallèle, décodage étalé (budget ms / frame), ordre des lots conservé (plafond de triangles déterministe).
+// Registre : un fichier identique au bit près (market == rail_station, solar_array 02-08 == 01) n'est téléchargé et décodé qu'une fois.
 export const DECODE_BUDGET_MS=6,UPLOAD_BUDGET_MS=4,FETCH_CONCURRENCY=4;
 const now=()=>typeof performance!=='undefined'&&performance.now?performance.now():Date.now();
 const defaultYield=()=>typeof requestAnimationFrame==='function'?new Promise(r=>requestAnimationFrame(r)):Promise.resolve();
 export async function loadLivingModels(batches,{signal,tier=1,fetcher=fetch,budgetMs=DECODE_BUDGET_MS,yieldFrame,concurrency=FETCH_CONCURRENCY}={}){
- const cfg=livingTier(tier),models={};let tris=0;
+ const cfg=livingTier(tier),models={},seen=new Map();let tris=0;
  const pause=yieldFrame??defaultYield,limit=Math.max(1,Math.min(8,concurrency|0));
- const raw=new Array(batches.length);let next=0,active=0;
+ const raw=new Array(batches.length),inflight=new Map();let next=0,active=0;
+ const getBuf=path=>inflight.get(path)??inflight.set(path,(async()=>{
+  try{const r=await fetcher(new URL('../../../'+path,import.meta.url),{signal});if(!r.ok)throw Error('HTTP '+r.status);return {buf:await r.arrayBuffer()};}
+  catch(e){if(signal?.aborted)throw e;return {err:e};}
+ })()).get(path);
  const kick=()=>{while(active<limit&&next<batches.length){const i=next++;active++;
   const b=batches[i];raw[i]=(async()=>{
    if(signal?.aborted)throw new DOMException('Aborted','AbortError');
-   try{const r=await fetcher(new URL('../../../'+modelPath(b.family,b.variant),import.meta.url),{signal});if(!r.ok)throw Error('HTTP '+r.status);
-    return {b,buf:await r.arrayBuffer()};}
-   catch(e){if(signal?.aborted)throw e;console.warn('[PlanèteDot V10] living model fallback:',b.key,e.message);return {b,err:e};}
+   const path=canonicalPath(modelPath(b.family,b.variant));
+   try{const job=await getBuf(path);if(job.err){console.warn('[PlanèteDot V10] living model fallback:',b.key,job.err.message);return {b,err:job.err,path};}return {b,buf:job.buf,path};}
+   catch(e){if(signal?.aborted)throw e;console.warn('[PlanèteDot V10] living model fallback:',b.key,e.message);return {b,err:e,path};}
   })().finally(()=>{active--;kick();});
  }};
  kick();
  let start=now();
  for(let i=0;i<batches.length;i++){
   if(signal?.aborted)throw new DOMException('Aborted','AbortError');
-  const job=await raw[i];if(job.err||!job.buf)continue;
+  const job=await raw[i];if(job.err||!job.buf){if(job.path){seen.set(job.path,null);trackResource(job.path,'failed');}continue;}
+  if(seen.has(job.path)){if(seen.get(job.path))models[job.b.key]=seen.get(job.path);continue;}
   if(now()-start>=budgetMs){await pause();start=now();}
-  try{const m=normalizeModel(decodeStaticGLB(job.buf,{maxTriangles:2000}));if(!m||tris+m.triangles>cfg.triangles)continue;tris+=m.triangles;models[job.b.key]=m;}
-  catch(e){if(signal?.aborted)throw e;console.warn('[PlanèteDot V10] living model fallback:',job.b.key,e.message);}
+  try{const m=normalizeModel(decodeStaticGLB(job.buf,{maxTriangles:2000}));trackResource(job.path,'ready',job.buf.byteLength);if(!m||tris+m.triangles>cfg.triangles){seen.set(job.path,null);continue;}tris+=m.triangles;models[job.b.key]=m;seen.set(job.path,m);}
+  catch(e){if(signal?.aborted)throw e;seen.set(job.path,null);trackResource(job.path,'failed');console.warn('[PlanèteDot V10] living model fallback:',job.b.key,e.message);}
  }
  return models;
 }
@@ -205,38 +212,113 @@ export function prewarmLivingProgram(gl,prog){
  }
 }
 // Envoi GPU : un VAO + deux tampons par lot. Retourne null s'il n'y a rien.
-function uploadLivingBatch(gl,b,m){
- const vao=gl.createVertexArray(),vb=gl.createBuffer(),ib=gl.createBuffer();if(!vao||!vb||!ib)throw Error('Living allocation failed');
+function uploadLivingBatch(gl,b,m,vbShared){
+ const vao=gl.createVertexArray(),vb=vbShared??gl.createBuffer(),ib=gl.createBuffer();if(!vao||!vb||!ib)throw Error('Living allocation failed');
  const inst=instanceData(b.items);gl.bindVertexArray(vao);
- gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,m.vertices,gl.STATIC_DRAW);const S=MODEL_VERTEX_STRIDE*4;
+ gl.bindBuffer(gl.ARRAY_BUFFER,vb);if(!vbShared)gl.bufferData(gl.ARRAY_BUFFER,m.vertices,gl.STATIC_DRAW);const S=MODEL_VERTEX_STRIDE*4;
  for(const [loc,n,off] of [[0,3,0],[1,3,12],[2,1,24],[3,4,28]]){gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,n,gl.FLOAT,false,S,off);gl.vertexAttribDivisor(loc,0);}
  gl.bindBuffer(gl.ARRAY_BUFFER,ib);gl.bufferData(gl.ARRAY_BUFFER,inst,gl.STATIC_DRAW);
  for(let k=0;k<4;k++){gl.enableVertexAttribArray(4+k);gl.vertexAttribPointer(4+k,4,gl.FLOAT,false,LIVING_INSTANCE_FLOATS*4,k*16);gl.vertexAttribDivisor(4+k,1);}
  return {vao,vb,ib,instBytes:inst.byteLength,count:m.vertices.length/MODEL_VERTEX_STRIDE};
 }
+function attachLiving(gl,batches,vbs,b,m){
+ const shared=vbs.get(m),u=uploadLivingBatch(gl,b,m,shared);if(!shared)vbs.set(m,u.vb);
+ batches.push({...b,vao:u.vao,vb:u.vb,ib:u.ib,count:u.count});return (shared?0:m.vertices.byteLength)+u.instBytes;
+}
+function dropLiving(gl,batches,vbs){for(const b of batches){gl.deleteVertexArray(b.vao);gl.deleteBuffer(b.ib);}for(const vb of vbs.values())gl.deleteBuffer(vb);vbs.clear();batches.length=0;}
 export function uploadLiving(gl,instances,models){
- const batches=[];let bytes=0;const oldVAO=gl.getParameter(gl.VERTEX_ARRAY_BINDING),oldArray=gl.getParameter(gl.ARRAY_BUFFER_BINDING);
+ const batches=[],vbs=new Map();let bytes=0;const oldVAO=gl.getParameter(gl.VERTEX_ARRAY_BINDING),oldArray=gl.getParameter(gl.ARRAY_BUFFER_BINDING);
  try{for(const b of livingBatches(instances)){const m=models[b.key];if(!m)continue;
-  const u=uploadLivingBatch(gl,b,m);bytes+=m.vertices.byteLength+u.instBytes;batches.push({...b,vao:u.vao,vb:u.vb,ib:u.ib,count:u.count});}
- }catch(e){for(const b of batches){gl.deleteVertexArray(b.vao);gl.deleteBuffer(b.vb);gl.deleteBuffer(b.ib);}throw e;}
+  bytes+=attachLiving(gl,batches,vbs,b,m);}
+ }catch(e){dropLiving(gl,batches,vbs);throw e;}
  finally{gl.bindVertexArray(oldVAO);gl.bindBuffer(gl.ARRAY_BUFFER,oldArray);}
  if(!batches.length)return null;
- return {batches,bytes,instances:batches.reduce((s,b)=>s+b.items.length,0),dispose(){for(const b of batches){gl.deleteVertexArray(b.vao);gl.deleteBuffer(b.vb);gl.deleteBuffer(b.ib);}batches.length=0;}};
+ return {batches,bytes,instances:batches.reduce((s,b)=>s+b.items.length,0),dispose(){dropLiving(gl,batches,vbs);}};
 }
 export async function uploadLivingAsync(gl,instances,models,{yieldFrame,budgetMs=UPLOAD_BUDGET_MS}={}){
  const pause=yieldFrame??defaultYield,list=livingBatches(instances).filter(b=>models[b.key]);
- const batches=[];let bytes=0,start=now();
+ const batches=[],vbs=new Map();let bytes=0,start=now();
  const oldVAO=gl.getParameter(gl.VERTEX_ARRAY_BINDING),oldArray=gl.getParameter(gl.ARRAY_BUFFER_BINDING);
  try{for(const b of list){if(now()-start>=budgetMs){await pause();start=now();}
-  const m=models[b.key],u=uploadLivingBatch(gl,b,m);bytes+=m.vertices.byteLength+u.instBytes;batches.push({...b,vao:u.vao,vb:u.vb,ib:u.ib,count:u.count});}
- }catch(e){for(const b of batches){gl.deleteVertexArray(b.vao);gl.deleteBuffer(b.vb);gl.deleteBuffer(b.ib);}throw e;}
+  bytes+=attachLiving(gl,batches,vbs,b,models[b.key]);}
+ }catch(e){dropLiving(gl,batches,vbs);throw e;}
  finally{gl.bindVertexArray(oldVAO);gl.bindBuffer(gl.ARRAY_BUFFER,oldArray);}
  if(!batches.length)return null;
- return {batches,bytes,instances:batches.reduce((s,b)=>s+b.items.length,0),dispose(){for(const b of batches){gl.deleteVertexArray(b.vao);gl.deleteBuffer(b.vb);gl.deleteBuffer(b.ib);}batches.length=0;}};
+ return {batches,bytes,instances:batches.reduce((s,b)=>s+b.items.length,0),dispose(){dropLiving(gl,batches,vbs);}};
 }
 export function drawLiving(gl,prog,mesh,{mvp,eye,light,time=0,era=0,growth=1,motion=1,wind=0,gain=1,focusCity=-1,focus=0,pop=0,reveal=1}){
  if(!mesh||!prog?.program||!(reveal>0))return 0;let draws=0;const oldVAO=gl.getParameter(gl.VERTEX_ARRAY_BINDING),U=prog.U;
  gl.useProgram(prog.program);gl.uniformMatrix4fv(U.uMVP,false,mvp);gl.uniform3fv(U.uEye,eye);gl.uniform3fv(U.uLight,light);gl.uniform1f(U.uTime,time);gl.uniform1f(U.uMotion,motion);gl.uniform1f(U.uWind,wind);gl.uniform1f(U.uGain,gain);gl.uniform1f(U.uReveal,reveal);gl.uniform3fv(U.uSodium,SODIUM);gl.uniform3fv(U.uLed,LED);gl.uniform1f(U.uFocusCity,focusCity);gl.uniform1f(U.uFocus,focus);gl.uniform1f(U.uPop,pop);gl.uniform3fv(U.uLightV,light);
  for(const b of mesh.batches){const n=visibleCount(b.items,era,growth);if(!n)continue;gl.bindVertexArray(b.vao);gl.drawArraysInstanced(gl.TRIANGLES,0,b.count,n);draws++;}
  gl.bindVertexArray(oldVAO);return draws;
+}
+// ---------------------------------------------------------------------------------------------------------------
+// V10fp interactions (?v10act=1) — trafic lumineux : points jaune-orangé qui roulent sur les routes du générateur
+// (natural-world-v22 roads), comme dans la vidéo de référence de Guillaume. Un seul appel instancié (4 sommets × N),
+// aucune texture, aucun téléchargement. Palier 0 : rien. « Réduire les animations » : points immobiles.
+export const TRAFFIC_TIER=Object.freeze([0,96,256,512]);
+export const TRAFFIC_FLOATS=12;
+export const TRAFFIC_ERA=Object.freeze([0,.25,.5,.75,1,1]);   // part du trafic visible par ère (village → âge spatial)
+export function trafficPlacement(world,{tier=3}={}){
+ const w=world?.natural,N=w?.grid,cap=TRAFFIC_TIER[Math.max(0,Math.min(3,Math.trunc(tier)||0))];
+ if(world?.type!=='earth'||!Number.isInteger(N)||!cap||!Array.isArray(w.roads))return [];
+ const seed=(world.seed??0)|0,cities=(w.cities??[]).slice(0,16);
+ const dirOf=c=>Number.isInteger(c)&&c>=0&&c<6*N*N?faceDir(Math.floor(c/(N*N)),2*(c%N+.5)/N-1,2*(Math.floor((c%(N*N))/N)+.5)/N-1,[0,0,0]):null;
+ const near=d=>{let best=-1,bd=-2;cities.forEach((c,i)=>{if(Array.isArray(c.dir)){const k=dot(c.dir,d);if(k>bd){bd=k;best=i;}}});return bd>Math.cos(.06)?best:-1;};
+ const all=[];
+ for(const road of w.roads){const cells=road.cells??[];if(cells.length<4)continue;
+  for(let k=0;k+3<cells.length;k+=2){const a=dirOf(cells[k]),b=dirOf(cells[k+3]);if(!a||!b||dot(a,b)<.98)continue;
+   const key=cells[k]*7+k,back=hash4(key,seed,53,1)<.5;
+   all.push({a:back?b:a,b:back?a:b,phase:hash4(key,seed,59,2),speed:.05+.05*hash4(key,seed,61,3),hue:hash4(key,seed,67,4),city:near(a),rank:hash4(key,seed,71,5)});}}
+ all.sort((x,y)=>x.rank-y.rank);
+ return all.slice(0,cap);
+}
+export function trafficVisible(n,era=5,growth=1){const e=TRAFFIC_ERA[Math.max(0,Math.min(5,Math.trunc(era)||0))],g=Number.isFinite(growth)?Math.max(0,Math.min(1,growth)):0;return Math.min(n,Math.ceil(n*e*g));}
+export function trafficData(items){
+ const a=new Float32Array(items.length*TRAFFIC_FLOATS);
+ items.forEach((it,i)=>{const o=i*TRAFFIC_FLOATS;a.set(it.a,o);a[o+3]=it.phase;a.set(it.b,o+4);a[o+7]=it.speed;a[o+8]=it.hue;a[o+9]=it.city;});
+ return a;
+}
+const TVS=`#version 300 es
+precision highp float;
+layout(location=0) in vec4 iA;layout(location=1) in vec4 iB;layout(location=2) in vec4 iC;
+uniform mat4 uMVP;uniform vec3 uEye;uniform vec3 uLight;uniform float uTime;uniform float uMotion;uniform float uSize;uniform float uFocusCity;uniform float uFocus;
+out float vA;out vec3 vC;out vec2 vQ;
+void main(){
+ vec2 q=vec2(float(gl_VertexID%2)*2.-1.,float(gl_VertexID/2)*2.-1.);vQ=q;
+ float t=fract(iA.w+uTime*uMotion*iB.w);vec3 a=normalize(iA.xyz),b=normalize(iB.xyz);
+ vec3 up=normalize(mix(a,b,t));vec3 fw=normalize(b-a-up*dot(b-a,up)+vec3(1e-6));vec3 rt=normalize(cross(up,fw));
+ float night=1.-smoothstep(-.12,.16,dot(up,normalize(uLight)));float hit=uFocus*step(abs(iC.y-uFocusCity),.5);
+ float s=uSize*(1.+.6*hit);vec3 p=up*1.0016+fw*q.y*s*2.2+rt*q.x*s;
+ vA=sin(3.14159*t)*(.28+.72*night+.6*hit);vC=mix(vec3(1.,.70,.35),vec3(1.,.86,.55),iC.x);   // sodium jaune-orangé, jamais de bleu
+ gl_Position=dot(up,normalize(uEye))<-.02?vec4(2.,2.,2.,1.):uMVP*vec4(p,1.);
+}`;
+const TFS=`#version 300 es
+precision mediump float;
+in float vA;in vec3 vC;in vec2 vQ;out vec4 o;
+void main(){float r=dot(vQ,vQ);if(r>1.)discard;float k=(1.-r)*(1.-r)*vA;o=vec4(vC*k,k);}`;
+export function createTrafficProgram(gl){
+ const shaders=[];let program=null;
+ try{for(const [type,src] of [[gl.VERTEX_SHADER,TVS],[gl.FRAGMENT_SHADER,TFS]]){const s=gl.createShader(type);if(!s)throw Error('Traffic shader allocation failed');shaders.push(s);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));}
+  program=gl.createProgram();for(const s of shaders)gl.attachShader(program,s);gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(program));
+ }catch(e){if(program)gl.deleteProgram(program);throw e;}finally{for(const s of shaders)gl.deleteShader(s);}
+ const U=Object.fromEntries(['uMVP','uEye','uLight','uTime','uMotion','uSize','uFocusCity','uFocus'].map(n=>[n,gl.getUniformLocation(program,n)]));
+ return {program,U,dispose(){if(program){gl.deleteProgram(program);program=null;}}};
+}
+export function uploadTraffic(gl,items){
+ if(!items?.length)return null;const oldVAO=gl.getParameter(gl.VERTEX_ARRAY_BINDING),oldArray=gl.getParameter(gl.ARRAY_BUFFER_BINDING);
+ const vao=gl.createVertexArray(),ib=gl.createBuffer();
+ try{if(!vao||!ib)throw Error('Traffic allocation failed');const data=trafficData(items);gl.bindVertexArray(vao);gl.bindBuffer(gl.ARRAY_BUFFER,ib);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);
+  for(let k=0;k<3;k++){gl.enableVertexAttribArray(k);gl.vertexAttribPointer(k,4,gl.FLOAT,false,TRAFFIC_FLOATS*4,k*16);gl.vertexAttribDivisor(k,1);}
+  return {vao,ib,count:items.length,bytes:data.byteLength,dispose(){gl.deleteVertexArray(vao);gl.deleteBuffer(ib);}};
+ }catch(e){if(vao)gl.deleteVertexArray(vao);if(ib)gl.deleteBuffer(ib);throw e;}
+ finally{gl.bindVertexArray(oldVAO);gl.bindBuffer(gl.ARRAY_BUFFER,oldArray);}
+}
+export function drawTraffic(gl,prog,mesh,{mvp,eye,light,time=0,motion=1,era=5,growth=1,focusCity=-1,focus=0,size=.0032}){
+ if(!mesh||!prog?.program)return 0;const n=trafficVisible(mesh.count,era,growth);if(!n)return 0;
+ const U=prog.U,oldVAO=gl.getParameter(gl.VERTEX_ARRAY_BINDING),blend=gl.isEnabled(gl.BLEND),mask=gl.getParameter(gl.DEPTH_WRITEMASK),src=gl.getParameter(gl.BLEND_SRC_RGB),dst=gl.getParameter(gl.BLEND_DST_RGB),srcA=gl.getParameter(gl.BLEND_SRC_ALPHA),dstA=gl.getParameter(gl.BLEND_DST_ALPHA);
+ try{gl.useProgram(prog.program);gl.uniformMatrix4fv(U.uMVP,false,mvp);gl.uniform3fv(U.uEye,eye);gl.uniform3fv(U.uLight,light);gl.uniform1f(U.uTime,time);gl.uniform1f(U.uMotion,motion);gl.uniform1f(U.uSize,size);gl.uniform1f(U.uFocusCity,focusCity);gl.uniform1f(U.uFocus,focus);
+  gl.enable(gl.BLEND);gl.blendFuncSeparate(gl.ONE,gl.ONE,gl.ZERO,gl.ONE);gl.depthMask(false);gl.bindVertexArray(mesh.vao);gl.drawArraysInstanced(gl.TRIANGLE_STRIP,0,4,n);}
+ finally{gl.bindVertexArray(oldVAO);if(!blend)gl.disable(gl.BLEND);gl.blendFuncSeparate(src,dst,srcA,dstA);gl.depthMask(mask);}
+ return 1;
 }

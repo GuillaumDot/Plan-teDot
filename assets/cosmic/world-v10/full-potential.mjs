@@ -1,7 +1,7 @@
 // V10 « plein potentiel » : helpers purs, sans DOM, sans RAF, sans moteur audio.
-// Chaque levier a son drapeau (?v10pal=0, ?v10pbr=0, ?v10aud=0, ?v10city=0, ?v10lod=0) ; tous actifs seulement sous ?world10=1.
+// Chaque levier a son drapeau (?v10pal=0, ?v10pbr=0, ?v10aud=0, ?v10part=0, ?v10city=0, ?v10lod=0) ; tous actifs seulement sous ?world10=1.
 export const FP_VERSION=1;
-export const FP_FLAGS=Object.freeze(['pal','pbr','aud','city','lod','smooth','win','flow']);
+export const FP_FLAGS=Object.freeze(['pal','pbr','aud','city','lod','smooth','win','flow','part']);
 // Leviers encore en ébauche : éteints même sous ?world10=1, à allumer un par un (?v10act=1).
 export const FP_OPT_IN=Object.freeze(['act']);
 export function fpFlags(search=''){
@@ -85,24 +85,43 @@ export const REACTIVITY=Object.freeze({off:0,soft:.5,full:1});
 export function defaultReactivity(inApp=false){return inApp?'soft':'full';}
 const unit=x=>Number.isFinite(x)?Math.max(0,Math.min(1,x)):0;
 export const AUDIO_LIGHT_CAP=.2;   // « réduire les animations » : aucune pulsation de kick, lumière plafonnée à +20 %
-export function audioPacket(input,state={},dt=0,{reducedMotion=false,reactivity='full'}={}){
- const s={bass:0,mid:0,high:0,level:0,kick:0,kickAge:9,lastFlash:-9,clock:0,cap:1,...state};
+// Périodes d'accumulation : multiples exacts des pulsations du shader, donc le repli à zéro ne produit aucun saut.
+export const WAVE_PERIOD=20*Math.PI;          // vagues : cos(k·phase) avec k = 0,9 / 1,3 / 1,7
+export const STORM_PERIOD=2*Math.PI/.55;      // cyclones : cos(… − phase·0,55)
+const AUDIO_OPTS=Object.freeze({reducedMotion:false,reactivity:'full'});
+// Le paquet est MIS À JOUR SUR PLACE (aucune allocation par image) et renvoyé. Il contient aussi les 8 flottants des 2 uniformes vec4 :
+//   u[0..3] = (bass, mid, high, level) lissés (attaque 40 ms, retombée 220 ms) ; u[4..7] = (kick, phase des vagues, phase des cyclones, plafond de lumière).
+// kick = enveloppe exp(−6·timeSinceKick) déjà limitée à 3 flashs/s ; les phases sont accumulées (jamais temps × vitesse).
+export function audioPacket(input,state={},dt=0,opts=AUDIO_OPTS){
+ const reducedMotion=!!opts?.reducedMotion,reactivity=opts?.reactivity??'full';
+ const s=state;
+ if(!(s.clock>=0)){s.bass=s.mid=s.high=s.level=s.kick=0;s.kickAge=9;s.lastFlash=-9;s.clock=0;s.cap=1;s.sb=s.sm=s.sh=s.sl=0;s.wave=s.storm=0;s.burstAge=9;s.burstSeed=0;s.u=new Float32Array(8);}
  const d=Math.max(0,Math.min(.25,Number.isFinite(dt)?dt:0));s.clock+=d;
- const src=typeof input==='number'?{level:input,live:input>0?1:0}:(input||{});
- const live=src.live===undefined?1:(src.live?1:0);
+ const num=typeof input==='number';
+ const src=num?null:(input||EMPTY);
+ const live=num?(input>0?1:0):(src.live===undefined?1:(src.live?1:0));
  const k=(typeof reactivity==='number'?unit(reactivity):(REACTIVITY[reactivity]??1))*live;
  s.cap=reducedMotion?AUDIO_LIGHT_CAP:1;
  const rest=Math.exp(-d/.12);   // au repos (pause, silence) : retour à zéro en moins de 0,5 s
- for(const key of ['bass','mid','high','level']){const target=unit(src[key])*k;s[key]=live?target:s[key]*rest;}
+ s.bass=live?unit(num?0:src.bass)*k:s.bass*rest;s.mid=live?unit(num?0:src.mid)*k:s.mid*rest;s.high=live?unit(num?0:src.high)*k:s.high*rest;s.level=live?unit(num?input:src.level)*k:s.level*rest;
  // Grosse caisse : au plus 3 flashs par seconde (WCAG 2.3.1) ; aucune en « réduire les animations ».
- const age=Number.isFinite(src.kickAge)?Math.max(0,src.kickAge):9;
- const fresh=live&&k>0&&!reducedMotion&&age<.05&&unit(src.kick)>0&&s.clock-s.lastFlash>=1/AUDIO_MAX_FLASH_HZ;
- if(fresh){s.lastFlash=s.clock;s.kickAge=0;s.kick=unit(src.kick)*k;}
+ const age=!num&&Number.isFinite(src.kickAge)?Math.max(0,src.kickAge):9;
+ const fresh=live&&k>0&&!reducedMotion&&age<.05&&!num&&unit(src.kick)>0&&s.clock-s.lastFlash>=1/AUDIO_MAX_FLASH_HZ;
+ if(fresh){s.lastFlash=s.clock;s.kickAge=0;s.kick=unit(src.kick)*k;if(s.kick>.6){s.burstAge=0;s.burstSeed=(s.burstSeed+1)%1024;}}
  else{s.kickAge=Math.min(9,s.kickAge+d);s.kick=reducedMotion?0:live?s.kick*Math.exp(-d*6):s.kick*rest;}
+ if(!fresh)s.burstAge=Math.min(9,s.burstAge+d);
+ if(reducedMotion)s.burstAge=9;
+ // Lissage visuel (naturel, pas de clignotement) puis phases accumulées : plus ou moins vite, jamais d'à-coup.
+ const att=1-Math.exp(-d/.04),rel=1-Math.exp(-d/.22);
+ s.sb+=(s.bass-s.sb)*(s.bass>s.sb?att:rel);s.sm+=(s.mid-s.sm)*(s.mid>s.sm?att:rel);s.sh+=(s.high-s.sh)*(s.high>s.sh?att:rel);s.sl+=(s.level-s.sl)*(s.level>s.sl?att:rel);
+ s.wave=(s.wave+d*(1+(reducedMotion?0:.6*s.sb)))%WAVE_PERIOD;
+ s.storm=(s.storm+d*(1+(reducedMotion?0:.25*s.sb+.25*s.kick)))%STORM_PERIOD;
+ const u=s.u;u[0]=s.sb;u[1]=s.sm;u[2]=s.sh;u[3]=s.sl;u[4]=s.kick;u[5]=s.wave;u[6]=s.storm;u[7]=s.cap;
  return s;
 }
+const EMPTY=Object.freeze({});
 // Gain de lumière des villes : la nuit seulement, basses + kick, +20 % au plus.
-export function cityLightGain(s,night=1){return 1+Math.min(s?.cap??1,AUDIO_LIGHT_CAP,.12*unit(s?.bass)+.08*unit(s?.kick))*unit(night);}
+export function cityLightGain(s,night=1){return 1+Math.min(s?.cap??1,AUDIO_LIGHT_CAP,.12*unit(s?.sb??s?.bass)+.08*unit(s?.kick))*unit(night);}
 // Particules (décision Dot Design) : aucune au palier 0, 128 sans réaction au son au palier 1, réactives dès le palier 2.
 export function particleBudget(tier){const t=tierOf(tier);return {count:[0,128,256,512][t],audio:t>=2};}
 // Croissance des villes : monte seulement pendant que le titre de la planète joue, pendant la session ; jamais de baisse, aucun compteur.

@@ -1,7 +1,9 @@
 // Host-driven focused-planet integration; no RAF, audio engine or persistence.
 import {createWorldAdapter,eligibleWorld} from './app-adapter.mjs';
 import {createSceneCompositor,sceneFrame} from './scene-bridge.mjs';
+import {registrySnapshot} from './resource-registry.mjs';
 import {fpFlags,v10Tier,lodLevel,targetCapForTier,targetPixelsForTier,audioPacket,cityGrowth,cityLightGain,fadeStep,defaultReactivity,shouldWarmHost,CITY_FADE_SEC} from './full-potential.mjs';
+const NOLIVE=Object.freeze({live:0});
 const TYPES=Object.freeze({0:'rock',1:'aquatic',2:'gas',3:'ice',4:'volcanic',6:'spectralMetallic',9:'spectralMetallic',10:'rock',11:'earth'});
 export function legacyDescriptor(p){
  if(!p||!Object.hasOwn(TYPES,p.type))return null;
@@ -9,9 +11,11 @@ export function legacyDescriptor(p){
  return eligibleWorld(d)?d:null;
 }
 export function createFocusedHost(gl,{enabled=false,makeAdapter=createWorldAdapter,makeCompositor=createSceneCompositor,onFallback=()=>{},search=''}={}){
- const fx=fpFlags(search);let lod=null,lastTier=-1,aud={},grow=0,growKey=null,fade=0;
- let focusI=-1,focusT=9;
- const fp={reduced:false,pop:0,living:false,era:5,growth:1,motion:1,wind:0,gain:1,focusCity:-1,focus:0,draws:0};
+ const fx=fpFlags(search);let lod=null,lastTier=-1,grow=0,growKey=null,fade=0;
+ const aud={},audOpts={reducedMotion:false,reactivity:'full'};   // paquet audio et options réutilisés : aucune allocation par image
+ let focusI=-1,focusT=9,cityDirs=null,cityKey=null;const focusOut={city:-1,level:0};   // objets réutilisés : aucune allocation par image ni au tap
+ const ease=u=>u<=0?0:u>=1?1:u*u*(3-2*u);
+ const fp={aud,part:false,partAudio:true,reduced:false,pop:0,living:false,traffic:false,trafficDraws:0,era:5,growth:1,motion:1,wind:0,gain:1,focusCity:-1,focus:0,draws:0};
  let adapter=null,compositor=null,initializing=null,requested=null,readyKey=null,epoch=0,closed=false,failed=false;
  function stop(){epoch++;requested=readyKey=null;if(adapter)void adapter.select(null).catch(()=>{});}
  function disposeResources(){compositor?.dispose();adapter?.dispose();compositor=adapter=null;}
@@ -61,10 +65,12 @@ export function createFocusedHost(gl,{enabled=false,makeAdapter=createWorldAdapt
    grow=cityGrowth(grow,{floor:.5+.5*(Number.isFinite(eraPc)?eraPc:1),playing,dt:delta,reducedMotion});
    const wantHouses=lod===null||lod>=2;
    fade=reducedMotion||!fx.flow?(wantHouses?1:0):fadeStep(fade,wantHouses,delta,CITY_FADE_SEC);
-   aud=audioPacket(fx.aud?(audioIn??{level:audio,live:audio>0?1:0}):{live:0},aud,delta,{reducedMotion,reactivity:reactivity??defaultReactivity(inApp)});
-   fp.living=!!fx.city&&tier>=1;fp.flow=!!fx.flow;fp.reveal=fx.flow?fade:1;fp.era=Math.max(0,Math.min(5,Math.trunc(era)||0));fp.growth=grow;fp.motion=reducedMotion||tier<1?0:1;fp.wind=reducedMotion||tier<2?0:.6+.4*aud.level;fp.gain=fade*cityLightGain(aud,1);fp.draws=0;fp.reduced=!!reducedMotion;
+   audOpts.reducedMotion=!!reducedMotion;audOpts.reactivity=reactivity??defaultReactivity(inApp);
+   audioPacket(fx.aud?(audioIn??(audio>0?audio:NOLIVE)):NOLIVE,aud,delta,audOpts);
+   fp.part=!!fx.part&&tier>=1;
+   fp.living=!!fx.city&&tier>=1;fp.flow=!!fx.flow;fp.reveal=fx.flow?fade:1;fp.era=Math.max(0,Math.min(5,Math.trunc(era)||0));fp.growth=grow;fp.motion=reducedMotion||tier<1?0:1;fp.wind=reducedMotion||tier<2?0:.6+.4*aud.level;fp.gain=fade*cityLightGain(aud,1);fp.draws=0;fp.reduced=!!reducedMotion;fp.traffic=!!fx.act&&tier>=1;fp.trafficDraws=0;
    // Interactions (?v10act=1) : la ville touchée s'illumine 0,5 s, tient 5 s, s'éteint en 1 s ; en « réduire les animations », lumière seule.
-   if(fx.act&&focusI>=0){focusT+=gesture?0:Math.max(0,Math.min(.25,delta||0));const f=focusT<.5?focusT/.5:focusT<5.5?1:Math.max(0,1-(focusT-5.5));fp.focusCity=focusI;fp.focus=f;fp.pop=reducedMotion||tier<1?0:f;if(f<=0&&focusT>5.5)focusI=-1;}
+   if(fx.act&&focusI>=0){focusT+=gesture?0:Math.max(0,Math.min(.25,delta||0));const f=tier<1||reducedMotion?(focusT<5.5?1:0):focusT<.6?ease(focusT/.6):focusT<5.5?1:ease(1-(focusT-5.5)/1.2);/* palier 0 ou réduire les animations : rien d'animé (allumé puis éteint net) */fp.focusCity=focusI;fp.focus=f;fp.pop=reducedMotion||tier<1?0:f;if(f<=0&&focusT>5.5)focusI=-1;}
    else{fp.focusCity=-1;fp.focus=fp.pop=0;}
    if(readyKey!==key||!adapter?.ready||!compositor||adapter.detailReady===false)return false;
    try{const ok=compositor.draw(adapter,body,sceneFrame({basis,light,audio,time,delta,tier,growth,sunIntensity:body.sunI??1,sunColor:body.sun??[1,1,1],lod:fx.lod&&lod!==null?lod:2,targetCap,fp,gesture,flow:fx.flow,targetPixels:fx.win&&appTier!==undefined?targetPixelsForTier(tier):0}),width,height);if(!ok)fail(Error('V10 composition failed'));return ok;}
@@ -77,12 +83,12 @@ export function createFocusedHost(gl,{enabled=false,makeAdapter=createWorldAdapt
    if(best<0)return null;const c=adapter.cities[best];return {index:best,dir:c.dir.slice(),port:!!c.port,river:!!c.river,tempC:c.tempC};
   },
   focusCity(i){if(!fx.act)return false;focusI=Number.isInteger(i)?i:-1;focusT=0;return focusI>=0;},
-  get cities(){return adapter?.ready?adapter.cities.map(c=>c.dir):[];},
-  get focus(){return {city:focusI,level:fp.focus};},
+  get cities(){if(!adapter?.ready)return [];if(cityKey!==adapter.cities){cityKey=adapter.cities;cityDirs=cityKey.map(c=>c.dir);}return cityDirs;},
+  get focus(){focusOut.city=focusI;focusOut.level=fp.focus;return focusOut;},
   leave(){focusI=-1;if(requested!==null)stop();},
   contextLost(){fail(Error('V10 context lost'));},
   dispose(){if(closed)return;closed=true;epoch++;requested=readyKey=null;disposeResources();},
-  get stats(){return {bake:adapter?.bake??null,target:compositor?.size??null,targetBytes:compositor?.bytes??0,lod,tier:lastTier,flags:fx,growth:grow,draws:fp.draws,focus:{city:focusI,level:fp.focus},audio:{bass:aud.bass,kick:aud.kick,cap:aud.cap},gpuBytes:adapter?.gpuBytes??0,cacheBytes:adapter?.cacheBytes??0};},
+  get stats(){return {bake:adapter?.bake??null,target:compositor?.size??null,targetBytes:compositor?.bytes??0,lod,tier:lastTier,flags:fx,growth:grow,draws:fp.draws,trafficDraws:fp.trafficDraws,focus:{city:focusI,level:fp.focus},audio:{bass:aud.sb,mid:aud.sm,high:aud.sh,level:aud.sl,kick:aud.kick,wave:aud.wave,storm:aud.storm,burstAge:aud.burstAge,cap:aud.cap},gpuBytes:adapter?.gpuBytes??0,cacheBytes:adapter?.cacheBytes??0,registry:registrySnapshot()};},
   get state(){return closed?'closed':failed?'fallback':!enabled?'disabled':readyKey?'ready':requested?'loading':'idle';}
  };
 }

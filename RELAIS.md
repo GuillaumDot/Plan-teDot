@@ -216,3 +216,58 @@ Cadre : vision de Guillaume copiée dans `docs/VISION_PACK_COSMIQUE.md` (référ
   - avant (d016fb5) : max 395,8 ms, p95 324,5 ms, 54 frames > 33 ms / 78, 8 réalloc. de tampon pendant l'approche, 11 GLB au total, 0 draw living à la fin.
   - après : max 231,7 ms, p95 184,9 ms, 57 frames > 33 ms / 71 (SwiftShader reste saturé à cette résolution : le taux > 33 ms ne s'améliore pas), 31 GLB, 25 draws living déjà prêts au LOD 2.
 - Tests : render-audio 18, living-cities 9, v10-sharpness 4, v10-city-smooth 7, world-v10/test.mjs et app-smoke OK. Flags éteints par défaut. V9 intact. Rien poussé.
+## V10fp · Phase A : inventaire du pack et registre central (Grok, 27/11, branche locale `feature/v10fp-interactions`, depuis ea5d52d)
+- **Fichiers** :
+  - `docs/INVENTAIRE_PACK_COSMIQUE.md` (synthèse, cartographie ressource→shader→moteur, top 10) ;
+  - `docs/inventaire-pack-cosmique.json` (914 fichiers, un par ligne) ;
+  - `tools/inventaire/inventaire.py` et `tools/inventaire/runtime-paths.mjs` (à relancer après tout ajout au pack) ;
+  - `assets/cosmic/world-v10/resource-registry.mjs` (20 jeux, 773 fichiers) ;
+  - `tests/resource-registry.test.mjs`.
+- **Branchement sans effet sur le rendu** : `trackResource` dans les chargeurs V10 (terrain, végétation, repères, villes) et `PD10Host.stats.registry`.
+- **Doublons exacts** : `market == rail_station` et `solar_array 02-08 == 01` étaient téléchargés et envoyés au GPU deux fois. Ils sont maintenant téléchargés et décodés une seule fois (`canonicalPath`), avec un tampon de sommets partagé dans `uploadLiving`.
+- **Constats** :
+  - aucun fichier de licence dans le pack (seul `world/world-v10/models.json` déclare CC0, pour des GLB non chargés) ;
+  - V9 ne lit rien dans `assets/cosmic` ;
+  - les hauteurs procedural-v19 font 97² ;
+  - les cartes de rugosité pbr-512 sont plates.
+- **Test corrigé** : `tests/living-cities.test.mjs` ne dépend plus du nom du dossier `repo/`. Son fetcher échouait dans un worktree.
+- **Tests réels** :
+  - `node --test tests/resource-registry.test.mjs` 6/6 ;
+  - `tests/living-cities.test.mjs` 9/9 ;
+  - `node tests/render-audio.test.cjs` 18/18 ;
+  - `world-v10/test.mjs` OK.
+
+## V10fp · Interactions finalisées et fluides (Grok, 28/11 matin, branche locale `feature/v10fp-interactions`, rebasée sur d016fb5 = 10.0.5)
+- **Rebase** : 382fd0f/3da3c7f/4aba9d4 rejoués sur d016fb5 (seul conflit : RELAIS.md, les deux sections gardées). La modif d'`index.html` non commitée était déjà commitée (réactions qui suivent la planète V10, panneau stable, carte V9 masquée sur une ville V10) : gardée.
+- **Tap sur une ville** (`?world10=1&v10act=1`) : un seul glissé temporel de 1,9 s en smootherstep (rotation + approche jusqu'à l'orbite proche pz 0,45, départ et arrivée à vitesse nulle) au lieu de deux lissages exponentiels concurrents ; un geste l'annule tout de suite ; réduire les animations / palier 0 : placement immédiat.
+- **Rien de lourd au tap** : panneau de verre créé dès la première image V10 (jamais au tap), rectangle du canvas mis en cache (plus de `getBoundingClientRect` par image), opacité écrite seulement si elle change, `translate3d`, objet `focus` et directions des villes réutilisés (aucune allocation par image) ; renderer : préchauffage en vue lointaine (V10 sans géométrie), une étape lourde par image (programme trafic, tampon trafic, programme villes, modèles) — seulement avec `?v10act=1`.
+- **Zone surlignée** : halo rose elliptique au pied du faisceau ; illumination de la ville en montée douce 0,6 s / extinction douce 1,2 s.
+- **Tests** : render-audio 18/18, living-cities 9/9, v10-sharpness 4/4, world-v10 1/1, resource-registry 6/6, v10-interactions 10/10 (2 nouveaux : fluidité/aucune allocation au tap, courbe d'approche).
+- **Banc Chromium** (`harness/v10act2.mjs`, SwiftShader, port 8140) : palier 2 (glissé .75→.45 progressif, panneau, « 💥 Ça tabasse » sur la ville, nuit), réduire les animations et palier 0 (aucune animation, palier 0 : aucun dessin villes/trafic), sans drapeau (V9 : aucun panneau, statut `disabled`) ; 0 erreur de page, 0 erreur de shader. Captures `preuves/v10fp-interactions-{final,reduit2,palier0,v9}-*.png`, planche `v10fp-interactions-final-planche.png`.
+- **Limites** : écarts d'images mesurés sous SwiftShader seulement (médiane ~67 ms, logiciel) : pas une mesure iPhone. Au palier 0, un pic isolé de 1,3 s après le tap dans le banc (non analysé). Le chargement des modèles au premier gros plan hors `?v10act=1` reste le sujet de la branche fluidité (`fix/v10-city-smooth`).
+
+## 10.0.7 — interactions rebasées sur la 10.0.6 (Grok, 28/11, branche locale `feature/v10fp-interactions`, non poussée)
+- **Rebase** propre sur `37ed2e3` (même arbre que le main distant `ae35c67`, 10.0.6). Conflits résolus dans `RELAIS.md`, `focused-host.mjs`, `living-cities.mjs` et `renderer.mjs`.
+- **Les deux mécanismes sont conservés, sans doublon** :
+  - 10.0.6 : préchargement dès l'approche (`shouldWarmHost` / loadLiving dès que `fp.living`, même hors gros plan), décodage et upload GPU étalés, préchauffage du shader living, fondu `uReveal` ~300 ms, cible hors écran qui ne rétrécit pas pendant un geste.
+  - interactions : trafic préparé dès que `?v10act=1` (programme + tampon en vue lointaine, dessin seulement si la géométrie est visible) ; registres et tampons de sommets partagés. Le second bloc `else if (!geometry)` qui rappelait `loadLiving` / `createLivingProgram` a été retiré (doublon de la 10.0.6).
+- **Version 10.0.7** : meta `pd-version`, import `focused-host.mjs?v=10.0.7`, vérifiés tous les deux par `world-v10/test.mjs`.
+- **Pic de 1,3 s au palier 0** : ce n'est pas l'appli. Rejoué sans aucune capture pendant la mesure : médiane 16,7 ms, p95 33,3 ms, max 167 ms (une seule frame, à 333 ms, quand la cible hors écran passe de 192² à 256×320). GPU inchangé, panneau déjà créé. Le 1 300 ms du banc précédent tombait pendant `page.screenshot` (prise au milieu du relevé des images). Une capture isolée après coup donne un max de 183 ms sous SwiftShader. Rien à corriger dans le chemin palier 0.
+- **Tests** : living-cities 9/9, resource-registry 6/6, v10-city-smooth 7/7 (fetcher rendu indépendant du dossier `/repo/`), v10-interactions 10/10, v10-sharpness 4/4, render-audio 18/18, world-v10/test.mjs 1/1. Smoke V9 sans flag : version 10.0.7, `PD10_ENABLED=false`, aucun hôte ni panneau, 0 pageerror, 0 erreur de shader. Captures `preuves/v10fp-interactions-spike-palier0.png` et `v10fp-interactions-v9-smoke.png`.
+- Inventaire : `docs/inventaire-pack-cosmique.json` fait 420 Ko et `tools/inventaire/` reste minuscule, donc ils restent dans la branche (seuil 500 Ko). Rien poussé, rien fusionné.
+
+
+## V10 « plein potentiel » — réactions musicales complètes (Grok, 28/11/2026, branche locale feature/v10-audio, rien poussé, aucun numéro de version fixé)
+- **Principe** : le spectre précalculé de l'hôte (`readAudio`, `bassLvl`, `SPB[1]`, `SPB[3]`, `audioLvl`, `beatLvl`, `beatT`) est lu dans `pd10Extra` (index.html), multiplié par `PDMS.k` (montée douce de 2,5 s), puis passé à `audioPacket` (full-potential.mjs) qui renvoie un paquet **mis à jour sur place** : basses, médiums, aigus, niveau lissés (attaque 40 ms, retombée 220 ms), kick (enveloppe `exp(−6·temps)`, ≤ 3 flashs/s), phases accumulées des vagues et des cyclones, plafond de lumière. Rien n'est relu côté lecteur : aucun `createMediaElementSource`, `AnalyserNode` ni micro. `audio: b.lv` reste passé en nombre (vent de la végétation, rétrocompatibilité) ; le paquet complet passe par `audioIn`.
+- **2 uniforms vec4** (shader planète, `uAudio` supprimé) : `uAudA = (basses, médiums, aigus, niveau)`, `uAudB = (kick, phase des vagues, phase des cyclones, plafond de lumière)`. `timeSinceKick` est encodé dans l'enveloppe du kick et dans `burstAge`.
+- **Effets** : lumières de ville (nuit seulement, déjà masquées par le terminateur) `+min(0,12·basses + 0,08·kick, 0,2)` ; vagues d'océan : amplitude `+35 %` sur les basses, phase **accumulée** (`+dt·(1+0,6·basses)`, repli à 20π = multiple exact des 3 fréquences, aucun saut) ; lave `+18 % basses + 7 % kick` (≤ +25 %) ; cyclones : phase accumulée `dt·(1+0,25·basses+0,25·kick)` ; atmosphère `+8 %` et nuages `+6 %` sur les médiums, teinte à peine plus chaude ; vibration des anneaux : inchangée, ils vivent dans le shader V9 (`pdPhTick`/`PDSPW`) et V10 n'a pas encore d'anneaux.
+- **Particules** (`particles.mjs`, nouveau) : un seul appel `gl.POINTS`, positions calculées dans le vertex shader depuis 512 graines fixes (8 Ko, aucune texture) ; palier 0 : rien ; palier 1 : 128 sans réaction au son ; palier 2+ : 256 (mobile) / 512 (ordinateur), brillance et taille `×(1+1,5·aigus)` (≤ ×2,5) et gerbe de 8 à 24 particules sur grosse caisse > 0,6. Flag de retour : `?v10part=0`. Aucune particule en « réduire les animations ».
+- **Garde-fous** : réactivité Off/Doux/Plein (0/50/100 %) via `?v10react=off|soft|full` ou `localStorage pd.v10react` (pas d'interface : à ajouter dans les réglages) ; défaut Plein dans Safari, Doux dans les navigateurs intégrés. « Réduire les animations » : kick forcé à 0, pas de gerbe, pas de particules, plafond de lumière +20 %, vitesses de vagues et cyclones non modulées. Pause : tout retombe en < 1 s, sans saut. L'audio ne modifie jamais le terrain (le paquet n'est lu qu'après les cartes, uniquement pour lumière, normales d'eau, phases, nuages ; aucun `texSubImage2D`/`bufferSubData`).
+- **Allocations** : paquet, options et objets de l'hôte réutilisés ; `matchMedia` n'est plus appelé à chaque image (lu une fois, écouteur `change`). Restent les objets littéraux historiques de l'appel `PD10Host.draw` (hors audio).
+- **Fichiers** : `assets/cosmic/world-v10/{full-potential,focused-host,renderer,scene-bridge,program}.mjs`, `planet-fragment.glsl`, `relief-atmosphere.glsl`, `particles.mjs` (nouveau), `index.html` (`pd10Extra` + ses variables seulement), `tests/render-audio.test.cjs` (+7 tests), `tests/living-cities.test.mjs` (le chargeur de test découpait le chemin sur `/repo/` : cassé hors du dossier `repo`, corrigé).
+- **Mesures** (Chromium SwiftShader, pas un iPhone ; même planète, même temps, seul le paquet change) : `preuves/v10-audio-static-mesures.json`, planches `v10-audio-planche-{terre,lave-gaz,gerbe}.png` (ligne du haut : rendus, ligne du bas : écart ×12), séquence réelle dans l'appli (audio synthétique à 144 BPM) `v10-audio-terre-jour-*.png` + `-log.json`. Surcoût : +1 appel de dessin (POINTS) au palier ≥ 1, +8 Ko ; aucun fps mesuré sur iPhone.
+
+## 10.0.7 — assemblage release (interactions + audio) — 28/11/2026 (Paris), branche locale `release/10.0.7`
+- Base `aa7c078` (interactions rebasées sur la 10.0.6) + cherry-pick de `efcfcaf` et `b68d581` (audio). Conflits résolus en gardant les trois : lissage 10.0.6, interactions (trafic, panneau, registre), audio (`uAudA`/`uAudB`, `particles.mjs`, `pd10Extra` sans allocation, `fp.aud`/`fp.part`). `stats` combine trafic, registre et spectre audio. Chargeurs de test indépendants du nom du dossier et exemption RAF de `living-cities.mjs` (garde audio) conservés. Une seule boucle RAF (6 appels dans `index.html`, comme la 10.0.6) ; `?world10` reste éteint par défaut.
+- Tests : living-cities 9, resource-registry 6, v10-city-smooth 7, v10-interactions 10, v10-sharpness 4, render-audio 25, world-v10/test.mjs 1 — tous verts.
+- Smokes Chromium SwiftShader (iPhone, palier 2) : V9 sans flag, `?world10=1`, `?world10=1&v10act=1` avec tap sur une ville et audio de test (kick, basses, gerbe de particules mesurés) : 0 pageerror, 0 erreur shader/link, 0 erreur `getError`. Seuls `ERR_FAILED` des ressources externes bloquées dans le banc. Planche `preuves/v10-1007-planche.png`. Pas de mesure iPhone réel.
