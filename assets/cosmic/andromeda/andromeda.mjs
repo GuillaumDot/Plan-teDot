@@ -23,7 +23,7 @@ export async function loadAndromeda(gl){
  const img=new Image();img.src=new URL('./spitzer-galex.png',import.meta.url).href;
  await img.decode();
  if(gl.isContextLost())throw Error('M31 context lost');
- if(img.width!==512||img.height!==512)throw Error('M31 texture must be 512x512');
+ if(img.naturalWidth!==512||img.naturalHeight!==512)throw Error('M31 texture must be 512x512');
  const canvas=document.createElement('canvas');canvas.width=img.width;canvas.height=img.height;
  const ctx=canvas.getContext('2d');if(!ctx)throw Error('M31 canvas unavailable');
  ctx.drawImage(img,0,0);
@@ -50,9 +50,14 @@ export async function loadAndromeda(gl){
   return {draw(quad,vp,time){
    if(!texture||gl.isContextLost())throw Error('M31 unavailable');
    // Host galaxy pass owns program/VAO/blend. Explicit unit 1 fixes Work's binding mismatch.
-   gl.useProgram(program);gl.bindVertexArray(quad);gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,texture);
-   gl.uniform1i(u.uM31,1);gl.uniformMatrix4fv(u.uVP,false,vp);gl.uniform1f(u.uTime,time);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
-   gl.bindTexture(gl.TEXTURE_2D,null);gl.activeTexture(gl.TEXTURE0);
+   const active=gl.getParameter(gl.ACTIVE_TEXTURE);
+   gl.activeTexture(gl.TEXTURE1);
+   const previous=gl.getParameter(gl.TEXTURE_BINDING_2D),sampler=gl.getParameter(gl.SAMPLER_BINDING);
+   try{
+    gl.bindSampler(1,null);gl.bindTexture(gl.TEXTURE_2D,texture);
+    gl.useProgram(program);gl.bindVertexArray(quad);
+    gl.uniform1i(u.uM31,1);gl.uniformMatrix4fv(u.uVP,false,vp);gl.uniform1f(u.uTime,time);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+   }finally{gl.bindTexture(gl.TEXTURE_2D,previous);gl.bindSampler(1,sampler);gl.activeTexture(active);}
   },dispose(){if(texture)gl.deleteTexture(texture);if(program)gl.deleteProgram(program);texture=program=null;}};
  }catch(e){if(texture)gl.deleteTexture(texture);if(program)gl.deleteProgram(program);throw e;}
  finally{shaders.forEach(shader=>gl.deleteShader(shader));}
