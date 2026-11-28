@@ -10,7 +10,8 @@ export function fpFlags(search=''){
 }
 // Paliers : l'appli en a 3 (0..2), V10 en a 4 (0..3). Mobile 2 -> 2 (16 Mio), ordinateur 2 -> 3 (24 Mio). (Dot Design §0)
 export function v10Tier(appTier,mobile){const t=Math.max(0,Math.min(2,Math.trunc(Number(appTier))||0));return t===2&&!mobile?3:t;}
-export const TIER_BUDGET_MIB=Object.freeze([4,8,16,24]);
+import {TIER_BUDGET_MIB} from './gemini-cosmic-manifest.mjs';
+export {TIER_BUDGET_MIB};
 export const TIER_CACHE_WORLDS=Object.freeze([0,2,2,4]);
 export const TIER_PBR_SIZE=Object.freeze([0,256,512,512]);
 export const TIER_TARGET_FPS=Object.freeze([30,60,60,60]);

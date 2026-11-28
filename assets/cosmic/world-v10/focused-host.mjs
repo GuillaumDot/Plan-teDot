@@ -10,7 +10,7 @@ export function legacyDescriptor(p){
  const d={type:TYPES[p.type],seed:p.seed,generatorVersion:p.generatorVersion};
  return eligibleWorld(d)?d:null;
 }
-export function createFocusedHost(gl,{enabled=false,makeAdapter=createWorldAdapter,makeCompositor=createSceneCompositor,onFallback=()=>{},search=''}={}){
+export function createFocusedHost(gl,{enabled=false,makeAdapter=createWorldAdapter,makeCompositor=createSceneCompositor,onFallback=()=>{},search='',cosmic=null}={}){
  const fx=fpFlags(search);let lod=null,lastTier=-1,grow=0,growKey=null,fade=0;
  const aud={},audOpts={reducedMotion:false,reactivity:'full'};   // paquet audio et options réutilisés : aucune allocation par image
  let focusI=-1,focusT=9,cityDirs=null,cityKey=null;const focusOut={city:-1,level:0};   // objets réutilisés : aucune allocation par image ni au tap
@@ -24,7 +24,7 @@ export function createFocusedHost(gl,{enabled=false,makeAdapter=createWorldAdapt
   if(closed||failed||!enabled)return false;
   if(initializing)return initializing;
   initializing=(async()=>{try{
-   adapter=makeAdapter({enabled:true,onFallback:fail});
+   adapter=makeAdapter({enabled:true,onFallback:fail,cosmic});
    const owner=adapter,ok=await owner.init(gl);
    if(closed||failed||adapter!==owner)return false;
    if(!ok){fail(Error('V10 host initialization failed'));return false;}
@@ -67,6 +67,7 @@ export function createFocusedHost(gl,{enabled=false,makeAdapter=createWorldAdapt
    fade=reducedMotion||!fx.flow?(wantHouses?1:0):fadeStep(fade,wantHouses,delta,CITY_FADE_SEC);
    audOpts.reducedMotion=!!reducedMotion;audOpts.reactivity=reactivity??defaultReactivity(inApp);
    audioPacket(fx.aud?(audioIn??(audio>0?audio:NOLIVE)):NOLIVE,aud,delta,audOpts);
+   if(cosmic) cosmic.updateAudioEnvelopeInPlace(cosmic.envelope,aud.u[0],aud.u[1],aud.u[2],delta);
    fp.part=!!fx.part&&tier>=1;
    fp.living=!!fx.city&&tier>=1;fp.flow=!!fx.flow;fp.reveal=fx.flow?fade:1;fp.era=Math.max(0,Math.min(5,Math.trunc(era)||0));fp.growth=grow;fp.motion=reducedMotion||tier<1?0:1;fp.wind=reducedMotion||tier<2?0:.6+.4*aud.level;fp.gain=fade*cityLightGain(aud,1);fp.draws=0;fp.reduced=!!reducedMotion;fp.traffic=!!fx.act&&tier>=1;fp.trafficDraws=0;
    // Interactions (?v10act=1) : la ville touchée s'illumine 0,5 s, tient 5 s, s'éteint en 1 s ; en « réduire les animations », lumière seule.
